@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+
+import { Button } from "primereact/button";
+import "./App.css";
+import viteLogo from "/vite.svg";
+import { Card } from "primereact/card";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+  const header = (
+    <img
+      alt="Card"
+      src="https://primefaces.org/cdn/primereact/images/usercard.png"
+    />
+  );
+  const footer = (
+    <>
+      <Button label="Save" icon="pi pi-check" />
+      <Button
+        label="Cancel"
+        className="bg-blue-400 dark:bg-red-400"
+        icon="pi pi-times"
+        style={{ marginLeft: "0.5em", backgroundColor: "blue" }}
+      />
+    </>
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+    <div className="card flex bg-red-500 justify-content-center">
+      <Card
+        title="Advanced Card"
+        subTitle="Card subtitle"
+        
+        footer={footer}
+        header={header}
+        className="md:w-25rem"
+      >
+        <p className="m-0 mt-5 bg-red-500">
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore
+          sed consequuntur error repudiandae numquam deserunt quisquam repellat
+          libero asperiores earum nam nobis, culpa ratione quam perferendis
+          esse, cupiditate neque quas!
         </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      </Card>
+    </div>
+  );
 }
 
-export default App
+export default App;
