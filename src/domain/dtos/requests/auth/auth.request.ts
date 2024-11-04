@@ -1,7 +1,7 @@
-import { requestValidator, regularExpressions } from "@/presentation/utilities";
+import { Regex } from "@/core/constants";
 import { z } from "zod";
 
-const { EMAIL, PASSWORD } = regularExpressions;
+const { EMAIL, PASSWORD } = Regex;
 
 export type AuthRequestModel = {
   readonly email: string;

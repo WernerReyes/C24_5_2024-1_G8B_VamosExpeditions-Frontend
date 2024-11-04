@@ -8,9 +8,15 @@ export default {
     extend: {
       colors: {
         "primary": "#01A3BB",
-        "secondary": "#01495D",
-      }
+        "secondary": "#F4F6F6",
+        "tertiary": "#01495D",
+        // "quaternary": "#F7F7F7",
+      },
+      
+      backgroundImage: {
+        "login": "url('/public/images/backgrounds/bg-login.png')",
+      },
     },
   },
   plugins: [],
-}
+} 

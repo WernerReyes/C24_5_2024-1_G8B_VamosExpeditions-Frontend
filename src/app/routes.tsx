@@ -1,3 +1,4 @@
+import { PublicRoutes } from "@/core/constants";
 import { lazy, useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
@@ -11,7 +12,7 @@ const LoginPage = lazy(
 // const UserRouter = lazy(() => import("./User.router"));
 // const AdminRouter = lazy(() => import("./Admin.router"));
 
-// const { LANDING, LOGIN, REGISTER } = PublicRoutes;
+const { LOGIN } = PublicRoutes;
 
 // const { USER, ADMIN } = PrivateRoutes;
 
@@ -46,13 +47,13 @@ export const AppRouter = () => {
         closeButton
       /> */}
       <Routes>
-      {/* <RouterWithNotFound> */}
-      {/* <Route path="/" element={<Navigate to={routeRole} />} /> */}
-      {/* <Route path={LANDING} element={<LandingPage />} /> */}
-      <Route path={"/login"} element={<LoginPage />} />
-      {/* <Route path={REGISTER} element={<RegisterPage />} /> */}
+        {/* <RouterWithNotFound> */}
+        <Route path="/" element={<Navigate to={LOGIN} />} />
+        {/* <Route path={LANDING} element={<LandingPage />} /> */}
+        <Route path={LOGIN} element={<LoginPage />} />
+        {/* <Route path={REGISTER} element={<RegisterPage />} /> */}
 
-      {/* {!isLoading && (
+        {/* {!isLoading && (
           <Route element={<AuthGuard privateValidation />}>
             //* Routes for user
             <Route element={<RoleGuard roles={[RoleEnum.ROLE_USER]} />}>
@@ -64,8 +65,8 @@ export const AppRouter = () => {
             </Route>
           </Route>
         )} */}
-      {/* </RouterWithNotFound> */}
-        </Routes>
+        {/* </RouterWithNotFound> */}
+      </Routes>
     </BrowserRouter>
   );
 };

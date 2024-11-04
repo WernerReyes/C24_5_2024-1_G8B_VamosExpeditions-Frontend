@@ -1,5 +1,7 @@
 import "./App.css";
 
+import "primeicons/primeicons.css";
+
 import { PrimeReactProvider } from "primereact/api";
 import { AppRouter } from "./routes";
 
