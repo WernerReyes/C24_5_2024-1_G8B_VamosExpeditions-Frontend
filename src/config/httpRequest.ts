@@ -1,84 +1,62 @@
-// import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
-// import { getEnvs } from "@/presentation/utilities";
+import axios, { AxiosRequestConfig } from "axios";
 // import { setupInterceptors } from "./interceptors";
-// import type { ApiResponse } from "@/domain/dtos";
 
-// type Methods = "GET" | "POST" | "PUT" | "DELETE";
+import { constantEnvs } from "@/core/constants/env.const";
+import { ApiResponse } from "@/domain/dtos/responses/common";
 
-// const baseURL = getEnvs().VITE_API_URL;
+type Methods = "GET" | "POST" | "PUT" | "DELETE";
 
-// export const httpRequest = {
-//   get: async <T>(
-//     url: string,
-//     options?: AxiosRequestConfig,
-//   ): Promise<ApiResponse<T>> => {
-//     return await request<T>(url, "GET", undefined, options);
-//   },
+const { VITE_API_URL } = constantEnvs;
 
-//   post: async <T>(
-//     url: string,
-//     data?: any,
-//     options?: AxiosRequestConfig,
-//   ): Promise<ApiResponse<T>> => {
-//     return await request<T>(url, "POST", data, options);
-//   },
+export const httpRequest = {
+  get: async <T>(
+    url: string,
+    options?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> => {
+    return await request<T>(url, "GET", undefined, options);
+  },
 
-//   put: async <T>(
-//     url: string,
-//     data?: any,
-//     options?: AxiosRequestConfig,
-//   ): Promise<ApiResponse<T>> => {
-//     return await request<T>(url, "PUT", data, options);
-//   },
+  post: async <T>(
+    url: string,
+    data?: any,
+    options?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> => {
+    return await request<T>(url, "POST", data, options);
+  },
 
-//   delete: async <T>(
-//     url: string,
-//     options?: AxiosRequestConfig,
-//   ): Promise<ApiResponse<T>> => {
-//     return await request<T>(url, "DELETE", undefined, options);
-//   },
-// };
-// // try {
-// //   const response: AxiosResponse<ApiResponse<T>> = await axios(
-// //     `${baseURL}${url}`,
-// //     {
-// //       method,
-// //       ...options,
-// //       data,
-// //     },
-// //   );
-// //   return {
-// //     data: response.data.data,
-// //     status: response.data.status,
-// //     message: response.data.message,
-// //   };
-// // } catch (error) {
-// //   throw error;
-// // }
+  put: async <T>(
+    url: string,
+    data?: any,
+    options?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> => {
+    return await request<T>(url, "PUT", data, options);
+  },
 
-// const request = async <T>(
-//   url: string,
-//   method: Methods,
-//   data?: any,
-//   options?: AxiosRequestConfig,
-// ): Promise<ApiResponse<T>> => {
-//   try {
-//     const response: AxiosResponse<ApiResponse<T>> = await axios(
-//       `${baseURL}${url}`,
-//       {
-//         method,
-//         ...options,
-//         data,
-//       },
-//     );
-//     return {
-//       data: response.data.data,
-//       status: response.data.status,
-//       message: response.data.message,
-//     };
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+  delete: async <T>(
+    url: string,
+    options?: AxiosRequestConfig
+  ): Promise<ApiResponse<T>> => {
+    return await request<T>(url, "DELETE", undefined, options);
+  },
+};
+
+const request = async <T>(
+  url: string,
+  method: Methods,
+  data?: any,
+  options?: AxiosRequestConfig
+): Promise<ApiResponse<T>> => {
+  try {
+    const response: ApiResponse<T> = await axios(`${VITE_API_URL}${url}`, {
+      method,
+      ...options,
+      data,
+    });
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
 
 // setupInterceptors(axios);

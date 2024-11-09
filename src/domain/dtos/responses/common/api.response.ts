@@ -1,11 +1,13 @@
-export enum ApiResponseStatus {
-  SUCCESS = "SUCCESS",
-  ERROR = "ERROR",
-  WARNING = "WARNING",
-}
+import type { AxiosResponse } from "axios";
 
-export type ApiResponse<T> = {
-  readonly status: ApiResponseStatus;
+// export enum ApiResponseStatus {
+//   SUCCESS = "SUCCESS",
+//   ERROR = "ERROR",
+//   WARNING = "WARNING",
+// }
+
+export interface ApiResponse<T> extends AxiosResponse<T> {
+  // readonly status: ApiResponseStatus;
   readonly data: T;
   readonly message: string;
-};
+}

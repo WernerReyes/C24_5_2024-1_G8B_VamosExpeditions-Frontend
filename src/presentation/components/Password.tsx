@@ -5,13 +5,13 @@ import {
   Password as PasswordPrimeReact,
 } from "primereact/password";
 import { classNames } from "primereact/utils";
-import type { HTMLAttributes, LabelHTMLAttributes } from "react";
+import { forwardRef, type HTMLAttributes, type LabelHTMLAttributes } from "react";
 
 type DesingType = "label" | "floatLabel";
 
 interface Props extends PasswordProps {
-  label: LabelHTMLAttributes<HTMLLabelElement> & { text: string };
-  small?: HTMLAttributes<HTMLElement> & { text: string };
+  label: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
+  small?: HTMLAttributes<HTMLElement> & { text?: string };
   desingType?: DesingType;
 }
 
@@ -20,26 +20,15 @@ const PT: PasswordPassThroughOptions = {
   hideIcon: { className: "mb-1" },
 };
 
-export const Password = ({ desingType = "label", ...props }: Props) => {
+export const Password = forwardRef<HTMLInputElement, Props>(({ desingType = "label", ...props }, ref) => {
   return desingType === "label" ? (
-    <PasswordWithLabel pt={PT} {...props} />
+    <PasswordWithLabel pt={PT} {...props} ref={ref} />
   ) : (
-    <PasswordWithFloatLabel pt={PT} {...props} />
+    <PasswordWithFloatLabel pt={PT} {...props} ref={ref} />
   );
-  // <PasswordPrimeReact
-  //   {...props}
-  //   toggleMask
-  //   pt={{
-  //     showIcon: { className: "mb-1" },
-  //     hideIcon: { className: "mb-1" },
-  //   }}
-  //   // feedback={true}
-  //   // mediumRegex="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})" // medium strength regex
-  //   // strongRegex="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{12,})" // strong strength regex
-  // />
-};
+});
 
-const PasswordWithLabel = ({ label, small, ...props }: Props) => {
+const PasswordWithLabel = forwardRef<HTMLInputElement, Props>(({ label, small, ...props }, ref) => {
   return (
     <>
       <label
@@ -52,17 +41,17 @@ const PasswordWithLabel = ({ label, small, ...props }: Props) => {
         {label.text}
       </label>
 
-      <PasswordPrimeReact {...props} />
+      <PasswordPrimeReact ref={ref as any} {...props} />
       {small && <small {...small}>{small?.text}</small>}
     </>
   );
-};
+})
 
-const PasswordWithFloatLabel = ({ label, ...props }: Props) => {
+const PasswordWithFloatLabel = forwardRef<HTMLInputElement, Props>(({ label, ...props }, ref) => {
   return (
     <FloatLabel>
-      <PasswordPrimeReact {...props} />
+      <PasswordPrimeReact {...props} ref={ref as any} />
       <label {...label}>{label.text}</label>
     </FloatLabel>
   );
-};
+})

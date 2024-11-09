@@ -1,64 +1,74 @@
 {
-    "users": [
-        {
-            "id": 1,
-            "name": "John Doe",
-            "email": "john.doe@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 2,
-            "name": "Jane Smith",
-            "email": "jane.smith@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 3,
-            "name": "Alice Johnson",
-            "email": "alice.johnson@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 4,
-            "name": "Bob Brown",
-            "email": "bob.brown@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 5,
-            "name": "Charlie Davis",
-            "email": "charlie.davis@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 6,
-            "name": "Diana Evans",
-            "email": "diana.evans@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 7,
-            "name": "Ethan Harris",
-            "email": "ethan.harris@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 8,
-            "name": "Fiona Clark",
-            "email": "fiona.clark@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 9,
-            "name": "George Lewis",
-            "email": "george.lewis@example.com",
-            "password": "password123"
-        },
-        {
-            "id": 10,
-            "name": "Hannah Walker",
-            "email": "hannah.walker@example.com",
-            "password": "password123"
-        }
-    ]
+  "users": [
+    {
+      "id": 1,
+      "name": "Werner Reyes",
+      "email": "john.doe@example.com",
+      "password": "aLTEC12345",
+      "role": "manager"
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "password": "aLTEC12345",
+      "role": "employee"
+    },
+    {
+      "id": 3,
+      "name": "Alice Johnson",
+      "email": "alice.johnson@example.com",
+      "password": "password123",
+      "role": "employee"
+    },
+    {
+      "id": 4,
+      "name": "Bob Brown",
+      "email": "bob.brown@example.com",
+      "password": "password123",
+      "role": "employee"
+    },
+    {
+      "id": 5,
+      "name": "Charlie Davis",
+      "email": "charlie.davis@example.com",
+      "password": "password123",
+      "role": "employee"
+    },
+    {
+      "id": 6,
+      "name": "Diana Evans",
+      "email": "diana.evans@example.com",
+      "password": "password123",
+      "role": "employee"
+    },
+    {
+      "id": 7,
+      "name": "Ethan Harris",
+      "email": "ethan.harris@example.com",
+      "password": "password123",
+      "role": "employee"
+    },
+    {
+      "id": 8,
+      "name": "Fiona Clark",
+      "email": "fiona.clark@example.com",
+      "password": "password123",
+      "role": "employee"
+    },
+    {
+      "id": 9,
+      "name": "George Lewis",
+      "email": "george.lewis@example.com",
+      "password": "password123",
+      "role": "employee"
+    },
+    {
+      "id": 10,
+      "name": "Hannah Walker",
+      "email": "hannah.walker@example.com",
+      "password": "password123",
+      "role": "employee"
+    }
+  ]
 }

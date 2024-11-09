@@ -11,8 +11,8 @@ import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
 type DesingType = "label" | "floatLabel";
 
 interface Props extends InputTextProps {
-  label: LabelHTMLAttributes<HTMLLabelElement> & { text: string };
-  small?: HTMLAttributes<HTMLElement> & { text: string };
+  label: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
+  small?: HTMLAttributes<HTMLElement> & { text?: string };
   desingType?: DesingType;
   iconField?: boolean;
   iconFieldProps?: IconFieldProps;

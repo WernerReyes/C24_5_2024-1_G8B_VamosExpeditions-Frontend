@@ -1,5 +1,6 @@
 import { classNames } from "primereact/utils";
-import toast, { ToastBar, Toaster as ToasterHot } from "react-hot-toast";
+import { ToastBar, Toaster as ToasterHot } from "react-hot-toast";
+import { toasterAdapter } from "@/core/adapters";
 
 export const Toaster = () => {
   const iconType = (icon: any) => {
@@ -11,9 +12,9 @@ export const Toaster = () => {
       iconColor = "bg-blue-500";
     }
     return {
-        color: iconColor,
-        type: iconType.charAt(0).toUpperCase() + iconType.slice(1),
-    }
+      color: iconColor,
+      type: iconType.charAt(0).toUpperCase() + iconType.slice(1),
+    };
   };
 
   return (
@@ -21,6 +22,7 @@ export const Toaster = () => {
       toastOptions={{
         className: "bg-red-500",
       }}
+      
       position="top-right"
     >
       {(t) => (
@@ -41,14 +43,14 @@ export const Toaster = () => {
                 <div className="mr-4">{icon}</div>
 
                 <div className="flex-grow text-xs sm:text-sm">
-                  <h3 className="font-semibold mb-1 text-md">{
-                    iconType(icon).type
-                    }</h3>
+                  <h3 className="font-semibold mb-1 text-md">
+                    {iconType(icon).type}
+                  </h3>
                   {message}
                 </div>
                 <i
                   className="pi pi-times cursor-pointer hover:bg-transparent/10 p-2 rounded-full hover:text-white"
-                  onClick={() => toastAdapter.dismiss(t.id)}
+                  onClick={() => toasterAdapter.dismiss(t.id)}
                 ></i>
               </div>
             );
@@ -57,25 +59,4 @@ export const Toaster = () => {
       )}
     </ToasterHot>
   );
-};
-
-export const toastAdapter = {
-  success: (message: string) => {
-    toast.success(message);
-  },
-  error: (message: string) => {
-    toast.error(message);
-  },
-  warn: (message: string) => {
-    toast.error(message);
-  },
-  info: (message: string) => {
-    toast(message);
-  },
-  cusmtom: (message: string, options: any) => {
-    toast(message, options);
-  },
-  dismiss: (id: string) => {
-    toast.dismiss(id);
-  },
 };

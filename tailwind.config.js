@@ -14,7 +14,7 @@ export default {
       },
       
       backgroundImage: {
-        "login": "url('/public/images/backgrounds/bg-login.png')",
+        "login": "url('/public/images/backgrounds/bg-login.webp')",
       },
     },
   },

@@ -1,43 +1,40 @@
-import { LoginRequest } from "@/domain/dtos/requests/auth";
-import {
-  Button,
-  Image,
-  InputText,
-  Password,
-  toastAdapter,
-  Toaster,
-} from "@/presentation/components";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { constantRoutes } from "@/core/constants";
+import {
+  loginRequestSchema,
+  type LoginRequest,
+} from "@/domain/dtos/requests/auth";
+import { useAuthStore } from "@/infraestructure/hooks";
+import { Button, Image, InputText, Password } from "@/presentation/components";
 
-const LoginPage = () => {
+const { MANAGER } = constantRoutes.private;
+
+const LoginPage = () => { 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginRequest>();
+  } = useForm<LoginRequest>({
+    resolver: zodResolver(loginRequestSchema),
+  });
+  const navigate = useNavigate();
+  const { startLogin } = useAuthStore();
 
   const handleLogin = async (data: LoginRequest) => {
-    console.log(data);
-    // toastAdapter.loading("Iniciando sesión...");
-    try {
-      // const response = await authService.login(loginRequest);
-      // if (response) {
-      //   toastAdapter.success("Inicio de sesión exitoso");
-      //   router.push("/dashboard");
-      // }
-    } catch (error) {
-      // toastAdapter.error(error.message);
-    }
+    startLogin(data.email, data.password).then((user) => {
+      // window.location.href = MANAGER;
+      console.log(user?.role);
+      navigate("/" + user.role);
+    });
   };
-
-  console.log(errors);
 
   return (
     <section
       aria-labelledby="login-heading"
       className="bg-login bg-no-repeat bg-cover bg-center w-screen min-h-screen flex justify-center items-center"
     >
-      <Toaster />
       <div className="mx-10 w-80 bg-secondary px-8 py-16 rounded-lg shadow-lg sm:w-[25rem]">
         <Image src="/images/logo.png" alt="Logo" className="mx-auto" />
         <h1
@@ -57,12 +54,17 @@ const LoginPage = () => {
           <Controller
             control={control}
             name="email"
-            render={({ field }) => (
+            defaultValue="john.doe@example.com"
+            render={({ field, fieldState: { error } }) => (
               <InputText
                 label={{
                   htmlFor: "email",
                   text: "Correo Electrónico",
                   className: "text-tertiary font-bold mb-2",
+                }}
+                small={{
+                  text: error?.message,
+                  className: "text-red-500",
                 }}
                 iconField
                 iconFieldProps={{
@@ -74,50 +76,43 @@ const LoginPage = () => {
                 id="email"
                 className="block w-full"
                 placeholder="Correo Electrónico"
-                // invalid
+                invalid={!!error}
                 {...field}
               />
             )}
           />
 
-          {/* <InputText
-            label={{
-              htmlFor: "email",
-              text: "Correo Electrónico",
-              className: "text-tertiary font-bold mb-2",
-            }}
-            iconField
-            iconFieldProps={{
-              iconPosition: "left",
-            }}
-            iconProps={{
-              className: "pi pi-envelope",
-            }}
-            id="email"
-            name="email"
-            className="block w-full"
-            placeholder="Correo Electrónico"
-            // invalid
-          /> */}
-
           <div className="mt-5">
-            <Password
-              label={{
-                htmlFor: "password",
-                text: "Contraseña",
-                className: "text-tertiary font-bold",
-              }}
+            <Controller
+              control={control}
               name="password"
-              feedback={false}
-              inputClassName="mt-2 block w-full sm:w-[21rem]"
-              placeholder="Contraseña"
-              toggleMask
+              defaultValue="aLTEC12345"
+              render={({ field, fieldState: { error } }) => (
+                <Password
+                  label={{
+                    htmlFor: "password",
+                    text: "Contraseña",
+                    className: "text-tertiary font-bold",
+                  }}
+                  small={{
+                    text: error?.message,
+                    className: "text-red-500",
+                  }}
+                  feedback={false}
+                  inputClassName="mt-2 block w-full sm:w-[21rem]"
+                  placeholder="Contraseña"
+                  toggleMask
+                  invalid={!!error}
+                  {...field}
+                />
+              )}
             />
           </div>
 
           <Button
             type="submit"
             label="Ingresar"
+            disabled={Object.keys(errors).length > 0}
             // onClick={handleSubmit}
             className="w-full mt-8"
           />
