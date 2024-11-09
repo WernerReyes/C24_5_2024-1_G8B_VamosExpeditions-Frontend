@@ -1,15 +1,26 @@
-import { Sidebar } from "../components/Sidebar";
+
+import { Navar } from "./components/nanvar/Navbar";
+import Sidebar from "./components/sidebar/Sidebar";
+import { useSidebar } from "./components/sidebar/useSidebar";
 import { StatisticsSummaryGraph } from "./components/StatisticsSummaryGraph";
+import './components/sidebar/index.css'
+
 
 const DashboardPage = () => {
+
+  const {visible,setVisible}=useSidebar();
   return (
     <section className="w-screen min-h-screen flex">
-      <Sidebar />
 
-      <div className="w-4/5 h-full bg-secondary">
-        <header className="flex justify-between items-center px-10 py-4 bg-white shadow-md">
-          Header
-        </header>
+      <div className={`w-72 ${visible ? "sidebar-fixed" : "hidden"}`}>
+           <Sidebar  visible={visible} setVisible={setVisible} />
+      </div>
+      
+
+      <div className={`flex-1 h-full mt-5 bg-secondary ${visible ? "" : "w-full "} `}>
+       
+        <Navar setVisible={setVisible} />
+       
         <main className="p-5 md:p-10">
           <h2 className="text-xl text-start font-bold text-primary">
             Dashboard
@@ -36,6 +47,56 @@ const DashboardPage = () => {
             <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
               {/* <StatisticsSummaryGraph /> */}
             </div>
+
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
+            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
+              {/* <StatisticsSummaryGraph /> */}
+            </div>
             {/* <div className="w-full bg-white border shadow-md h-40 max-w-screen-lg">
               <StatisticsSummaryGraph />
             </div> */}
@@ -48,19 +109,3 @@ const DashboardPage = () => {
 
 export default DashboardPage;
 
-{
-  /* <section className="flex h-screen">
-            <div className={`w-72 ${visible ? "sidebar-fixed" : "hidden"}`}>
-                <BasicDemo visible={visible} setVisible={setVisible} />
-            </div>
-
-
-            <div className={`flex-1 bg-red-500 ${visible ? "" : "w-full "}`}>
-                <div className="flex-1 ">
-                    <Navar setVisible={setVisible} />
-                </div>
-
-              
-            </div>
-        </section> */
-}
