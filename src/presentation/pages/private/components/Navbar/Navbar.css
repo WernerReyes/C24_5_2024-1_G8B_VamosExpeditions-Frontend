@@ -1,0 +1,73 @@
+/* panelmenu */
+.p-panelmenu
+  .p-panelmenu-header:not(.p-highlight):not(.p-disabled):hover
+  .p-panelmenu-header-content {
+  border-color: white !important;
+  background: #00bcd4 !important;
+  color: white !important;
+}
+
+.p-panelmenu
+  .p-panelmenu-header:not(.p-disabled).p-highlight
+  .p-panelmenu-header-content {
+  border-color: white !important;
+  background: #00bcd4 !important;
+  color: white !important;
+}
+
+.p-panelmenu
+  .p-panelmenu-header:not(.p-disabled).p-highlight:hover
+  .p-panelmenu-header-content {
+  border-color: white !important;
+  background: #00bcd4 !important;
+  color: white !important;
+}
+
+.p-panelmenu .p-panelmenu-header-content {
+  border-color: white !important;
+  background: white !important;
+  color: white !important;
+}
+
+.p-panelmenu
+  .p-panelmenu-header
+  .p-panelmenu-header-content
+  .p-panelmenu-header-link:hover {
+  color: white !important;
+}
+
+/* 
+ */
+
+.p-dialog-top-right {
+  top: -1rem !important;
+}
+
+.p-dialog-top .p-dialog,
+.p-dialog-bottom .p-dialog,
+.p-dialog-left .p-dialog,
+.p-dialog-right .p-dialog,
+.p-dialog-top-left .p-dialog,
+.p-dialog-top-right .p-dialog,
+.p-dialog-bottom-left .p-dialog,
+.p-dialog-bottom-right .p-dialog {
+  margin: 4.8rem !important;
+}
+
+.fixed-menubar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: var(--primary-color);
+  color: white;
+
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.p-menubar {
+  border-radius: 0px !important;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}

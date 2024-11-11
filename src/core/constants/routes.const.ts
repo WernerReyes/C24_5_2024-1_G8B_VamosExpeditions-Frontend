@@ -14,6 +14,7 @@ type PrivateRoutes = {
   MANAGER: string;
   common: {
     DASHBOARD: string;
+    QUOTES: string;
   };
   //     HOME: string;
   //     LOGIN: string;
@@ -46,6 +47,7 @@ export const constantRoutes: Routes = {
     MANAGER: "/manager",
     common: {
       DASHBOARD: `dashboard`,
+      QUOTES: `quotes`,
     },
     //     HOME: PublicRoutes.HOME,
     //     LOGIN: PublicRoutes.LOGIN,

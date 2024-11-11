@@ -5,16 +5,23 @@ import { store } from "./store";
 
 import "./App.css";
 import "primeicons/primeicons.css";
+import { Suspense } from "react";
 
 function App() {
   return (
     <>
       <Provider store={store}>
-        {/* <Suspense fallback={<ProgressSpinner darkColor="bg-[#111827]" lightColor="bg-white" />}> */}
+        <Suspense fallback={
+          <div className="loader-container">
+            <div className="loader">
+              loading...
+            </div>
+          </div>
+        }>
         <PrimeReactProvider>
           <AppRouter />
         </PrimeReactProvider>
-        {/* </Suspense> */}
+        </Suspense>
       </Provider>
     </>
   );

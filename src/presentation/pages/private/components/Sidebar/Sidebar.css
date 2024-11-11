@@ -1,0 +1,34 @@
+.p-sidebar {
+  box-shadow: none !important;
+}
+
+.p-sidebar-content {
+  box-shadow: none !important;
+}
+
+.p-sidebar-mask {
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+@media (max-width: 1000px) {
+  .sidebar-fixed {
+    position: fixed; /* Fija la barra lateral */
+    top: 0;
+    left: 0;
+    height: 100vh; /* Ocupa toda la altura de la pantalla */
+    z-index: 10; /* Asegúrate de que flote sobre otros elementos */
+  }
+}
+
+.p-menubar-button {
+  display: none !important;
+}
+
+/* PanelMenu */
+.p-panelmenu
+  .p-panelmenu-header:not(.p-highlight):not(.p-disabled):hover
+  .p-panelmenu-header-content {
+  background: var(--primary-color) !important;
+}
+

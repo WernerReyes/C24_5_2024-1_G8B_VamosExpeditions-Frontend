@@ -1,6 +1,27 @@
 :root {
-    --primary-color: #01A3BB;
-    --secondary-color: #F4F6F6;
-    --tertiary-color: #01495D;
+  --primary-color: #01a3bb;
+  --secondary-color: #f4f6f6;
+  --tertiary-color: #01495d;
+}
 
+/* Scrollbar Styling */
+
+::-webkit-scrollbar {
+  width: 15px;
+  height: 15px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  border: 3px solid #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--tertiary-color);
 }

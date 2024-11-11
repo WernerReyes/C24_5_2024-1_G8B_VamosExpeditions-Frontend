@@ -1,127 +1,60 @@
-import { Sidebar } from "../components/Sidebar";
-import { StatisticsSummaryGraph } from "./components/StatisticsSummaryGraph";
+import { Button } from "@/presentation/components";
+import { MainLayout } from "../layouts";
+import {
+  ActiveReserves,
+  RecentQuotes,
+  StatisticsSummaryGraph,
+  StatsOverviewCard,
+} from "./components";
 
 const DashboardPage = () => {
-
-  const {visible,setVisible}=useSidebar();
   return (
-    <section className="w-screen min-h-screen flex">
-      <Sidebar />
-
-      <div className="w-4/5 h-full bg-secondary">
-        <header className="flex justify-between items-center px-10 py-4 bg-white shadow-md">
-          Header
-        </header>
-        <main className="p-5 md:p-10">
-          <h2 className="text-xl text-start font-bold text-primary">
-            Dashboard
-          </h2>
-          <div className="grid grid-cols-4 grid-flow-row gap-x-4 gap-y-6  mt-4">
-            <div className="w-full bg-white border col-span-4 h-full shadow-md rounded-md p-3">
-              <StatisticsSummaryGraph />
-            </div>
-            <StatsOverview
-              title="Cotizaciones Pendientes"
-              icon="pi pi-file"
-              extraInfo="+2% desde el mes pasado"
-              value={12}
-            />
-            <StatsOverview
-              title="Reservas Activas"
-              icon="pi pi-calendar"
-              extraInfo="+2% desde el mes pasado"
-              value={24}
-             />
-            <StatsOverview
-              title="Ingresos Totales"
-              icon="pi pi-globe"
-              extraInfo="+2% desde el mes pasado"
-              value={45231}
-
-             />
-            <StatsOverview />
-            {/*  */}
-            <div className="w-full bg-white border col-span-4 lg:col-span-2 shadow-md h-40 rounded-md max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-4 lg:col-span-2 shadow-md h-40 rounded-md max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            <div className="w-full bg-white border col-span-2 shadow-md h-40 max-w-screen-lg">
-              {/* <StatisticsSummaryGraph /> */}
-            </div>
-            {/* <div className="w-full bg-white border shadow-md h-40 max-w-screen-lg">
-              <StatisticsSummaryGraph />
-            </div> */}
-          </div>
-        </main>
+    <MainLayout>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl text-start font-bold text-primary">
+          Bienvenido, Pablo Moreno!
+        </h1>
+        <Button label="Nueva cotización" icon="pi pi-plus-circle" />
       </div>
-    </section>
+
+      <div className="grid grid-cols-4 grid-flow-row gap-x-4 gap-y-6 mt-4">
+        <div className="w-full bg-white border col-span-4 h-full shadow-md rounded-md p-3">
+          <StatisticsSummaryGraph />
+        </div>
+        <StatsOverviewCard
+          title="Cotizaciones Pendientes"
+          icon="pi pi-file"
+          extraInfo="+2% desde el mes pasado"
+          value={"12"}
+        />
+        <StatsOverviewCard
+          title="Reservas Activas"
+          icon="pi pi-calendar"
+          extraInfo="+2% desde el mes pasado"
+          value={"24"}
+        />
+        <StatsOverviewCard
+          title="Ingresos Totales"
+          icon="pi pi-dollar"
+          extraInfo="+2% desde el mes pasado"
+          value={"$45231"}
+        />
+        <StatsOverviewCard
+          title="Margen de Utilidad"
+          icon="pi pi-percentage"
+          extraInfo="+5% desde el mes pasado"
+          value={"20%"}
+        />
+
+        <div className="w-full p-6 bg-white border col-span-4 xl:col-span-2 shadow-md rounded-md">
+          <RecentQuotes />
+        </div>
+        <div className="w-full p-6 bg-white border col-span-4 xl:col-span-2 shadow-md rounded-md   ">
+          <ActiveReserves />
+        </div>
+      </div>
+    </MainLayout>
   );
 };
 
 export default DashboardPage;
-
-{
-  /* <section className="flex h-screen">
-            <div className={`w-72 ${visible ? "sidebar-fixed" : "hidden"}`}>
-                <BasicDemo visible={visible} setVisible={setVisible} />
-            </div>
-
-
-            <div className={`flex-1 bg-red-500 ${visible ? "" : "w-full "}`}>
-                <div className="flex-1 ">
-                    <Navar setVisible={setVisible} />
-                </div>
-
-              
-            </div>
-        </section> */
-}

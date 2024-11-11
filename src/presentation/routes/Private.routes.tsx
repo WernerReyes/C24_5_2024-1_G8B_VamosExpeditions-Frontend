@@ -8,8 +8,10 @@ const DashboardPage = lazy(
   () => import("../pages/private/dashboard/Dashboard.page")
 );
 
+const QuotesPage = lazy(() => import("../pages/private/quotes/Quotes.page"));
+
 const {
-  common: { DASHBOARD },
+  common: { DASHBOARD, QUOTES },
 } = constantRoutes.private;
 
 const PrivateRoutes = () => {
@@ -22,9 +24,8 @@ const PrivateRoutes = () => {
         }
       >
         <Route path={DASHBOARD} element={<DashboardPage />} />
+        <Route path={QUOTES} element={<QuotesPage />} />
       </Route>
-
-      
     </Routes>
   );
 };
