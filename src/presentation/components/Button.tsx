@@ -9,10 +9,10 @@ export const Button = ({ ...props }: Props) => {
   return (
     <ButtonPrimeReact
       {...props}
-      pt={{
-        ...props.pt,
-        icon: { className: "me-3" },
-      }}
+      // pt={{
+      //   ...props.pt,
+      //   // icon: { className: "me-3" },
+      // }}
     />
   );
 };
