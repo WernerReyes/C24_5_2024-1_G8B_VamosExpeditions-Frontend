@@ -42,17 +42,20 @@ export const AppRouter = () => {
   //     startClearMessages();
   //   }, [messages]);
 
-    // if (status === AuthStatus.CHECKING) return <h1>Loading...</h1>;
+  // if (status === AuthStatus.CHECKING) return <h1>Loading...</h1>;
 
-    const userSimulated = {
-      role: UserRoleEnum.MANAGER,
-    };
+  const userSimulated = {
+    role: UserRoleEnum.MANAGER,
+  };
 
   return (
-    <BrowserRouter>
-      
-
-      <Toaster  />
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      <Toaster />
       <Routes>
         {/* <RouterWithNotFound> */}
         <Route path="/" element={<Navigate to={LOGIN} />} />
