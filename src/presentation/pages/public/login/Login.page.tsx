@@ -38,7 +38,7 @@ const LoginPage = () => {
           id="login-heading"
           className="text-2xl mt-7 font-bold text-center mb-1 text-tertiary"
         >
-          Bienvenid de nuevo
+          Bienvenido de nuevo
         </h1>
         <p className="text-center font-light text-sm mb-6">
           Ingresa tus credenciales para acceder a tu cuenta

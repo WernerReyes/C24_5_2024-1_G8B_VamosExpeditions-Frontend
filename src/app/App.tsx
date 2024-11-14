@@ -5,6 +5,7 @@ import { store } from "./store";
 
 import "./App.css";
 import "primeicons/primeicons.css";
+
 import { Suspense } from "react";
 
 function App() {

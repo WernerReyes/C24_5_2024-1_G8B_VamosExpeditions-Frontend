@@ -1,14 +1,13 @@
+import { lazy } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { constantRoutes } from "@/core/constants";
 import { UserRoleEnum } from "@/domain/entities";
 import { useAuthStore } from "@/infraestructure/hooks";
 import { Toaster } from "@/presentation/components";
 import { AuthGuard } from "@/presentation/guards/Auth.guard";
 import PrivateRoutes from "@/presentation/routes/Private.routes";
-import { lazy } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 //* Public pages
-
 const LoginPage = lazy(
   () => import("../presentation/pages/public/login/Login.page")
 );
