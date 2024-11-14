@@ -111,7 +111,7 @@ const LoginPage = () => {
             label="Ingresar"
             disabled={Object.keys(errors).length > 0}
             // onClick={handleSubmit}
-            className="w-full mt-8"
+            className="w-full mt-8 bg-red-500"
           />
         </form>
       </div>
