@@ -70,5 +70,95 @@
       "password": "password123",
       "role": "employee"
     }
+  ],
+  "quotes": [
+    {
+      "id": 1,
+      "startDate": "2024-11-11",
+      "endDate": "2024-11-11",
+      "status": "Aceptado",
+      "passengers": 4,
+      "representative": {
+      "id": 2,
+      "name": "Pablo perez"
+      },
+      "customer": {
+      "id": 1,
+      "name": "Werner Reyes",
+      "country": "Argentina"
+      },
+      "versions": [
+      {
+        "id": 1,
+        "startDate": "2021-10-10",
+        "endDate": "2021-12-10",
+        "passengers": 4,
+        "status": "Rechazado",
+        "representative": {
+        "id": 2,
+        "name": "Pablo"
+        },
+        "customer": {
+        "name": "Juan Perez",
+        "country": "Argentina"
+        },
+        "total": 1000
+      }
+      ],
+      "total": 1000
+    },
+    {
+      "id": 2,
+      "startDate": "2021-10-10",
+      "endDate": "2021-12-10",
+      "status": "Aceptado",
+      "passengers": 4,
+      "representative": {
+      "id": 1,
+      "name": "Pablo primero"
+      },
+      "customer": {
+      "id": 2,
+      "name": "Juan Perez",
+      "country": "Argentina"
+      },
+      "versions": [
+      {
+        "id": 3,
+        "startDate": "2021-10-10",
+        "endDate": "2021-12-10",
+        "passengers": 4,
+        "status": "Rechazado",
+        "representative": {
+        "id": 2,
+        "name": "Pablo"
+        },
+        "customer": {
+        "name": "Juan Perez",
+        "country": "Argentina"
+        },
+        "total": 1000
+      }
+      ],
+      "total": 1000
+    },
+    {
+      "id": 3,
+      "startDate": "2021-10-10",
+      "endDate": "2021-12-10",
+      "passengers": 4,
+      "status": "Aceptado",
+      "representative": {
+      "id": 1,
+      "name": "Pablo primero"
+      },
+      "customer": {
+      "id": 2,
+      "name": "Juan Perez",
+      "country": "Argentina"
+      },
+      "versions": [],
+      "total": 5000
+    }
   ]
 }

@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { onChecking, type AppState, onLogin, onLogout } from "../store";
-import { authService } from "../services/auth.service";
+import { authService } from "../services";
 import { toasterAdapter } from "@/core/adapters";
 
 export const useAuthStore = () => {

@@ -1,11 +1,11 @@
 import { classNamesAdapter } from "@/core/adapters";
 
-type  StatsOverviewProps = {
+type StatsOverviewProps = {
   title: string;
   icon: string;
   value: string;
   extraInfo: string;
-}
+};
 
 export const StatsOverviewCard = ({
   title,

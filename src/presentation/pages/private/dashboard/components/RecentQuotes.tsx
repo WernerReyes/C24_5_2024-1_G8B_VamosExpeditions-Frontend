@@ -1,4 +1,5 @@
 import { classNamesAdapter } from "@/core/adapters";
+import { QuoteStatusEnum } from "@/domain/entities";
 import { Avatar, Button } from "@/presentation/components";
 
 //* Sample Data
@@ -7,36 +8,35 @@ const RECENT_QUOTES = [
     id: 1,
     client: "Juan Perez",
     date: "2024-10-10",
-    status: "Pendiente",
+    status: QuoteStatusEnum.Pending,
     total: 2500,
   },
   {
     id: 2,
     client: "Maria Gonzalez",
     date: "2024-07-30",
-    status: "Aceptado",
+    status: QuoteStatusEnum.Accepted,
     total: 3800,
   },
   {
     id: 3,
     client: "Carlos Lopez",
     date: "2024-07-30",
-    status: "Rechazado",
+    status:  QuoteStatusEnum.Rejected,
     total: 1900,
   },
 ];
 
-type RecentQuoteStatus = "Pendiente" | "Aceptado" | "Rechazado";
 
 export const RecentQuotes = () => {
   //* Helper function to get status styles
-  const getStatusClass = (status: RecentQuoteStatus) => {
+  const getStatusClass = (status: QuoteStatusEnum) => {
     switch (status) {
-      case "Pendiente":
+      case  QuoteStatusEnum.Pending:
         return "bg-yellow-100 text-yellow-800 border border-yellow-300";
-      case "Aceptado":
+      case QuoteStatusEnum.Accepted:
         return "bg-green-100 text-green-800 border border-green-300";
-      case "Rechazado":
+      case  QuoteStatusEnum.Rejected:
         return "bg-red-100 text-red-800 border border-red-300";
       default:
         return "";
@@ -81,7 +81,7 @@ export const RecentQuotes = () => {
               <span
                 className={classNamesAdapter(
                   "inline-block px-3 py-1 text-xs font-semibold rounded-full",
-                  getStatusClass(quote.status as RecentQuoteStatus)
+                  getStatusClass(quote.status)
                 )}
               >
                 {quote.status}

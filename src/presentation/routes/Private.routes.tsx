@@ -26,6 +26,7 @@ const PrivateRoutes = () => {
         <Route path={DASHBOARD} element={<DashboardPage />} />
         <Route path={QUOTES} element={<QuotesPage />} />
       </Route>
+
     </Routes>
   );
 };

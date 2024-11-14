@@ -13,14 +13,20 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     <section className="w-screen min-h-screen flex max-w-full">
       <div
         className={classNamesAdapter(
-          "w-72",
+          "w-72 bg-secondary transition-all",
           visible ? "sidebar-fixed" : "hidden"
         )}
       >
         <Sidebar visible={visible} setVisible={setVisible} />
       </div>
 
-      <div className={`flex-1 bg-secondary ${visible ? "" : "w-full"} `}>
+      <div
+        style={{
+          width: "calc(100% - 18rem)",
+          transition: "width 0.5s",
+        }}
+        className={`flex-1 bg-secondary ${visible ? "" : "w-full"} `}
+      >
         <Navbar setVisible={setVisible} />
 
         <main className="px-5 pt-28 pb-10 md:px-10 xl:px-20">{children}</main>

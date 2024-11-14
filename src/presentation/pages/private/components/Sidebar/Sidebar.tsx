@@ -26,8 +26,6 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
   const dinamyRoute = (route: string) =>
     "/" + (authUser?.role ? authUser?.role + "/" : "manager/") + route;
 
-
-
   const items: MenuItem[] = [
     {
       label: "Dashboard",

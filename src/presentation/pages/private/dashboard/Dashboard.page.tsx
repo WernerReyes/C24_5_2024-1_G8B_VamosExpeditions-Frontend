@@ -11,10 +11,10 @@ const DashboardPage = () => {
   return (
     <MainLayout>
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl text-start font-bold text-primary">
+        <h1 className="text-xl sm:text-3xl text-start font-bold text-primary">
           Bienvenido, Pablo Moreno!
         </h1>
-        <Button label="Nueva cotización" icon="pi pi-plus-circle" />
+        <Button size="small" label="Nueva cotización" icon="pi pi-plus-circle" />
       </div>
 
       <div className="grid grid-cols-4 grid-flow-row gap-x-4 gap-y-6 mt-4">
