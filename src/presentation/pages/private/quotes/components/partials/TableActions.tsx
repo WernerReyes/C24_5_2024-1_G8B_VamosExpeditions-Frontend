@@ -6,7 +6,7 @@ type TyoeTableActions = {
   type: "principal" | "secondary";
 };
 
-export const TableActions = ({ rowData, type }: TyoeTableActions) => {
+export const TableActions = ({ type }: TyoeTableActions) => {
   return (
     <div className="space-x-2">
       <Button icon="pi pi-pencil" rounded outlined />

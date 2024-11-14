@@ -1,7 +1,6 @@
 import { constantRoutes } from "@/core/constants";
 import { UserRoleEnum } from "@/domain/entities";
 import { useAuthStore } from "@/infraestructure/hooks";
-import { AuthStatus } from "@/infraestructure/store";
 import { Toaster } from "@/presentation/components";
 import { AuthGuard } from "@/presentation/guards/Auth.guard";
 import PrivateRoutes from "@/presentation/routes/Private.routes";
@@ -20,7 +19,6 @@ const LoginPage = lazy(
 
 const {
   public: { LOGIN },
-  private: { MANAGER },
 } = constantRoutes;
 
 // const { USER, ADMIN } = PrivateRoutes;

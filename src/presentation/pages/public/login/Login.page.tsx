@@ -1,15 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { constantRoutes } from "@/core/constants";
 import {
   loginRequestSchema,
   type LoginRequest,
 } from "@/domain/dtos/requests/auth";
 import { useAuthStore } from "@/infraestructure/hooks";
 import { Button, Image, InputText, Password } from "@/presentation/components";
-
-const { MANAGER } = constantRoutes.private;
 
 const LoginPage = () => { 
   const {

@@ -1,10 +1,12 @@
 import axios, { AxiosRequestConfig } from "axios";
-// import { setupInterceptors } from "./interceptors";
-
 import { constantEnvs } from "@/core/constants/env.const";
-import { ApiResponse } from "@/domain/dtos/responses/common";
 
 type Methods = "GET" | "POST" | "PUT" | "DELETE";
+
+export type ApiResponse<T> = {
+  data: T;
+  status: number;
+};
 
 const { VITE_API_URL } = constantEnvs;
 
