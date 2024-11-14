@@ -6,13 +6,5 @@ import {
 interface Props extends ButtonProps {}
 
 export const Button = ({ ...props }: Props) => {
-  return (
-    <ButtonPrimeReact
-      {...props}
-      // pt={{
-      //   ...props.pt,
-      //   // icon: { className: "me-3" },
-      // }}
-    />
-  );
+  return <ButtonPrimeReact {...props} />;
 };

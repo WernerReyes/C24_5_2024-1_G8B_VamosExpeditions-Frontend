@@ -22,21 +22,20 @@ const RECENT_QUOTES = [
     id: 3,
     client: "Carlos Lopez",
     date: "2024-07-30",
-    status:  QuoteStatusEnum.Rejected,
+    status: QuoteStatusEnum.Rejected,
     total: 1900,
   },
 ];
-
 
 export const RecentQuotes = () => {
   //* Helper function to get status styles
   const getStatusClass = (status: QuoteStatusEnum) => {
     switch (status) {
-      case  QuoteStatusEnum.Pending:
+      case QuoteStatusEnum.Pending:
         return "bg-yellow-100 text-yellow-800 border border-yellow-300";
       case QuoteStatusEnum.Accepted:
         return "bg-green-100 text-green-800 border border-green-300";
-      case  QuoteStatusEnum.Rejected:
+      case QuoteStatusEnum.Rejected:
         return "bg-red-100 text-red-800 border border-red-300";
       default:
         return "";
