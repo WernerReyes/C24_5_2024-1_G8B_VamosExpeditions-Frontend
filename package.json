@@ -8,7 +8,7 @@
     "db:json-server": "json-server --watch src/data/db.json --port 8000",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview --port 8080"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -3,9 +3,10 @@ import { PrimeReactProvider } from "primereact/api";
 import { AppRouter } from "./routes";
 import { store } from "./store";
 
-import "./App.css";
+// import "./App.css";
+import "./theme.css";
+// import "primereact/resources/themes/saga-blue/theme.css";
 import "primeicons/primeicons.css";
-
 import { Suspense } from "react";
 
 function App() {

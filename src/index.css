@@ -1,5 +1,12 @@
 @layer tailwind-base, primereact, tailwind-utilities;
 
+/* @import 'primereact/resources/themes/lara-light-cyan/theme.css'; */
+
+/* :root {
+  --primary-color: red;
+  --button-bg-color: #2980b9;
+  --button-text-color: white;
+} */
 
 @layer tailwind-base {
   @tailwind base;
