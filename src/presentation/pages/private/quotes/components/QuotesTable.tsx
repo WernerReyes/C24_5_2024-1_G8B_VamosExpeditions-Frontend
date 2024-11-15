@@ -1,26 +1,25 @@
-import { useEffect, useState } from "react";
+import { formatCurrency, formatDate } from "@/core/utils";
 import type { QuoteEntity } from "@/domain/entities";
 import { useQuoteStore } from "@/infraestructure/hooks";
 import {
   Button,
-  Calendar,
   Column,
   DataTable,
-  MultiSelect,
   Tag,
-  type ColumnFilterApplyTemplateOptions,
-  type ColumnFilterClearTemplateOptions,
-  type ColumnFilterElementTemplateOptions,
   type ColumnFilterMatchModeOptions,
-  type ColumnFilterMetaDataWithConstraint,
   type DataTableExpandedRows,
   type DataTableValueArray,
-  type MultiSelectChangeEvent,
 } from "@/presentation/components";
+import { useEffect, useState } from "react";
+import { filterByName, getQuoteSeverity } from "../utils";
 import { QuoteVersionsTable } from "./QuoteVersionsTable";
-import { TableActions } from "./partials";
-import { formatCurrency, formatDate } from "@/core/utils";
-import { getQuoteSeverity } from "../utils";
+import {
+  FilterApplyButton,
+  FilterByDate,
+  FilterByRepresentative,
+  FilterClearButton,
+  TableActions,
+} from "./partials";
 
 const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
   {
@@ -52,7 +51,9 @@ export const QuotesTable = () => {
 
   const handleExpandAll = () => {
     let _expandedRows: DataTableExpandedRows = {};
-    quotes.forEach((p) => (_expandedRows[`${p.id}`] = true));
+    quotes.forEach((p) => {
+      if (p.versions.length > 0) _expandedRows[p.id] = true;
+    });
     setExpandedRows(_expandedRows);
   };
 
@@ -60,7 +61,10 @@ export const QuotesTable = () => {
 
   useEffect(() => {
     startGetQuotes();
+  }, []);
 
+  useEffect(() => {
+    if (!quotes.length) return;
     const uniqueRepresentatives = Array.from(
       new Set(quotes.map((quote) => quote.representative.id))
     ).map((id) => {
@@ -68,7 +72,7 @@ export const QuotesTable = () => {
         .representative;
     });
     setRepresentatives(uniqueRepresentatives);
-  }, []);
+  }, [quotes]);
 
   return (
     <div className="card">
@@ -78,8 +82,14 @@ export const QuotesTable = () => {
         expandedRows={expandedRows}
         onRowToggle={(e) => setExpandedRows(e.data)}
         rowExpansionTemplate={(quote: QuoteEntity) => (
-          <QuoteVersionsTable quote={quote} />
+          <QuoteVersionsTable
+            quote={quote}
+            filterMatchModeOptions={FILTER_MATCH_MODES}
+            representatives={representatives}
+          />
         )}
+        size="small"
+        className="text-sm lg:text-[15px] mt-5"
         dataKey="id"
         header={
           <div className="flex flex-wrap justify-content-end gap-2">
@@ -101,15 +111,11 @@ export const QuotesTable = () => {
         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
         paginator
         rowsPerPageOptions={[10, 25, 50]}
+        showGridlines
         filterDisplay="menu"
-        globalFilterFields={[
-          "customer.name",
-          "representative.name",
-          "startDate",
-        ]}
         rows={10}
         currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} cotizaciones"
-        emptyMessage="No encontrado"
+        emptyMessage="No hay cotizaciones"
       >
         <Column
           expander={(quote) => quote.versions.length > 0}
@@ -124,28 +130,8 @@ export const QuotesTable = () => {
           sortable
           filterPlaceholder="Buscar por nombre"
           filterMatchModeOptions={FILTER_MATCH_MODES}
-          filterClear={(options: ColumnFilterClearTemplateOptions) => {
-            return (
-              <Button
-                label="Limpiar"
-                outlined
-                onClick={() => options.filterClearCallback()}
-              />
-            );
-          }}
-          filterApply={(options: ColumnFilterApplyTemplateOptions) => {
-            return (
-              <Button
-                label="Aplicar"
-                onClick={() => {
-                  const value = (
-                    options.filterModel as any as ColumnFilterMetaDataWithConstraint
-                  ).constraints[0].value;
-                  options.filterApplyCallback(value, 0);
-                }}
-              />
-            );
-          }}
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
         />
         <Column field="customer.country" header="País" sortable />
         <Column field="passengers" header="Pasajeros" sortable />
@@ -154,44 +140,40 @@ export const QuotesTable = () => {
           field="startDate"
           header="Fecha de inicio"
           className="min-w-32"
+          filterMenuStyle={{ width: "16rem" }}
           dataType="date"
           sortable
           filter
           showFilterOperator={false}
           showAddButton={false}
-          filterPlaceholder="Buscar por fecha"
           showFilterMatchModes={false}
-          filterMatchModeOptions={FILTER_MATCH_MODES}
           filterField="startDate"
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
           body={(e: QuoteEntity) => formatDate(e.startDate)}
-          filterElement={(options: ColumnFilterElementTemplateOptions) => {
-            return (
-              <Calendar
-                value={options.value}
-                onChange={(e) =>
-                  e.value && options.filterCallback(e.value, options.index)
-                }
-                placeholder="Fecha de inicio"
-                dateFormat={"dd/mm/yy"}
-                showButtonBar
-                showIcon
-                showOnFocus={false}
-              />
-            );
-          }}
-          pt={{
-            filterMatchModeDropdown: {
-              defaultChecked: "equals",
-            },
-          }}
+          filterElement={(options) => (
+            <FilterByDate options={options} placeholder="Fecha de inicio" />
+          )}
         />
 
         <Column
           field="endDate"
           header="Fecha fin"
-          className="min-w-32"
-          body={(e: QuoteEntity) => formatDate(e.endDate)}
           sortable
+          className="min-w-32"
+          dataType="date"
+          filter
+          showFilterOperator={false}
+          showAddButton={false}
+          showFilterMatchModes={false}
+          filterPlaceholder="Buscar por fecha"
+          filterField="endDate"
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
+          body={(e: QuoteEntity) => formatDate(e.endDate)}
+          filterElement={(options) => (
+            <FilterByDate options={options} placeholder="Fecha de fin" />
+          )}
         />
         <Column
           field="representative.name"
@@ -199,49 +181,21 @@ export const QuotesTable = () => {
           showFilterMatchModes={false}
           showFilterOperator={false}
           showAddButton={false}
-          filterMenuStyle={{ width: "14rem" }}
+          filterMenuStyle={{ width: "16rem" }}
           filter
           filterMatchMode="custom"
           sortField="representative.name"
           filterField="representative"
-          filterFunction={(value, filter) => {
-            if (Array.isArray(filter) && filter.length === 0) {
-              return true;
-            }
-
-            return Array.isArray(filter)
-              ? filter.some(
-                  (item) =>
-                    item?.name?.toLowerCase() === value?.name?.toLowerCase()
-                )
-              : false;
-          }}
+          filterFunction={filterByName}
           sortable
-          filterElement={
-            // representativeFilterTemplate
-            (options: ColumnFilterElementTemplateOptions) => {
-              return (
-                <MultiSelect
-                  value={options.value || []}
-                  options={representatives}
-                  display="chip"
-                  itemTemplate={(option: { id: number; name: string }) => (
-                    <div className="flex align-items-center gap-2">
-                      <span>{option.name}</span>
-                    </div>
-                  )}
-                  onChange={(e: MultiSelectChangeEvent) =>
-                    options.filterCallback(e.value)
-                  }
-                  dataKey="id"
-                  optionLabel="name"
-                  placeholder="Selecciona representantes"
-                  filterBy="name"
-                  className="p-column-filter"
-                />
-              );
-            }
-          }
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
+          filterElement={(options) => (
+            <FilterByRepresentative
+              options={options}
+              representatives={representatives}
+            />
+          )}
         />
         <Column
           field="amount"

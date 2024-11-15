@@ -1,18 +1,46 @@
-import { Column, DataTable, Tag } from "@/presentation/components";
+import {
+  Column,
+  type ColumnFilterMatchModeOptions,
+  DataTable,
+  Tag,
+} from "@/presentation/components";
 import type { QuoteEntity, VersionEntity } from "@/domain/entities";
 import { formatCurrency, formatDate } from "@/core/utils";
-import { TableActions } from "./partials";
-import { getQuoteSeverity } from "../utils";
+import {
+  FilterApplyButton,
+  FilterByDate,
+  FilterByRepresentative,
+  FilterClearButton,
+  TableActions,
+} from "./partials";
+import { filterByName, getQuoteSeverity } from "../utils";
 
 type QuoteVersionsTableProps = {
   quote: QuoteEntity;
+  filterMatchModeOptions: ColumnFilterMatchModeOptions[];
+  representatives: { id: number; name: string }[];
 };
 
-export const QuoteVersionsTable = ({ quote }: QuoteVersionsTableProps) => {
+export const QuoteVersionsTable = ({
+  quote,
+  filterMatchModeOptions,
+  representatives,
+}: QuoteVersionsTableProps) => {
   return (
-    <div className="p-3">
-      <h5>Total de versiones: {quote.versions.length}</h5>
-      <DataTable value={quote.versions}>
+    <div className="p-5">
+      <DataTable
+        size="small"
+        className="text-sm lg:text-[15px]"
+        value={quote.versions}
+        emptyMessage="No hay versiones disponibles"
+        footer={
+          <td colSpan={5}>
+            <div className="flex justify-content-end font-bold w-full">
+              Total Versions: {quote.versions.length}
+            </div>
+          </td>
+        }
+      >
         <Column
           field="id"
           header="Version"
@@ -20,24 +48,80 @@ export const QuoteVersionsTable = ({ quote }: QuoteVersionsTableProps) => {
           sortable
         ></Column>
         {/* <Column field="customer" header="Customer" sortable></Column> */}
-        <Column field="customer.name" header="Cliente" sortable></Column>
+        <Column
+          field="customer.name"
+          filter
+          showFilterOperator={false}
+          showAddButton={false}
+          header="Cliente"
+          sortable
+          filterPlaceholder="Buscar por nombre"
+          filterMatchModeOptions={filterMatchModeOptions}
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
+        />
         <Column field="customer.country" header="País" sortable />
         <Column field="passengers" header="Pasajeros" sortable />
         <Column
           field="startDate"
           header="Fecha de inicio"
           className="min-w-32"
+          filterMenuStyle={{ width: "16rem" }}
+          dataType="date"
           sortable
-          body={(e: VersionEntity) => formatDate(e.startDate)}
+          filter
+          showFilterOperator={false}
+          showAddButton={false}
+          showFilterMatchModes={false}
+          filterField="startDate"
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
+          body={(e: QuoteEntity) => formatDate(e.startDate)}
+          filterElement={(options) => (
+            <FilterByDate options={options} placeholder="Fecha de inicio" />
+          )}
         />
         <Column
           field="endDate"
           header="Fecha fin"
-          className="min-w-32"
           sortable
-          body={(e: VersionEntity) => formatDate(e.endDate)}
+          className="min-w-32"
+          dataType="date"
+          filter
+          showFilterOperator={false}
+          showAddButton={false}
+          showFilterMatchModes={false}
+          filterPlaceholder="Buscar por fecha"
+          filterField="endDate"
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
+          body={(e: QuoteEntity) => formatDate(e.endDate)}
+          filterElement={(options) => (
+            <FilterByDate options={options} placeholder="Fecha de fin" />
+          )}
         />
-        <Column field="representative.name" header="Representante" sortable />
+        <Column
+          field="representative.name"
+          header="Representante"
+          showFilterMatchModes={false}
+          showFilterOperator={false}
+          showAddButton={false}
+          filterMenuStyle={{ width: "16rem" }}
+          filter
+          filterMatchMode="custom"
+          sortField="representative.name"
+          filterField="representative"
+          filterFunction={filterByName}
+          sortable
+          filterClear={(options) => <FilterClearButton {...options} />}
+          filterApply={(options) => <FilterApplyButton {...options} />}
+          filterElement={(options) => (
+            <FilterByRepresentative
+              options={options}
+              representatives={representatives}
+            />
+          )}
+        />
         <Column
           field="amount"
           header="Precio"
@@ -57,6 +141,7 @@ export const QuoteVersionsTable = ({ quote }: QuoteVersionsTableProps) => {
           )}
         />
         <Column
+          header="Acciones"
           body={(version: VersionEntity) => (
             <TableActions rowData={version} type="secondary" />
           )}

@@ -6,15 +6,21 @@ import {
   StatisticsSummaryGraph,
   StatsOverviewCard,
 } from "./components";
+import { useWindowSize } from "@/presentation/hooks";
 
 const DashboardPage = () => {
+  const { width, TABLET } = useWindowSize();
   return (
     <MainLayout>
       <div className="flex justify-between items-center">
         <h1 className="text-xl sm:text-3xl text-start font-bold text-primary">
           Bienvenido, Pablo Moreno!
         </h1>
-        <Button size="small" label="Nueva cotización" icon="pi pi-plus-circle" />
+        <Button
+          size={width <= TABLET ? "small" : undefined}
+          label="Nueva cotización"
+          icon="pi pi-plus-circle"
+        />
       </div>
 
       <div className="grid grid-cols-4 grid-flow-row gap-x-4 gap-y-6 mt-4">

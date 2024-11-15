@@ -1,7 +1,8 @@
-import React from "react";
-import { useSidebar } from "../hooks";
-import { Navbar, Sidebar } from "../components";
 import { classNamesAdapter } from "@/core/adapters";
+import React from "react";
+import { useWindowSize } from "@/presentation/hooks";
+import { Navbar, Sidebar } from "../components";
+import { useSidebar } from "../hooks";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -9,12 +10,14 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
   const { visible, setVisible } = useSidebar();
+  const { width, TABLET } = useWindowSize();
+
   return (
     <section className="w-screen min-h-screen flex max-w-full">
       <div
         className={classNamesAdapter(
-          "w-72 bg-secondary transition-all",
-          visible ? "sidebar-fixed" : "hidden"
+          "bg-red-400 transition-all",
+          visible ? "sidebar-fixed bg-red-500" : "hidden"
         )}
       >
         <Sidebar visible={visible} setVisible={setVisible} />
@@ -22,10 +25,10 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
 
       <div
         style={{
-          width: "calc(100% - 18rem)",
+          width: visible && width > TABLET ? "calc(100% - 18rem)" : "100%",
           transition: "width 0.5s",
         }}
-        className={`flex-1 bg-secondary ${visible ? "" : "w-full"} `}
+        className="ml-auto bg-secondary transition-all"
       >
         <Navbar setVisible={setVisible} />
 

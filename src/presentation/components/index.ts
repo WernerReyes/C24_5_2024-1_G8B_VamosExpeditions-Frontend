@@ -17,3 +17,4 @@ export * from './Column';
 export * from './DataTable';
 export * from './MultiSelect';
 export * from './Tag';
+export * from './ProgressSpinner';

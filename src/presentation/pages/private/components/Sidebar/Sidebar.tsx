@@ -10,6 +10,7 @@ import { classNamesAdapter } from "@/core/adapters";
 import { constantRoutes } from "@/core/constants";
 import { useAuthStore } from "@/infraestructure/hooks";
 import "./Sidebar.css";
+import { useWindowSize } from "@/presentation/hooks";
 
 interface SidebarProps {
   visible: boolean;
@@ -22,6 +23,7 @@ const {
 
 export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
   const { authUser } = useAuthStore();
+  const { width, DESKTOP } = useWindowSize();
 
   const dinamyRoute = (route: string) =>
     "/" + (authUser?.role ? authUser?.role + "/" : "manager/") + route;
@@ -74,16 +76,15 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
   return (
     <SidebarComponent
       header={() => (
-        <Image src="/images/logo.png" alt="Logo" width="150" height="200" />
+        <Image src="/images/logo.png" alt="Logo" width="200" height="200" />
       )}
       onHide={() => setVisible(false)}
+      closeOnEscape={true}
       visible={visible}
-      position="left"
       className="w-72"
-      showCloseIcon={true}
       blockScroll={false}
       modal={false}
-      dismissable={window.innerWidth < 1000}
+      dismissable={width < DESKTOP}
     >
       <hr className="mt-3 mb-2 border-2 border-gray-300 " />
       <PanelMenu model={items} className="w-full" />
