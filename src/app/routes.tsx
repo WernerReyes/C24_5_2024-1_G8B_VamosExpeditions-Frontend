@@ -1,11 +1,11 @@
 import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "@/presentation/components";
+import { AuthGuard } from "@/presentation/guards";
+import PrivateRoutes from "@/presentation/routes/Private.routes";
+import { useAuthStore } from "@/infraestructure/hooks";
 import { constantRoutes } from "@/core/constants";
 import { UserRoleEnum } from "@/domain/entities";
-import { useAuthStore } from "@/infraestructure/hooks";
-import { Toaster } from "@/presentation/components";
-import { AuthGuard } from "@/presentation/guards/Auth.guard";
-import PrivateRoutes from "@/presentation/routes/Private.routes";
 
 //* Public pages
 const LoginPage = lazy(
@@ -65,7 +65,7 @@ export const AppRouter = () => {
         {/* <Route path={MANAGER + "/*"} element={<PrivateRoutes />} /> */}
 
         <Route element={<AuthGuard privateValidation />}>
-          <Route path={userSimulated.role + "/*"} element={<PrivateRoutes />} />
+          <Route path={"/*"} element={<PrivateRoutes />} />
         </Route>
 
         {/* <PrivateRoutes /> */}

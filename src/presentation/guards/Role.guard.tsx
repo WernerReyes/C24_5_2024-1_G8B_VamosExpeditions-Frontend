@@ -14,11 +14,11 @@ export const RoleGuard = ({ roles }: Props) => {
   console.log(authUser, status);
   
 
-  const userSimulated = {
-    role: UserRoleEnum.EMPLOYEE,
-  };
+  // const userSimulated = {
+  //   role: UserRoleEnum.EMPLOYEE,
+  // };
 
-  return roles.includes(userSimulated.role) ? (
+  return authUser && roles.includes(authUser.role) ? (
     <Outlet />
   ) : (
     <Navigate to={LOGIN} />

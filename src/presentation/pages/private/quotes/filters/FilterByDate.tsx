@@ -17,9 +17,13 @@ export const FilterByDate = ({ options, placeholder }: Props) => {
       }
       placeholder={placeholder}
       dateFormat={"dd/mm/yy"}
-      showButtonBar
-      showIcon
+      showIcon      
       showOnFocus={false}
+      todayButtonClassName="p-button-text"
+      clearButtonClassName="p-button-text"
+      locale="es"
+      inputClassName="text-sm"
+      
     />
   );
 };

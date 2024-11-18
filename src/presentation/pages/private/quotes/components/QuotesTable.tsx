@@ -18,8 +18,8 @@ import {
   FilterByDate,
   FilterByRepresentative,
   FilterClearButton,
-  TableActions,
-} from "./partials";
+} from "../filters";
+import { TableActions } from "./TableActions";
 
 const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
   {
@@ -88,6 +88,7 @@ export const QuotesTable = () => {
             representatives={representatives}
           />
         )}
+      paginatorClassName="text-sm lg:text-[15px]"
         size="small"
         className="text-sm lg:text-[15px] mt-5"
         dataKey="id"

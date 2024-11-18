@@ -5,34 +5,26 @@ import {
   PanelMenu,
   Sidebar as SidebarComponent,
 } from "@/presentation/components";
-
 import { classNamesAdapter } from "@/core/adapters";
 import { constantRoutes } from "@/core/constants";
-import { useAuthStore } from "@/infraestructure/hooks";
-import "./Sidebar.css";
 import { useWindowSize } from "@/presentation/hooks";
+import "./Sidebar.css";
 
 interface SidebarProps {
   visible: boolean;
   setVisible: (value: boolean) => void;
 }
 
-const {
-  common: { DASHBOARD, QUOTES },
-} = constantRoutes.private;
+const { DASHBOARD, QUOTES, NEW_QUOTE } = constantRoutes.private;
 
 export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
-  const { authUser } = useAuthStore();
   const { width, DESKTOP } = useWindowSize();
-
-  const dinamyRoute = (route: string) =>
-    "/" + (authUser?.role ? authUser?.role + "/" : "manager/") + route;
 
   const items: MenuItem[] = [
     {
       label: "Dashboard",
       icon: "pi pi-home",
-      url: dinamyRoute(DASHBOARD),
+      url: DASHBOARD,
       template: (e) => <Template {...e} />,
       // className: "bg-primary p-4",
       // items: [
@@ -51,8 +43,23 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
     {
       label: "Cotizaciones",
       icon: "pi  pi-book",
-      url: dinamyRoute(QUOTES),
-      template: (e) => <Template {...e} />,
+
+      items: [
+        {
+          label: "Nueva Cotización",
+          icon: "pi pi-plus-circle",
+          url: NEW_QUOTE,
+          template: (e) => <Template {...e} />,
+          // url: '/new-quote'
+        },
+        {
+          label: "Listado de Cotizaciones",
+          icon: "pi pi-book",
+          template: (e) => <Template {...e} />,
+          url: QUOTES,
+          //url: '/quotes'
+        },
+      ],
     },
 
     // {
@@ -73,13 +80,15 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
     // },
   ];
 
+  console.log({ visible });
+
   return (
     <SidebarComponent
       header={() => (
         <Image src="/images/logo.png" alt="Logo" width="200" height="200" />
       )}
       onHide={() => setVisible(false)}
-      closeOnEscape={true}
+      // closeOnEscape={true}
       visible={visible}
       className="w-72"
       blockScroll={false}

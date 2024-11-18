@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/presentation/components";
 import { MainLayout } from "../layouts";
 import {
@@ -6,10 +7,15 @@ import {
   StatisticsSummaryGraph,
   StatsOverviewCard,
 } from "./components";
-import { useWindowSize } from "@/presentation/hooks";
+import { constantRoutes } from "@/core/constants";
+
+const { NEW_QUOTE } = constantRoutes.private;
 
 const DashboardPage = () => {
-  const { width, TABLET } = useWindowSize();
+  const navigate = useNavigate();
+
+  const handleNewQuote = () => navigate(NEW_QUOTE);
+
   return (
     <MainLayout>
       <div className="flex justify-between items-center">
@@ -17,9 +23,9 @@ const DashboardPage = () => {
           Bienvenido, Pablo Moreno!
         </h1>
         <Button
-          size={width <= TABLET ? "small" : undefined}
           label="Nueva cotización"
           icon="pi pi-plus-circle"
+          onClick={() => handleNewQuote()}
         />
       </div>
 

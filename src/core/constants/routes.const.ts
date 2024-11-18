@@ -11,11 +11,10 @@ type PublicRoutes = {
 };
 
 type PrivateRoutes = {
-  MANAGER: string;
-  common: {
-    DASHBOARD: string;
-    QUOTES: string;
-  };
+  DASHBOARD: string;
+  QUOTES: string;
+  NEW_QUOTE: string;
+
   //     HOME: string;
   //     LOGIN: string;
   //     REGISTER: string;
@@ -44,17 +43,15 @@ export const constantRoutes: Routes = {
   },
 
   private: {
-    MANAGER: "/manager",
-    common: {
-      DASHBOARD: `dashboard`,
-      QUOTES: `quotes`,
-    },
-    //     HOME: PublicRoutes.HOME,
-    //     LOGIN: PublicRoutes.LOGIN,
-    //     REGISTER: PublicRoutes.REGISTER,
-    //     FORGOT_PASSWORD: PublicRoutes.FORGOT_PASSWORD,
-    //     RESET_PASSWORD: PublicRoutes.RESET_PASSWORD,
-    //     VERIFY_EMAIL: PublicRoutes.VERIFY_EMAIL,
-    //     NOT_FOUND: PublicRoutes.NOT_FOUND,
+    DASHBOARD: "/dashboard",
+    QUOTES: "/quotes",
+    NEW_QUOTE: "/new-quote",
   },
+  //     HOME: PublicRoutes.HOME,
+  //     LOGIN: PublicRoutes.LOGIN,
+  //     REGISTER: PublicRoutes.REGISTER,
+  //     FORGOT_PASSWORD: PublicRoutes.FORGOT_PASSWORD,
+  //     RESET_PASSWORD: PublicRoutes.RESET_PASSWORD,
+  //     VERIFY_EMAIL: PublicRoutes.VERIFY_EMAIL,
+  //     NOT_FOUND: PublicRoutes.NOT_FOUND,
 };

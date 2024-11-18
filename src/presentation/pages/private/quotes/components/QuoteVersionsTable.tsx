@@ -11,8 +11,9 @@ import {
   FilterByDate,
   FilterByRepresentative,
   FilterClearButton,
-  TableActions,
-} from "./partials";
+} from "../filters";
+import { TableActions } from "./TableActions";
+
 import { filterByName, getQuoteSeverity } from "../utils";
 
 type QuoteVersionsTableProps = {
@@ -34,11 +35,11 @@ export const QuoteVersionsTable = ({
         value={quote.versions}
         emptyMessage="No hay versiones disponibles"
         footer={
-          <td colSpan={5}>
+          // <td colSpan={5}>
             <div className="flex justify-content-end font-bold w-full">
               Total Versions: {quote.versions.length}
             </div>
-          </td>
+          
         }
       >
         <Column

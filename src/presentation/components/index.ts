@@ -18,3 +18,5 @@ export * from './DataTable';
 export * from './MultiSelect';
 export * from './Tag';
 export * from './ProgressSpinner';
+export * from './Stepper';
+export * from './SplitButton';

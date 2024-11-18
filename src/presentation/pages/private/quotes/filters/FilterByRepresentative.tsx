@@ -9,8 +9,7 @@ type Props = {
   representatives: { id: number; name: string }[];
 };
 
-export const FilterByRepresentative = ({ options, representatives }: Props) => {
-    console.log({ options, representatives });
+export const FilterByRepresentative = ({ options, representatives }: Props) => {;
   return (
     <MultiSelect
       value={options.value || []}

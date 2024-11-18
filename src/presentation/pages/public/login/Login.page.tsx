@@ -7,8 +7,12 @@ import {
 } from "@/domain/dtos/requests/auth";
 import { useAuthStore } from "@/infraestructure/hooks";
 import { Button, Image, InputText, Password } from "@/presentation/components";
+import { AuthStatus } from "@/infraestructure/store";
+import { constantRoutes } from "@/core/constants";
 
-const LoginPage = () => { 
+const { DASHBOARD } = constantRoutes.private;
+
+const LoginPage = () => {
   const {
     control,
     handleSubmit,
@@ -17,13 +21,11 @@ const LoginPage = () => {
     resolver: zodResolver(loginRequestSchema),
   });
   const navigate = useNavigate();
-  const { startLogin } = useAuthStore();
+  const { startLogin, status } = useAuthStore();
 
   const handleLogin = async (data: LoginRequest) => {
-    startLogin(data.email, data.password).then((user) => {
-      // window.location.href = MANAGER;
-      console.log(user?.role);
-      navigate("/" + user.role);
+    startLogin(data.email, data.password).then(() => {
+      navigate(DASHBOARD);
     });
   };
 
@@ -109,7 +111,9 @@ const LoginPage = () => {
           <Button
             type="submit"
             label="Ingresar"
-            disabled={Object.keys(errors).length > 0}
+            disabled={
+              Object.keys(errors).length > 0 || status === AuthStatus.CHECKING
+            }
             // onClick={handleSubmit}
             className="w-full mt-8"
           />

@@ -22,10 +22,9 @@ export const useAuthStore = () => {
         toasterAdapter.error("Credenciales incorrectas");
         throw new Error("Credenciales incorrectas");
       }
-
-      return user;
     } catch (error: any) {
-      if(error.code === 'ERR_NETWORK') {
+      dispatch(onLogout());
+      if (error.code === "ERR_NETWORK") {
         toasterAdapter.error("Error de conexión");
       }
       throw error;
