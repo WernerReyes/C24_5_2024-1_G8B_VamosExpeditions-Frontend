@@ -1,5 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { UserEntity } from "@/domain/entities";
+import { constantStorage } from "@/core/constants";
+
+const { USER_AUTH } = constantStorage;
 
 export enum AuthStatus {
   CHECKING = "checking",
@@ -13,8 +16,12 @@ export type AuthSliceState = {
 };
 
 const initialState: AuthSliceState = {
-  status: AuthStatus.UNAUTHENTICATED,
-  authUser: null,
+  status: localStorage.getItem(USER_AUTH)
+    ? AuthStatus.AUTHENTICATED
+    : AuthStatus.UNAUTHENTICATED,
+  authUser: localStorage.getItem(USER_AUTH)
+    ? JSON.parse(localStorage.getItem(USER_AUTH) as string)
+    : null,
 };
 
 export const authSlice = createSlice({

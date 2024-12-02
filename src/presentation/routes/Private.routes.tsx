@@ -1,8 +1,9 @@
 import { constantRoutes } from "@/core/constants";
-import { UserRoleEnum } from "@/domain/entities";
-import { lazy } from "react";
+import { RoleEnum } from "@/domain/entities";
+import { lazy, useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { RoleGuard } from "../guards";
+import { useAuthStore } from "@/infraestructure/hooks";
 
 const DashboardPage = lazy(
   () => import("../pages/private/dashboard/Dashboard.page")
@@ -15,12 +16,18 @@ const QuotesPage = lazy(() => import("../pages/private/quotes/Quotes.page"));
 const { DASHBOARD, QUOTES, NEW_QUOTE } = constantRoutes.private;
 
 const PrivateRoutes = () => {
+  const { startUserAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    startUserAuthenticated();
+  }, []);
+
   return (
     <Routes>
       <Route path={"/"} element={<Navigate to={DASHBOARD} />} />
       <Route
         element={
-          <RoleGuard roles={[UserRoleEnum.MANAGER, UserRoleEnum.EMPLOYEE]} />
+          <RoleGuard roles={[RoleEnum.MANAGER_ROLE, RoleEnum.EMPLOYEE_ROLE]} />
         }
       >
         <Route path={DASHBOARD} element={<DashboardPage />} />

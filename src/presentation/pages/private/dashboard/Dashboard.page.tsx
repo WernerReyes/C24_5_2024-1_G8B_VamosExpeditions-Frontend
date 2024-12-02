@@ -8,11 +8,13 @@ import {
   StatsOverviewCard,
 } from "./components";
 import { constantRoutes } from "@/core/constants";
+import { useAuthStore } from "@/infraestructure/hooks";
 
 const { NEW_QUOTE } = constantRoutes.private;
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const { authUser } = useAuthStore()
 
   const handleNewQuote = () => navigate(NEW_QUOTE);
 
@@ -20,7 +22,7 @@ const DashboardPage = () => {
     <MainLayout>
       <div className="flex justify-between items-center">
         <h1 className="text-xl sm:text-3xl text-start font-bold text-primary">
-          Bienvenido, Pablo Moreno!
+          Bienvenido, {authUser?.fullname} 👋
         </h1>
         <Button
           label="Nueva cotización"

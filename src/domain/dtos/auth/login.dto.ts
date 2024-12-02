@@ -4,20 +4,20 @@ import { requestValidator } from "@/core/utils";
 
 const { EMAIL, PASSWORD } = regex;
 
-export type LoginRequest = {
+export type LoginDto = {
   readonly email: string;
   readonly password: string;
 };
 
-export const loginRequest = (email: string, password: string) => {
+export const loginDto = (email: string, password: string) => {
   return {
-    from: (): [LoginRequest?, string[]?] => {
+    create: (): [LoginDto?, string[]?] => {
       const errors = requestValidator(
         {
           email,
           password,
         },
-        loginRequestSchema
+        loginDtoSchema
       );
       if (errors) {
         return [undefined, errors];
@@ -27,7 +27,7 @@ export const loginRequest = (email: string, password: string) => {
   };
 };
 
-export const loginRequestSchema = z.object({
+export const loginDtoSchema = z.object({
   email: z
     .string()
     .min(1, {

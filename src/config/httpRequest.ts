@@ -1,10 +1,12 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { constantEnvs } from "@/core/constants/env.const";
+import { setupInterceptors } from "./interceptors";
 
 type Methods = "GET" | "POST" | "PUT" | "DELETE";
 
 export type ApiResponse<T> = {
   data: T;
+  message: string;
   status: number;
 };
 
@@ -49,16 +51,26 @@ const request = async <T>(
   options?: AxiosRequestConfig
 ): Promise<ApiResponse<T>> => {
   try {
-    const response: ApiResponse<T> = await axios(`${VITE_API_URL}${url}`, {
-      method,
-      ...options,
-      data,
-    });
-
-    return response;
+    const response: AxiosResponse<ApiResponse<T>> = await axios(
+      `${VITE_API_URL}${url}`,
+      {
+        method,
+        ...options,
+        data,
+        withCredentials: true,
+      }
+    );
+    
+    return {
+      data: response.data.data,
+      message: response.data.message,
+      status: response.data.status,
+    };
   } catch (error) {
     throw error;
   }
 };
 
-// setupInterceptors(axios);
+
+
+setupInterceptors(axios);

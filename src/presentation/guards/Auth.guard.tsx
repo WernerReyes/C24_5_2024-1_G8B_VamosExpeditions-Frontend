@@ -1,10 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom";
-
-
 import { constantRoutes } from "@/core/constants";
 import { useAuthStore } from "@/infraestructure/hooks";
 
-const { public: { LOGIN } } = constantRoutes
+const {
+  public: { LOGIN },
+} = constantRoutes;
 
 type Props = {
   privateValidation: boolean;
@@ -12,14 +12,6 @@ type Props = {
 
 export const AuthGuard = ({ privateValidation }: Props) => {
   const { authUser } = useAuthStore();
-
-  console.log(authUser?.role, "HOLA MUBD");
-
-  // const userSimulated = {
-  //   id: 1,
-  //   role: UserRoleEnum.MANAGER
-  // };
-
   return authUser?.id ? (
     privateValidation ? (
       <Outlet />
@@ -30,4 +22,3 @@ export const AuthGuard = ({ privateValidation }: Props) => {
     <Navigate replace to={LOGIN} />
   );
 };
-

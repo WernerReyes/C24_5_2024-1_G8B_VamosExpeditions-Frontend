@@ -80,8 +80,6 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
     // },
   ];
 
-  console.log({ visible });
-
   return (
     <SidebarComponent
       header={() => (

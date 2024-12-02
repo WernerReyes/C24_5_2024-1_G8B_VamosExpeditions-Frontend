@@ -1,11 +1,9 @@
-export enum UserRoleEnum {
-  MANAGER = "manager",
-  EMPLOYEE = "employee",
-}
+import type { RoleEntity } from "./role.entity";
+
+
 export interface UserEntity {
   id: string;
-  name: string;
+  fullname: string;
   email: string;
-  password: string;
-  role: UserRoleEnum;
+  role: RoleEntity
 }

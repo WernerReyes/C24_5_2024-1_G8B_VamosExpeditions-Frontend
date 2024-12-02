@@ -1,10 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import {
-  loginRequestSchema,
-  type LoginRequest,
-} from "@/domain/dtos/requests/auth";
+import { loginDtoSchema, type LoginDto } from "@/domain/dtos/auth";
 import { useAuthStore } from "@/infraestructure/hooks";
 import { Button, Image, InputText, Password } from "@/presentation/components";
 import { AuthStatus } from "@/infraestructure/store";
@@ -17,13 +14,13 @@ const LoginPage = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginRequest>({
-    resolver: zodResolver(loginRequestSchema),
+  } = useForm<LoginDto>({
+    resolver: zodResolver(loginDtoSchema),
   });
   const navigate = useNavigate();
   const { startLogin, status } = useAuthStore();
 
-  const handleLogin = async (data: LoginRequest) => {
+  const handleLogin = async (data: LoginDto) => {
     startLogin(data.email, data.password).then(() => {
       navigate(DASHBOARD);
     });
@@ -53,7 +50,7 @@ const LoginPage = () => {
           <Controller
             control={control}
             name="email"
-            defaultValue="john.doe@example.com"
+            defaultValue="test1@google.com"
             render={({ field, fieldState: { error } }) => (
               <InputText
                 label={{
@@ -85,7 +82,7 @@ const LoginPage = () => {
             <Controller
               control={control}
               name="password"
-              defaultValue="aLTEC12345"
+              defaultValue="aLTEC1234@"
               render={({ field, fieldState: { error } }) => (
                 <Password
                   label={{

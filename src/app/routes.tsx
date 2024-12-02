@@ -1,11 +1,10 @@
-import { lazy } from "react";
+import { lazy, useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/presentation/components";
 import { AuthGuard } from "@/presentation/guards";
 import PrivateRoutes from "@/presentation/routes/Private.routes";
 import { useAuthStore } from "@/infraestructure/hooks";
 import { constantRoutes } from "@/core/constants";
-import { UserRoleEnum } from "@/domain/entities";
 
 //* Public pages
 const LoginPage = lazy(
@@ -18,18 +17,16 @@ const LoginPage = lazy(
 
 const {
   public: { LOGIN },
+  private: { DASHBOARD },
 } = constantRoutes;
 
 // const { USER, ADMIN } = PrivateRoutes;
 
 export const AppRouter = () => {
-  const { authUser, status } = useAuthStore();
-
-  console.log(authUser, status);
+  const { authUser } = useAuthStore();
 
   //   const { isDark } = useThemeStore();
   //   const { isMobile } = useWindowSize();
-  //   const { startRevalidateToken, isLoading, routeRole } = useAuthStore();
   //   const { messages, type, startClearMessages } = useMessageStore();
 
   //   useEffect(() => {
@@ -44,10 +41,6 @@ export const AppRouter = () => {
 
   // if (status === AuthStatus.CHECKING) return <h1>Loading...</h1>;
 
-  const userSimulated = {
-    role: UserRoleEnum.MANAGER,
-  };
-
   return (
     <BrowserRouter
       future={{
@@ -58,7 +51,10 @@ export const AppRouter = () => {
       <Toaster />
       <Routes>
         {/* <RouterWithNotFound> */}
-        <Route path="/" element={<Navigate to={LOGIN} />} />
+        <Route
+          path="/"
+          element={<Navigate to={authUser?.id ? DASHBOARD : LOGIN} />}
+        />
         {/* <Route path={LANDING} element={<LandingPage />} /> */}
         <Route path={LOGIN} element={<LoginPage />} />
 

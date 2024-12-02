@@ -1,7 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
 import { onChecking, type AppState, onLogin, onLogout } from "../store";
-import { authService } from "../services";
-import { toasterAdapter } from "@/core/adapters";
+import { authService } from "../services/auth";
+import { toasterAdapter } from "@/presentation/components";
+import { constantStorage } from "@/core/constants";
+
+const { USER_AUTH } = constantStorage;
 
 export const useAuthStore = () => {
   const dispatch = useDispatch();
@@ -10,42 +13,48 @@ export const useAuthStore = () => {
   const startLogin = async (email: string, password: string) => {
     dispatch(onChecking());
     try {
-      const { data } = await authService.login({ email, password });
-      const user = data.find(
-        (user) => user.email === email && user.password === password
-      );
-      if (user) {
-        dispatch(onLogin(user));
-        toasterAdapter.success("Bienvenido");
-      } else {
-        dispatch(onLogout());
-        toasterAdapter.error("Credenciales incorrectas");
-        throw new Error("Credenciales incorrectas");
-      }
+      const { data, message } = await authService.login({ email, password });
+      console.log({ data, message });
+      dispatch(onLogin(data.user));
+      localStorage.setItem(USER_AUTH, JSON.stringify(data.user));
+      toasterAdapter.success(message);
     } catch (error: any) {
-      dispatch(onLogout());
-      if (error.code === "ERR_NETWORK") {
-        toasterAdapter.error("Error de conexión");
-      }
       throw error;
-      //   dispatch(authSlice.actions.loginError(error));
     }
   };
 
-  //   const logout = async () => {
-  //     try {
-  //       dispatch(authSlice.actions.logout());
-  //       await authApi.logout();
-  //     } catch (error) {
-  //       dispatch(authSlice.actions.logoutError(error));
-  //     }
-  //   };
+  const startUserAuthenticated = async () => {
+    dispatch(onChecking());
+
+    const userAuth = localStorage.getItem(USER_AUTH);
+    // if (userAuth) return;
+    try {
+      const { data } = await authService.userAuthenticated();
+      dispatch(onLogin(data.user));
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
+
+  const startLogout = async () => {
+    try {
+      await authService.logout();
+      localStorage.removeItem(USER_AUTH);
+      dispatch(onLogout());
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
   return {
     //* Atributtes
     ...auth,
 
     //* Functions
     startLogin,
+    startUserAuthenticated,
+    startLogout,
     // logout,
   };
 };

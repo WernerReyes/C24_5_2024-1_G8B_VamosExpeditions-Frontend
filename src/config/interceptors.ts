@@ -1,70 +1,36 @@
-// import axios, { AxiosInstance } from "axios";
-// import daysjs from "dayjs";
-// import {
-//   errorMessage,
-//   getEnvs,
-//   getStorage,
-//   setStorage,
-//   StorageKeys,
-// } from "@/presentation/utilities";
-// import { JwtPayload, jwtDecode } from "jwt-decode";
-// import type { ApiResponse } from "@/domain/dtos";
+import { AxiosInstance } from "axios";
+import { toasterAdapter } from "@/presentation/components";
+import { getValidationError } from "@/core/utils";
+import { constantErrorCode } from "@/core/constants";
 
-// const { TOKEN } = StorageKeys;
+export const setupInterceptors = (axiosInstance: AxiosInstance) => {
+  //* Message interceptor
+  axiosInstance.interceptors.response.use(
+    (res) => res,
+    (error) => {
+      if (!error.response) {
+        const errorMsg = getValidationError(error.code);
+        toasterAdapter.error(errorMsg);
+        return Promise.reject({
+          status: 500,
+          message: "Error de conexión",
+        });
+      }
 
-// const { VITE_API_URL } = getEnvs();
+      console.log({ error });
+      
+      const code = error.response.data.code;
 
-// const axiosInstanceForTokenRenewal = axios.create({
-//   baseURL: VITE_API_URL,
-// });
+      if (code === constantErrorCode.ERR_USER_INVALID_TOKEN) {
+        toasterAdapter.tokenExpired();
+        return Promise.reject(error.response.data);
+      }
 
-// export const setupInterceptors = (axiosInstance: AxiosInstance) => {
-//   //* Token refresh interceptor
-//   axiosInstance.interceptors.request.use(async (req) => {
-//     let token = getStorage<string>("token")
-//       ? getStorage<string>("token")
-//       : null;
-
-//     if (token) {
-//       const user = jwtDecode<JwtPayload>(token);
-
-//       const isExpired = daysjs.unix(user.exp!).diff(daysjs()) < 1;
-//       if (!isExpired) {
-//         req.headers.Authorization = `Bearer ${token}`;
-//         return req;
-//       }
-
-//       const {
-//         data: { data },
-//       } = await axiosInstanceForTokenRenewal.post<ApiResponse<string>>(
-//         `/auth/renovate-token?expiredToken=${token}`,
-//       );
-//       token = data;
-//       req.headers.Authorization = `Bearer ${token}`;
-//       setStorage(TOKEN, token);
-//     }
-
-//     return req;
-//   });
-
-//   axiosInstance.interceptors.response.use(
-//     (res) => res,
-//     (error) => {
-//       console.error(error);
-//       if (!error.response) {
-//         const message = "Error Server, please try again later";
-//         errorMessage([message]);
-//         return Promise.reject({
-//           status: 500,
-//           message,
-//         });
-//       }
-
-//       const errorMsg = error.response.data.error;
-//       if (errorMsg) {
-//         errorMessage([errorMsg]);
-//       }
-//       return Promise.reject(error.response.data);
-//     },
-//   );
-// };
+      const errorMsg = getValidationError(code);
+      if (errorMsg) {
+        toasterAdapter.error(errorMsg);
+      }
+      return Promise.reject(error.response.data);
+    }
+  );
+};
