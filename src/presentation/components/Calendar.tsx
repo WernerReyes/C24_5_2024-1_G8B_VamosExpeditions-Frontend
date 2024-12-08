@@ -3,13 +3,38 @@ import {
   type CalendarProps,
 } from "primereact/calendar";
 import { addLocale, type LocaleOptions } from "primereact/api";
+import { HTMLAttributes, LabelHTMLAttributes } from 'react';
 
-type Props = CalendarProps & {};
 
-export const Calendar = ({ locale, ...props }: Props) => {
+
+type Props = CalendarProps & {
+  label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
+  small?:HTMLAttributes<HTMLElement> & { text?: string };
+};
+
+export const Calendar = ({ locale,small,label, ...props }: Props) => {
   if (locale === "es") addLocale("es", spanishLocaleOptions);
 
-  return <CalendarPrimeReact {...props} locale={locale} />;
+
+  return (
+    <>
+      {label ? (
+        <label {...label}>
+          {label.text}
+        </label>
+      ):null}
+      <CalendarPrimeReact
+
+        {...props}
+        locale={locale}
+        showIcon
+      />
+      {small ? (
+        <small {...small}>{small.text}</small>
+      ) : null}
+    </>
+  );
+   
 };
 
 const spanishLocaleOptions: LocaleOptions & { showMonthAfterYear: boolean } = {

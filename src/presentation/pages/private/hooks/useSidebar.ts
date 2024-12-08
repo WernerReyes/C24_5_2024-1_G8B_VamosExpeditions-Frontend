@@ -1,8 +1,8 @@
-import { useWindowSize } from '@/presentation/hooks';
+//import { useWindowSize } from '@/presentation/hooks';
 import { useState, useEffect } from 'react';
 
 export const useSidebar = () => {
-    // const { isMobile } = useWindowSize();
+    ///const { isMobile } = useWindowSize();
     // Recuperar el estado inicial de localStorage o usar 'true' como valor por defecto
     const [visible, setVisible] = useState(() => {
         const savedVisible = localStorage.getItem('sidebarVisible');
@@ -15,11 +15,11 @@ export const useSidebar = () => {
 
             
 
-            // if (isMobile && visible) {
-            //     setVisible(false); // Ocultar si estamos en móvil
-            // } else if (!isMobile && !visible) {
-            //     setVisible(true); // Mostrar en pantallas grandes
-            // }
+             if (isMobile && visible) {
+                 setVisible(false); // Ocultar si estamos en móvil
+             } else if (!isMobile && !visible) {
+                 setVisible(true); // Mostrar en pantallas grandes
+             }
         };
 
         window.addEventListener('resize', handleResize);

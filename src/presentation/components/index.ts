@@ -20,3 +20,6 @@ export * from './Tag';
 export * from './ProgressSpinner';
 export * from './Stepper';
 export * from './SplitButton';
+export * from './RadioButton';
+export * from './InputTextarea';
+export * from './Dropdown';
