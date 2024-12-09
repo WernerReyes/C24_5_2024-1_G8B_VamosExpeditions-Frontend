@@ -12,11 +12,13 @@ export default {
         "tertiary": "#01495D",
         // "quaternary": "#F7F7F7",
       },
-      
+
       backgroundImage: {
         "login": "url('/public/images/backgrounds/bg-login.webp')",
       },
     },
   },
-  plugins: [],
+  plugins: [
+
+  ],
 } 

@@ -2,13 +2,24 @@ import { Stepper } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
 import { Button } from "primereact/button";
 import { StepperRefAttributes } from "primereact/stepper";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MainLayout } from "../layouts";
-import { CostingModule, CustomerDataModule } from "./modules";
+import { CostingModule, CustomerDataModule, CostSummaryModule } from "./modules";
+import { constantStorage } from "@/core/constants";
+
+const { CURRENT_ACTIVE_STEP } = constantStorage;
 
 const NewQuotePage = () => {
   const { width, DESKTOP } = useWindowSize();
   const stepperRef = useRef<StepperRefAttributes>(null);
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    const currentStep = localStorage.getItem(CURRENT_ACTIVE_STEP);
+    if (currentStep) {
+      setActiveStep(+currentStep);
+    }
+  }, [activeStep]);
 
   return (
     <MainLayout>
@@ -18,6 +29,7 @@ const NewQuotePage = () => {
           linear
           orientation={width > DESKTOP ? "horizontal" : "vertical"}
           includePanel
+          activeStep={activeStep}
           panelContent={[
             {
               header: "Datos del Cliente",
@@ -34,20 +46,49 @@ const NewQuotePage = () => {
                       label="Next"
                       icon="pi pi-arrow-right"
                       iconPos="right"
-                      onClick={() => stepperRef.current?.nextCallback()}
+                      onClick={() => {
+                        stepperRef.current?.nextCallback();
+                        setActiveStep(1);
+                        localStorage.setItem(CURRENT_ACTIVE_STEP, "1");
+                      }}
                     />
                   </div>
                 </>
               ),
+              
             },
             {
-              header: "Modulo de Costeo",
+              header: "Itinerario",
               children: (
-                <div className="flex flex-col">
-                  <div className="border-2 h-full w-full p-4 border-dashed surface-border border-round surface-ground font-medium">
-                    <CostingModule />
+                <>
+                  <div className="flex flex-col">
+                    <div className="border-2 h-full w-full p-4 border-dashed surface-border border-round surface-ground font-medium">
+                      <CostingModule />
+                    </div>
                   </div>
-                </div>
+                  <div className="flex pt-4 justify-between">
+                  <Button
+                      label="Back"
+                      severity="secondary"
+                      icon="pi pi-arrow-left"
+                      onClick={() => {
+                        stepperRef.current?.prevCallback();
+                        setActiveStep(1);
+                        localStorage.setItem(CURRENT_ACTIVE_STEP, "0");
+                      }}
+                    />
+                    <Button
+                      label="Next"
+                      icon="pi pi-arrow-right"
+                      iconPos="right"
+                      onClick={() => {
+                        stepperRef.current?.nextCallback();
+                        setActiveStep(2);
+                        localStorage.setItem(CURRENT_ACTIVE_STEP, "2");
+                      }}
+                    />
+                  </div>
+                </>
               ),
               // footer: (
               //   <div className="flex pt-4 justify-between">
@@ -67,13 +108,38 @@ const NewQuotePage = () => {
               // ),
             },
             {
-              header: "",
+              header: "Resumen de costos",
               children: (
-                <div className="flex flex-col h-12rem">
-                  <div className="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-center items-center font-medium">
-                    Content III
+                <>
+                <CostSummaryModule />
+                  <div className="flex flex-col h-12rem">
+                    <div className="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-center items-center font-medium">
+                      {/* <CostSummaryModule /> */}
+                    </div>
                   </div>
-                </div>
+                  <div className="flex pt-4 justify-between">
+                    <Button
+                      label="Back"
+                      severity="secondary"
+                      icon="pi pi-arrow-left"
+                      onClick={() => {
+                        stepperRef.current?.prevCallback();
+                        setActiveStep(1);
+                        localStorage.setItem(CURRENT_ACTIVE_STEP, "1");
+                      }}
+                    />
+                    <Button
+                      label="Next"
+                      icon="pi pi-arrow-right"
+                      iconPos="right"
+                      onClick={() => {
+                        stepperRef.current?.nextCallback();
+                        setActiveStep(3);
+                        localStorage.setItem(CURRENT_ACTIVE_STEP, "3");
+                      }}
+                    />
+                  </div>
+                </>
               ),
               // footer: (
               //   <div className="flex pt-4 justify-between">
@@ -95,11 +161,26 @@ const NewQuotePage = () => {
             {
               header: "Header III",
               children: (
+                <>
                 <div className="flex flex-col h-12rem">
                   <div className="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-center items-center font-medium">
                     Content III
                   </div>
                 </div>
+                <div className="flex pt-4 justify-between">
+                    <Button
+                      label="Back"
+                      severity="secondary"
+                      icon="pi pi-arrow-left"
+                      onClick={() => {
+                        stepperRef.current?.prevCallback();
+                        setActiveStep(2);
+                        localStorage.setItem(CURRENT_ACTIVE_STEP, "2");
+                      }}
+                    />
+                   
+                  </div>
+                </>
               ),
               // footer: (
               //   <div className="flex pt-4 justify-start">

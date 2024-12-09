@@ -1,9 +1,8 @@
 import type { RoleEntity } from "./role.entity";
 
-
 export interface UserEntity {
-  id: string;
-  fullname: string;
-  email: string;
-  role: RoleEntity
+  readonly id: string;
+  readonly fullname: string;
+  readonly email: string;
+  readonly role: RoleEntity
 }

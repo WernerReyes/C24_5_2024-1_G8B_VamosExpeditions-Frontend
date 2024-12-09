@@ -15,11 +15,11 @@ export const useSidebar = () => {
 
             
 
-            // if (isMobile && visible) {
-            //     setVisible(false); // Ocultar si estamos en móvil
-            // } else if (!isMobile && !visible) {
-            //     setVisible(true); // Mostrar en pantallas grandes
-            // }
+            if (isMobile && visible) {
+                setVisible(false); // Ocultar si estamos en móvil
+            } else if (!isMobile && !visible) {
+                setVisible(true); // Mostrar en pantallas grandes
+            }
         };
 
         window.addEventListener('resize', handleResize);

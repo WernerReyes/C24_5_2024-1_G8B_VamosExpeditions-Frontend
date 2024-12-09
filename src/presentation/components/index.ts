@@ -20,3 +20,7 @@ export * from './Tag';
 export * from './ProgressSpinner';
 export * from './Stepper';
 export * from './SplitButton';
+export * from './InputNumber';
+export * from './DataView';
+export * from './Rating';
+export * from './TabView';

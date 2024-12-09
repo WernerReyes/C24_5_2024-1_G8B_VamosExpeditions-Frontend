@@ -3,6 +3,6 @@ export enum RoleEnum {
   EMPLOYEE_ROLE = "EMPLOYEE_ROLE",
 }
 export interface RoleEntity {
-  id: string;
-  name: RoleEnum;
+  readonly id: string;
+  readonly name: RoleEnum;
 }

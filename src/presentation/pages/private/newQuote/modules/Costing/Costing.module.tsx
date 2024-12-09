@@ -5,6 +5,8 @@ import { Itinerary } from "./components";
 
 import "./Costing.module.css";
 
+import { useQuotationStore } from "@/infraestructure/hooks";
+
 type Region = {
   label: string;
   id: number;
@@ -28,12 +30,9 @@ const REGIONS = [
     id: 4,
   },
 ];
-
-const NUMERS_OF_DAYS = 5;
-
 export const CostingModule = () => {
+  const {   startSetInitialDate, initialDate } = useQuotationStore();
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
-  const [firstItineraryDate, setFirstItineraryDate] = useState<Date | null>();
   const handleRegionSelection = (region: Region) => {
     if (selectedRegion === region) {
       setSelectedRegion(null);
@@ -46,9 +45,10 @@ export const CostingModule = () => {
     setSelectedRegion(REGIONS[0]);
   }, []);
 
+
   useEffect(() => {
-    if (!firstItineraryDate) {
-      setFirstItineraryDate(new Date());
+    if (!initialDate) {
+      startSetInitialDate(new Date());
     }
   }, []);
 
@@ -78,8 +78,8 @@ export const CostingModule = () => {
           locale="es"
           dateFormat={"dd/mm/yy"}
           showIcon
-          value={firstItineraryDate}
-          onChange={(e) => setFirstItineraryDate(e.value)}
+          value={initialDate}
+          onChange={(e) => startSetInitialDate(e.value!)}
           showOnFocus={false}
           className="text-sm"
           todayButtonClassName="p-button-text"
@@ -90,9 +90,7 @@ export const CostingModule = () => {
         />
       </div>
       <Itinerary
-        numberOfDays={NUMERS_OF_DAYS}
         selectedRegion={selectedRegion ?? REGIONS[0]}
-        firstItineraryDate={firstItineraryDate!}
       />
     </div>
   );

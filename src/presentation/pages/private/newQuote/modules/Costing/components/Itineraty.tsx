@@ -5,42 +5,91 @@ import { MenuItem } from "primereact/menuitem";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
 import { SelectItem } from "primereact/selectitem";
 import { useEffect, useRef, useState } from "react";
+import { Accommodiations } from "./accommodation";
+import { useQuotationStore } from "@/infraestructure/hooks";
+import { constantStorage } from "@/core/constants";
 
-interface Day {
+const { ITINERARY_CURRENT_ACTIVITY, ITINERARY_CURRENT_SELECTED_DAY } =
+  constantStorage;
+
+const options: SelectItem[] = [
+  {
+    label: "Servicios",
+    icon: "pi pi-users",
+    className: "w-1/2",
+    value: "services",
+  },
+  {
+    label: "Alojamiento",
+    icon: "pi pi-home",
+    className: "w-1/2",
+    value: "accommodation",
+  },
+];
+
+export interface Day {
   id: number;
+  number: number;
   name: string;
   date: string;
 }
-
-//   const days: Day[] = [
-//     { id: 1, name: "Día 1", date: "Monday, 16 de September, 2024" },
-//     { id: 2, name: "Día 2", date: "Tuesday, 17 de September, 2024" },
-//     { id: 3, name: "Día 3", date: "Wednesday, 18 de September, 2024" },
-//     { id: 4, name: "Día 4", date: "Thursday, 19 de September, 2024" },
-//     { id: 5, name: "Día 5", date: "Friday, 20 de September, 2024" },
-//   ];
-
 type Props = {
-  firstItineraryDate: Date | null;
   selectedRegion: { label: string; id: number };
-  numberOfDays: number;
 };
 
-export const Itinerary = ({
-  selectedRegion,
-  firstItineraryDate,
-  numberOfDays,
-}: Props) => {
+export const Itinerary = ({ selectedRegion }: Props) => {
+  const { startSetDaysNumber, initialDate, daysNumber } = useQuotationStore();
   const [selectedDay, setSelectedDay] = useState<Day>();
   const [generatedDays, setGeneratedDays] = useState<Day[]>();
+  const [lastItineraryDate, setLastItineraryDate] = useState<Date>();
+  const scrollContainerRef = useRef<HTMLUListElement>(null);
+  const [value, setValue] = useState<string>(
+    localStorage.getItem(ITINERARY_CURRENT_ACTIVITY) || options[0].value
+  );
+  const menuLeft = useRef<Menu>(null);
+
+  const handleAddDay = () => {
+    if (generatedDays) {
+      lastItineraryDate?.setDate(lastItineraryDate.getDate() + 1);
+      const newDay: Day = {
+        id: generatedDays.length + 1,
+        number: generatedDays.length + 1,
+        name: `Día ${generatedDays.length + 1}`,
+        date: lastItineraryDate!.toLocaleDateString("es-ES", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+      };
+      setGeneratedDays([...generatedDays, newDay]);
+      setSelectedDay(newDay);
+
+      //* Save new date in local storage
+      startSetDaysNumber(generatedDays.length + 1);
+
+      // Desplaza el contenedor hacia el final
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTo({
+            top: scrollContainerRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    }
+  };
 
   useEffect(() => {
-    if (firstItineraryDate) {
-      const days: Day[] = Array.from({ length: numberOfDays }, (_, index) => {
-        const date = new Date(firstItineraryDate);
+    if (initialDate) {
+      const days: Day[] = Array.from({ length: daysNumber }, (_, index) => {
+        const date = new Date(initialDate);
         date.setDate(date.getDate() + index);
+
+        setLastItineraryDate(date);
         return {
           id: index + 1,
+          number: index + 1,
           name: `Día ${index + 1}`,
           date: date.toLocaleDateString("es-ES", {
             weekday: "long",
@@ -51,27 +100,25 @@ export const Itinerary = ({
         };
       });
       setGeneratedDays(days);
-      setSelectedDay(days[0]);
+      setSelectedDay(
+        JSON.parse(localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) as string) as Day ||
+          days[0]
+      );
     }
-  }, [firstItineraryDate]);
+  }, [initialDate]);
 
-  const options: SelectItem[] = [
-    {
-      label: "Servicios",
-      icon: "pi pi-users",
-      className: "w-1/2",
-      value: "services",
-    },
-    {
-      label: "Alojamiento",
-      icon: "pi pi-home",
-      className: "w-1/2",
-      value: "accommodation",
-    },
-  ];
+  useEffect(() => {
+    if (selectedDay) {
+      localStorage.setItem(
+        ITINERARY_CURRENT_SELECTED_DAY,
+        JSON.stringify(selectedDay)
+      );
+    }
+  }, [selectedDay]);
 
-  const [value, setValue] = useState<SelectItem>(options[0].value);
-  const menuLeft = useRef<Menu>(null);
+  useEffect(() => {
+    localStorage.setItem(ITINERARY_CURRENT_ACTIVITY, value);
+  }, [value]);
 
   const items: MenuItem[] = [
     {
@@ -129,26 +176,41 @@ export const Itinerary = ({
           />
 
           {/* Content */}
+          {value === "services" && (
+            <>
+              <div className="flex justify-end">
+                <Menu model={items} popup ref={menuLeft} id="popup_menu_left" />
+                <Button
+                  label="Agregar Servicio"
+                  icon="pi pi-plus-circle"
+                  onClick={(event) => menuLeft.current?.toggle(event)}
+                  aria-controls="popup_menu_left"
+                  aria-haspopup
+                />
+              </div>
+              <p className="text-center bg-secondary p-2 md:w-3/4 mx-auto rounded-md text-gray-500">
+                Ningún servicio por ahora
+              </p>
+            </>
+          )}
 
-          <div className="flex justify-end">
-            <Menu model={items} popup ref={menuLeft} id="popup_menu_left" />
-            <Button
-              label="Agregar Servicio"
-              icon="pi pi-plus-circle"
-              onClick={(event) => menuLeft.current?.toggle(event)}
-              aria-controls="popup_menu_left"
-              aria-haspopup
-            />
-          </div>
-          <p className="text-center bg-secondary p-2 md:w-3/4 mx-auto rounded-md text-gray-500">
-            Ningún servicio por ahora
-          </p>
+          {value === "accommodation" && (
+            <>
+              <Accommodiations selectedDay={selectedDay
+              || { id: 1, number: 1, name: "Día 1", date: "Hoy" }
+
+              } />
+            </>
+          )}
         </div>
       </div>
 
       {/* Sidebar */}
       <div className="lg:w-1/4 order-2 lg:order-1">
-        <ul className="space-y-2">
+        <ul
+          ref={scrollContainerRef}
+          className="space-y-2 max-h-svh overflow-y-auto"
+        >
           {generatedDays?.map((day, index) => (
             <li
               key={day.id}
@@ -177,10 +239,15 @@ export const Itinerary = ({
               </div>
             </li>
           ))}
-          <div className="flex justify-center">
-            <Button label="Agregar Día" icon="pi pi-plus-circle" text />
-          </div>
         </ul>
+        <div className="flex justify-center mt-4">
+          <Button
+            label="Agregar Día"
+            icon="pi pi-plus-circle"
+            text
+            onClick={handleAddDay}
+          />
+        </div>
       </div>
     </div>
   );
