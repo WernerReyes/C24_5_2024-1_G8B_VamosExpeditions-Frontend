@@ -1,8 +1,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form"
-import { RadioButtonChangeEvent } from "primereact/radiobutton";
-import { MultiSelectChangeEvent } from 'primereact/multiselect';
+import { RadioButtonChangeEvent } from "primereact/radiobutton";;
 import { DropdownChangeEvent } from 'primereact/dropdown';
 import { TreeSelectChangeEvent, TreeSelectSelectionKeysType } from 'primereact/treeselect';
 
@@ -12,7 +11,6 @@ import {
     Dropdown,
     InputText,
     InputTextarea,
-    MultiSelect,
     RadioButton,
     TreeSelect
 } from "@/presentation/components"
@@ -142,7 +140,7 @@ const transformData = (cities: any) => {
                                     filter
                                     options={
                                         clients.map((client) => ({
-                                            name: client.full_name,
+                                            name: client.fullName,
                                             id: client.id
                                         }))
                                     }

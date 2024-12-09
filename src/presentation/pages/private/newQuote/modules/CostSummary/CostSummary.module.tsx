@@ -4,7 +4,6 @@ import {
   useQuotationStore,
 } from "@/infraestructure/hooks";
 import { Button, TabView, Tag } from "@/presentation/components";
-import { classNames } from "primereact/utils";
 import { useEffect, useState } from "react";
 
 export const CostSummaryModule = () => {
@@ -32,7 +31,6 @@ export const CostSummaryModule = () => {
 
         
         tabPanelContent={
-          
           Array.from({ length: daysNumber }).map((_, index) => ({
             header: `Día ${index + 1}`,
             children: (

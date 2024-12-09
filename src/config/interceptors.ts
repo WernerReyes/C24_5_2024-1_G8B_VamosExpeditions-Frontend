@@ -16,8 +16,6 @@ export const setupInterceptors = (axiosInstance: AxiosInstance) => {
           message: "Error de conexión",
         });
       }
-
-      console.log({ error });
       
       const code = error.response.data.code;
 
