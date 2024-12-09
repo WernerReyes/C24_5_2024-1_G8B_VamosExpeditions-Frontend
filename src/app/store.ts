@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+
 import {
   type AppState,
   authSlice,
@@ -6,6 +7,7 @@ import {
   accommodationRoomSlice,
   accommodationQuoteSlice,
   quotationSlice,
+  clientSlice,
 } from "@/infraestructure/store";
 
 export const store = configureStore<AppState>({
@@ -15,9 +17,13 @@ export const store = configureStore<AppState>({
     accommodationRoom: accommodationRoomSlice.reducer,
     accommodationQuote: accommodationQuoteSlice.reducer,
     quotation: quotationSlice.reducer,
+    client: clientSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
 });
+
+
+

@@ -5,8 +5,10 @@ import { requestValidator } from "@/core/utils";
 const { EMAIL, PASSWORD } = regex;
 
 export type LoginDto = {
+  
   readonly email: string;
   readonly password: string;
+
 };
 
 export const loginDto = (email: string, password: string) => {

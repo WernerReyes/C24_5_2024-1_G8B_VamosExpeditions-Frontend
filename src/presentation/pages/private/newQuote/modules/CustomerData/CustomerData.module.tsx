@@ -1,7 +1,13 @@
-import React from 'react'
+import { ClientFormt, ReservationFormt } from "./components"
+
 
 export const CustomerDataModule = () => {
   return (
-    <div>CustomerData</div>
+    <div className="
+    flex flex-col xl:flex-row gap-4
+    ">
+       <ClientFormt/>
+       <ReservationFormt/>
+    </div>
   )
 }

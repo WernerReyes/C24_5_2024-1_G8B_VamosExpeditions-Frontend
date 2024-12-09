@@ -1,12 +1,15 @@
+import {
+    Dropdown as DropdownPrimereact,
+    type DropdownProps
+} from "primereact/dropdown";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
-import { MultiSelect as MultiSelectPrimereact, type MultiSelectProps } from 'primereact/multiselect';
 
-interface Props extends MultiSelectProps {
+interface Props extends DropdownProps {
     label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
     small?: HTMLAttributes<HTMLElement> & { text?: string };
 }
 
-export const MultiSelect = forwardRef<MultiSelectPrimereact, Props>(({ label, small, ...props }, ref) => {
+export const Dropdown = forwardRef<DropdownPrimereact, Props>(({ label, small, ...props }, ref) => {
     return (
         < >
             {label && (
@@ -14,7 +17,7 @@ export const MultiSelect = forwardRef<MultiSelectPrimereact, Props>(({ label, sm
                     {label.text}
                 </label>
             )}
-            <MultiSelectPrimereact {...props} ref={ref}/>
+            <DropdownPrimereact {...props} ref={ref} />
             {small && (
                 <small {...small}>
                     {small.text}

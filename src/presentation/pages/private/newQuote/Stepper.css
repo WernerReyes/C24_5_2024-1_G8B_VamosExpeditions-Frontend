@@ -1,0 +1,49 @@
+/** Stepper */
+.p-stepper .p-stepper-header .p-stepper-action {
+    transition: box-shadow 0.2s;
+    border-radius: 6px;
+    background: none;
+    outline-color: transparent;
+}
+
+.p-stepper .p-stepper-header .p-stepper-action .p-stepper-number {
+  color: #4b5563;
+  border: 1px solid #f3f4f6;
+  border-width: 2px;
+  background: #ffffff;
+  min-width: 3rem;
+  height: 3rem;
+  line-height: 2rem;
+  font-size: 1.143rem;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.p-stepper .p-stepper-header.p-highlight .p-stepper-number {
+  background: var(--primary-color) !important;
+  color: #ffffff;
+}
+
+.p-stepper .p-stepper-panels {
+  background: none !important;
+  padding: 1.25rem;
+  color: #4b5563;
+}
+
+
+
+/* Calendar */
+.p-datepicker:not(.p-disabled) table td span:not(.p-highlight):not(.p-disabled):hover {
+  background: var(--primary-color) !important;
+  color: white;
+}
+.p-datepicker:not(.p-disabled) table td span:not(.p-highlight):not(.p-disabled):focus {
+  outline: 0 none;
+  outline-offset: 0;
+  box-shadow: 0 0 0 0.2rem #a5f3fc;
+}
+.p-datepicker:not(.p-disabled) .p-monthpicker .p-monthpicker-month:not(.p-disabled):not(.p-highlight):hover {
+  background: #f3f4f6;
+}
+
+

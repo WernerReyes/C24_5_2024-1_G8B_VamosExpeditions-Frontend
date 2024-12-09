@@ -1,4 +1,4 @@
-import { Stepper } from "@/presentation/components";
+import { Button, Stepper } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
 import { Button } from "primereact/button";
 import { StepperRefAttributes } from "primereact/stepper";
@@ -25,7 +25,7 @@ const NewQuotePage = () => {
     <MainLayout>
       <section className="bg-white pe-7 py-5 md:p-10 rounded-lg my-auto shadow-md">
         <Stepper
-          ref={stepperRef}
+
           linear
           orientation={width > DESKTOP ? "horizontal" : "vertical"}
           includePanel
