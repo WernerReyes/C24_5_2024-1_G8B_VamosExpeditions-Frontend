@@ -23,3 +23,4 @@ export * from './SplitButton';
 export * from './RadioButton';
 export * from './InputTextarea';
 export * from './Dropdown';
+export * from './TreeSelect';

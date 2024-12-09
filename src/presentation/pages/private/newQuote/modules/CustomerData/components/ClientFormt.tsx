@@ -1,9 +1,34 @@
-import { InputText } from "@/presentation/components"
+import { NewClientDto, newClientDtoSchema } from "@/domain/dtos/client";
+import { useClientStore } from "@/infraestructure/hooks/useClientStore";
+import { Button, InputText } from "@/presentation/components"
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form"
 
 
 export const ClientFormt = () => {
-    const { control } = useForm();
+   const {startRegisterClient}= useClientStore()
+    const {
+        control,
+        handleSubmit,
+        reset,
+        /* formState: { errors }, */
+    } = useForm<NewClientDto>({
+        resolver: zodResolver(newClientDtoSchema),
+    });
+
+   
+    const handleForm = (data:NewClientDto ) => {
+        startRegisterClient(data.fullName, data.email, data.phone, data.country)
+        .then(() => {
+            
+            reset();
+          })
+          .catch((error) => {
+            
+            console.error(error);
+          });
+     
+    }
 
     return (
         <form className="
@@ -11,12 +36,17 @@ export const ClientFormt = () => {
         flex-1
         shadow-xl bg-white rounded-lg
         border-2 border-secondary
+        flex flex-col
+        
+        "
     
-      ">
+        onSubmit={handleSubmit(handleForm)}
+        noValidate
+        >
 
             <Controller
                 control={control}
-                name="name"
+                name="fullName"
 
                 defaultValue=""
 
@@ -28,7 +58,7 @@ export const ClientFormt = () => {
                             className: "text-tertiary font-bold text-xl ",
                         }}
                         type="text"
-
+                         
                         small={{
                             text: error?.message,
                             className: "text-red-500",
@@ -137,7 +167,10 @@ export const ClientFormt = () => {
                 )}
             />
 
-
+       <Button
+       className="mt-4"
+        label="Guardar"
+       />
 
         </form>
     )
