@@ -1,0 +1,3 @@
+.column {
+    @apply flex flex-col md:flex-row md:gap-x-5 md:justify-evenly;
+}

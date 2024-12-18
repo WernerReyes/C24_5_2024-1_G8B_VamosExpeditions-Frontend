@@ -1,0 +1,25 @@
+.form {
+  @apply md:px-7 md:py-7 px-5 py-5
+      flex-1 
+      bg-white rounded-lg
+      border-2 border-secondary
+      flex flex-col;
+}
+
+.form .container {
+  @apply flex flex-col w-full mb-5;
+}
+
+.form .container label {
+  @apply text-tertiary text-[15px] font-bold
+      mb-2;
+}
+
+.form .container small {
+  @apply text-red-500;
+}
+
+.form button {
+  @apply rounded-md
+      mt-auto;
+}

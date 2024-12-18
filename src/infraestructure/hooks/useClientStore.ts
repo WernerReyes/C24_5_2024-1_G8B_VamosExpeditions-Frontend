@@ -3,6 +3,7 @@ import { clientService } from "../services/client";
 
 import { onAddNewClient, onSetClients, type AppState } from "../store";
 import { toasterAdapter } from "@/presentation/components";
+import { RegisterClientDto } from "@/domain/dtos/client";
 
 
 export const useClientStore = () => {
@@ -18,11 +19,11 @@ export const useClientStore = () => {
         }
     }
 
-    const startRegisterClient = async (fullName: string, email: string, phone: string, country: string) => {
+    const startRegisterClient = async (registerClientDto: RegisterClientDto) => {
         try {
 
 
-            const { data, message } = await clientService.clietRegister({ fullName, email, phone, country });
+            const { data, message } = await clientService.clietRegister(registerClientDto);
 
             dispatch(onAddNewClient(data));
             toasterAdapter.success(message);

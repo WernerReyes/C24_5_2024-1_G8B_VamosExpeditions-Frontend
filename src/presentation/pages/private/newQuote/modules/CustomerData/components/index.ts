@@ -1,2 +1,2 @@
-export * from "./ClientFormt";
-export * from "./ReservationFormt";
+export * from "./ClientForm/ClientForm";
+export * from "./ReservationForm/ReservationForm";

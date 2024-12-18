@@ -8,6 +8,7 @@ import {
   accommodationQuoteSlice,
   quotationSlice,
   clientSlice,
+  externalCountrySlice,
 } from "@/infraestructure/store";
 
 export const store = configureStore<AppState>({
@@ -18,12 +19,10 @@ export const store = configureStore<AppState>({
     accommodationQuote: accommodationQuoteSlice.reducer,
     quotation: quotationSlice.reducer,
     client: clientSlice.reducer,
+    externalCountry: externalCountrySlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
 });
-
-
-

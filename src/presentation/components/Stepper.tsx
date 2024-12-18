@@ -1,7 +1,7 @@
 import {
   Stepper as StepperPrimeReact,
-  type StepperRefAttributes,
   type StepperProps as StepperPropsPrimeReact,
+  type StepperRefAttributes,
 } from "primereact/stepper";
 import {
   StepperPanel as StepperPanelPrimeReact,
@@ -23,14 +23,14 @@ export const Stepper = forwardRef<StepperRefAttributes, StepperProps>(
     return (
       <StepperPrimeReact ref={ref} {...props}>
         {includePanel &&
-          panelContent?.map((panel) => (
-            <StepperPanelPrimeReact {...panel} key={panel.header} />
+          panelContent?.map((panel, index) => (
+            <StepperPanelPrimeReact {...panel} key={index} />
           ))}
       </StepperPrimeReact>
     );
   }
 );
 
-export const StepperPanel = ({ children, ...props }: StepperPanelProps) => {
-  return <StepperPanelPrimeReact {...props}>{children}</StepperPanelPrimeReact>;
-};
+// export const StepperPanel = ({ children, ...props }: StepperPanelProps) => {
+//   return <StepperPanelPrimeReact {...props}>{children}</StepperPanelPrimeReact>;
+// };

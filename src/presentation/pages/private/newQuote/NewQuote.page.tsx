@@ -312,7 +312,7 @@ const steps: Title[] = [
 const renderStepContent = (step: number): React.ReactNode => {
   switch (step) {
     case 0:
-      return <CustomerDataModule />;
+     return <CustomerDataModule />;
     case 1:
       return <CostingModule />;
     case 2:
@@ -401,7 +401,6 @@ const renderStepContent = (step: number): React.ReactNode => {
 
 const NewQuotePage = () => {
   const { width, DESKTOP } = useWindowSize();
-  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
 
   const handleNext = () => {
@@ -435,10 +434,11 @@ const NewQuotePage = () => {
 
   useEffect(() => {
     const currentStep = localStorage.getItem(CURRENT_ACTIVE_STEP);
+    console.log("Retrieved step from localStorage:", currentStep);
     if (currentStep) {
       setActiveStep(+currentStep);
     }
-  }, [activeStep]);
+  }, []);
 
   return (
     <MainLayout>

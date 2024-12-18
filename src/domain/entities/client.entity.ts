@@ -1,8 +1,12 @@
+import { z } from "zod";
 
-export interface ClientEntity {
-    id: string;
-    fullName: string;
-    email: string;
-    phone: string;
-    country: string;
-}
+export const clientEntitySchema = z.object({
+    id: z.string(),
+    fullName: z.string(),
+    email: z.string(),
+    phone: z.string(),
+    country: z.string(),
+});
+
+export type ClientEntity = z.infer<typeof clientEntitySchema>;
+
