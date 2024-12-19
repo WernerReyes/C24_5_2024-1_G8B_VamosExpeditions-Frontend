@@ -1,5 +1,4 @@
 import {
-  newClientDtoSchema,
   RegisterClientDto,
   registerClientDtoSchema,
 } from "@/domain/dtos/client";
@@ -12,10 +11,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
 import Style from "../Style.module.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ExternalCountryEntity } from "@/infraestructure/services/external/country";
+import { DropdownChangeEvent } from "primereact/dropdown";
 
 export const ClientForm = () => {
+  //const url = `https://restcountries.com/v3.1/name/${countryName}`;
+
   const { startRegisterClient } = useClientStore();
   const { externalCountries, startGetAllExternalCountries } =
     useExternalCountryStore();
@@ -39,9 +41,12 @@ export const ClientForm = () => {
     console.log("useEffect");
   }, []);
 
-
   return (
-    <form className={Style.form} onSubmit={handleSubmit(handleForm)} noValidate>
+    <form
+      className={`${Style.form} flex-[1] `}
+      onSubmit={handleSubmit(handleForm)}
+      noValidate
+    >
       <div className={Style.container}>
         <Controller
           control={control}
@@ -58,6 +63,7 @@ export const ClientForm = () => {
                 text: error?.message,
               }}
               id="name"
+              placeholder="Nombre completo"
               invalid={!!error}
               {...field}
             />
@@ -81,6 +87,7 @@ export const ClientForm = () => {
                 text: error?.message,
                 className: "text-red-500",
               }}
+              placeholder="Correo electronico"
               id="email"
               invalid={!!error}
               {...field}
@@ -122,6 +129,10 @@ export const ClientForm = () => {
                 optionLabel="name"
                 {...field}
                 virtualScrollerOptions={{ itemSize: 38 }}
+                onChange={(e: DropdownChangeEvent) => {
+                  field.onChange(e.value);
+                  console.log(e.value);
+                }}
               />
             );
           }}
@@ -144,6 +155,7 @@ export const ClientForm = () => {
                 text: error?.message,
                 className: "text-red-500",
               }}
+              placeholder="Telefono"
               id="phone"
               invalid={!!error}
               {...field}

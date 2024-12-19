@@ -45,7 +45,7 @@ export const ReservationForm = () => {
   const {
     control,
     handleSubmit,
-    /* reset, */
+    reset,
     /* formState: { errors }, */
   } = useForm<ReservationDto>({
     resolver: zodResolver(reservationDtoSchema),
@@ -67,7 +67,12 @@ export const ReservationForm = () => {
       data.comfortClass,
       data.destination,
       data.specialSpecifications
-    );
+    ).then(() => {
+      reset();
+    })
+    .catch((error) => {
+      console.error(error);
+    });;
   };
 
   const cities = [
@@ -103,18 +108,24 @@ export const ReservationForm = () => {
     return cities.map((country: any) => ({
       key: country.code,
       label: country.name,
-      disabled: true, // Deshabilita los nodos padre (países)
+
       children: country.city.map((city: any) => ({
         key: city.id_city.toString(),
         label: city.name,
+        disabled: true,
         data: city,
       })),
     }));
   };
 
   return (
-    <form className={Style.form} onSubmit={handleSubmit(handleReservation)}>
+    <form
+      className={`${Style.form} flex-[2] `}
+      onSubmit={handleSubmit(handleReservation)}
+    >
+      {/*  */}
       <div className={ReservationFormStyle.column}>
+        {/*  */}
         <div className={Style.container}>
           <Controller
             control={control}
@@ -134,7 +145,6 @@ export const ReservationForm = () => {
                   placeholder="Nombre del cliente"
                   small={{
                     text: error?.message,
-                    className: "text-red-500",
                   }}
                   invalid={!!error}
                   {...field}
@@ -150,6 +160,7 @@ export const ReservationForm = () => {
             }}
           />
         </div>
+        {/*  */}
         <div className={Style.container}>
           <Controller
             control={control}
@@ -164,17 +175,19 @@ export const ReservationForm = () => {
                 type="number"
                 small={{
                   text: error?.message,
-                  className: "text-red-500",
                 }}
                 id="numberOfPeople"
-                className="block w-full mb-4 "
+                placeholder="Número de Personas"
                 invalid={!!error}
                 {...field}
               />
             )}
           />
         </div>
+
+        {/*  */}
       </div>
+      {/*  */}
       <div className={ReservationFormStyle.column}>
         <div className={Style.container}>
           <Controller
@@ -193,8 +206,8 @@ export const ReservationForm = () => {
                 value={field.value as Date[]}
                 small={{
                   text: error?.message,
-                  className: "text-red-500",
                 }}
+                placeholder="Seleccione una fecha"
                 selectionMode="range"
                 readOnlyInput
                 hideOnRangeSelection
@@ -216,13 +229,13 @@ export const ReservationForm = () => {
                 }}
                 small={{
                   text: error?.message,
-                  className: "text-red-500",
                 }}
                 invalid={!!error}
                 {...field}
                 value={field.value}
                 optionLabel="name"
                 optionValue="name"
+                placeholder="Código"
                 onChange={(e: DropdownChangeEvent) => {
                   field.onChange(e.value);
                   console.log(e.value);
@@ -232,9 +245,9 @@ export const ReservationForm = () => {
           />
         </div>
       </div>
-      <div className="flex flex-col mt-4 mb-4">
-        <label className="text-tertiary font-bold mb-2">Clase de Confort</label>
-        <div className="flex flex-wrap justify-evenly">
+      <div className={ReservationFormStyle.confort}>
+        <label >Clase de Confort</label>
+        <div >
           <Controller
             control={control}
             name="comfortClass"
@@ -247,8 +260,7 @@ export const ReservationForm = () => {
                     label={{
                       text: travelClass.label,
                       htmlFor: travelClass.label,
-                      className:
-                        "text-tertiary font-bold mb-2 ml-2  text-xs md:text-sm",
+                      className: "ml-2",
                     }}
                     invalid={!!error}
                     {...field}
@@ -261,7 +273,7 @@ export const ReservationForm = () => {
                   />
                 ))}
                 {error && (
-                  <small className="text-red-500  text-xs md:text-sm">
+                  <small >
                     {error.message}
                   </small>
                 )}
@@ -285,7 +297,6 @@ export const ReservationForm = () => {
               placeholder="Seleccione una ciudad"
               label={{
                 text: "Destino",
-                className: "text-tertiary font-bold mb-2",
                 htmlFor: "destino",
               }}
               {...field}
@@ -296,7 +307,6 @@ export const ReservationForm = () => {
               }}
               small={{
                 text: error?.message,
-                className: "text-red-500",
               }}
             />
           )}
@@ -314,23 +324,21 @@ export const ReservationForm = () => {
               cols={30}
               label={{
                 text: "Comentarios",
-                className: "text-tertiary font-bold mb-2",
                 htmlFor: "comentarios",
               }}
-              className=" w-full"
               small={{
                 text: error?.message,
-                className: "text-red-500",
               }}
               id="specialSpecifications"
               invalid={!!error}
               {...field}
+              placeholder="Comentarios"
             />
           )}
         />
       </div>
 
-      <Button icon="pi pi-save" className="mt-4" label="Guardar" />
+      <Button icon="pi pi-save" label="Guardar" />
     </form>
   );
 };

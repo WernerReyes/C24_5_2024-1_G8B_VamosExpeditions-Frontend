@@ -55,5 +55,15 @@ export const registerClientDtoSchema = z.object({
   phone: z.string().min(1, {
     message: "El campo telefono es requerido",
   }),
-  country: externalCountryEntitySchema,
+  country: externalCountryEntitySchema.refine(
+    (country) =>
+      !!country.name.trim() && // name no debe ser vacío
+      !!country.code.trim() && // code no debe ser vacío
+      country.image !== null && // image debe existir
+      !!country.image.png.trim() && // png no debe ser vacío
+      !!country.image.svg.trim(), // svg no debe ser vacío
+    {
+      message: "El campo país es inválido o incompleto",
+    }
+  ),
 });

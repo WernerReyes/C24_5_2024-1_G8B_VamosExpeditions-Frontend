@@ -13,6 +13,7 @@ export const useClientStore = () => {
     const startGetClients = async () => {
         try {
             const { data } = await clientService.getAllClients();
+            
             dispatch(onSetClients(data));
         } catch (error: any) {
             throw error;
