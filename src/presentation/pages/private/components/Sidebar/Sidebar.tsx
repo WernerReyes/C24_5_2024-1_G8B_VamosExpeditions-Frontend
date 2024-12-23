@@ -10,6 +10,7 @@ import { constantRoutes } from "@/core/constants";
 import { useWindowSize } from "@/presentation/hooks";
 import "./Sidebar.css";
 
+
 interface SidebarProps {
   visible: boolean;
   setVisible: (value: boolean) => void;
@@ -18,7 +19,9 @@ interface SidebarProps {
 const { DASHBOARD, QUOTES, NEW_QUOTE } = constantRoutes.private;
 
 export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
-  const { width, DESKTOP } = useWindowSize();
+  const { width, DESKTOP,MACBOOK } = useWindowSize();
+
+
 
   const items: MenuItem[] = [
     {
@@ -86,11 +89,12 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
         <Image src="/images/logo.png" alt="Logo" width="200" height="200" />
       )}
       onHide={() => setVisible(false)}
-      // closeOnEscape={true}
+      /* closeOnEscape={true} */
       visible={visible}
       className="w-72"
+      baseZIndex={width < MACBOOK ? 1000 : 0}
       blockScroll={false}
-      modal={false}
+      modal={width < MACBOOK}
       dismissable={width < DESKTOP}
     >
       <hr className="mt-3 mb-2 border-2 border-gray-300 " />

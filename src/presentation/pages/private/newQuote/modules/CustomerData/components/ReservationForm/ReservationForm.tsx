@@ -22,7 +22,7 @@ import {
   reservationDtoSchema,
   ReservationDto,
 } from "@/domain/dtos/reservation";
-import { useReservationStore } from "@/infraestructure/hooks";
+import { useNationStore, useReservationStore } from "@/infraestructure/hooks";
 
 import Style from "../Style.module.css";
 import ReservationFormStyle from "./ReservationForm.module.css";
@@ -41,6 +41,7 @@ const codigo = [
   { name: "nMv4ZcdT" },
 ];
 
+/*  */
 export const ReservationForm = () => {
   const {
     control,
@@ -52,10 +53,12 @@ export const ReservationForm = () => {
   });
 
   const { clients, startGetClients } = useClientStore();
+  const { nations, getNations } = useNationStore();
   const { registerReservation } = useReservationStore();
 
   useEffect(() => {
     startGetClients();
+    getNations();
   }, []);
 
   const handleReservation = (data: ReservationDto) => {
@@ -67,53 +70,24 @@ export const ReservationForm = () => {
       data.comfortClass,
       data.destination,
       data.specialSpecifications
-    ).then(() => {
-      reset();
-    })
-    .catch((error) => {
-      console.error(error);
-    });;
+    )
+      .then(() => {
+        reset();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
-
-  const cities = [
-    {
-      id_country: 1,
-      name: "Colombia",
-      code: "CO",
-      city: [
-        { id_city: 1, name: "Bogota", country_id: 1 },
-        { id_city: 2, name: "Medellin", country_id: 1 },
-      ],
-    },
-    {
-      id_country: 2,
-      name: "Argentina",
-      code: "AR",
-      city: [{ id_city: 3, name: "Buenos Aires", country_id: 2 }],
-    },
-    { id_country: 3, name: "Brasil", code: "BR", city: [] },
-    {
-      id_country: 4,
-      name: "Peru",
-      code: "PE",
-      city: [
-        { id_city: 7, name: "Lima", country_id: 4 },
-        { id_city: 8, name: "Arequipa", country_id: 4 },
-      ],
-    },
-    { id_country: 5, name: "Chile", code: "CL", city: [] },
-  ];
 
   const transformData = (cities: any) => {
     return cities.map((country: any) => ({
       key: country.code,
       label: country.name,
-
-      children: country.city.map((city: any) => ({
-        key: city.id_city.toString(),
+      selectable: false,
+      children: country.cities.map((city: any) => ({
+        key: city.id.toString(),
         label: city.name,
-        disabled: true,
-        data: city,
+        selectable: true,
       })),
     }));
   };
@@ -180,6 +154,8 @@ export const ReservationForm = () => {
                 placeholder="Número de Personas"
                 invalid={!!error}
                 {...field}
+                max={20}
+                min={1}
               />
             )}
           />
@@ -246,8 +222,8 @@ export const ReservationForm = () => {
         </div>
       </div>
       <div className={ReservationFormStyle.confort}>
-        <label >Clase de Confort</label>
-        <div >
+        <label>Clase de Confort</label>
+        <div>
           <Controller
             control={control}
             name="comfortClass"
@@ -272,11 +248,7 @@ export const ReservationForm = () => {
                     checked={field.value === travelClass.key}
                   />
                 ))}
-                {error && (
-                  <small >
-                    {error.message}
-                  </small>
-                )}
+                {error && <small>{error.message}</small>}
               </>
             )}
           />
@@ -290,7 +262,7 @@ export const ReservationForm = () => {
           render={({ field, fieldState: { error } }) => (
             <TreeSelect
               className="w-full"
-              options={transformData(cities)}
+              options={transformData(nations)}
               selectionMode="multiple"
               showClear
               filter

@@ -11,15 +11,15 @@
   background-color: transparent !important;
 }
 
-@media (max-width: 1000px) {
+/* @media (max-width: 1000px) {
   .sidebar-fixed {
-    position: fixed; /* Fija la barra lateral */
+    position: fixed; 
     top: 0;
     left: 0;
-    height: 100vh; /* Ocupa toda la altura de la pantalla */
-    z-index: 10; /* Asegúrate de que flote sobre otros elementos */
+    height: 100vh; 
+    z-index: 10; 
   }
-}
+} */
 
 .p-menubar-button {
   display: none !important;

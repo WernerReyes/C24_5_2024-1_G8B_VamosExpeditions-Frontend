@@ -1,8 +1,8 @@
 .form {
   @apply px-3 py-3
-      bg-white rounded-lg
+/*       bg-white rounded-lg
       shadow-xl
-      border-2 border-secondary
+      border-2 border-secondary */
       flex flex-col;
 }
 

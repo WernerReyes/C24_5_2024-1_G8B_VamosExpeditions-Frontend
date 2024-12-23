@@ -9,6 +9,7 @@ import {
   quotationSlice,
   clientSlice,
   externalCountrySlice,
+  nationSlice,
 } from "@/infraestructure/store";
 
 export const store = configureStore<AppState>({
@@ -20,6 +21,7 @@ export const store = configureStore<AppState>({
     quotation: quotationSlice.reducer,
     client: clientSlice.reducer,
     externalCountry: externalCountrySlice.reducer,
+    nation: nationSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
