@@ -8,6 +8,7 @@ export const externalCountryEntitySchema = z.object({
     png: z.string(),
     svg: z.string(),
   }),
+  root: z.string(),
 });
 
 export type ExternalCountryEntity = z.infer<typeof externalCountryEntitySchema>;

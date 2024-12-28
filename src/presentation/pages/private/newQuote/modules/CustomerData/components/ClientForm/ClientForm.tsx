@@ -11,16 +11,34 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
 import Style from "../Style.module.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ExternalCountryEntity } from "@/infraestructure/services/external/country";
 import { DropdownChangeEvent } from "primereact/dropdown";
 
 export const ClientForm = () => {
   //const url = `https://restcountries.com/v3.1/name/${countryName}`;
 
+  const [sc, setSc] = useState({
+    name: "",
+    code: "",
+    image: {
+      png: "",
+      svg: "",
+    },
+    root: "",
+  });
+  
   const { startRegisterClient } = useClientStore();
-  const { externalCountries, startGetAllExternalCountries } =
-    useExternalCountryStore();
+
+
+  const { externalCountries, startGetAllExternalCountries } =useExternalCountryStore();
+ 
+  
+
+  externalCountries.filter((country) => country.name === sc.name);
+  
+   
+
   const { control, handleSubmit, reset } = useForm<RegisterClientDto>({
     resolver: zodResolver(registerClientDtoSchema),
   });
@@ -107,6 +125,7 @@ export const ClientForm = () => {
               png: "",
               svg: "",
             },
+            root: "",
           }}
           render={({ field, fieldState: { error } }) => {
             return (
@@ -131,7 +150,8 @@ export const ClientForm = () => {
                 virtualScrollerOptions={{ itemSize: 38 }}
                 onChange={(e: DropdownChangeEvent) => {
                   field.onChange(e.value);
-                  console.log(e.value);
+                  /* console.log(e.value); */
+                  setSc(e.value);
                 }}
               />
             );
@@ -155,10 +175,14 @@ export const ClientForm = () => {
                 text: error?.message,
                 className: "text-red-500",
               }}
+             
               placeholder="Telefono"
               id="phone"
               invalid={!!error}
-              {...field}
+              {...field
+               
+
+              }
             />
           )}
         />
