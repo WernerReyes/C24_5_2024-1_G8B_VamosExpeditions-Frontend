@@ -31,6 +31,7 @@ export const useReservationStore = () => {
                 
             });
             toasterAdapter.success(message);
+            
            console.log(data);
         } catch (error) {
             throw error;
