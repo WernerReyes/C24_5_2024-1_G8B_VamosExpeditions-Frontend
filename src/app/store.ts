@@ -1,7 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-
+import { authService, quoteService } from "@/infraestructure/store/services";
 import {
-  type AppState,
   authSlice,
   quoteSlice,
   accommodationRoomSlice,
@@ -12,7 +11,7 @@ import {
   nationSlice,
 } from "@/infraestructure/store";
 
-export const store = configureStore<AppState>({
+export const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
     quote: quoteSlice.reducer,
@@ -22,9 +21,15 @@ export const store = configureStore<AppState>({
     client: clientSlice.reducer,
     externalCountry: externalCountrySlice.reducer,
     nation: nationSlice.reducer,
+    [quoteService.reducerPath]: quoteService.reducer,
+    [authService.reducerPath]: authService.reducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
+    }).concat(quoteService.middleware).concat(authService.middleware),
 });
+
+export type AppState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

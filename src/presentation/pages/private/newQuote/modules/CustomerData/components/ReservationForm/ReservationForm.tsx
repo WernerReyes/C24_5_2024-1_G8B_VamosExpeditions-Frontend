@@ -178,6 +178,7 @@ export const ReservationForm = () => {
                 }}
                 onChange={(e) => {
                   field.onChange(e.value);
+                  console.log(e.value);
                 }}
                 value={field.value as Date[]}
                 small={{

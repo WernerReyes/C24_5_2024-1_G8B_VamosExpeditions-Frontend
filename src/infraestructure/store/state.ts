@@ -16,4 +16,7 @@ export type AppState = {
   quotation: QuotationSliceState;
   externalCountry: ExternalCountrySliceState;
   nation: NationSliceState;
+
+  // Add more slices here
+  [key: string]: any;
 };

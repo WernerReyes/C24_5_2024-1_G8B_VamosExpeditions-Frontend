@@ -65,6 +65,8 @@ export const reservationDtoSchema = z.object({
   }),
   travelDates: z.array(z.date(), {
     required_error: "El campo fechas de viaje es requerido",
+  }).length(2, {
+    message: "El campo fechas de viaje debe tener al menos 2 elementos",
   }),
   code: z
     .string({

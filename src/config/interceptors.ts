@@ -9,25 +9,29 @@ export const setupInterceptors = (axiosInstance: AxiosInstance) => {
     (res) => res,
     (error) => {
       if (!error.response) {
-        const errorMsg = getValidationError(error.code);
-        toasterAdapter.error(errorMsg);
-        return Promise.reject({
-          status: 500,
-          message: "Error de conexión",
-        });
+        console.log(error)
+        // const errorMsg = getValidationError(error.code);
+        // toasterAdapter.error(errorMsg);
+        // return Promise.reject({
+        //   status: 500,
+        //   message: "Error de conexión",
+        // });
+        return Promise.reject(error);
       }
       
       const code = error.response.data.code;
+
+      console.log({ error });
 
       if (code === constantErrorCode.ERR_USER_INVALID_TOKEN) {
         toasterAdapter.tokenExpired();
         return Promise.reject(error.response.data);
       }
 
-      const errorMsg = getValidationError(code);
-      if (errorMsg) {
-        toasterAdapter.error(errorMsg);
-      }
+      // const errorMsg = getValidationError(code);
+      // if (errorMsg) {
+      //   toasterAdapter.error(errorMsg);
+      // }
       return Promise.reject(error.response.data);
     }
   );

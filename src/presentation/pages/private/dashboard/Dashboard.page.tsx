@@ -10,6 +10,7 @@ import {
 import { constantRoutes } from "@/core/constants";
 import { useAuthStore } from "@/infraestructure/hooks";
 
+
 const { NEW_QUOTE } = constantRoutes.private;
 
 const DashboardPage = () => {
@@ -17,6 +18,8 @@ const DashboardPage = () => {
   const { authUser } = useAuthStore()
 
   const handleNewQuote = () => navigate(NEW_QUOTE);
+
+  console.log({ authUser });
 
   return (
     <MainLayout>

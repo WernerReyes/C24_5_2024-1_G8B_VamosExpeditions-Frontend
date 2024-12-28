@@ -1,10 +1,11 @@
-import { lazy, useEffect } from "react";
+import { lazy, useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { Toaster } from "@/presentation/components";
+import { ProgressSpinner, Toaster } from "@/presentation/components";
 import { AuthGuard } from "@/presentation/guards";
 import PrivateRoutes from "@/presentation/routes/Private.routes";
 import { useAuthStore } from "@/infraestructure/hooks";
 import { constantRoutes } from "@/core/constants";
+import { useUserAuthenticatedQuery } from "@/infraestructure/store/services";
 
 //* Public pages
 const LoginPage = lazy(
@@ -23,23 +24,33 @@ const {
 // const { USER, ADMIN } = PrivateRoutes;
 
 export const AppRouter = () => {
-  const { authUser } = useAuthStore();
+  const { authUser, startLogin } = useAuthStore();
+  const { data, isLoading, error } = useUserAuthenticatedQuery();
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  //   const { isDark } = useThemeStore();
-  //   const { isMobile } = useWindowSize();
-  //   const { messages, type, startClearMessages } = useMessageStore();
+  useEffect(() => {
+    if (data) {
+      startLogin(data.data.user);
+      setLoadingUser(false);
+    }
+  }, [data]);
 
-  //   useEffect(() => {
-  //     startRevalidateToken();
-  //   }, []);
+  useEffect(() => {
+    if (error) {
+      setLoadingUser(false);
+    }
+  }, [error]);
 
-  //   useEffect(() => {
-  //     if (!messages.length) return;
-  //     showMessage(type, messages);
-  //     startClearMessages();
-  //   }, [messages]);
 
-  // if (status === AuthStatus.CHECKING) return <h1>Loading...</h1>;
+  if (isLoading || loadingUser) {
+    return (
+      <div className="flex h-full max-h-full min-h-screen w-full items-center justify-center">
+        <ProgressSpinner />
+      </div>
+    );
+  }
+
+  console.log({ authUser });
 
   return (
     <BrowserRouter
@@ -59,10 +70,11 @@ export const AppRouter = () => {
         <Route path={LOGIN} element={<LoginPage />} />
 
         {/* <Route path={MANAGER + "/*"} element={<PrivateRoutes />} /> */}
-
-        <Route element={<AuthGuard privateValidation />}>
-          <Route path={"/*"} element={<PrivateRoutes />} />
-        </Route>
+      
+          <Route element={<AuthGuard privateValidation />}>
+            <Route path={"/*"} element={<PrivateRoutes />} />
+          </Route>
+       
 
         {/* <PrivateRoutes /> */}
 

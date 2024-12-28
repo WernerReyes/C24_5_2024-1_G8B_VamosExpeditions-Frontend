@@ -28,3 +28,4 @@ export * from './RadioButton';
 export * from './InputTextarea';
 export * from './Dropdown';
 export * from './TreeSelect';
+export * from './error/ErrorBoundary';

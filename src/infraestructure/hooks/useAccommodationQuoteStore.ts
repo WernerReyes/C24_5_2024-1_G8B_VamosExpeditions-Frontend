@@ -1,6 +1,7 @@
 import type { SetAccomodationQuoteDto } from "@/domain/dtos/accommodationQuote";
 import { useDispatch, useSelector } from "react-redux";
-import { onSetLocalAccommodationQuote, type AppState } from "../store";
+import { onSetLocalAccommodationQuote } from "../store";
+import type { AppState } from "@/app/store";
 
 export const useAccommodationQuoteStore = () => {
   const dispatch = useDispatch();

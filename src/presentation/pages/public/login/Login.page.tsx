@@ -6,6 +6,8 @@ import { useAuthStore } from "@/infraestructure/hooks";
 import { Button, Image, InputText, Password } from "@/presentation/components";
 import { AuthStatus } from "@/infraestructure/store";
 import { constantRoutes } from "@/core/constants";
+import { useLoginMutation } from "@/infraestructure/store/services";
+import { useEffect } from "react";
 
 const { DASHBOARD } = constantRoutes.private;
 
@@ -18,13 +20,25 @@ const LoginPage = () => {
     resolver: zodResolver(loginDtoSchema),
   });
   const navigate = useNavigate();
-  const { startLogin, status } = useAuthStore();
+  const { startLogin, startLogout } = useAuthStore();
+
+  const [login, { error, isLoading, data }] = useLoginMutation();
 
   const handleLogin = async (data: LoginDto) => {
-    startLogin(data.email, data.password).then(() => {
-      navigate(DASHBOARD);
-    });
+    try {
+      await login(data).unwrap();
+    } catch (error: any) {
+      console.log({ error });
+      startLogout();
+    }
   };
+
+  useEffect(() => {
+    if (data && !isLoading) {
+      navigate(DASHBOARD);
+      startLogin(data.data.user);
+    }
+  }, [data]);
 
   return (
     <section
@@ -107,10 +121,8 @@ const LoginPage = () => {
 
           <Button
             type="submit"
-            label="Ingresar"
-            disabled={
-              Object.keys(errors).length > 0 || status === AuthStatus.CHECKING
-            }
+            label={isLoading ? "Validando..." : "Iniciar Sesión"}
+            disabled={Object.keys(errors).length > 0 || isLoading}
             // onClick={handleSubmit}
             className="w-full mt-8"
           />
