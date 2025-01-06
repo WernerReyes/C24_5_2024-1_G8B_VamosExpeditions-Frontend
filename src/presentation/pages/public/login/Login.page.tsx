@@ -2,14 +2,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { loginDtoSchema, type LoginDto } from "@/domain/dtos/auth";
-import { useAuthStore } from "@/infraestructure/hooks";
+import { useAuthStore, useCookieExpirationStore } from "@/infraestructure/hooks";
 import { Button, Image, InputText, Password } from "@/presentation/components";
-import { AuthStatus } from "@/infraestructure/store";
 import { constantRoutes } from "@/core/constants";
 import { useLoginMutation } from "@/infraestructure/store/services";
-import { useEffect } from "react";
+import { useAlert } from "@/presentation/hooks";
 
 const { DASHBOARD } = constantRoutes.private;
+
+const MAX_TOASTS = 3;
 
 const LoginPage = () => {
   const {
@@ -20,25 +21,25 @@ const LoginPage = () => {
     resolver: zodResolver(loginDtoSchema),
   });
   const navigate = useNavigate();
+  const [login, { isLoading }] = useLoginMutation();
+  const { startShowApiError, startShowSuccess } = useAlert(MAX_TOASTS);
   const { startLogin, startLogout } = useAuthStore();
-
-  const [login, { error, isLoading, data }] = useLoginMutation();
+  const { init } = useCookieExpirationStore()
 
   const handleLogin = async (data: LoginDto) => {
-    try {
-      await login(data).unwrap();
-    } catch (error: any) {
-      console.log({ error });
-      startLogout();
-    }
+    await login(data)
+      .unwrap()
+      .then((response) => {
+        startShowSuccess(response.message);
+        startLogin(response.data.user);
+        navigate(DASHBOARD);
+        init(response.data.expiresAt);
+      })
+      .catch((error) => {
+        startShowApiError(error);
+        startLogout();
+      });
   };
-
-  useEffect(() => {
-    if (data && !isLoading) {
-      navigate(DASHBOARD);
-      startLogin(data.data.user);
-    }
-  }, [data]);
 
   return (
     <section

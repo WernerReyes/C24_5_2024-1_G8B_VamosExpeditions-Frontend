@@ -2,11 +2,11 @@ import { z } from "zod";
 import { requestValidator } from "@/core/utils";
 import { regex } from "@/core/constants";
 import {
-  externalCountryEntitySchema,
   type ExternalCountryEntity,
-} from "@/infraestructure/services/external/country";
+  externalCountryEntitySchema,
+} from "@/infraestructure/store/services/external/country";
 
-const { EMAIL } = regex;
+const { EMAIL, PHONE } = regex;
 
 export type RegisterClientDto = {
   readonly fullName: string;
@@ -49,21 +49,17 @@ export const registerClientDtoSchema = z.object({
     .min(1, {
       message: "El campo email es requerido",
     })
-    .refine((value) => EMAIL.test(value), {
-      message: "Email invalid, debe ser un email valido",
+    .regex(EMAIL, {
+      message: "El campo email es inválido",
     }),
-  phone: z.string().min(1, {
-    message: "El campo telefono es requerido",
-  }),
-  country: externalCountryEntitySchema.refine(
-    (country) =>
-      !!country.name.trim() && // name no debe ser vacío
-      !!country.code.trim() && // code no debe ser vacío
-      country.image !== null && // image debe existir
-      !!country.image.png.trim() && // png no debe ser vacío
-      !!country.image.svg.trim(), // svg no debe ser vacío
-    {
-      message: "El campo país es inválido o incompleto",
-    }
-  ),
+  phone: z
+    .string()
+    .min(1, {
+      message: "El campo telefono es requerido",
+    })
+    .regex(PHONE, {
+      message:
+        "El campo teléfono es inválido, debe tener el formato (+99..) 999999999..",
+    }),
+  country: z.object(externalCountryEntitySchema.shape),
 });

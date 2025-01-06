@@ -5,7 +5,7 @@ import {
 import { addLocale, type LocaleOptions } from "primereact/api";
 import { HTMLAttributes, LabelHTMLAttributes } from 'react';
 
-
+import "./Calendar.css";
 
 type Props = CalendarProps & {
   label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };

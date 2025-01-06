@@ -1,22 +1,30 @@
 import { requestValidator } from "@/core/utils";
+import {
+  clientEntitySchema,
+  type ClientEntity,
+  OrderType,
+  TravelerStyle,
+} from "@/domain/entities";
 import { z } from "zod";
 
 export type ReservationDto = {
-  readonly clientId: number;
-  readonly numberOfPeople: string;
+  readonly client: ClientEntity;
+  readonly numberOfPeople: number;
   readonly travelDates: Date[];
   readonly code: string;
-  readonly comfortClass: string;
+  readonly travelerStyle: TravelerStyle;
+  readonly orderType: OrderType;
   readonly destination: { [key: number]: boolean };
   readonly specialSpecifications: string;
 };
 
-export const reservationRequest = (
-  clientId: number,
-  numberOfPeople: string,
+export const reservationDto = (
+  client: ClientEntity,
+  numberOfPeople: number,
   travelDates: Date[],
   code: string,
-  comfortClass: string,
+  travelerStyle: TravelerStyle,
+  orderType: OrderType,
   destination: { [key: number]: boolean },
   specialSpecifications: string
 ) => {
@@ -24,11 +32,12 @@ export const reservationRequest = (
     create: (): [ReservationDto?, string[]?] => {
       const errors = requestValidator(
         {
-          clientId,
+          client,
           numberOfPeople,
           travelDates,
           code,
-          comfortClass,
+          travelerStyle,
+          orderType,
           destination,
           specialSpecifications,
         },
@@ -39,11 +48,12 @@ export const reservationRequest = (
       }
       return [
         {
-          clientId,
+          client,
           numberOfPeople,
           travelDates,
           code,
-          comfortClass,
+          travelerStyle,
+          orderType,
           destination,
           specialSpecifications,
         },
@@ -54,27 +64,41 @@ export const reservationRequest = (
 };
 
 export const reservationDtoSchema = z.object({
-  clientId: z
+  client: z.object(clientEntitySchema.shape, {
+    required_error: "El campo cliente es requerido",
+  }),
+  numberOfPeople: z
     .number({
-      required_error: "El campo id de cliente es requerido",
+      message: "El campo número de personas es requerido",
     })
-    .int()
-    .min(1),
-  numberOfPeople: z.string().min(1, {
-    message: "El campo numero de personas es requerido",
-  }),
-  travelDates: z.array(z.date(), {
-    required_error: "El campo fechas de viaje es requerido",
-  }).length(2, {
-    message: "El campo fechas de viaje debe tener al menos 2 elementos",
-  }),
+    .int({
+      message: "El campo número de personas debe ser un número entero",
+    })
+    .positive({
+      message: "El campo número de personas debe ser un número positivo",
+    })
+    .min(1, {
+      message: "El campo número de personas es requerido",
+    }),
+  travelDates: z
+    .array(z.date(), {
+      required_error: "El campo fechas de viaje es requerido",
+    })
+    .length(2, {
+      message: "El campo fechas de viaje debe tener al menos 2 elementos",
+    }),
   code: z
     .string({
-      required_error: "El campo código es requerido",
+      message: "El campo código es requerido",
     })
-    .min(1),
-  comfortClass: z.string().min(1, {
-    message: "El campo clase de confort es requerido",
+    .min(1, {
+      message: "El campo código es requerido",
+    }),
+  travelerStyle: z.nativeEnum(TravelerStyle, {
+    required_error: "El campo estilo de viajero es requerido",
+  }),
+  orderType: z.nativeEnum(OrderType, {
+    required_error: "El campo tipo de orden es requerido",
   }),
   destination: z.record(z.boolean(), {
     required_error: "El campo destino es requerido",

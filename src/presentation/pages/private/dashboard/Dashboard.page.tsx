@@ -19,8 +19,6 @@ const DashboardPage = () => {
 
   const handleNewQuote = () => navigate(NEW_QUOTE);
 
-  console.log({ authUser });
-
   return (
     <MainLayout>
       <div className="flex justify-between items-center">

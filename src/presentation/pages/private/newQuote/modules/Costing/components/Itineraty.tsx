@@ -6,8 +6,12 @@ import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
 import { SelectItem } from "primereact/selectitem";
 import { useEffect, useRef, useState } from "react";
 import { Accommodiations } from "./accommodation";
-import { useQuotationStore } from "@/infraestructure/hooks";
+import {
+  useQuotationStore,
+  useReservationStore,
+} from "@/infraestructure/hooks";
 import { constantStorage } from "@/core/constants";
+import type { CityEntity } from "@/domain/entities";
 
 const { ITINERARY_CURRENT_ACTIVITY, ITINERARY_CURRENT_SELECTED_DAY } =
   constantStorage;
@@ -34,11 +38,19 @@ export interface Day {
   date: string;
 }
 type Props = {
-  selectedRegion: { label: string; id: number };
+  selectedCity: CityEntity;
 };
 
-export const Itinerary = ({ selectedRegion }: Props) => {
-  const { startSetDaysNumber, initialDate, daysNumber } = useQuotationStore();
+export const Itinerary = ({ selectedCity }: Props) => {
+  const { startSetDaysNumber } = useQuotationStore();
+  const {
+    currentReservation,
+    startUpdatingReservatioTravelDates,
+  } = useReservationStore();
+  const [[startDate, endDate], setDaysRange] = useState<[Date, Date]>([
+    new Date(),
+    new Date(),
+  ]);
   const [selectedDay, setSelectedDay] = useState<Day>();
   const [generatedDays, setGeneratedDays] = useState<Day[]>();
   const [lastItineraryDate, setLastItineraryDate] = useState<Date>();
@@ -51,6 +63,10 @@ export const Itinerary = ({ selectedRegion }: Props) => {
   const handleAddDay = () => {
     if (generatedDays) {
       lastItineraryDate?.setDate(lastItineraryDate.getDate() + 1);
+
+      //* Update reservation travel dates
+      startUpdatingReservatioTravelDates([startDate, lastItineraryDate!]);
+
       const newDay: Day = {
         id: generatedDays.length + 1,
         number: generatedDays.length + 1,
@@ -81,10 +97,26 @@ export const Itinerary = ({ selectedRegion }: Props) => {
   };
 
   useEffect(() => {
-    if (initialDate) {
+    if (currentReservation) {
+      setDaysRange([
+        new Date(currentReservation.startDate),
+        new Date(currentReservation.endDate),
+      ]);
+    }
+  }, [currentReservation]);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const daysNumber =
+        Math.abs(
+          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        ) + 1;
+      console.log({ daysNumber });
       const days: Day[] = Array.from({ length: daysNumber }, (_, index) => {
-        const date = new Date(initialDate);
+        const date = new Date(startDate);
         date.setDate(date.getDate() + index);
+
+        // console.log({ date });
 
         setLastItineraryDate(date);
         return {
@@ -101,11 +133,12 @@ export const Itinerary = ({ selectedRegion }: Props) => {
       });
       setGeneratedDays(days);
       setSelectedDay(
-        JSON.parse(localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) as string) as Day ||
-          days[0]
+        (JSON.parse(
+          localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) as string
+        ) as Day) || days[0]
       );
     }
-  }, [initialDate]);
+  }, [startDate, endDate]);
 
   useEffect(() => {
     if (selectedDay) {
@@ -153,7 +186,7 @@ export const Itinerary = ({ selectedRegion }: Props) => {
       {/* Main Content */}
       <div className="flex-1 md:ps-6 order-1 lg:order-2">
         <h2 className="text-4xl font-bold text-tertiary">
-          {selectedDay?.name} - {selectedRegion.label}
+          {selectedDay?.name} - {selectedCity.name}
         </h2>
         <p className="text-primary mb-4">{selectedDay?.date}</p>
 
@@ -196,10 +229,16 @@ export const Itinerary = ({ selectedRegion }: Props) => {
 
           {value === "accommodation" && (
             <>
-              <Accommodiations selectedDay={selectedDay
-              || { id: 1, number: 1, name: "Día 1", date: "Hoy" }
-
-              } />
+              <Accommodiations
+                selectedDay={
+                  selectedDay || {
+                    id: 1,
+                    number: 1,
+                    name: "Día 1",
+                    date: "Hoy",
+                  }
+                }
+              />
             </>
           )}
         </div>

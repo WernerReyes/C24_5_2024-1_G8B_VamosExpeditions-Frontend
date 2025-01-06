@@ -1,6 +1,7 @@
 import {
     Dropdown as DropdownPrimereact,
-    type DropdownProps
+    type DropdownProps,
+    type DropdownChangeEvent
 } from "primereact/dropdown";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
 
@@ -26,3 +27,7 @@ export const Dropdown = forwardRef<DropdownPrimereact, Props>(({ label, small, .
         </>
     );
 });
+
+export {
+    type DropdownChangeEvent
+}

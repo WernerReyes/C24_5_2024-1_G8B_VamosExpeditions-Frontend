@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import {
   Stepper as StepperPrimeReact,
   type StepperProps as StepperPropsPrimeReact,
@@ -7,7 +8,8 @@ import {
   StepperPanel as StepperPanelPrimeReact,
   type StepperPanelProps as StepperPanelPropsPrimeReact,
 } from "primereact/stepperpanel";
-import { forwardRef } from "react";
+
+import './Stepper.css';
 
 interface StepperProps extends StepperPropsPrimeReact {
   includePanel?: boolean;

@@ -1,8 +1,11 @@
+import { useWindowSize } from "@/presentation/hooks";
 import {
   SplitButton as SplitButtonPrimeReact,
   type SplitButtonProps,
 } from "primereact/splitbutton";
-import { useWindowSize } from "../hooks";
+
+import "./SplitButton.css";
+
 
 interface Props extends SplitButtonProps {}
 

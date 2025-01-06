@@ -83,7 +83,7 @@ export const AccommodiationsList = ({
     setCustomerNumbers(new Map(accommodationRooms.map((room) => [room.id, 0])));
   }, [accommodationRooms]);
 
-  console.log(customerNumbers);
+
 
   useEffect(() => {
     applyFilters();
@@ -146,6 +146,9 @@ export const AccommodiationsList = ({
               </div>
               <div>
                 <InputNumber
+                  label={{
+
+                  }}
                   placeholder="Cant. Personas"
                   size={2}
                   className="w-36"
@@ -258,6 +261,9 @@ export const AccommodiationsList = ({
             </div>
             <div>
               <InputNumber
+                label={{
+
+                }}
                 placeholder="Cant. Personas"
                 size={2}
                 className="w-36"

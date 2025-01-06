@@ -3,95 +3,121 @@ import { classNamesAdapter } from "@/core/adapters";
 import { Calendar, SplitButton } from "@/presentation/components";
 import { Itinerary } from "./components";
 
-import "./Costing.module.css";
+import { useReservationStore } from "@/infraestructure/hooks";
+import type { CityEntity } from "@/domain/entities";
 
-import { useQuotationStore } from "@/infraestructure/hooks";
-
-type Region = {
-  label: string;
-  id: number;
-};
-
-const REGIONS = [
-  {
-    label: "Región 1",
-    id: 1,
-  },
-  {
-    label: "Región 2",
-    id: 2,
-  },
-  {
-    label: "Región 3",
-    id: 3,
-  },
-  {
-    label: "Región 4",
-    id: 4,
-  },
-];
 export const CostingModule = () => {
-  const {   startSetInitialDate, initialDate } = useQuotationStore();
-  const [selectedRegion, setSelectedRegion] = useState<Region | null>(null);
-  const handleRegionSelection = (region: Region) => {
-    if (selectedRegion === region) {
-      setSelectedRegion(null);
+  const { currentReservation, startUpdatingReservatioTravelDates } =
+    useReservationStore();
+  const [[startDate, endDate], setDateRange] = useState<
+    [Date | null, Date | null]
+  >([null, null]);
+  const [selectedCity, setSelectedCity] = useState<CityEntity | null>(null);
+  const [isDateRangeChanged, setIsDateRangeChanged] = useState(false);
+
+  const handleCitySelection = (city: CityEntity) => {
+    if (selectedCity === city) {
+      setSelectedCity(selectedCity);
     } else {
-      setSelectedRegion(region);
+      setSelectedCity(city);
     }
   };
 
   useEffect(() => {
-    setSelectedRegion(REGIONS[0]);
-  }, []);
-
-
-  useEffect(() => {
-    if (!initialDate) {
-      startSetInitialDate(new Date());
+    if (currentReservation?.cities && !selectedCity) {
+      setSelectedCity(currentReservation.cities[0]);
     }
   }, []);
+
+  useEffect(() => {
+    if (currentReservation) {
+      setDateRange([
+        currentReservation.startDate,
+        currentReservation.endDate,
+      ]);
+    }
+  }, [currentReservation]);
+
+  useEffect(() => {
+    if (isDateRangeChanged) {
+      console.log({ startDate, endDate });
+      startUpdatingReservatioTravelDates([startDate!, endDate!]).then(() => {
+        setIsDateRangeChanged(false);
+      });
+    }
+  }, [isDateRangeChanged]);
+
+  console.log({ startDate, endDate });
 
   return (
     <div className="max-w-screen-2xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between max-h-[54px] gap-y-4 mb-20 sm:mb-0">
         <SplitButton
-          label={selectedRegion ? selectedRegion.label : "Seleccionar Región"}
+          label={selectedCity ? selectedCity.name : "Seleccionar Región"}
           icon="pi pi-plus"
           className="lg:max-w-52"
           onClick={() => {
             console.log("clicked");
           }}
-          model={REGIONS.map((region) => ({
-            label: region.label,
-            command: () => handleRegionSelection(region),
-            className: classNamesAdapter(
-              "border-[#D0D5DD]",
-              selectedRegion === region
-                ? "bg-secondary"
-                : "text-black bg-transparent"
-            ),
-          }))}
+          model={
+            currentReservation?.cities!.map((city: CityEntity) => ({
+              label: city.name,
+              command: () => handleCitySelection(city),
+              className: classNamesAdapter(
+                "border-[#D0D5DD]",
+                selectedCity === city
+                  ? "bg-secondary"
+                  : "text-black bg-transparent"
+              ),
+            })) ?? []
+          }
         />
 
         <Calendar
-          locale="es"
-          dateFormat={"dd/mm/yy"}
+          dateFormat="dd/mm/yy"
           showIcon
-          value={initialDate}
-          onChange={(e) => startSetInitialDate(e.value!)}
+          numberOfMonths={2}
+          value={[startDate, endDate]}
+          onChange={(e) => {
+            setDateRange(e.value as [Date, Date]);
+            if (e.value && e.value[0] && e.value[1])
+              setIsDateRangeChanged(true);
+          }}
           showOnFocus={false}
+          locale="es"
           className="text-sm"
           todayButtonClassName="p-button-text"
           clearButtonClassName="p-button-text"
           placeholder="Ingresa la fecha de inicio"
-
-          //   inputClassName="text-sm"
+          selectionMode="range"
+          readOnlyInput
         />
       </div>
       <Itinerary
-        selectedRegion={selectedRegion ?? REGIONS[0]}
+        selectedCity={selectedCity ?? currentReservation!.cities![0]}
       />
     </div>
   );
 };
+
+
+{/* <Calendar
+numberOfMonths={2}
+label={{
+  text: "Fecha",
+  htmlFor: "calendar",
+}}
+onChange={(e) => {
+  field.onChange(e.value);
+}}
+value={field.value as Date[]}
+small={{
+  text: error?.message,
+}}
+locale="es"
+dateFormat="dd/mm/yy"
+placeholder="Seleccione una fecha"
+selectionMode="range"
+readOnlyInput
+hideOnRangeSelection
+/> */}

@@ -1,0 +1,8 @@
+.p-treeselect-items-wrapper {
+  max-height: 250px !important;
+  overflow-y: auto;
+}
+
+.p-treeselect-panel {
+  max-height: 250px;
+}

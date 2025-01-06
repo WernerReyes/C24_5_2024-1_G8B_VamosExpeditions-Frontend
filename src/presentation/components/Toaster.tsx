@@ -6,7 +6,6 @@ import toast, {
 } from "react-hot-toast";
 import { Button } from "./Button";
 import { useAuthStore } from "@/infraestructure/hooks";
-import { useNavigate } from "react-router-dom";
 
 export const Toaster = () => {
   const iconType = (icon: any) => {
@@ -27,8 +26,14 @@ export const Toaster = () => {
     <ToasterHot
       toastOptions={{
         className: "bg-red-500",
+        duration: 5000,
+        
+        
       }}
       position="top-right"
+      gutter={5}
+    
+      
     >
       {(t) => (
         <ToastBar
@@ -36,6 +41,7 @@ export const Toaster = () => {
             padding: "0",
           }}
           toast={t}
+          
         >
           {({ icon, message }) => {
             return (
@@ -69,6 +75,8 @@ export const Toaster = () => {
 export const toasterAdapter = {
   success: (message: string) => toast.success(message),
   error: (message: string) => toast.error(message),
+  dismiss: (id?: string) => toast.dismiss(id),
+  remove: (message: string) => toast.remove(message),
   tokenExpired: () => {
     return toast.custom((t) => <LogoutToast t={t} />, {
       duration: 100000000,
@@ -78,7 +86,6 @@ export const toasterAdapter = {
 };
 
 const LogoutToast = ({ t }: { t: Toast }) => {
-  const navigate = useNavigate();
   const { startLogout } = useAuthStore();
 
   const handleLogout = async () => {

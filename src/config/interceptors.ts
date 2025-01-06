@@ -24,7 +24,7 @@ export const setupInterceptors = (axiosInstance: AxiosInstance) => {
       console.log({ error });
 
       if (code === constantErrorCode.ERR_USER_INVALID_TOKEN) {
-        toasterAdapter.tokenExpired();
+        // toasterAdapter.tokenExpired();
         return Promise.reject(error.response.data);
       }
 

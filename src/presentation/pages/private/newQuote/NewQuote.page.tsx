@@ -280,7 +280,11 @@
 
 // export default NewQuotePage;
 
-import { Button, Stepper, toasterAdapter } from "@/presentation/components";
+import {
+  Button,
+  Stepper,
+  toasterAdapter,
+} from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
 import { useEffect, useState } from "react";
 import { MainLayout } from "../layouts";
@@ -289,11 +293,11 @@ import {
   CostSummaryModule,
   CustomerDataModule,
 } from "./modules";
-import "./Stepper.css";
+
 import { constantRoutes, constantStorage } from "@/core/constants";
 import { InputText } from "primereact/inputtext";
 import { Slider } from "primereact/slider";
-import { useNavigate } from "react-router-dom";
+import { useReservationStore } from "@/infraestructure/hooks";
 
 const { CURRENT_ACTIVE_STEP } = constantStorage;
 const { QUOTES } = constantRoutes.private;
@@ -312,7 +316,7 @@ const steps: Title[] = [
 const renderStepContent = (step: number): React.ReactNode => {
   switch (step) {
     case 0:
-     return <CustomerDataModule />;
+      return <CustomerDataModule />;
     case 1:
       return <CostingModule />;
     case 2:
@@ -401,7 +405,13 @@ const renderStepContent = (step: number): React.ReactNode => {
 
 const NewQuotePage = () => {
   const { width, DESKTOP } = useWindowSize();
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(
+    localStorage.getItem(CURRENT_ACTIVE_STEP)
+      ? +localStorage.getItem(CURRENT_ACTIVE_STEP)!
+      : 0
+  );
+  const { currentReservation, startGettingCurrentReservation } = useReservationStore();
+  const [isLoadingStep, setIsLoadingStep] = useState(true);
 
   const handleNext = () => {
     if (activeStep < steps.length - 1) {
@@ -421,24 +431,22 @@ const NewQuotePage = () => {
     setActiveStep(event.index);
   };
 
-  // const handleQuotationSuccess = () => {
-  //   setActiveStep(0);
-  //   localStorage.removeItem(CURRENT_ACTIVE_STEP);
-
-  //   toasterAdapter.success("Cotización generada correctamente");
-
-  //   setTimeout(() => {
-  //     navigate(QUOTES);
-  //   }, 2000);
-  // };
+   useEffect(() => {
+      startGettingCurrentReservation();
+    }, []);
+  
 
   useEffect(() => {
     const currentStep = localStorage.getItem(CURRENT_ACTIVE_STEP);
-    console.log("Retrieved step from localStorage:", currentStep);
-    if (currentStep) {
-      setActiveStep(+currentStep);
-    }
+    if (currentStep)  setActiveStep(+currentStep);
   }, []);
+
+  useEffect(() => {
+    setIsLoadingStep(true);
+    setTimeout(() => {
+      setIsLoadingStep(false);
+    }, 500);
+  }, [activeStep]);
 
   return (
     <MainLayout>
@@ -451,7 +459,8 @@ const NewQuotePage = () => {
           onChangeStep={handleChangeStep}
           panelContent={steps.map((step, index) => ({
             header: step.header,
-            children: (
+
+            children: !isLoadingStep ? (
               <>
                 {renderStepContent(index)}
                 <div className="flex pt-4 justify-between">
@@ -466,14 +475,19 @@ const NewQuotePage = () => {
 
                   {index < steps.length - 1 && (
                     <Button
-                      label="Next"
+                      label="Confirmar y Continuar"
                       icon="pi pi-arrow-right"
                       iconPos="right"
                       onClick={handleNext}
+                      disabled={activeStep === 0 && !currentReservation}
                     />
                   )}
                 </div>
               </>
+            ) : (
+              <div className="flex justify-center items-center h-96 lg:h-[30rem]">
+                <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
+              </div>
             ),
           }))}
         />

@@ -12,8 +12,6 @@ type Props = {
 
 export const AuthGuard = ({ privateValidation }: Props) => {
   const { authUser } = useAuthStore();
-  console.log({ authUser });
-
   return authUser?.id ? (
     privateValidation ? (
       <Outlet />

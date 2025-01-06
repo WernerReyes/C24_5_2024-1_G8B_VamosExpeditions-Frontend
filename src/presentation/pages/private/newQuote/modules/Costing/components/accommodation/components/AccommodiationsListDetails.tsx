@@ -21,8 +21,6 @@ export const AccommodiationsListDetails = ({ selectedDay }: Props) => {
     );
   }, [localAccommodationQuotes, selectedDay]);
 
-  console.log(localAccommodationQuotesPerDay);
-
   return (
     <>
     {localAccommodationQuotesPerDay.length === 0 ? (

@@ -4,6 +4,7 @@ import {
   Button,
   Column,
   DataTable,
+  DefaultFallBackComponent,
   ErrorBoundary,
   Tag,
   type ColumnFilterMatchModeOptions,
@@ -11,19 +12,18 @@ import {
   type DataTableValueArray,
 } from "@/presentation/components";
 import React, { useEffect, useState } from "react";
-import { filterByName, getQuoteSeverity } from "../utils";
-import { QuoteVersionsTable } from "./QuoteVersionsTable";
 import {
   FilterApplyButton,
   FilterByDate,
   FilterByRepresentative,
   FilterClearButton,
 } from "../filters";
+import { filterByName, getQuoteSeverity } from "../utils";
+import { QuoteVersionsTable } from "./QuoteVersionsTable";
 import { TableActions } from "./TableActions";
 
-import { Skeleton } from "primereact/skeleton";
-import { classNamesAdapter } from "@/core/adapters";
 import { useGetQuotesQuery } from "@/infraestructure/store/services";
+import { Skeleton } from "primereact/skeleton";
 
 const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
   {
@@ -45,7 +45,13 @@ const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
 ];
 
 export const QuotesTable = () => {
-  const { data: quotes = [], isLoading, error, refetch, isFetching, } = useGetQuotesQuery(null);
+  const {
+    data: quotes = [],
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useGetQuotesQuery(null);
   const [representatives, setRepresentatives] = useState<
     { id: number; name: string }[]
   >([]);
@@ -69,19 +75,12 @@ export const QuotesTable = () => {
           representatives={[]}
           isLoading={false}
           message={
-            <div className="flex justify-center gap-x-2 items-center p-4 text-slate-500">
-              <i className="pi pi-exclamation-triangle"></i>
-
-              <h5>{"Ocurrió un error al cargar las cotizaciones"}</h5>
-              <Button
-                onClick={() => refetch()}
-                text
-                icon={classNamesAdapter({
-                  "pi pi-spin pi-spinner": isFetching,
-                  "pi pi-refresh": !isFetching,
-                })}
-                className="p-0 text-slate-500"
-                disabled={isLoading}
+            <div className="p-4">
+              <DefaultFallBackComponent
+                refetch={refetch}
+                isFetching={isFetching}
+                isLoading={isLoading}
+                message="No se pudieron cargar las cotizaciones"
               />
             </div>
           }

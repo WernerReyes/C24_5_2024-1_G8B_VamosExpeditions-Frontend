@@ -69,7 +69,7 @@ export const Navbar = ({ setVisible }: NavbarProps) => {
             </div>
           </div>
         )}
-        className="fixed-menubar"
+        className="fixed-menubar z-[1000]"
       />
 
       <Menu

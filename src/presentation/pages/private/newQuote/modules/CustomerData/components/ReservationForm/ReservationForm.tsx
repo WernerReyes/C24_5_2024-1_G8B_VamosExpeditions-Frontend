@@ -1,82 +1,79 @@
+import { type MouseEvent, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { RadioButtonChangeEvent } from "primereact/radiobutton";
-import { DropdownChangeEvent } from "primereact/dropdown";
-import {
-  TreeSelectChangeEvent,
-  TreeSelectSelectionKeysType,
-} from "primereact/treeselect";
-
 import {
   Button,
   Calendar,
   Dropdown,
+  type DropdownChangeEvent,
+  InputNumber,
   InputText,
   InputTextarea,
   RadioButton,
+  type RadioButtonChangeEvent,
   TreeSelect,
+  type TreeSelectChangeEvent,
+  type TreeSelectSelectionKeysType,
 } from "@/presentation/components";
 import { useClientStore } from "@/infraestructure/hooks/useClientStore";
-import { useEffect } from "react";
 import {
   reservationDtoSchema,
-  ReservationDto,
+  type ReservationDto,
 } from "@/domain/dtos/reservation";
 import { useNationStore, useReservationStore } from "@/infraestructure/hooks";
 
 import Style from "../Style.module.css";
+
 import ReservationFormStyle from "./ReservationForm.module.css";
+import { OrderType, TravelerStyle } from "@/domain/entities";
+import { generateCode } from "../../utils";
 
-const travelClasses = [
-  { key: "comfort", label: "Confort" },
-  { key: "economy", label: "Económica" },
-  { key: "firstClass", label: "Primera Clase" },
+const TRAVELER_CLASES = [
+  { key: TravelerStyle.COMFORT, label: "Confort" },
+  { key: TravelerStyle.LUXURY, label: "Lujo" },
+  { key: TravelerStyle.STANDARD, label: "Estándar" },
 ];
 
-const codigo = [
-  { name: "EtzyYYgS" },
-  { name: "4I3ot8Vq" },
-  { name: "BACYr45u" },
-  { name: "pqPZc0FZ" },
-  { name: "nMv4ZcdT" },
-];
-
-/*  */
 export const ReservationForm = () => {
+  const { control, handleSubmit, reset, watch, setValue } =
+    useForm<ReservationDto>({
+      resolver: zodResolver(reservationDtoSchema),
+    });
   const {
-    control,
-    handleSubmit,
-    reset,
-    /* formState: { errors }, */
-  } = useForm<ReservationDto>({
-    resolver: zodResolver(reservationDtoSchema),
-  });
-
+    startCreatingReservation,
+    startUpdatingReservation,
+    startDeletingReservation,
+    currentReservation,
+    createReservationResult: { isLoading: isCreatingReservation },
+    updateReservationResult: { isLoading: isUpdatingReservation },
+  } = useReservationStore();
   const { clients, startGetClients } = useClientStore();
   const { nations, getNations } = useNationStore();
-  const { registerReservation } = useReservationStore();
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    startGetClients();
-    getNations();
-  }, []);
+  const handleReservation = (reservationDto: ReservationDto) => {
+    console.log(reservationDto);
+    if (currentReservation) {
+      startUpdatingReservation(currentReservation.id, reservationDto);
 
-  const handleReservation = (data: ReservationDto) => {
-    registerReservation(
-      data.clientId,
-      data.numberOfPeople,
-      data.travelDates,
-      data.code,
-      data.comfortClass,
-      data.destination,
-      data.specialSpecifications
-    )
-      .then(() => {
-        reset();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      return;
+    }
+    startCreatingReservation(reservationDto);
+  };
+
+  const handleCancelReservation = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    startDeletingReservation(currentReservation!.id);
+    reset({
+      client: {},
+      numberOfPeople: 1,
+      travelDates: [],
+      code: "",
+      travelerStyle: TravelerStyle.COMFORT,
+      orderType: OrderType.DIRECT,
+      destination: {},
+      specialSpecifications: "",
+    });
   };
 
   const transformData = (cities: any) => {
@@ -92,9 +89,66 @@ export const ReservationForm = () => {
     }));
   };
 
+  useEffect(() => {
+    startGetClients();
+    getNations();
+  }, []);
+
+  useEffect(() => {
+    if (currentReservation) {
+      const {
+        client,
+        numberOfPeople,
+        startDate,
+        endDate,
+        code,
+        cities,
+        orderType,
+        travelerStyle,
+        specialSpecifications,
+      } = currentReservation;
+      reset({
+        client,
+        numberOfPeople,
+        travelDates: [startDate, endDate],
+        code,
+        travelerStyle,
+        orderType,
+        destination: cities.reduce(
+          (acc, city) => ({ ...acc, [city.id]: true }),
+          {}
+        ),
+        specialSpecifications: specialSpecifications ?? "",
+      });
+    }
+
+    setIsLoading(false);
+  }, [currentReservation]);
+
+  useEffect(() => {
+    const code = generateCode({
+      continent: watch("client.continent"),
+      orderType: watch("orderType"),
+      startDate: watch("travelDates") && watch("travelDates")[0],
+      travelerStyle: watch("travelerStyle"),
+      travelersAmount: watch("numberOfPeople"),
+    });
+    setValue("code", code);
+  }, [
+    watch().client,
+    watch().orderType,
+    watch().travelDates,
+    watch().travelerStyle,
+    watch().numberOfPeople,
+  ]);
+
+  // if (isLoading) {
+  //   return <div>Cargando...</div>; // Puedes personalizar este indicador de carga
+  // }
+
   return (
     <form
-      className={`${Style.form} flex-[2] `}
+      className={`${Style.form} flex-[2]`}
       onSubmit={handleSubmit(handleReservation)}
     >
       {/*  */}
@@ -103,15 +157,13 @@ export const ReservationForm = () => {
         <div className={Style.container}>
           <Controller
             control={control}
-            name="clientId"
+            name="client"
             render={({ field, fieldState: { error } }) => {
               return (
                 <Dropdown
+                  loading={isLoading}
                   filter
-                  options={clients.map((client) => ({
-                    name: client.fullName,
-                    id: client.id,
-                  }))}
+                  options={clients}
                   label={{
                     text: "Nombre del cliente",
                     htmlFor: "client",
@@ -123,8 +175,7 @@ export const ReservationForm = () => {
                   invalid={!!error}
                   {...field}
                   value={field.value}
-                  optionLabel="name"
-                  optionValue="id"
+                  optionLabel="fullName"
                   onChange={(e: DropdownChangeEvent) => {
                     field.onChange(e.value);
                     console.log(e.value);
@@ -139,25 +190,33 @@ export const ReservationForm = () => {
           <Controller
             control={control}
             name="numberOfPeople"
-            defaultValue=""
-            render={({ field, fieldState: { error } }) => (
-              <InputText
-                label={{
-                  htmlFor: "Número de Personas",
-                  text: "Número de Personas",
-                }}
-                type="number"
-                small={{
-                  text: error?.message,
-                }}
-                id="numberOfPeople"
-                placeholder="Número de Personas"
-                invalid={!!error}
-                {...field}
-                max={20}
-                min={1}
-              />
-            )}
+            defaultValue={1}
+            render={({ field, fieldState: { error } }) => {
+              return (
+                <InputNumber
+                  label={{
+                    htmlFor: "Número de Personas",
+                    text: "Número de Personas",
+                  }}
+                  small={{
+                    text: error?.message,
+                  }}
+                  id="numberOfPeople"
+                  placeholder="Número de Personas"
+                  invalid={!!error}
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e.value);
+                  }}
+                  onValueChange={(e) => {
+                    field.onChange(e.value);
+                  }}
+                  // minFractionDigits={0}
+                  min={1}
+                  max={15}
+                />
+              );
+            }}
           />
         </div>
 
@@ -178,15 +237,17 @@ export const ReservationForm = () => {
                 }}
                 onChange={(e) => {
                   field.onChange(e.value);
-                  console.log(e.value);
                 }}
                 value={field.value as Date[]}
                 small={{
                   text: error?.message,
                 }}
+                locale="es"
+                dateFormat="dd/mm/yy"
                 placeholder="Seleccione una fecha"
                 selectionMode="range"
                 readOnlyInput
+                icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-calendar"}
                 hideOnRangeSelection
               />
             )}
@@ -195,11 +256,115 @@ export const ReservationForm = () => {
         <div className={Style.container}>
           <Controller
             control={control}
-            name="code"
+            name="destination"
             render={({ field, fieldState: { error } }) => (
-              <Dropdown
+              <TreeSelect
+                // className="w-full"
+                options={transformData(nations)}
+                selectionMode="multiple"
+                showClear
                 filter
-                options={codigo}
+                placeholder="Seleccione una ciudad"
+                label={{
+                  text: "Destino",
+                  htmlFor: "destino",
+                }}
+                {...field}
+                value={field.value as unknown as TreeSelectSelectionKeysType}
+                onChange={(e: TreeSelectChangeEvent) => {
+                  console.log(e.value);
+                  field.onChange(e.value);
+                }}
+                small={{
+                  text: error?.message,
+                }}
+              />
+            )}
+          />
+        </div>
+      </div>
+      <div className="flex justify-between">
+        <div className={ReservationFormStyle.confort}>
+          <label>Elegir Clase</label>
+          <div>
+            <Controller
+              control={control}
+              name="travelerStyle"
+              defaultValue={TravelerStyle.COMFORT}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  {TRAVELER_CLASES.map((travelClass) => (
+                    <RadioButton
+                      key={travelClass.key}
+                      label={{
+                        text: travelClass.label,
+                        htmlFor: travelClass.label,
+                        className: "ml-2",
+                      }}
+                      loading={isLoading}
+                      invalid={!!error}
+                      {...field}
+                      onChange={(e: RadioButtonChangeEvent) => {
+                        field.onChange(e.value);
+                      }}
+                      value={travelClass.key}
+                      name="comfortClass"
+                      checked={field.value === travelClass.key}
+                    />
+                  ))}
+                  {error && <small>{error.message}</small>}
+                </>
+              )}
+            />
+          </div>
+        </div>
+        <div className={ReservationFormStyle.confort}>
+          <label>Tipo de Pedido</label>
+          <div>
+            <Controller
+              control={control}
+              name="orderType"
+              defaultValue={OrderType.DIRECT}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  {[
+                    { key: OrderType.DIRECT, label: "Directa" },
+                    { key: OrderType.INDIRECT, label: "Indirecta" },
+                  ].map((order) => (
+                    <RadioButton
+                      key={order.key}
+                      label={{
+                        text: order.label,
+                        htmlFor: order.label,
+                        className: "ml-2",
+                      }}
+                      loading={isLoading}
+                      invalid={!!error}
+                      {...field}
+                      onChange={(e: RadioButtonChangeEvent) => {
+                        field.onChange(e.value);
+                      }}
+                      value={order.key}
+                      name="orderType"
+                      checked={field.value === order.key}
+                    />
+                  ))}
+                  {error && <small>{error.message}</small>}
+                </>
+              )}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className={Style.container + " mt-3"}>
+        <Controller
+          control={control}
+          name="code"
+          defaultValue=""
+          render={({ field, fieldState: { error } }) => {
+            return (
+              <InputText
                 label={{
                   text: "Código",
                   htmlFor: "codigo",
@@ -207,82 +372,14 @@ export const ReservationForm = () => {
                 small={{
                   text: error?.message,
                 }}
+                id="code"
                 invalid={!!error}
                 {...field}
-                value={field.value}
-                optionLabel="name"
-                optionValue="name"
                 placeholder="Código"
-                onChange={(e: DropdownChangeEvent) => {
-                  field.onChange(e.value);
-                  console.log(e.value);
-                }}
+                disabled
               />
-            )}
-          />
-        </div>
-      </div>
-      <div className={ReservationFormStyle.confort}>
-        <label>Clase de Confort</label>
-        <div>
-          <Controller
-            control={control}
-            name="comfortClass"
-            defaultValue=""
-            render={({ field, fieldState: { error } }) => (
-              <>
-                {travelClasses.map((travelClass) => (
-                  <RadioButton
-                    key={travelClass.key}
-                    label={{
-                      text: travelClass.label,
-                      htmlFor: travelClass.label,
-                      className: "ml-2",
-                    }}
-                    invalid={!!error}
-                    {...field}
-                    onChange={(e: RadioButtonChangeEvent) => {
-                      field.onChange(e.value);
-                    }}
-                    value={travelClass.key}
-                    name="comfortClass"
-                    checked={field.value === travelClass.key}
-                  />
-                ))}
-                {error && <small>{error.message}</small>}
-              </>
-            )}
-          />
-        </div>
-      </div>
-
-      <div className={Style.container}>
-        <Controller
-          control={control}
-          name="destination"
-          render={({ field, fieldState: { error } }) => (
-            <TreeSelect
-              className="w-full"
-              options={transformData(nations)}
-              selectionMode="multiple"
-              showClear
-              filter
-              placeholder="Seleccione una ciudad"
-              label={{
-                text: "Destino",
-                htmlFor: "destino",
-              }}
-              {...field}
-              value={field.value as unknown as TreeSelectSelectionKeysType}
-              onChange={(e: TreeSelectChangeEvent) => {
-                console.log(e.value);
-                field.onChange(e.value);
-              }}
-              small={{
-                text: error?.message,
-              }}
-            />
-          )}
+            );
+          }}
         />
       </div>
 
@@ -293,8 +390,9 @@ export const ReservationForm = () => {
           defaultValue=""
           render={({ field, fieldState: { error } }) => (
             <InputTextarea
-              rows={5}
-              cols={30}
+            
+              rows={4}
+              cols={20}
               label={{
                 text: "Comentarios",
                 htmlFor: "comentarios",
@@ -311,7 +409,21 @@ export const ReservationForm = () => {
         />
       </div>
 
-      <Button icon="pi pi-save" label="Guardar" />
+      <div className="flex justify-between">
+        <Button
+          icon="pi pi-save"
+          disabled={isCreatingReservation || isUpdatingReservation}
+          label={currentReservation ? "Actualizar Reserva" : "Crear Reserva"}
+        />
+        {currentReservation && (
+          <Button
+            icon="pi pi-times"
+            className="bg-primary"
+            label="Cancelar Edición"
+            onClick={handleCancelReservation}
+          />
+        )}
+      </div>
     </form>
   );
 };
