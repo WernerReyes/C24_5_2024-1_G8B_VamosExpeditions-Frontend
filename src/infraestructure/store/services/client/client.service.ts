@@ -1,7 +1,7 @@
 import { constantEnvs } from "@/core/constants/env.const";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiResponse } from "../response";
-import { ClientEntity } from "@/domain/entities";
+import type { ClientEntity } from "@/domain/entities";
 import { RegisterClientDto } from "@/domain/dtos/client";
 
 const { VITE_API_URL } = constantEnvs;

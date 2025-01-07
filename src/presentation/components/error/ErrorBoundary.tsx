@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Skeleton, type SkeletonProps } from "../Skeleton";
 
 interface Props {
   children: React.ReactNode;
@@ -7,6 +8,7 @@ interface Props {
   error?: boolean;
   isLoader?: boolean;
   loadingComponent?: React.ReactNode;
+  skeleton?: SkeletonProps;
 }
 
 export const ErrorBoundary = ({
@@ -16,6 +18,7 @@ export const ErrorBoundary = ({
   error,
   isLoader,
   loadingComponent,
+  skeleton,
 }: Props) => {
   const [hasError, setHasError] = useState(false);
   const [prevResetCondition, setPrevResetCondition] = useState(resetCondition);
@@ -41,7 +44,15 @@ export const ErrorBoundary = ({
 
   return (
     <ErrorCatcher onError={errorHandler}>
-      {isLoader ? loadingComponent : children}
+      {isLoader ? (
+        loadingComponent ? (
+          loadingComponent
+        ) : (
+          <Skeleton shape="rectangle" height="2rem" {...skeleton} />
+        )
+      ) : (
+        children
+      )}
     </ErrorCatcher>
   );
 };

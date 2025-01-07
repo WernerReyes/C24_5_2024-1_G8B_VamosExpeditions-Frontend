@@ -12,12 +12,16 @@ export const useCookieExpirationStore = () => {
     if (!expiration.length) return;
 
     const timeLeft = new Date(expiration).getTime() - Date.now();
+    console.log(timeLeft / 1000);
     if (timeLeft <= 0) {
       dispatch(onSetExpired(true));
+      console.log(timeLeft / 1000);
     } else {
+      console.log(timeLeft / 1000);
       // Set a timer to alert when the cookie expires
       const timer = setTimeout(() => {
         dispatch(onSetExpired(true));
+        console.log(timeLeft / 1000);
       }, timeLeft);
 
       return () => clearTimeout(timer); // Cleanup timer on unmount

@@ -32,6 +32,7 @@ export * from './ProgressBar';
 export * from './Card';
 export * from './InputMask'
 export * from './Checkbox';
+export * from './Skeleton';
 
 //* Alerts
 export * from './alerts/ExpiredSessionCountdown';

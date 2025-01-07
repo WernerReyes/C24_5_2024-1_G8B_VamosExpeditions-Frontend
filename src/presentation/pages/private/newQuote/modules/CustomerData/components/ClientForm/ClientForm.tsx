@@ -37,7 +37,12 @@ export const ClientForm = () => {
   const { data, isLoading, error, refetch, isFetching } =
     useGetAllExternalCountriesQuery();
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<RegisterClientDto>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RegisterClientDto>({
     resolver: zodResolver(registerClientDtoSchema),
   });
   const { startShowSuccess, startShowApiError } = useAlert();
@@ -126,15 +131,7 @@ export const ClientForm = () => {
         <ErrorBoundary
           fallBackComponent={
             <>
-              <label
-                htmlFor="
-            country"
-                className="text-red-500
-            "
-              >
-                País de origen
-              </label>
-
+              <label htmlFor="country">País de origen</label>
               <DefaultFallBackComponent
                 refetch={refetch}
                 isFetching={isFetching}
@@ -148,16 +145,9 @@ export const ClientForm = () => {
           <Controller
             control={control}
             name="country"
-            defaultValue={{
-              code: "",
-              name: "",
-              image: {
-                png: "",
-                svg: "",
-              },
-              continent: "",
-            }}
+            defaultValue={undefined}
             render={({ field, fieldState: { error } }) => {
+              console.log("error", error);
               return (
                 <Dropdown
                   label={{
@@ -274,7 +264,9 @@ export const ClientForm = () => {
         icon={isRegisteringClient ? "pi pi-spin pi-spinner" : "pi pi-save"}
         className="mt-auto"
         label={isRegisteringClient ? "Registrando..." : "Registrar"}
-        disabled={isRegisteringClient || isLoading || Object.keys(errors).length > 0}
+        disabled={
+          isRegisteringClient || isLoading || Object.keys(errors).length > 0
+        }
         type="submit"
       />
     </form>

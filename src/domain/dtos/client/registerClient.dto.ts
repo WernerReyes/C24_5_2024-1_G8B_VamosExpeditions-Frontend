@@ -61,5 +61,7 @@ export const registerClientDtoSchema = z.object({
       message:
         "El campo teléfono es inválido, debe tener el formato (+99..) 999999999..",
     }),
-  country: z.object(externalCountryEntitySchema.shape),
+  country: z.object(externalCountryEntitySchema.shape, {
+    message: "El campo país es requerido",
+  }),
 });

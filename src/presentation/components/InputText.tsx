@@ -7,6 +7,7 @@ import {
 } from "primereact/inputtext";
 import { classNames } from "primereact/utils";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
+import { Skeleton, type SkeletonProps } from "./Skeleton";
 
 type DesingType = "label" | "floatLabel";
 
@@ -17,6 +18,8 @@ interface Props extends InputTextProps {
   iconField?: boolean;
   iconFieldProps?: IconFieldProps;
   iconProps?: InputIconProps;
+  loading?: boolean;
+  skeleton?: SkeletonProps;
 }
 
 export const InputText = forwardRef<HTMLInputElement, Props>(
@@ -30,7 +33,7 @@ export const InputText = forwardRef<HTMLInputElement, Props>(
 );
 
 const InputTextWithLabel = forwardRef<HTMLInputElement, Props>(
-  ({ label, small, iconField, ...props }, ref) => {
+  ({ label, small, iconField, loading, skeleton, ...props }, ref) => {
     return (
       <>
         <label
@@ -42,10 +45,16 @@ const InputTextWithLabel = forwardRef<HTMLInputElement, Props>(
         >
           {label.text}
         </label>
-        {iconField ? (
-          <InputTextWithIcon {...props} />
+        {loading ? (
+          <Skeleton shape="rectangle" height="3rem" {...skeleton} />
         ) : (
-          <InputTextPrimeReact {...props} ref={ref} />
+          <>
+            {iconField ? (
+              <InputTextWithIcon {...props} />
+            ) : (
+              <InputTextPrimeReact {...props} ref={ref} />
+            )}
+          </>
         )}
         {small && <small {...small}>{small?.text}</small>}
       </>
@@ -54,25 +63,22 @@ const InputTextWithLabel = forwardRef<HTMLInputElement, Props>(
 );
 
 const InputTextWithFloatLabel = forwardRef<HTMLInputElement, Props>(
-  (
-    {
-      label,
-      small,
-      iconField,
-
-      ...props
-    },
-    ref
-  ) => {
+  ({ label, small, iconField, loading, skeleton, ...props }, ref) => {
     return (
-      <FloatLabel>
-        {iconField ? (
-          <InputTextWithIcon {...props} ref={ref} />
+      <>
+        {loading ? (
+          <Skeleton shape="rectangle" height="3rem" {...skeleton} />
         ) : (
-          <InputTextPrimeReact {...props} ref={ref} />
+          <FloatLabel>
+            {iconField ? (
+              <InputTextWithIcon {...props} ref={ref} />
+            ) : (
+              <InputTextPrimeReact {...props} ref={ref} />
+            )}
+            <label {...label}>{label.text}</label>
+          </FloatLabel>
         )}
-        <label {...label}>{label.text}</label>
-      </FloatLabel>
+      </>
     );
   }
 );

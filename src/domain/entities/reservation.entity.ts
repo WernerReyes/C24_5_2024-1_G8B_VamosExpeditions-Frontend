@@ -12,7 +12,7 @@ export enum ReservationStatus {
 export enum TravelerStyle {
   STANDARD = "STANDARD",
   COMFORT = "COMFORT",
-  LUXURY = "LUXURY",
+  LUXUS = "LUXUS",
 }
 
 export enum OrderType {

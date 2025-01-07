@@ -1,4 +1,4 @@
-import { memo, useEffect } from "react";
+import { memo, useEffect, useState } from "react";
 import { ClientForm, ReservationForm } from "./components";
 import {
   DefaultFallBackComponent,
@@ -16,38 +16,57 @@ export const CustomerDataModule = memo(() => {
     startChangingCurrentReservation,
     getAllReservationsByStatusResult: {
       data,
-      isLoading,
+      isLoading: isLoadingGettingReservationsByStatus,
       isFetching,
       error,
     },
     startGettingAllReservationsByStatus,
   } = useReservationStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleReservationChange = (e: DropdownChangeEvent) =>
     startChangingCurrentReservation(e.value);
 
   useEffect(() => {
-    startGettingAllReservationsByStatus(
-      ReservationStatus.PENDING
-    );
-  } , []);
+    startGettingAllReservationsByStatus(ReservationStatus.PENDING).then(() => {
+      setIsLoading(false);
+    });
+  }, []);
 
   return (
     <>
       <ErrorBoundary
+        isLoader={isLoadingGettingReservationsByStatus || isLoading}
+        loadingComponent={
+          <div className="font-bold flex flex-col gap-2 mb-5">
+            <Dropdown
+              label={{
+                text: "Reservas pendientes",
+                htmlFor: "reservation",
+              }}
+              skeleton={{
+                height: "4rem",
+              }}
+              loading={isLoading}
+              options={[]}
+              className="container"
+            />
+          </div>
+        }
         fallBackComponent={
-          <>
+          <div className="mb-5">
+            <label className="font-bold text-gray-700" htmlFor="reservation">
+              Reservas pendientes
+            </label>
             <DefaultFallBackComponent
               refetch={() => {
-                startGettingAllReservationsByStatus(
-                  ReservationStatus.PENDING
-                );
+                startGettingAllReservationsByStatus(ReservationStatus.PENDING);
               }}
               isFetching={isFetching}
-              isLoading={isLoading}
+              isLoading={isLoadingGettingReservationsByStatus}
               message="No se pudo cargar la lista de reservas pendientes"
             />
-          </>
+          </div>
         }
         error={!!error}
       >
@@ -62,7 +81,7 @@ export const CustomerDataModule = memo(() => {
             onChange={handleReservationChange}
             optionLabel="code"
             placeholder="Seleccione una reserva"
-            loading={isLoading}
+            loading={isLoadingGettingReservationsByStatus}
             valueTemplate={(reservation: ReservationEntity, props) => {
               if (!reservation && !currentReservation)
                 return <span>{props.placeholder}</span>;
@@ -91,7 +110,7 @@ const ItemTemplate = ({ reservation }: { reservation: ReservationEntity }) => (
     </span>
     <span className="text-sm text-gray-500">
       {dateFnsAdapter.format(reservation.startDate, "yyyy-MM-dd")} hasta{" "}
-      {dateFnsAdapter.format(reservation.startDate, "yyyy-MM-dd")} -{" "}
+      {dateFnsAdapter.format(reservation.endDate, "yyyy-MM-dd")} -{" "}
       {reservation.numberOfPeople}{" "}
       {reservation.numberOfPeople > 1 ? "personas" : "persona"}
     </span>

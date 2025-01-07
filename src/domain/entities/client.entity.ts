@@ -22,7 +22,8 @@ export const clientEntitySchema = z.object({
       "Asia",
       "Europe",
       "Oceania",
-      "America",
+      "South America",
+      "North America",
     ].includes(value);
   }),
 });

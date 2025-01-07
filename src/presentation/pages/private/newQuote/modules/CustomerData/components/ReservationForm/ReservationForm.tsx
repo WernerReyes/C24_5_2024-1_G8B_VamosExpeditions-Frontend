@@ -30,7 +30,7 @@ import { generateCode } from "../../utils";
 
 const TRAVELER_CLASES = [
   { key: TravelerStyle.COMFORT, label: "Confort" },
-  { key: TravelerStyle.LUXURY, label: "Lujo" },
+  { key: TravelerStyle.LUXUS, label: "Lujo" },
   { key: TravelerStyle.STANDARD, label: "Estándar" },
 ];
 
@@ -55,9 +55,9 @@ export const ReservationForm = () => {
     console.log(reservationDto);
     if (currentReservation) {
       startUpdatingReservation(currentReservation.id, reservationDto);
-
       return;
     }
+    console.log(reservationDto);
     startCreatingReservation(reservationDto);
   };
 
@@ -142,10 +142,6 @@ export const ReservationForm = () => {
     watch().numberOfPeople,
   ]);
 
-  // if (isLoading) {
-  //   return <div>Cargando...</div>; // Puedes personalizar este indicador de carga
-  // }
-
   return (
     <form
       className={`${Style.form} flex-[2]`}
@@ -158,7 +154,9 @@ export const ReservationForm = () => {
           <Controller
             control={control}
             name="client"
+            defaultValue={undefined}
             render={({ field, fieldState: { error } }) => {
+              console.log(field.value, error);
               return (
                 <Dropdown
                   loading={isLoading}
@@ -185,7 +183,7 @@ export const ReservationForm = () => {
             }}
           />
         </div>
-        {/*  */}
+
         <div className={Style.container}>
           <Controller
             control={control}
@@ -201,6 +199,7 @@ export const ReservationForm = () => {
                   small={{
                     text: error?.message,
                   }}
+                  loading={isLoading}
                   id="numberOfPeople"
                   placeholder="Número de Personas"
                   invalid={!!error}
@@ -211,7 +210,6 @@ export const ReservationForm = () => {
                   onValueChange={(e) => {
                     field.onChange(e.value);
                   }}
-                  // minFractionDigits={0}
                   min={1}
                   max={15}
                 />
@@ -242,6 +240,8 @@ export const ReservationForm = () => {
                 small={{
                   text: error?.message,
                 }}
+                invalid={!!error}
+                loading={isLoading}
                 locale="es"
                 dateFormat="dd/mm/yy"
                 placeholder="Seleccione una fecha"
@@ -249,6 +249,7 @@ export const ReservationForm = () => {
                 readOnlyInput
                 icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-calendar"}
                 hideOnRangeSelection
+                showIcon
               />
             )}
           />
@@ -259,7 +260,6 @@ export const ReservationForm = () => {
             name="destination"
             render={({ field, fieldState: { error } }) => (
               <TreeSelect
-                // className="w-full"
                 options={transformData(nations)}
                 selectionMode="multiple"
                 showClear
@@ -269,7 +269,9 @@ export const ReservationForm = () => {
                   text: "Destino",
                   htmlFor: "destino",
                 }}
+                loading={isLoading}
                 {...field}
+                invalid={!!error}
                 value={field.value as unknown as TreeSelectSelectionKeysType}
                 onChange={(e: TreeSelectChangeEvent) => {
                   console.log(e.value);
@@ -369,6 +371,7 @@ export const ReservationForm = () => {
                   text: "Código",
                   htmlFor: "codigo",
                 }}
+                loading={isLoading}
                 small={{
                   text: error?.message,
                 }}
@@ -390,12 +393,15 @@ export const ReservationForm = () => {
           defaultValue=""
           render={({ field, fieldState: { error } }) => (
             <InputTextarea
-            
               rows={4}
               cols={20}
               label={{
                 text: "Comentarios",
                 htmlFor: "comentarios",
+              }}
+              loading={isLoading}
+              skeleton={{
+                height: "7rem",
               }}
               small={{
                 text: error?.message,
@@ -412,7 +418,7 @@ export const ReservationForm = () => {
       <div className="flex justify-between">
         <Button
           icon="pi pi-save"
-          disabled={isCreatingReservation || isUpdatingReservation}
+          disabled={isCreatingReservation || isUpdatingReservation || isLoading}
           label={currentReservation ? "Actualizar Reserva" : "Crear Reserva"}
         />
         {currentReservation && (
@@ -420,6 +426,9 @@ export const ReservationForm = () => {
             icon="pi pi-times"
             className="bg-primary"
             label="Cancelar Edición"
+            disabled={
+              isCreatingReservation || isUpdatingReservation || isLoading
+            }
             onClick={handleCancelReservation}
           />
         )}
