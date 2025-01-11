@@ -33,6 +33,3 @@ export const Stepper = forwardRef<StepperRefAttributes, StepperProps>(
   }
 );
 
-// export const StepperPanel = ({ children, ...props }: StepperPanelProps) => {
-//   return <StepperPanelPrimeReact {...props}>{children}</StepperPanelPrimeReact>;
-// };

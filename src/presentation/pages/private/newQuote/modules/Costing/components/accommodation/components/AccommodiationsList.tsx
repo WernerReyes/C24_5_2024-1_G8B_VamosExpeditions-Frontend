@@ -8,6 +8,8 @@ import {
   DataView,
   DataViewLayoutOptions,
   Rating,
+  Accordion,
+  OrderList,
 } from "@/presentation/components";
 import { classNamesAdapter } from "@/core/adapters";
 import { AccommodationRoomEntity } from "@/domain/entities";
@@ -16,6 +18,102 @@ import {
   useAccommodationRoomStore,
 } from "@/infraestructure/hooks";
 import { Day } from "../../Itineraty";
+
+/* interface Item {
+  id: number;
+  name: string;
+}
+
+const items: Item[] = [
+  { id: 1, name: 'Manzana' },
+  { id: 2, name: 'Banana' },
+  { id: 3, name: 'Cereza' },
+]; */
+
+interface Room {
+  id_accommodation_room: number;
+  room_type: string;
+  price_usd: string;
+  service_tax: string;
+  rate_usd: string;
+  price_pen: string;
+  capacity: number;
+  available: boolean;
+  accommodation_id: number;
+}
+
+interface Accommodation {
+  id_accommodation: number;
+  name: string;
+  category: string;
+  address: string;
+  rating: number;
+  email: string;
+  distrit_id_distrit: number;
+  accommodation_room: Room[];
+}
+
+interface District {
+  id_distrit: number;
+  name: string;
+  city_id: number;
+  accommodation: Accommodation[];
+}
+
+// Definición del array `data`
+const data: District[] = [
+  {
+    id_distrit: 1,
+    name: "Usaquen",
+    city_id: 1,
+    accommodation: [
+      {
+        id_accommodation: 1,
+        name: "Hotel 1",
+        category: "5 Estrellas",
+        address: "Calle 1",
+        rating: 5,
+        email: "hotel1@gmail.com",
+        distrit_id_distrit: 1,
+        accommodation_room: [
+          {
+            id_accommodation_room: 1,
+            room_type: "SINGLE",
+            price_usd: "100",
+            service_tax: "0.18",
+            rate_usd: "3.9",
+            price_pen: "390",
+            capacity: 1,
+            available: true,
+            accommodation_id: 1,
+          },
+          {
+            id_accommodation_room: 2,
+            room_type: "DOUBLE",
+            price_usd: "150",
+            service_tax: "0.18",
+            rate_usd: "3.9",
+            price_pen: "585",
+            capacity: 2,
+            available: true,
+            accommodation_id: 1,
+          },
+          {
+            id_accommodation_room: 3,
+            room_type: "TRIPLE",
+            price_usd: "300",
+            service_tax: "0.18",
+            rate_usd: "3.9",
+            price_pen: "1170",
+            capacity: 3,
+            available: true,
+            accommodation_id: 1,
+          },
+        ],
+      },
+    ],
+  },
+];
 
 type Props = {
   visible: boolean;
@@ -30,6 +128,7 @@ export const AccommodiationsList = ({
 }: Props) => {
   const { accommodationRooms, startGetAllAccommodationRooms } =
     useAccommodationRoomStore();
+
   const { startSetLocalAccommodationQuote } = useAccommodationQuoteStore();
   const [layout, setLayout] = useState<"grid" | "list">("grid");
   const [value, setValue] = useState<number>(0);
@@ -82,8 +181,6 @@ export const AccommodiationsList = ({
     setAccommodationRoomsFiltered(accommodationRooms);
     setCustomerNumbers(new Map(accommodationRooms.map((room) => [room.id, 0])));
   }, [accommodationRooms]);
-
-
 
   useEffect(() => {
     applyFilters();
@@ -146,9 +243,7 @@ export const AccommodiationsList = ({
               </div>
               <div>
                 <InputNumber
-                  label={{
-
-                  }}
+                  label={{}}
                   placeholder="Cant. Personas"
                   size={2}
                   className="w-36"
@@ -201,17 +296,26 @@ export const AccommodiationsList = ({
     );
   };
 
-  // export interface AccommodationQuoteEntity {
-  //   readonly id: number;
-  //   readonly accommodationRoom: AccommodationRoomEntity
-  //   readonly customerNumber: number;
-  //   readonly total: number;
-  //   readonly versionQuotation: null;
-  //   readonly day: number;
-  // }
-
   const gridItem = (product: AccommodationRoomEntity, index: number) => {
     const id = customerNumbers?.get(product.id) ?? 0;
+
+    const [activeRoom, setActiveRoom] = useState<number | number[]>();
+
+    const rooms = data
+      .flatMap((district) => district.accommodation)
+      .flatMap((accommodation) => accommodation.accommodation_room);
+    
+
+    const handleTabChange = (e: any) => {
+      const index = Array.isArray(e.index) ? e.index[0] : e.index; // Capturamos el índice activo
+      setActiveRoom(index);
+
+      if (index !== null) {
+        const selectedRoom = rooms[index];
+        console.log("Datos de la habitación seleccionada:", selectedRoom);
+      }
+    };
+
     return (
       <div className="mt-5" key={index}>
         <div className="p-4 border border-gray-300 bg-white rounded-lg shadow">
@@ -237,7 +341,7 @@ export const AccommodiationsList = ({
                   key={i}
                   className={`pi ${
                     i < product.accommodation.rating
-                      ? "text-primary pi-star-fill"
+                      ? "text-primary pi-star-fill "
                       : "text-primary pi-star"
                   }`}
                 ></i>
@@ -261,9 +365,7 @@ export const AccommodiationsList = ({
             </div>
             <div>
               <InputNumber
-                label={{
-
-                }}
+                label={{}}
                 placeholder="Cant. Personas"
                 size={2}
                 className="w-36"
@@ -309,6 +411,24 @@ export const AccommodiationsList = ({
               }}
             />
           </div>
+
+          <Accordion
+            includeTab
+            
+            className="mt-5"
+            activeIndex={activeRoom}
+            onTabChange={handleTabChange} // Captura del cambio
+            tabContent={rooms.map((room) => ({
+              header: `Tipo de Habitación: ${room.room_type}`, // Header dinámico
+              children: (
+                <div>
+                  <p>Precio en USD: {room.price_usd}</p>
+                  <p>Capacidad: {room.capacity} personas</p>
+                  <p>Disponible: {room.available ? "Sí" : "No"}</p>
+                </div>
+              ),
+            }))}
+          />
         </div>
       </div>
     );
@@ -409,6 +529,7 @@ export const AccommodiationsList = ({
           </div> */}
 
           <Rating
+            className=""
             value={value}
             onChange={(e) => {
               const value = e.value ?? 0;
@@ -449,3 +570,7 @@ export const AccommodiationsList = ({
     </Dialog>
   );
 };
+/* const itemTemplate = (item: Item) => {
+  return <div>{item.name}</div>;
+};
+ */

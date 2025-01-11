@@ -3,12 +3,17 @@ import { classNamesAdapter } from "@/core/adapters";
 import { Calendar, SplitButton } from "@/presentation/components";
 import { Itinerary } from "./components";
 
-import { useReservationStore } from "@/infraestructure/hooks";
+import {
+  useAccommodationQuoteStore,
+  useReservationStore,
+} from "@/infraestructure/hooks";
 import type { CityEntity } from "@/domain/entities";
 
 export const CostingModule = () => {
-  const { currentReservation, startUpdatingReservatioTravelDates } =
-    useReservationStore();
+  const { currentReservation, startUpdatingReservatioTravelDates } =useReservationStore();
+ 
+  const { CountryAndCity } = useAccommodationQuoteStore();
+
   const [[startDate, endDate], setDateRange] = useState<
     [Date | null, Date | null]
   >([null, null]);
@@ -31,23 +36,26 @@ export const CostingModule = () => {
 
   useEffect(() => {
     if (currentReservation) {
-      setDateRange([
-        currentReservation.startDate,
-        currentReservation.endDate,
-      ]);
+      setDateRange([currentReservation.startDate, currentReservation.endDate]);
     }
   }, [currentReservation]);
 
   useEffect(() => {
     if (isDateRangeChanged) {
-      console.log({ startDate, endDate });
+      /* console.log({ startDate, endDate }); */
       startUpdatingReservatioTravelDates([startDate!, endDate!]).then(() => {
         setIsDateRangeChanged(false);
       });
     }
   }, [isDateRangeChanged]);
 
-  console.log({ startDate, endDate });
+  useEffect(() => {
+    
+    if (selectedCity) CountryAndCity(selectedCity);
+    
+  }, [selectedCity]);
+
+  /* console.log({ startDate, endDate }); */
 
   return (
     <div className="max-w-screen-2xl mx-auto">
@@ -100,8 +108,8 @@ export const CostingModule = () => {
   );
 };
 
-
-{/* <Calendar
+{
+  /* <Calendar
 numberOfMonths={2}
 label={{
   text: "Fecha",
@@ -120,4 +128,5 @@ placeholder="Seleccione una fecha"
 selectionMode="range"
 readOnlyInput
 hideOnRangeSelection
-/> */}
+/> */
+}

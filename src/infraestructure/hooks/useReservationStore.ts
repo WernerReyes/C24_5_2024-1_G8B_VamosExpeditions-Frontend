@@ -13,16 +13,15 @@ import type { ReservationEntity, ReservationStatus } from "@/domain/entities";
 
 export const useReservationStore = () => {
   const dispatch = useDispatch();
+
   const { currentReservation, reservationsByStatus } = useSelector(
     (state: AppState) => state.reservation
   );
-  const [createReservation, createReservationResult] =
-    useCreateReservationMutation();
-  const [updateReservation, updateReservationResult] =
-    useUpdateReservationMutation();
+  const [createReservation, createReservationResult] =useCreateReservationMutation();
+  const [updateReservation, updateReservationResult] =useUpdateReservationMutation();
+  
   const { startShowSuccess, startShowApiError, startShowError } = useAlert();
-  const [geAllReservationsByStatus, getAllReservationsByStatusResult] =
-    useLazyGetAllReservationsByStatusQuery();
+  const [geAllReservationsByStatus, getAllReservationsByStatusResult] =useLazyGetAllReservationsByStatusQuery();
 
   const startCreatingReservation = async (reservationDto: ReservationDto) => {
     await createReservation(reservationDto)
