@@ -1,9 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import { externalCountryService } from "../services/external/country";
-import {
-    onSetExternalCountries,
-    type AppState
-} from "../store";
+import { onSetExternalCountries, type AppState } from "../store";
+import { useLazyGetAllExternalCountriesQuery } from "../store/services";
 
 export const useExternalCountryStore = () => {
   const dispatch = useDispatch();
@@ -11,17 +8,30 @@ export const useExternalCountryStore = () => {
     (state: AppState) => state.externalCountry
   );
 
+  const [getAllExternalCountries, {
+    isLoading: isGettingAllExternalCountries,
+    ...getAllExternalCountriesResult
+  }] =
+    useLazyGetAllExternalCountriesQuery();
+
   const startGetAllExternalCountries = async () => {
-    try {
-      const { data } = await externalCountryService.getAll();
-      dispatch(onSetExternalCountries(data));
-    } catch (error) {
-      throw error;
-    }
+    await getAllExternalCountries()
+      .unwrap()
+      .then(({ data }) => {
+        dispatch(onSetExternalCountries(data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return {
     //* Atributtes
+    getAllExternalCountriesResult: {
+      isGettingAllExternalCountries,
+      ...getAllExternalCountriesResult,
+      refetch: () => getAllExternalCountries(),
+    },
     externalCountries,
     selectedExternalCountry,
 

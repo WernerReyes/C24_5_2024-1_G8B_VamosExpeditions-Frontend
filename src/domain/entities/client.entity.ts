@@ -1,3 +1,4 @@
+import { generateEmptyObject } from "@/core/utils";
 import { z } from "zod";
 
 export type Continent =
@@ -28,4 +29,7 @@ export const clientEntitySchema = z.object({
   }),
 });
 
+
 export type ClientEntity = z.infer<typeof clientEntitySchema>;
+
+export const clientEntityEmpty = generateEmptyObject<ClientEntity>(clientEntitySchema);

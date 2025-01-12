@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { requestValidator } from "@/core/utils";
+import { generateEmptyObject, requestValidator } from "@/core/utils";
 import { regex } from "@/core/constants";
 import {
   type ExternalCountryEntity,
@@ -8,21 +8,21 @@ import {
 
 const { EMAIL, PHONE } = regex;
 
-export type RegisterClientDto = {
+export type ClientDto = {
   readonly fullName: string;
   readonly email: string;
   readonly phone: string;
   readonly country: ExternalCountryEntity;
 };
 
-export const registerClientDto = (
+export const clientDto = (
   fullName: string,
   email: string,
   phone: string,
   country: ExternalCountryEntity
 ) => {
   return {
-    create: (): [RegisterClientDto?, string[]?] => {
+    create: (): [ClientDto?, string[]?] => {
       const errors = requestValidator(
         {
           fullName,
@@ -30,7 +30,7 @@ export const registerClientDto = (
           phone,
           country,
         },
-        registerClientDtoSchema
+        clientDtoSchema
       );
       if (errors) {
         return [undefined, errors];
@@ -40,7 +40,7 @@ export const registerClientDto = (
   };
 };
 
-export const registerClientDtoSchema = z.object({
+export const clientDtoSchema = z.object({
   fullName: z.string().min(1, {
     message: "El campo nombre es requerido",
   }),
@@ -65,3 +65,6 @@ export const registerClientDtoSchema = z.object({
     message: "El campo país es requerido",
   }),
 });
+
+export const clientDtoEmpty = generateEmptyObject<ClientDto>(clientDtoSchema);
+

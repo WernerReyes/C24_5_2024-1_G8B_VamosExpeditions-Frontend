@@ -1,28 +1,40 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
 import { reservationService } from "@/data";
-import { onSetCurrentReservation, onSetReservationsByStatus } from "../store";
+import {
+  onSetCurrentReservation,
+  onSetReservations,
+  onSetSincronizedCurrentReservationByClient,
+} from "../store";
 import {
   useCreateReservationMutation,
-  useLazyGetAllReservationsByStatusQuery,
+  useLazyGetAllReservationsQuery,
   useUpdateReservationMutation,
 } from "../store/services";
-import { reservationDto, ReservationDto } from "@/domain/dtos/reservation";
+import {
+  getReservationsDto,
+  GetReservationsDto,
+  reservationDto,
+  ReservationDto,
+} from "@/domain/dtos/reservation";
 import { useAlert } from "@/presentation/hooks";
-import type { ReservationEntity, ReservationStatus } from "@/domain/entities";
+import type { ClientEntity, ReservationEntity } from "@/domain/entities";
 
 export const useReservationStore = () => {
   const dispatch = useDispatch();
-  const { currentReservation, reservationsByStatus } = useSelector(
+  const { currentReservation, reservations } = useSelector(
     (state: AppState) => state.reservation
   );
+  const { startShowSuccess, startShowApiError, startShowError } = useAlert();
+
   const [createReservation, createReservationResult] =
     useCreateReservationMutation();
   const [updateReservation, updateReservationResult] =
     useUpdateReservationMutation();
-  const { startShowSuccess, startShowApiError, startShowError } = useAlert();
-  const [geAllReservationsByStatus, getAllReservationsByStatusResult] =
-    useLazyGetAllReservationsByStatusQuery();
+  const [
+    getReservations,
+    { isLoading: isGettingAllReservations, ...restGetAllReservations },
+  ] = useLazyGetAllReservationsQuery();
 
   const startCreatingReservation = async (reservationDto: ReservationDto) => {
     await createReservation(reservationDto)
@@ -82,13 +94,35 @@ export const useReservationStore = () => {
     );
   };
 
-  const startGettingAllReservationsByStatus = async (
-    status: ReservationStatus
-  ) => {
-    await geAllReservationsByStatus(status)
+  const startUpdatingReservationClient = async (client: ClientEntity) => {
+    if (!currentReservation) return;
+    await reservationService.registerReservation({
+      ...currentReservation,
+      client,
+    });
+    console.log({ ...currentReservation, client });
+    try {
+      dispatch(
+        onSetSincronizedCurrentReservationByClient({
+          ...currentReservation,
+          client,
+        })
+      );
+    } catch (error) {
+      console.log({ error });
+    }
+  };
+
+  const startGettingAllReservations = async ({
+    status,
+  }: GetReservationsDto) => {
+    const [getReservationwDtoValidated, errors] =
+      getReservationsDto(status).create();
+    if (errors) return startShowError(errors[0]);
+    await getReservations(getReservationwDtoValidated!)
       .unwrap()
       .then(({ data }) => {
-        dispatch(onSetReservationsByStatus(data));
+        dispatch(onSetReservations(data));
       })
       .catch((error) => {
         console.log(error);
@@ -125,15 +159,21 @@ export const useReservationStore = () => {
     //* Atributtes
     updateReservationResult,
     createReservationResult,
-    getAllReservationsByStatusResult,
+    getAllReservationsResult: {
+      ...restGetAllReservations,
+      isGettingAllReservations,
+      refetch: (getReservationsDto: GetReservationsDto) =>
+        getReservations(getReservationsDto),
+    },
     currentReservation,
-    reservationsByStatus,
+    reservations,
 
     //* Functions
     startCreatingReservation,
     startUpdatingReservation,
     startUpdatingReservatioTravelDates,
-    startGettingAllReservationsByStatus,
+    startUpdatingReservationClient,
+    startGettingAllReservations,
     startChangingCurrentReservation,
     startGettingCurrentReservation,
     startDeletingReservation,

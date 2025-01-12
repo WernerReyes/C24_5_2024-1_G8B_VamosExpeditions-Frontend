@@ -17,16 +17,18 @@ import {
 } from "@/presentation/components";
 import { useClientStore } from "@/infraestructure/hooks/useClientStore";
 import {
+  reservationDtoEmpty,
   reservationDtoSchema,
   type ReservationDto,
 } from "@/domain/dtos/reservation";
 import { useNationStore, useReservationStore } from "@/infraestructure/hooks";
 
-import Style from "../Style.module.css";
-
 import ReservationFormStyle from "./ReservationForm.module.css";
 import { OrderType, TravelerStyle } from "@/domain/entities";
-import { generateCode } from "../../utils";
+import { generateCode, transformDataToTree } from "../../utils";
+
+import Style from "../Style.module.css";
+
 
 const TRAVELER_CLASES = [
   { key: TravelerStyle.COMFORT, label: "Confort" },
@@ -47,50 +49,33 @@ export const ReservationForm = () => {
     createReservationResult: { isLoading: isCreatingReservation },
     updateReservationResult: { isLoading: isUpdatingReservation },
   } = useReservationStore();
-  const { clients, startGetClients } = useClientStore();
+  const {
+    clients,
+    startGettingAllClients,
+    startSelectingClient,
+    getAllClientsResult: { isGettingAllClients },
+  } = useClientStore();
   const { nations, getNations } = useNationStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isContentLoading, setIsContentLoading] = useState(true);
 
   const handleReservation = (reservationDto: ReservationDto) => {
-    console.log(reservationDto);
     if (currentReservation) {
       startUpdatingReservation(currentReservation.id, reservationDto);
       return;
     }
-    console.log(reservationDto);
     startCreatingReservation(reservationDto);
   };
 
   const handleCancelReservation = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     startDeletingReservation(currentReservation!.id);
-    reset({
-      client: {},
-      numberOfPeople: 1,
-      travelDates: [],
-      code: "",
-      travelerStyle: TravelerStyle.COMFORT,
-      orderType: OrderType.DIRECT,
-      destination: {},
-      specialSpecifications: "",
-    });
-  };
-
-  const transformData = (cities: any) => {
-    return cities.map((country: any) => ({
-      key: country.code,
-      label: country.name,
-      selectable: false,
-      children: country.cities.map((city: any) => ({
-        key: city.id.toString(),
-        label: city.name,
-        selectable: true,
-      })),
-    }));
+    reset(reservationDtoEmpty);
+    startSelectingClient(null);
   };
 
   useEffect(() => {
-    startGetClients();
+    // startGetClients();
+    startGettingAllClients();
     getNations();
   }, []);
 
@@ -122,7 +107,11 @@ export const ReservationForm = () => {
       });
     }
 
-    setIsLoading(false);
+    if (currentReservation?.client) {
+      startSelectingClient(currentReservation.client);
+    }
+
+    setIsContentLoading(false);
   }, [currentReservation]);
 
   useEffect(() => {
@@ -156,10 +145,9 @@ export const ReservationForm = () => {
             name="client"
             defaultValue={undefined}
             render={({ field, fieldState: { error } }) => {
-              console.log(field.value, error);
               return (
                 <Dropdown
-                  loading={isLoading}
+                  loading={isContentLoading || isGettingAllClients}
                   filter
                   options={clients}
                   label={{
@@ -176,7 +164,7 @@ export const ReservationForm = () => {
                   optionLabel="fullName"
                   onChange={(e: DropdownChangeEvent) => {
                     field.onChange(e.value);
-                    console.log(e.value);
+                    startSelectingClient(e.value);
                   }}
                 />
               );
@@ -199,7 +187,7 @@ export const ReservationForm = () => {
                   small={{
                     text: error?.message,
                   }}
-                  loading={isLoading}
+                  loading={isContentLoading}
                   id="numberOfPeople"
                   placeholder="Número de Personas"
                   invalid={!!error}
@@ -241,13 +229,15 @@ export const ReservationForm = () => {
                   text: error?.message,
                 }}
                 invalid={!!error}
-                loading={isLoading}
+                loading={isContentLoading}
                 locale="es"
                 dateFormat="dd/mm/yy"
                 placeholder="Seleccione una fecha"
                 selectionMode="range"
                 readOnlyInput
-                icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-calendar"}
+                icon={
+                  isContentLoading ? "pi pi-spin pi-spinner" : "pi pi-calendar"
+                }
                 hideOnRangeSelection
                 showIcon
               />
@@ -260,7 +250,7 @@ export const ReservationForm = () => {
             name="destination"
             render={({ field, fieldState: { error } }) => (
               <TreeSelect
-                options={transformData(nations)}
+                options={transformDataToTree(nations)}
                 selectionMode="multiple"
                 showClear
                 filter
@@ -269,12 +259,11 @@ export const ReservationForm = () => {
                   text: "Destino",
                   htmlFor: "destino",
                 }}
-                loading={isLoading}
+                loading={isContentLoading}
                 {...field}
                 invalid={!!error}
                 value={field.value as unknown as TreeSelectSelectionKeysType}
                 onChange={(e: TreeSelectChangeEvent) => {
-                  console.log(e.value);
                   field.onChange(e.value);
                 }}
                 small={{
@@ -303,7 +292,7 @@ export const ReservationForm = () => {
                         htmlFor: travelClass.label,
                         className: "ml-2",
                       }}
-                      loading={isLoading}
+                      loading={isContentLoading}
                       invalid={!!error}
                       {...field}
                       onChange={(e: RadioButtonChangeEvent) => {
@@ -340,7 +329,7 @@ export const ReservationForm = () => {
                         htmlFor: order.label,
                         className: "ml-2",
                       }}
-                      loading={isLoading}
+                      loading={isContentLoading}
                       invalid={!!error}
                       {...field}
                       onChange={(e: RadioButtonChangeEvent) => {
@@ -371,7 +360,7 @@ export const ReservationForm = () => {
                   text: "Código",
                   htmlFor: "codigo",
                 }}
-                loading={isLoading}
+                loading={isContentLoading}
                 small={{
                   text: error?.message,
                 }}
@@ -399,7 +388,7 @@ export const ReservationForm = () => {
                 text: "Comentarios",
                 htmlFor: "comentarios",
               }}
-              loading={isLoading}
+              loading={isContentLoading}
               skeleton={{
                 height: "7rem",
               }}
@@ -417,9 +406,14 @@ export const ReservationForm = () => {
 
       <div className="flex justify-between">
         <Button
-          icon="pi pi-save"
-          disabled={isCreatingReservation || isUpdatingReservation || isLoading}
+          icon={currentReservation ? "pi pi-pencil" : "pi pi-plus"}
+          disabled={
+            isContentLoading || isCreatingReservation || isUpdatingReservation
+          }
           label={currentReservation ? "Actualizar Reserva" : "Crear Reserva"}
+          loading={
+            isContentLoading || isCreatingReservation || isUpdatingReservation
+          }
         />
         {currentReservation && (
           <Button
@@ -427,7 +421,7 @@ export const ReservationForm = () => {
             className="bg-primary"
             label="Cancelar Edición"
             disabled={
-              isCreatingReservation || isUpdatingReservation || isLoading
+              isCreatingReservation || isUpdatingReservation || isContentLoading
             }
             onClick={handleCancelReservation}
           />

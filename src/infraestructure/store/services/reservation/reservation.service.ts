@@ -8,7 +8,6 @@ import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import { ApiResponse } from "../response";
 import {
   ReservationEntity,
-  ReservationStatus,
 } from "@/domain/entities/reservation.entity";
 import { ReservationDto } from "@/domain/dtos/reservation";
 
@@ -55,26 +54,24 @@ export const reservationService = createApi({
     //     body: updateReservationDto,
     // }),
     // }),
-    getAllReservationsByStatus: builder.query<
-      ApiResponse<ReservationEntity[]>,
-      ReservationStatus
-    >({
-      query: (state) => `/status/${state}`,
-    }),
 
-    getAllReservations: builder.query<ApiResponse<ReservationEntity[]>, void>({
-      query: () => "/",
+    getAllReservations: builder.query<
+      ApiResponse<ReservationEntity[]>,
+      Record<string, any>
+    >({
+      query: (params) => {
+        return {
+          url: "/",
+          params,
+        };
+      },
     }),
   }),
 });
 
 export const {
   useGetReservationByIdQuery,
-  // useCreateReservationMutation,
-  // useUpdateReservationMutation,
-  useGetAllReservationsByStatusQuery,
-  useLazyGetAllReservationsByStatusQuery,
-  useGetAllReservationsQuery,
+  useLazyGetAllReservationsQuery,
   useCreateReservationMutation,
   useUpdateReservationMutation,
 } = reservationService;

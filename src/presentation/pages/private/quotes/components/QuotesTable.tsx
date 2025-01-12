@@ -1,4 +1,4 @@
-import { formatCurrency, formatDate } from "@/core/utils";
+import { formatCurrency } from "@/core/utils";
 import type { QuoteEntity } from "@/domain/entities";
 import {
   Button,
@@ -6,6 +6,7 @@ import {
   DataTable,
   DefaultFallBackComponent,
   ErrorBoundary,
+  Skeleton,
   Tag,
   type ColumnFilterMatchModeOptions,
   type DataTableExpandedRows,
@@ -21,9 +22,8 @@ import {
 import { filterByName, getQuoteSeverity } from "../utils";
 import { QuoteVersionsTable } from "./QuoteVersionsTable";
 import { TableActions } from "./TableActions";
-
 import { useGetQuotesQuery } from "@/infraestructure/store/services";
-import { Skeleton } from "primereact/skeleton";
+import { dateFnsAdapter } from "@/core/adapters";
 
 const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
   {
@@ -207,7 +207,7 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         filterField="startDate"
         filterClear={(options) => <FilterClearButton {...options} />}
         filterApply={(options) => <FilterApplyButton {...options} />}
-        body={(e: QuoteEntity) => formatDate(e.startDate)}
+        body={(e: QuoteEntity) => dateFnsAdapter.format(e.startDate)}
         filterElement={(options) => (
           <FilterByDate options={options} placeholder="Fecha de inicio" />
         )}
@@ -227,7 +227,7 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         filterField="endDate"
         filterClear={(options) => <FilterClearButton {...options} />}
         filterApply={(options) => <FilterApplyButton {...options} />}
-        body={(e: QuoteEntity) => formatDate(e.endDate)}
+        body={(e: QuoteEntity) => dateFnsAdapter.format(e.endDate)}
         filterElement={(options) => (
           <FilterByDate options={options} placeholder="Fecha de fin" />
         )}

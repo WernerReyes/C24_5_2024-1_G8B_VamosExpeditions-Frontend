@@ -21,5 +21,6 @@ export const externalCountryService = createApi({
 });
 
 export const {
+  useLazyGetAllExternalCountriesQuery,
   useGetAllExternalCountriesQuery,
 } = externalCountryService;

@@ -14,6 +14,8 @@ type PrivateRoutes = {
   DASHBOARD: string;
   QUOTES: string;
   NEW_QUOTE: string;
+  RESERVATIONS: string;
+
 
   //     HOME: string;
   //     LOGIN: string;
@@ -46,6 +48,7 @@ export const constantRoutes: Routes = {
     DASHBOARD: "/dashboard",
     QUOTES: "/quotes",
     NEW_QUOTE: "/new-quote",
+    RESERVATIONS: "/reservations",
   },
   //     HOME: PublicRoutes.HOME,
   //     LOGIN: PublicRoutes.LOGIN,

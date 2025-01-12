@@ -1,5 +1,5 @@
 import { httpRequest } from "@/config";
-import { RegisterClientDto } from "@/domain/dtos/client";
+import { ClientDto } from "@/domain/dtos/client";
 import { ClientEntity } from "@/domain/entities";
 
 const PREFIX = "/client";
@@ -13,11 +13,11 @@ export const clientService = {
     }
   },
 
-  clietRegister: async (registerClientDto: RegisterClientDto) => {
+  clietRegister: async (ClientDto: ClientDto) => {
     try {
       return await httpRequest.post<ClientEntity>(
         `${PREFIX}/register`,
-        registerClientDto
+        ClientDto
       );
     } catch (error) {
       throw error;

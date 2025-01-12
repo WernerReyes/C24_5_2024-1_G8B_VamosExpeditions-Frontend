@@ -47,8 +47,6 @@ export const CostingModule = () => {
     }
   }, [isDateRangeChanged]);
 
-  console.log({ startDate, endDate });
-
   return (
     <div className="max-w-screen-2xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between max-h-[54px] gap-y-4 mb-20 sm:mb-0">
@@ -56,11 +54,8 @@ export const CostingModule = () => {
           label={selectedCity ? selectedCity.name : "Seleccionar Región"}
           icon="pi pi-plus"
           className="lg:max-w-52"
-          onClick={() => {
-            console.log("clicked");
-          }}
           model={
-            currentReservation?.cities!.map((city: CityEntity) => ({
+            currentReservation?.cities.map((city: CityEntity) => ({
               label: city.name,
               command: () => handleCitySelection(city),
               className: classNamesAdapter(
@@ -99,25 +94,3 @@ export const CostingModule = () => {
     </div>
   );
 };
-
-
-{/* <Calendar
-numberOfMonths={2}
-label={{
-  text: "Fecha",
-  htmlFor: "calendar",
-}}
-onChange={(e) => {
-  field.onChange(e.value);
-}}
-value={field.value as Date[]}
-small={{
-  text: error?.message,
-}}
-locale="es"
-dateFormat="dd/mm/yy"
-placeholder="Seleccione una fecha"
-selectionMode="range"
-readOnlyInput
-hideOnRangeSelection
-/> */}

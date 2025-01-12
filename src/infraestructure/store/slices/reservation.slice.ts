@@ -5,12 +5,12 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 type ReservationSlice = {
   currentReservation: ReservationEntity | null;
-  reservationsByStatus: ReservationEntity[];
+  reservations: ReservationEntity[];
 };
 
 const initialState: ReservationSlice = {
   currentReservation: null,
-  reservationsByStatus: [],
+  reservations: [],
 };
 
 export const reservationSlice = createSlice({
@@ -26,23 +26,56 @@ export const reservationSlice = createSlice({
         currentReservation: payload
           ? {
               ...payload,
-              startDate: dateFnsAdapter.parseISO(payload.startDate as any),
-              endDate: dateFnsAdapter.parseISO(payload.endDate as any),
+              startDate:
+                typeof payload.startDate === "string"
+                  ? dateFnsAdapter.parseISO(payload.startDate)
+                  : payload.startDate,
+              endDate:
+                typeof payload.endDate === "string"
+                  ? dateFnsAdapter.parseISO(payload.endDate)
+                  : payload.endDate,
             }
           : null,
       };
     },
 
-    onSetReservationsByStatus: (
+    onSetSincronizedCurrentReservationByClient: (
+      state,
+      { payload }: PayloadAction<ReservationEntity>
+    ) => {
+      return {
+        ...state,
+        currentReservation: {
+          ...state.currentReservation,
+          ...payload,
+        },
+        reservations: state.reservations.map((reservation) => {
+          if (reservation.client.id === payload.client.id) {
+            return {
+              ...reservation,
+              client: payload.client,
+            };
+          }
+
+          return reservation;
+        }),
+      };
+    },
+
+    onSetReservations: (
       state,
       { payload }: PayloadAction<ReservationEntity[]>
     ) => {
       return {
         ...state,
-        reservationsByStatus: payload,
+        reservations: payload,
       };
-    }
+    },
   },
 });
 
-export const { onSetCurrentReservation, onSetReservationsByStatus } = reservationSlice.actions;
+export const {
+  onSetCurrentReservation,
+  onSetReservations,
+  onSetSincronizedCurrentReservationByClient,
+} = reservationSlice.actions;

@@ -5,7 +5,7 @@ import {
   Tag,
 } from "@/presentation/components";
 import type { QuoteEntity, VersionEntity } from "@/domain/entities";
-import { formatCurrency, formatDate } from "@/core/utils";
+import { formatCurrency } from "@/core/utils";
 import {
   FilterApplyButton,
   FilterByDate,
@@ -15,6 +15,7 @@ import {
 import { TableActions } from "./TableActions";
 
 import { filterByName, getQuoteSeverity } from "../utils";
+import { dateFnsAdapter } from "@/core/adapters";
 
 type QuoteVersionsTableProps = {
   quote: QuoteEntity;
@@ -77,7 +78,7 @@ export const QuoteVersionsTable = ({
           filterField="startDate"
           filterClear={(options) => <FilterClearButton {...options} />}
           filterApply={(options) => <FilterApplyButton {...options} />}
-          body={(e: QuoteEntity) => formatDate(e.startDate)}
+          body={(e: QuoteEntity) => dateFnsAdapter.format(e.startDate)}
           filterElement={(options) => (
             <FilterByDate options={options} placeholder="Fecha de inicio" />
           )}
@@ -96,7 +97,7 @@ export const QuoteVersionsTable = ({
           filterField="endDate"
           filterClear={(options) => <FilterClearButton {...options} />}
           filterApply={(options) => <FilterApplyButton {...options} />}
-          body={(e: QuoteEntity) => formatDate(e.endDate)}
+          body={(e: QuoteEntity) => dateFnsAdapter.format(e.endDate)}
           filterElement={(options) => (
             <FilterByDate options={options} placeholder="Fecha de fin" />
           )}

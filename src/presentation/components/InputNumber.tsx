@@ -1,6 +1,7 @@
 import {
   InputNumber as InputNumberPrimeReact,
   type InputNumberProps,
+  type InputNumberValueChangeEvent
 } from "primereact/inputnumber";
 import { classNames } from "primereact/utils";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
@@ -36,3 +37,7 @@ export const InputNumber = forwardRef<InputNumberPrimeReact, Props>(
     );
   }
 );
+
+export {
+  InputNumberValueChangeEvent
+}

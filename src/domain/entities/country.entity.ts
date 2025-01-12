@@ -5,7 +5,7 @@ export const countryEntitySchema = z.object({
   id: z.number(),
   name: z.string(),
   code: z.string(),
-  cities: cityEntitySchema,
+  cities: z.array(cityEntitySchema),
 });
 
 export type CountryEntity = z.infer<typeof countryEntitySchema>;

@@ -1,74 +1,157 @@
 import { useEffect, useState } from "react";
 import {
-  RegisterClientDto,
-  registerClientDtoSchema,
+  type ClientDto,
+  clientDtoEmpty,
+  clientDtoSchema,
 } from "@/domain/dtos/client";
 import {
-  Button,
   Checkbox,
   DefaultFallBackComponent,
   Dropdown,
+  type DropdownChangeEvent,
   ErrorBoundary,
   InputMask,
   InputText,
+  SplitButton,
 } from "@/presentation/components";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
-import { DropdownChangeEvent } from "primereact/dropdown";
-import {
-  useGetAllExternalCountriesQuery,
-  useRegisterClientMutation,
-} from "@/infraestructure/store/services";
-
 import {
   classNamesAdapter,
-  CountryCode,
+  type CountryCode,
   phoneNumberAdapter,
 } from "@/core/adapters";
 
 import Style from "../Style.module.css";
-import { useAlert } from "@/presentation/hooks";
+
 import type { ExternalCountryEntity } from "@/infraestructure/store/services/external/country";
+import {
+  useClientStore,
+  useExternalCountryStore,
+  useReservationStore,
+} from "@/infraestructure/hooks";
+import { getCountryPhoneMask } from "../../utils";
+
+const OPERATIONS = [
+  {
+    label: "Registrar cliente",
+    loading: "Registrando...",
+    icon: "pi pi-plus",
+  },
+  {
+    label: "Actualizar cliente",
+    loading: "Actualizando...",
+    icon: "pi pi-pencil",
+  },
+];
 
 export const ClientForm = () => {
-  const [registerClient, { isLoading: isRegisteringClient }] =
-    useRegisterClientMutation();
-  const { data, isLoading, error, refetch, isFetching } =
-    useGetAllExternalCountriesQuery();
-
+  const {
+    selectedClient,
+    startCreatingClient,
+    startUpdatingClient,
+    createClientResult: { isCreatingClient },
+    updateClientResult: { isUpdatingClient },
+  } = useClientStore();
+  const { startUpdatingReservationClient } = useReservationStore();
+  const {
+    externalCountries,
+    startGetAllExternalCountries,
+    getAllExternalCountriesResult: {
+      isGettingAllExternalCountries,
+      error,
+      refetch,
+      isFetching,
+    },
+  } = useExternalCountryStore();
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<RegisterClientDto>({
-    resolver: zodResolver(registerClientDtoSchema),
+  } = useForm<ClientDto>({
+    resolver: zodResolver(clientDtoSchema),
   });
-  const { startShowSuccess, startShowApiError } = useAlert();
   const [selectedCountry, setSelectedCountry] =
     useState<ExternalCountryEntity>();
+  const [currentOp, setCurrentOp] = useState(OPERATIONS[0]);
   const [suggestPhone, setSuggestPhone] = useState(false);
+  const [isContentLoading, setIsContentLoading] = useState(true);
 
-  const handleForm = (registerClientDto: RegisterClientDto) => {
-    registerClient(registerClientDto)
-      .unwrap()
-      .then(() => {
-        reset();
-        startShowSuccess("Cliente registrado con éxito");
-      })
-      .catch((error) => {
-        startShowApiError(error);
+  const handleOperation = (op: (typeof OPERATIONS)[number]) => {
+    setCurrentOp(op);
+    if (op === OPERATIONS[0]) {
+      reset(clientDtoEmpty);
+      setSelectedCountry(undefined);
+      setSuggestPhone(false);
+    }
+
+    if (op === OPERATIONS[1] && selectedClient) {
+      const country = externalCountries.find(
+        (country) => country.name === selectedClient.country
+      );
+      reset({
+        fullName: selectedClient.fullName,
+        email: selectedClient.email,
+        phone: selectedClient.phone,
+        country,
       });
+      setSelectedCountry(country);
+      setSuggestPhone(true);
+    }
+  };
+
+  const handleForm = (clientDto: ClientDto) => {
+    if (selectedClient && currentOp === OPERATIONS[1]) {
+      startUpdatingClient(selectedClient.id, clientDto).then((client) => {
+        startUpdatingReservationClient(client);
+        reset();
+      });
+      return;
+    }
+    startCreatingClient(clientDto).then(() => {
+      reset();
+    });
   };
 
   useEffect(() => {
-    if (data && selectedCountry) {
+    startGetAllExternalCountries();
+  }, []);
+
+  useEffect(() => {
+    if (externalCountries && selectedCountry) {
       setSelectedCountry(
-        data.data.find((country) => country.code == selectedCountry.code)
+        externalCountries.find(
+          (country) => country.code == selectedCountry.code
+        )
       );
     }
-  }, [selectedCountry, data]);
+  }, [selectedCountry, externalCountries]);
+
+  useEffect(() => {
+    if (selectedClient) {
+      const country = externalCountries.find(
+        (country) => country.name === selectedClient.country
+      );
+
+      reset({
+        fullName: selectedClient.fullName,
+        email: selectedClient.email,
+        phone: selectedClient.phone,
+        country,
+      });
+      setSelectedCountry(country);
+      setSuggestPhone(true);
+      setCurrentOp(OPERATIONS[1]);
+    } else {
+      reset(clientDtoEmpty);
+      setSelectedCountry(undefined);
+      setSuggestPhone(false);
+      setCurrentOp(OPERATIONS[0]);
+    }
+    setIsContentLoading(false);
+  }, [selectedClient, externalCountries]);
 
   const countryPhoneMask = getCountryPhoneMask(selectedCountry);
 
@@ -97,6 +180,7 @@ export const ClientForm = () => {
               placeholder="Nombre completo"
               invalid={!!error}
               {...field}
+              loading={isContentLoading}
             />
           )}
         />
@@ -122,6 +206,7 @@ export const ClientForm = () => {
               id="email"
               invalid={!!error}
               {...field}
+              loading={isContentLoading}
             />
           )}
         />
@@ -135,7 +220,7 @@ export const ClientForm = () => {
               <DefaultFallBackComponent
                 refetch={refetch}
                 isFetching={isFetching}
-                isLoading={isLoading}
+                isLoading={isGettingAllExternalCountries}
                 message="No se pudo cargar los paises"
               />
             </>
@@ -147,7 +232,6 @@ export const ClientForm = () => {
             name="country"
             defaultValue={undefined}
             render={({ field, fieldState: { error } }) => {
-              console.log("error", error);
               return (
                 <Dropdown
                   label={{
@@ -158,15 +242,15 @@ export const ClientForm = () => {
                     text: error?.message,
                     className: "text-red-500",
                   }}
-                  loading={isLoading}
-                  disabled={isLoading}
+                  loading={isContentLoading || isGettingAllExternalCountries}
+                  disabled={isContentLoading || isGettingAllExternalCountries}
                   filter
                   valueTemplate={selectedCountryTemplate}
                   itemTemplate={countryOptionTemplate}
                   id="country"
                   placeholder="Seleccione un país"
                   invalid={!!error}
-                  options={data?.data}
+                  options={externalCountries}
                   optionLabel="name"
                   {...field}
                   virtualScrollerOptions={{ itemSize: 38 }}
@@ -207,6 +291,7 @@ export const ClientForm = () => {
                       )?.number;
                       return field.onChange(parsedValue ?? e.value);
                     }}
+                    loading={isContentLoading}
                     invalid={!!error}
                     small={{
                       text: error?.message,
@@ -234,6 +319,7 @@ export const ClientForm = () => {
                           countryPhoneMask === null && suggestPhone,
                       }),
                     }}
+                    loading={isContentLoading}
                     placeholder="Telefono"
                     id="phone"
                     invalid={!!error}
@@ -248,6 +334,7 @@ export const ClientForm = () => {
           <Checkbox
             inputId="suggestPhone"
             name="suggestPhone"
+            loading={isContentLoading}
             value={suggestPhone}
             onChange={(e) => setSuggestPhone(!!e.checked)}
             label={{
@@ -260,14 +347,36 @@ export const ClientForm = () => {
         </div>
       </div>
 
-      <Button
-        icon={isRegisteringClient ? "pi pi-spin pi-spinner" : "pi pi-save"}
-        className="mt-auto"
-        label={isRegisteringClient ? "Registrando..." : "Registrar"}
-        disabled={
-          isRegisteringClient || isLoading || Object.keys(errors).length > 0
+      <SplitButton
+        label={
+          isCreatingClient || isUpdatingClient
+            ? currentOp.loading
+            : currentOp.label
         }
-        type="submit"
+        loading={isContentLoading || isCreatingClient || isUpdatingClient}
+        disabled={
+          isContentLoading ||
+          isCreatingClient ||
+          isGettingAllExternalCountries ||
+          Object.keys(errors).length > 0
+        }
+        icon={currentOp.icon}
+        menuClassName={classNamesAdapter({ hidden: !selectedClient })}
+        dropdownIcon={!selectedClient ? "pi pi-ban" : undefined}
+        onClick={() => {
+          handleSubmit(handleForm)();
+        }}
+        typeof="submit"
+        className="mt-auto"
+        model={OPERATIONS.map((op) => ({
+          label: op.label,
+          icon: op.icon,
+          command: () => handleOperation(op),
+          className: classNamesAdapter(
+            "border-[#D0D5DD]",
+            currentOp === op ? "bg-secondary" : "text-black bg-transparent"
+          ),
+        }))}
       />
     </form>
   );
@@ -305,18 +414,3 @@ const selectedCountryTemplate = (option: ExternalCountryEntity, props: any) => {
   return <span>{props.placeholder}</span>;
 };
 
-const getCountryPhoneMask = (country?: ExternalCountryEntity) => {
-  if (country) {
-    const countryCode = country.code as CountryCode;
-    if (!phoneNumberAdapter.existsCountry(countryCode)) return null;
-    const numberExample = phoneNumberAdapter
-      .getExampleNumber(countryCode)
-      ?.formatNational();
-    const countryCallingCode =
-      phoneNumberAdapter.getExampleNumber(countryCode)?.countryCallingCode;
-    const numberReplaceByNine = numberExample?.replace(/[0-9]/g, "9");
-    return `(+${countryCallingCode}) ${numberReplaceByNine}`;
-  }
-
-  return undefined;
-};

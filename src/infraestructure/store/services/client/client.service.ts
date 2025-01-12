@@ -2,7 +2,7 @@ import { constantEnvs } from "@/core/constants/env.const";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiResponse } from "../response";
 import type { ClientEntity } from "@/domain/entities";
-import { RegisterClientDto } from "@/domain/dtos/client";
+import { ClientDto } from "@/domain/dtos/client";
 
 const { VITE_API_URL } = constantEnvs;
 
@@ -15,14 +15,22 @@ export const clientService = createApi({
     credentials: "include",
   }),
   endpoints: (builder) => ({
-    registerClient: builder.mutation<
-      ApiResponse<ClientEntity>,
-      RegisterClientDto
-    >({
-      query: (registerClientDto) => ({
-        url: "/register",
+    createClient: builder.mutation<ApiResponse<ClientEntity>, ClientDto>({
+      query: (createClientDto) => ({
+        url: "/",
         method: "POST",
-        body: registerClientDto,
+        body: createClientDto,
+      }),
+    }),
+
+    updateClient: builder.mutation<
+      ApiResponse<ClientEntity>,
+      ClientDto & { id: number }
+    >({
+      query: (updateClientDto) => ({
+        url: `/${updateClientDto.id}`,
+        method: "PUT",
+        body: updateClientDto,
       }),
     }),
 
@@ -36,7 +44,8 @@ export const clientService = createApi({
 });
 
 export const {
-  useRegisterClientMutation,
+  useCreateClientMutation,
+  useUpdateClientMutation,
   useGetClientByIdQuery,
-  useGetAllClientsQuery,
+  useLazyGetAllClientsQuery
 } = clientService;

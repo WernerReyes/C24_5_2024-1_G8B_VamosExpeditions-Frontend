@@ -1,5 +1,5 @@
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
-import { MultiSelect as MultiSelectPrimereact, type MultiSelectProps } from 'primereact/multiselect';
+import { MultiSelect as MultiSelectPrimereact, type MultiSelectProps, type MultiSelectChangeEvent } from 'primereact/multiselect';
 
 interface Props extends MultiSelectProps {
     label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
@@ -23,3 +23,7 @@ export const MultiSelect = forwardRef<MultiSelectPrimereact, Props>(({ label, sm
         </>
     );
 });
+
+export {
+    MultiSelectChangeEvent
+}

@@ -10,18 +10,15 @@ import { constantRoutes } from "@/core/constants";
 import { useWindowSize } from "@/presentation/hooks";
 import "./Sidebar.css";
 
-
 interface SidebarProps {
   visible: boolean;
   setVisible: (value: boolean) => void;
 }
 
-const { DASHBOARD, QUOTES, NEW_QUOTE } = constantRoutes.private;
+const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
 
 export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
-  const { width, DESKTOP,MACBOOK } = useWindowSize();
-
-
+  const { width, DESKTOP, MACBOOK } = useWindowSize();
 
   const items: MenuItem[] = [
     {
@@ -29,19 +26,12 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
       icon: "pi pi-home",
       url: DASHBOARD,
       template: (e) => <Template {...e} />,
-      // className: "bg-primary p-4",
-      // items: [
-      //   {
-      //     label: "Styled",
-      //     icon: "pi pi-eraser",
-      //     //url: '/theming'
-      //   },
-      //   {
-      //     label: "Unstyled",
-      //     icon: "pi pi-heart",
-      //     //url: '/unstyled'
-      //   },
-      // ],
+    },
+    {
+      label: "Reservaciones",
+      icon: "pi pi-bookmark",
+      url: RESERVATIONS,
+      template: (e) => <Template {...e} />,
     },
     {
       label: "Cotizaciones",
@@ -53,34 +43,15 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
           icon: "pi pi-plus-circle",
           url: NEW_QUOTE,
           template: (e) => <Template {...e} />,
-          // url: '/new-quote'
         },
         {
           label: "Listado de Cotizaciones",
           icon: "pi pi-book",
           template: (e) => <Template {...e} />,
           url: QUOTES,
-          //url: '/quotes'
         },
       ],
     },
-
-    // {
-    //   label: "Usuarios",
-    //   icon: "pi pi-users",
-    //   items: [
-    //     {
-    //       label: "React.js",
-    //       icon: "pi pi-star",
-    //       // url: 'https://react.dev/'
-    //     },
-    //     {
-    //       label: "Vite.js",
-    //       icon: "pi pi-bookmark",
-    //       //url: 'https://vite.dev/'
-    //     },
-    //   ],
-    // },
   ];
 
   return (
@@ -89,7 +60,6 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
         <Image src="/images/logo.png" alt="Logo" width="200" height="200" />
       )}
       onHide={() => setVisible(false)}
-      /* closeOnEscape={true} */
       visible={visible}
       className="w-72"
       baseZIndex={width < MACBOOK ? 1000 : 0}

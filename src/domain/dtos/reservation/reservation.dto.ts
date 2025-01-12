@@ -1,9 +1,10 @@
-import { requestValidator } from "@/core/utils";
+import { generateEmptyObject, requestValidator } from "@/core/utils";
 import {
   clientEntitySchema,
   type ClientEntity,
   OrderType,
   TravelerStyle,
+  clientEntityEmpty,
 } from "@/domain/entities";
 import { z } from "zod";
 
@@ -107,3 +108,15 @@ export const reservationDtoSchema = z.object({
     message: "El campo especificaciones especiales es requerido",
   }),
 });
+
+const defaultValues = {
+  client: clientEntityEmpty,
+  travelerStyle: TravelerStyle.COMFORT,
+  orderType: OrderType.DIRECT,
+};
+
+export const reservationDtoEmpty = generateEmptyObject<ReservationDto>(
+  reservationDtoSchema,
+  defaultValues
+);
+
