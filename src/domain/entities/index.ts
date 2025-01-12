@@ -9,3 +9,4 @@ export * from './accommodationRoom.entity';
 export * from './accommodationQuote.entity';
 export * from './client.entity';
 export * from './reservation.entity';
+export * from './hotel.entity'

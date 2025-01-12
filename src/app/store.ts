@@ -5,7 +5,10 @@ import {
   externalCountryService,
   clientService,
   reservationService,
+  accommodationRoomService,
+  
 } from "@/infraestructure/store/services";
+
 import {
   authSlice,
   quoteSlice,
@@ -17,7 +20,10 @@ import {
   nationSlice,
   cookieExpirationSlice,
   reservationSlice,
+  
 } from "@/infraestructure/store";
+
+
 
 export const store = configureStore({
   reducer: {
@@ -36,6 +42,8 @@ export const store = configureStore({
     [clientService.reducerPath]: clientService.reducer,
     [reservationService.reducerPath]: reservationService.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
+    [accommodationRoomService.reducerPath]: accommodationRoomService.reducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -46,6 +54,8 @@ export const store = configureStore({
       .concat(clientService.middleware)
       .concat(reservationService.middleware)
       .concat(externalCountryService.middleware)
+      .concat(accommodationRoomService.middleware),
+      
 });
 
 export type AppState = ReturnType<typeof store.getState>;

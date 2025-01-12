@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { accommodationRoomService } from "../services/accommodationRoom";
 import { onSetAccommodationRooms, type AppState } from "../store";
 
+
 export const useAccommodationRoomStore = () => {
   const dispatch = useDispatch();
   const { accommodationRooms, selectedAccommodationRoom } = useSelector(
@@ -17,6 +18,15 @@ export const useAccommodationRoomStore = () => {
     }
   };
 
+/*   const getCountryAndCity = async (db: CityEntity | null) => {
+    try {
+      console.log(await accommodationRoomService.countryAndCity(db));
+      
+    } catch (error) {
+      throw error;
+    }
+  }; */
+
   return {
     //* Atributtes
     accommodationRooms,
@@ -24,5 +34,6 @@ export const useAccommodationRoomStore = () => {
 
     //* Actions
     startGetAllAccommodationRooms,
+    /* getCountryAndCity, */
   };
 };
