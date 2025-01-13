@@ -4,7 +4,7 @@ import { regex } from "@/core/constants";
 import {
   type ExternalCountryEntity,
   externalCountryEntitySchema,
-} from "@/infraestructure/store/services/external/country";
+} from "@/infraestructure/store/services";
 
 const { EMAIL, PHONE } = regex;
 

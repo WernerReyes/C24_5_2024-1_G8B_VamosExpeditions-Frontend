@@ -10,14 +10,17 @@ import {
 import type { CityEntity } from "@/domain/entities";
 
 export const CostingModule = () => {
-  const { currentReservation, startUpdatingReservatioTravelDates } =useReservationStore();
- 
+  const { currentReservation, startUpdatingReservatioTravelDates } =
+    useReservationStore();
+
   const { CountryAndCity } = useAccommodationQuoteStore();
 
   const [[startDate, endDate], setDateRange] = useState<
     [Date | null, Date | null]
   >([null, null]);
-  const [selectedCity, setSelectedCity] = useState<CityEntity | null>(null);
+  const [selectedCity, setSelectedCity] = useState<CityEntity | undefined>(
+    undefined
+  );
   const [isDateRangeChanged, setIsDateRangeChanged] = useState(false);
 
   const handleCitySelection = (city: CityEntity) => {
@@ -42,7 +45,6 @@ export const CostingModule = () => {
 
   useEffect(() => {
     if (isDateRangeChanged) {
-      /* console.log({ startDate, endDate }); */
       startUpdatingReservatioTravelDates([startDate!, endDate!]).then(() => {
         setIsDateRangeChanged(false);
       });
@@ -57,7 +59,7 @@ export const CostingModule = () => {
           icon="pi pi-plus"
           className="lg:max-w-52"
           model={
-            currentReservation?.cities.map((city: CityEntity) => ({
+            currentReservation?.cities?.map((city: CityEntity) => ({
               label: city.name,
               command: () => handleCitySelection(city),
               className: classNamesAdapter(
@@ -90,9 +92,7 @@ export const CostingModule = () => {
           readOnlyInput
         />
       </div>
-      <Itinerary
-        selectedCity={selectedCity ?? currentReservation!.cities![0]}
-      />
+      <Itinerary selectedCity={selectedCity} />
     </div>
   );
 };

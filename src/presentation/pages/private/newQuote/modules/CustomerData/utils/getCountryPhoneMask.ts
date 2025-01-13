@@ -1,5 +1,5 @@
 import { phoneNumberAdapter, type CountryCode } from "@/core/adapters";
-import type { ExternalCountryEntity } from "@/infraestructure/store/services/external/country";
+import type { ExternalCountryEntity } from "@/infraestructure/store/services";
 
 export const getCountryPhoneMask = (country?: ExternalCountryEntity) => {
   if (country) {

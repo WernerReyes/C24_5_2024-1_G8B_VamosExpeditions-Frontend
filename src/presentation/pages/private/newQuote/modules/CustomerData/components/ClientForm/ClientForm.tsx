@@ -25,7 +25,7 @@ import {
 
 import Style from "../Style.module.css";
 
-import type { ExternalCountryEntity } from "@/infraestructure/store/services/external/country";
+import type { ExternalCountryEntity } from "@/infraestructure/store/services";
 import {
   useClientStore,
   useExternalCountryStore,

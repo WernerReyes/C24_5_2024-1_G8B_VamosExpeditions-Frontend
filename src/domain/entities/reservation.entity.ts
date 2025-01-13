@@ -13,7 +13,7 @@ export enum ReservationStatus {
 
 export const reservationStatusRender: Record<
   ReservationStatus,
-  { label: string; severity: Severity, icon: string }
+  { label: string; severity: Severity; icon: string }
 > = {
   ACTIVE: {
     label: "Activa",
@@ -82,7 +82,6 @@ export const orderTypeRender: Record<
 
 const reservationEntitySchema = z.object({
   id: z.number().int().positive().min(1),
-  client: clientEntitySchema,
   numberOfPeople: z.number(),
   startDate: z.date(),
   endDate: z.date(),
@@ -91,7 +90,8 @@ const reservationEntitySchema = z.object({
   orderType: z.nativeEnum(OrderType),
   status: z.nativeEnum(ReservationStatus),
   specialSpecifications: z.string().optional(),
-  cities: z.array(cityEntitySchema),
+  client: z.object(clientEntitySchema.shape).optional(),
+  cities: z.array(cityEntitySchema).optional(),
 });
 
 export type ReservationEntity = z.infer<typeof reservationEntitySchema>;

@@ -6,6 +6,8 @@ import {
   clientService,
   reservationService,
   accommodationRoomService,
+  countryService,
+  hotelService,
   
 } from "@/infraestructure/store/services";
 
@@ -17,9 +19,10 @@ import {
   quotationSlice,
   clientSlice,
   externalCountrySlice,
-  nationSlice,
+  countrySlice,
   cookieExpirationSlice,
   reservationSlice,
+  hotelSlice,
   
 } from "@/infraestructure/store";
 
@@ -29,17 +32,20 @@ export const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
     quote: quoteSlice.reducer,
+    hotel: hotelSlice.reducer,
     accommodationRoom: accommodationRoomSlice.reducer,
     accommodationQuote: accommodationQuoteSlice.reducer,
     quotation: quotationSlice.reducer,
     client: clientSlice.reducer,
     externalCountry: externalCountrySlice.reducer,
-    nation: nationSlice.reducer,
+    country: countrySlice.reducer,
     reservation: reservationSlice.reducer,
     cookieExpiration: cookieExpirationSlice.reducer,
     [quoteService.reducerPath]: quoteService.reducer,
     [authService.reducerPath]: authService.reducer,
+    [countryService.reducerPath]: countryService.reducer,
     [clientService.reducerPath]: clientService.reducer,
+    [hotelService.reducerPath]: hotelService.reducer,
     [reservationService.reducerPath]: reservationService.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
     [accommodationRoomService.reducerPath]: accommodationRoomService.reducer,
@@ -51,7 +57,9 @@ export const store = configureStore({
     })
       .concat(quoteService.middleware)
       .concat(authService.middleware)
+      .concat(countryService.middleware)
       .concat(clientService.middleware)
+      .concat(hotelService.middleware)
       .concat(reservationService.middleware)
       .concat(externalCountryService.middleware)
       .concat(accommodationRoomService.middleware),

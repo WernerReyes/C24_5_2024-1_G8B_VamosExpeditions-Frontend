@@ -1,16 +1,16 @@
 import { CountryEntity } from "@/domain/entities";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-export type NationSliceState = {
-  nations: CountryEntity[];
+type countrySliceState = {
+  countries: CountryEntity[];
 };
 
-const initialState: NationSliceState = {
-  nations: [],
+const initialState: countrySliceState = {
+  countries: [],
 };
 
-export const nationSlice = createSlice({
-  name: "nation",
+export const countrySlice = createSlice({
+  name: "country",
   initialState,
   reducers: {
     onSetCountries: (
@@ -19,10 +19,10 @@ export const nationSlice = createSlice({
     ) => {
       return {
         ...state,
-        nations: payload,
+        countries: payload,
       };
     },
   },
 });
 
-export const { onSetCountries } = nationSlice.actions;
+export const { onSetCountries } = countrySlice.actions;

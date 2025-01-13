@@ -1,6 +1,6 @@
 import { Button } from "@/presentation/components";
 import { useState } from "react";
-import { AccommodiationsList } from "./components/AccommodiationsList";
+import { HotelList } from "./components/HotelList";
 import { AccommodiationsListDetails } from "./components/AccommodiationsListDetails";
 import type { Day } from "../Itineraty";
 
@@ -27,7 +27,7 @@ export const Accommodiations = ({ selectedDay }: Props) => {
 
       <AccommodiationsListDetails selectedDay={selectedDay} />
 
-      <AccommodiationsList
+      <HotelList
         visible={visible}
         setVisible={setVisible}
         selectedDay={selectedDay}

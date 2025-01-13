@@ -50,7 +50,7 @@ export const reservationSlice = createSlice({
           ...payload,
         },
         reservations: state.reservations.map((reservation) => {
-          if (reservation.client.id === payload.client.id) {
+          if (reservation.client?.id === payload.client?.id) {
             return {
               ...reservation,
               client: payload.client,

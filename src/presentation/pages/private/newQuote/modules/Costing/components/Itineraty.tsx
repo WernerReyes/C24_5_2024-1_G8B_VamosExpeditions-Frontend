@@ -38,7 +38,7 @@ export interface Day {
   date: string;
 }
 type Props = {
-  selectedCity: CityEntity;
+  selectedCity?: CityEntity;
 };
 
 export const Itinerary = ({ selectedCity }: Props) => {
@@ -186,7 +186,7 @@ export const Itinerary = ({ selectedCity }: Props) => {
       {/* Main Content */}
       <div className="flex-1 md:ps-6 order-1 lg:order-2">
         <h2 className="text-4xl font-bold text-tertiary">
-          {selectedDay?.name} - {selectedCity.name}
+          {selectedDay?.name} - {selectedCity?.name}
         </h2>
         <p className="text-primary mb-4">{selectedDay?.date}</p>
 

@@ -21,7 +21,7 @@ import {
   reservationDtoSchema,
   type ReservationDto,
 } from "@/domain/dtos/reservation";
-import { useNationStore, useReservationStore } from "@/infraestructure/hooks";
+import { useCountryStore, useReservationStore } from "@/infraestructure/hooks";
 
 import ReservationFormStyle from "./ReservationForm.module.css";
 import { OrderType, TravelerStyle } from "@/domain/entities";
@@ -55,7 +55,7 @@ export const ReservationForm = () => {
     startSelectingClient,
     getAllClientsResult: { isGettingAllClients },
   } = useClientStore();
-  const { nations, getNations } = useNationStore();
+  const { countries, startGettingCountries } = useCountryStore();
   const [isContentLoading, setIsContentLoading] = useState(true);
 
   const handleReservation = (reservationDto: ReservationDto) => {
@@ -74,9 +74,8 @@ export const ReservationForm = () => {
   };
 
   useEffect(() => {
-    // startGetClients();
     startGettingAllClients();
-    getNations();
+    startGettingCountries();
   }, []);
 
   useEffect(() => {
@@ -99,7 +98,7 @@ export const ReservationForm = () => {
         code,
         travelerStyle,
         orderType,
-        destination: cities.reduce(
+        destination: cities?.reduce(
           (acc, city) => ({ ...acc, [city.id]: true }),
           {}
         ),
@@ -250,7 +249,7 @@ export const ReservationForm = () => {
             name="destination"
             render={({ field, fieldState: { error } }) => (
               <TreeSelect
-                options={transformDataToTree(nations)}
+                options={transformDataToTree(countries)}
                 selectionMode="multiple"
                 showClear
                 filter

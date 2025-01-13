@@ -23,10 +23,12 @@ export const CustomerDataModule = memo(() => {
     },
     startGettingAllReservations,
   } = useReservationStore();
+  const [reservation, setReservation] = useState<ReservationEntity>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleReservationChange = (e: DropdownChangeEvent) =>
+  const handleReservationChange = (e: DropdownChangeEvent) => {
     startChangingCurrentReservation(e.value);
+  };
 
   useEffect(() => {
     startGettingAllReservations({
@@ -35,6 +37,17 @@ export const CustomerDataModule = memo(() => {
       setIsLoading(false);
     });
   }, []);
+  useEffect(() => {
+    if (currentReservation) {
+      setReservation({
+        ...currentReservation,
+        startDate: dateFnsAdapter.toISO(currentReservation.startDate) as any,
+        endDate: dateFnsAdapter.toISO(currentReservation.endDate) as any,
+      });
+    }
+  }, [currentReservation]);
+
+  console.log(reservation);
 
   return (
     <>
@@ -82,11 +95,11 @@ export const CustomerDataModule = memo(() => {
               htmlFor: "reservation",
             }}
             options={reservations}
-            value={currentReservation}
+            value={reservation}
             onChange={handleReservationChange}
-            optionLabel="code"
             placeholder="Seleccione una reserva"
             loading={isGettingAllReservations}
+            highlightOnSelect
             valueTemplate={(reservation: ReservationEntity, props) => {
               if (!reservation && !currentReservation)
                 return <span>{props.placeholder}</span>;
@@ -94,6 +107,7 @@ export const CustomerDataModule = memo(() => {
                 <ItemTemplate reservation={reservation || currentReservation} />
               );
             }}
+            checkmark
             itemTemplate={(reservation: ReservationEntity) => (
               <ItemTemplate reservation={reservation} />
             )}
@@ -111,7 +125,7 @@ export const CustomerDataModule = memo(() => {
 const ItemTemplate = ({ reservation }: { reservation: ReservationEntity }) => (
   <div className="flex flex-col">
     <span className="font-medium">
-      {reservation.client.fullName} - {reservation.code}
+      {reservation.client?.fullName} - {reservation.code}
     </span>
     <span className="text-sm text-gray-500">
       {dateFnsAdapter.format(reservation.startDate, "yyyy-MM-dd")} hasta{" "}

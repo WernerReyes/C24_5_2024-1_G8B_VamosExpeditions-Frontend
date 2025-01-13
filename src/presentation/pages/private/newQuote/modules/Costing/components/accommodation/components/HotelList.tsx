@@ -12,12 +12,13 @@ import {
   OrderList,
 } from "@/presentation/components";
 import { classNamesAdapter } from "@/core/adapters";
-import { AccommodationRoomEntity } from "@/domain/entities";
 import {
   useAccommodationQuoteStore,
   useAccommodationRoomStore,
+  useHotelStore,
 } from "@/infraestructure/hooks";
 import { Day } from "../../Itineraty";
+import { HotelEntity } from "@/domain/entities";
 
 /* interface Item {
   id: number;
@@ -121,30 +122,37 @@ type Props = {
   selectedDay: Day;
 };
 
-export const AccommodiationsList = ({
+export const HotelList = ({
   visible,
   setVisible,
   selectedDay,
 }: Props) => {
-  const { accommodationRooms, startGetAllAccommodationRooms } =
-    useAccommodationRoomStore();
+  // const { accommodationRooms, startGetAllAccommodationRooms } =
+  //   useAccommodationRoomStore();
+  const {
+    hotels,
+    startGetAllHotels,
+    getHotelsResult: {
+      isGettingAllHotels,
+    }
+  } = useHotelStore();
 
   const { startSetLocalAccommodationQuote } = useAccommodationQuoteStore();
   const [layout, setLayout] = useState<"grid" | "list">("grid");
   const [value, setValue] = useState<number>(0);
   const [customerNumbers, setCustomerNumbers] = useState<Map<number, number>>();
-  const [accommodationRoomsFiltered, setAccommodationRoomsFiltered] = useState<
-    AccommodationRoomEntity[]
+  const [hotelsFiltered, setHotelsFiltered] = useState<
+    HotelEntity[]
   >([]);
   const [hotelFilter, setHotelFilter] = useState("");
   const [ratingFilter, setRatingFilter] = useState(0);
 
   const applyFilters = () => {
-    let filtered = accommodationRooms;
+    let filtered = hotels;
 
     if (hotelFilter) {
-      filtered = filtered.filter((room) =>
-        room.accommodation.name
+      filtered = filtered.filter((hotel) =>
+        hotel.name
           .toLowerCase()
           .includes(hotelFilter.toLowerCase())
       );
@@ -152,11 +160,11 @@ export const AccommodiationsList = ({
 
     if (ratingFilter > 0) {
       filtered = filtered.filter(
-        (room) => room.accommodation.rating === ratingFilter
+        (hotel) => hotel.rating === ratingFilter
       );
     }
 
-    setAccommodationRoomsFiltered(filtered);
+    setHotelsFiltered(filtered);
   };
 
   const handleCustomerNumbersChange = (index: number, value: number) => {
@@ -174,19 +182,19 @@ export const AccommodiationsList = ({
   };
 
   useEffect(() => {
-    startGetAllAccommodationRooms();
+    startGetAllHotels({});
   }, []);
 
   useEffect(() => {
-    setAccommodationRoomsFiltered(accommodationRooms);
-    setCustomerNumbers(new Map(accommodationRooms.map((room) => [room.id, 0])));
-  }, [accommodationRooms]);
+    setHotelsFiltered(hotels);
+    // setCustomerNumbers(new Map(accommodationRooms.map((room) => [room.id, 0])));
+  }, [hotels]);
 
   useEffect(() => {
     applyFilters();
   }, [hotelFilter, ratingFilter]);
 
-  const listItem = (product: AccommodationRoomEntity, index: number) => {
+  const listItem = (product: HotelEntity, index: number) => {
     const id = customerNumbers?.get(product.id) ?? 0;
     return (
       <div className="w-full" key={product.id}>
@@ -198,14 +206,14 @@ export const AccommodiationsList = ({
           <div className="flex flex-col sm:flex-row justify-between items-center xl:items-start flex-1 gap-4">
             <div className="flex flex-col items-center sm:items-start gap-3">
               <div className="text-2xl font-bold text-gray-900">
-                {product.accommodation.name}
+                {product.name}
               </div>
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
                   <i
                     key={i}
                     className={`pi ${
-                      i < product.accommodation.rating
+                      i < product.rating
                         ? "text-primary pi-star-fill"
                         : "text-primary pi-star"
                     }`}
@@ -216,17 +224,17 @@ export const AccommodiationsList = ({
                 <span className="flex items-center gap-2">
                   <i className="pi pi-tag text-gray-500"></i>
                   <span className="font-semibold text-gray-700">
-                    {product.roomType}
+                    {product.category}
                   </span>
                 </span>
-                <Tag
+                {/* <Tag
                   value={product.available ? "DISPONIBLE" : "No DISPONIBLE"}
                   severity={product.available ? "success" : "danger"}
-                />
+                /> */}
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 my-5">
+            {/* <div className="flex items-center justify-between gap-3 my-5">
               <div className="flex items-center gap-3 my-5">
                 <i
                   className={classNamesAdapter(
@@ -256,8 +264,8 @@ export const AccommodiationsList = ({
                   disabled={!product.available}
                 />
               </div>
-            </div>
-            <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2">
+            </div> */}
+            {/* <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2">
               <span className="text-2xl font-semibold text-gray-900">
                 ${product.priceUsd}
               </span>
@@ -289,14 +297,14 @@ export const AccommodiationsList = ({
                   }, 1000);
                 }}
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
     );
   };
 
-  const gridItem = (product: AccommodationRoomEntity, index: number) => {
+  const gridItem = (product: HotelEntity, index: number) => {
     const id = customerNumbers?.get(product.id) ?? 0;
 
     const [activeRoom, setActiveRoom] = useState<number | number[]>();
@@ -319,7 +327,7 @@ export const AccommodiationsList = ({
     return (
       <div className="mt-5" key={index}>
         <div className="p-4 border border-gray-300 bg-white rounded-lg shadow">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <i className="pi pi-tag text-gray-500"></i>
               <span className="font-semibold text-gray-700">
@@ -330,8 +338,8 @@ export const AccommodiationsList = ({
               value={product.available ? "DISPONIBLE" : "No DISPONIBLE"}
               severity={product.available ? "success" : "danger"}
             />
-          </div>
-          <div className="flex flex-col items-center gap-3 py-5">
+          </div> */}
+          {/* <div className="flex flex-col items-center gap-3 py-5">
             <div className="text-2xl font-bold text-gray-900">
               {product.accommodation.name}
             </div>
@@ -347,8 +355,8 @@ export const AccommodiationsList = ({
                 ></i>
               ))}
             </div>
-          </div>
-          <div className="flex items-center justify-between gap-3 my-5">
+          </div> */}
+          {/* <div className="flex items-center justify-between gap-3 my-5">
             <div className="flex items-center gap-3 my-5">
               <i
                 className={classNamesAdapter(
@@ -378,8 +386,8 @@ export const AccommodiationsList = ({
                 disabled={!product.available}
               />
             </div>
-          </div>
-
+          </div> */}
+{/* 
           <div className="flex items-center justify-between">
             <span className="text-2xl font-semibold text-gray-900">
               ${product.priceUsd}
@@ -410,7 +418,7 @@ export const AccommodiationsList = ({
                 }, 1000);
               }}
             />
-          </div>
+          </div> */}
 
           <Accordion
             includeTab
@@ -435,7 +443,7 @@ export const AccommodiationsList = ({
   };
 
   const itemTemplate = (
-    product: AccommodationRoomEntity,
+    product: HotelEntity,
     layout: "grid" | "list",
     index: number
   ) => {
@@ -448,7 +456,7 @@ export const AccommodiationsList = ({
   };
 
   const listTemplate = (
-    products: AccommodationRoomEntity[],
+    products: HotelEntity[],
     layout: "grid" | "list"
   ) => {
     return (
@@ -559,7 +567,7 @@ export const AccommodiationsList = ({
     >
       <div className="card">
         <DataView
-          value={accommodationRoomsFiltered}
+          value={hotelsFiltered}
           listTemplate={listTemplate}
           layout={layout}
           header={header()}
