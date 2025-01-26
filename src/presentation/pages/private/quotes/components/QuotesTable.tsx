@@ -22,8 +22,8 @@ import {
 import { filterByName, getQuoteSeverity } from "../utils";
 import { QuoteVersionsTable } from "./QuoteVersionsTable";
 import { TableActions } from "./TableActions";
-import { useGetQuotesQuery } from "@/infraestructure/store/services";
 import { dateFnsAdapter } from "@/core/adapters";
+import { useQuoteStore } from "@/infraestructure/hooks";
 
 const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
   {
@@ -46,15 +46,22 @@ const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
 
 export const QuotesTable = () => {
   const {
-    data: quotes = [],
-    isLoading,
-    error,
-    refetch,
-    isFetching,
-  } = useGetQuotesQuery(null);
+    quotes,
+    startGetQuotes,
+    getQuotesResult: {
+      isGettingQuotes,
+      isFetching,
+      error,
+      refetch,
+    }
+   } = useQuoteStore()
   const [representatives, setRepresentatives] = useState<
     { id: number; name: string }[]
   >([]);
+
+  useEffect(() => {
+    startGetQuotes();
+  }, []);
 
   useEffect(() => {
     if (!quotes.length && !!error) return;
@@ -66,6 +73,8 @@ export const QuotesTable = () => {
     });
     setRepresentatives(uniqueRepresentatives);
   }, [quotes]);
+
+  console.log(quotes);
 
   return (
     <ErrorBoundary
@@ -79,7 +88,7 @@ export const QuotesTable = () => {
               <DefaultFallBackComponent
                 refetch={refetch}
                 isFetching={isFetching}
-                isLoading={isLoading}
+                isLoading={isGettingQuotes}
                 message="No se pudieron cargar las cotizaciones"
               />
             </div>
@@ -92,7 +101,7 @@ export const QuotesTable = () => {
         <Table
           quotes={quotes}
           representatives={representatives}
-          isLoading={isLoading}
+          isLoading={isGettingQuotes}
         />
       </div>
     </ErrorBoundary>

@@ -283,11 +283,11 @@
 import {
   Button,
   Stepper,
+  type StepperChangeEvent,
   toasterAdapter,
 } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
 import { useEffect, useState } from "react";
-import { MainLayout } from "../layouts";
 import {
   CostingModule,
   CostSummaryModule,
@@ -297,7 +297,18 @@ import {
 import { constantRoutes, constantStorage } from "@/core/constants";
 import { InputText } from "primereact/inputtext";
 import { Slider } from "primereact/slider";
-import { useReservationStore } from "@/infraestructure/hooks";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppState } from "@/app/store";
+import {
+  useGetAllHotelRoomQuotationsQuery,
+  useGetReservationByIdQuery,
+  useGetVersionQuotationByIdQuery,
+} from "@/infraestructure/store/services";
+import {
+  onSetCurrentReservation,
+  onSetCurrentStep,
+  onSetHotelRoomQuotations,
+} from "@/infraestructure/store";
 
 const { CURRENT_ACTIVE_STEP } = constantStorage;
 const { QUOTES } = constantRoutes.private;
@@ -404,95 +415,125 @@ const renderStepContent = (step: number): React.ReactNode => {
 };
 
 const NewQuotePage = () => {
+  const dispatch = useDispatch();
   const { width, DESKTOP } = useWindowSize();
-  const [activeStep, setActiveStep] = useState(
-    localStorage.getItem(CURRENT_ACTIVE_STEP)
-      ? +localStorage.getItem(CURRENT_ACTIVE_STEP)!
-      : 0
+
+  const { currentQuotation, currentStep } = useSelector(
+    (state: AppState) => state.quotation
   );
-  const { currentReservation, startGettingCurrentReservation } = useReservationStore();
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+  const { currentReservation } = useSelector(
+    (state: AppState) => state.reservation
+  );
+
+  const versionQuotationId = currentQuotation?.currentVersion?.id;
+  const reservationId = currentVersionQuotation?.reservation?.id;
+
+  const { data: HotelRoomQuotations } = useGetAllHotelRoomQuotationsQuery(
+    {
+      versionNumber: versionQuotationId?.versionNumber,
+      quotationId: versionQuotationId?.quotationId,
+    },
+    {
+      skip: !versionQuotationId,
+    }
+  );
+
+  useGetVersionQuotationByIdQuery(versionQuotationId!, {
+    skip: !versionQuotationId,
+  });
+
+  const { data: reservationData } = useGetReservationByIdQuery(reservationId!, {
+    skip: !reservationId || currentReservation !== null,
+  });
+
   const [isLoadingStep, setIsLoadingStep] = useState(true);
 
   const handleNext = () => {
-    if (activeStep < steps.length - 1) {
-      setActiveStep((prevStep) => prevStep + 1);
-      localStorage.setItem(CURRENT_ACTIVE_STEP, (activeStep + 1).toString());
+    if (currentStep < steps.length - 1) {
+      dispatch(onSetCurrentStep(currentStep + 1));
     }
   };
 
   const handleBack = () => {
-    if (activeStep > 0) {
-      setActiveStep((prevStep) => prevStep - 1);
-      localStorage.setItem(CURRENT_ACTIVE_STEP, (activeStep - 1).toString());
+    if (currentStep > 0) {
+      dispatch(onSetCurrentStep(currentStep - 1));
     }
   };
 
-  const handleChangeStep = (event: any) => {
-    setActiveStep(event.index);
+  const handleChangeStep = (event: StepperChangeEvent) => {
+    dispatch(onSetCurrentStep(event.index));
   };
 
-   useEffect(() => {
-      startGettingCurrentReservation();
-    }, []);
-  
-
   useEffect(() => {
-    const currentStep = localStorage.getItem(CURRENT_ACTIVE_STEP);
-    if (currentStep)  setActiveStep(+currentStep);
-  }, []);
+    if (reservationData) {
+      dispatch(onSetCurrentReservation(reservationData.data));
+    }
+  }, [reservationData]);
+
+  // useEffect(() => {
+  //   if (HotelRoomQuotations) {
+  //     dispatch(onSetHotelRoomQuotations(HotelRoomQuotations.data));
+  //   }
+  // }, [HotelRoomQuotations]);
+
+  // useEffect(() => {
+  //   if (currentReservation) {
+  //   }
+  // }, [currentReservation]);
 
   useEffect(() => {
     setIsLoadingStep(true);
     setTimeout(() => {
       setIsLoadingStep(false);
     }, 500);
-  }, [activeStep]);
+  }, [currentStep]);
 
   return (
-    <MainLayout>
-      <section className="bg-white pe-7 py-5 md:p-10 rounded-lg my-auto shadow-md">
-        <Stepper
-          linear
-          orientation={width > DESKTOP ? "horizontal" : "vertical"}
-          includePanel
-          activeStep={activeStep}
-          onChangeStep={handleChangeStep}
-          panelContent={steps.map((step, index) => ({
-            header: step.header,
+    <section className="bg-white pe-7 py-5 md:p-10 rounded-lg my-auto shadow-md">
+      <Stepper
+        linear
+        orientation={width > DESKTOP ? "horizontal" : "vertical"}
+        includePanel
+        activeStep={currentStep}
+        onChangeStep={handleChangeStep}
+        panelContent={steps.map((step, index) => ({
+          header: step.header,
 
-            children: !isLoadingStep ? (
-              <>
-                {renderStepContent(index)}
-                <div className="flex pt-4 justify-between">
-                  {index > 0 && (
-                    <Button
-                      label="Back"
-                      severity="secondary"
-                      icon="pi pi-arrow-left"
-                      onClick={handleBack}
-                    />
-                  )}
+          children: !isLoadingStep ? (
+            <>
+              {renderStepContent(index)}
+              <div className="flex pt-4 justify-between">
+                {index > 0 && (
+                  <Button
+                    label="Back"
+                    severity="secondary"
+                    icon="pi pi-arrow-left"
+                    onClick={handleBack}
+                  />
+                )}
 
-                  {index < steps.length - 1 && (
-                    <Button
-                      label="Confirmar y Continuar"
-                      icon="pi pi-arrow-right"
-                      iconPos="right"
-                      onClick={handleNext}
-                      disabled={activeStep === 0 && !currentReservation}
-                    />
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="flex justify-center items-center h-96 lg:h-[30rem]">
-                <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
+                {index < steps.length - 1 && (
+                  <Button
+                    label="Confirmar y Continuar"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    onClick={handleNext}
+                    disabled={currentStep === 0 && !currentReservation}
+                  />
+                )}
               </div>
-            ),
-          }))}
-        />
-      </section>
-    </MainLayout>
+            </>
+          ) : (
+            <div className="flex justify-center items-center h-96 lg:h-[30rem]">
+              <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
+            </div>
+          ),
+        }))}
+      />
+    </section>
   );
 };
 

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect } from "react";
 import { ClientForm, ReservationForm } from "./components";
 import {
   DefaultFallBackComponent,
@@ -6,53 +6,86 @@ import {
   type DropdownChangeEvent,
   ErrorBoundary,
 } from "@/presentation/components";
-import { ReservationEntity, ReservationStatus } from "@/domain/entities";
+import { ReservationStatus, ReservationEntity } from "@/domain/entities";
 import { dateFnsAdapter } from "@/core/adapters";
-import { useReservationStore } from "@/infraestructure/hooks";
+
+import {
+  useGetAllReservationsQuery,
+  useUpdateVersionQuotationMutation,
+} from "@/infraestructure/store/services";
+import { useDispatch, useSelector } from "react-redux";
+import { AppState } from "@/app/store";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+import { onSetCurrentReservation } from "@/infraestructure/store";
 
 export const CustomerDataModule = memo(() => {
-  const {
-    reservations,
-    currentReservation,
-    startChangingCurrentReservation,
-    getAllReservationsResult: {
-      isGettingAllReservations,
-      isFetching,
-      error,
-      refetch,
-    },
-    startGettingAllReservations,
-  } = useReservationStore();
-  const [reservation, setReservation] = useState<ReservationEntity>();
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
 
-  const handleReservationChange = (e: DropdownChangeEvent) => {
-    startChangingCurrentReservation(e.value);
+  const { currentReservation, reservations } = useSelector(
+    (state: AppState) => state.reservation
+  );
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+
+  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
+  const {
+    isLoading: isGettingAllReservations,
+    isFetching,
+    error,
+    refetch,
+  } = useGetAllReservationsQuery({
+    status: ReservationStatus.PENDING,
+    quotationId: currentVersionQuotation?.id.quotationId!,
+    versionNumber: currentVersionQuotation?.id.versionNumber!,
+  }, {
+    skip: !currentVersionQuotation,
+  });
+
+
+  const handleReservationChange = async (e: DropdownChangeEvent) => {
+    if (!e.value) return;
+    const reservation = e.value as ReservationEntity;
+    if (currentVersionQuotation) {
+      await updateVersionQuotation(
+        versionQuotationDto.parse({
+          ...currentVersionQuotation,
+          reservation,
+        })
+      )
+        .unwrap()
+        .then(() => {
+          dispatch(onSetCurrentReservation(reservation));
+        });
+    }
   };
 
-  useEffect(() => {
-    startGettingAllReservations({
-      status: ReservationStatus.PENDING,
-    }).then(() => {
-      setIsLoading(false);
-    });
-  }, []);
-  useEffect(() => {
-    if (currentReservation) {
-      setReservation({
-        ...currentReservation,
-        startDate: dateFnsAdapter.toISO(currentReservation.startDate) as any,
-        endDate: dateFnsAdapter.toISO(currentReservation.endDate) as any,
-      });
-    }
-  }, [currentReservation]);
+  // useEffect(() => {
+  //   if (currentVersionQuotation) {
+  //     updateVersionQuotation(
+  //       versionQuotationDto().parse({
+  //         ...currentVersionQuotation,
+  //         reservation: currentReservation ?? undefined,
+  //       })
+  //     );
+  //   }
+  // }, [currentReservation]);
 
-  console.log(reservation);
+  // useEffect(() => {
+  //   if (selectedClient && currentReservation) {
+  //     dispatch(
+  //       onSetCurrentReservation({
+  //         ...currentReservation,
+  //         client: selectedClient,
+  //       })
+  //     );
+  //   }
+  // }, [selectedClient]);
 
   return (
     <>
       <ErrorBoundary
-        isLoader={isGettingAllReservations || isLoading}
+        isLoader={isGettingAllReservations}
         loadingComponent={
           <div className="font-bold flex flex-col gap-2 mb-5">
             <Dropdown
@@ -63,7 +96,7 @@ export const CustomerDataModule = memo(() => {
               skeleton={{
                 height: "4rem",
               }}
-              loading={isLoading}
+              loading={isFetching}
               options={[]}
               className="container"
             />
@@ -75,11 +108,7 @@ export const CustomerDataModule = memo(() => {
               Reservas pendientes
             </label>
             <DefaultFallBackComponent
-              refetch={() =>
-                refetch({
-                  status: ReservationStatus.PENDING,
-                })
-              }
+              refetch={refetch}
               isFetching={isFetching}
               isLoading={isGettingAllReservations}
               message="No se pudo cargar la lista de reservas pendientes"
@@ -95,11 +124,12 @@ export const CustomerDataModule = memo(() => {
               htmlFor: "reservation",
             }}
             options={reservations}
-            value={reservation}
+            value={currentReservation}
             onChange={handleReservationChange}
             placeholder="Seleccione una reserva"
             loading={isGettingAllReservations}
             highlightOnSelect
+            emptyMessage="No hay reservas pendientes"
             valueTemplate={(reservation: ReservationEntity, props) => {
               if (!reservation && !currentReservation)
                 return <span>{props.placeholder}</span>;

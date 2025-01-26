@@ -1,64 +1,86 @@
-// import type { ApiResponse } from "@/config";
-// import { constantEnvs } from "@/core/constants/env.const";
-// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import type { ExternalCountryEntity } from "./country.entity";
-
-import { constantEnvs } from "@/core/constants/env.const";
-import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
-import { ApiResponse } from "../response";
+import { startShowSuccess } from "@/core/utils";
 import {
-  ReservationEntity,
-} from "@/domain/entities/reservation.entity";
-import { ReservationDto } from "@/domain/dtos/reservation";
-
-const { VITE_API_URL } = constantEnvs;
+  getReservationsDto,
+  GetReservationsDto,
+  reservationDto,
+  ReservationDto,
+} from "@/domain/dtos/reservation";
+import { type ReservationEntity } from "@/domain/entities";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import {
+  onSetCurrentReservation,
+  onSetReservations,
+} from "../../slices/reservation.slice";
+import { requestConfig } from "../config";
+import { ApiResponse } from "../response";
+import { dateFnsAdapter } from "@/core/adapters";
 
 const PREFIX = "/reservation";
 
-export const reservationService = createApi({
-  reducerPath: "reservationService",
-  baseQuery: fetchBaseQuery({
-    baseUrl: VITE_API_URL + PREFIX,
-    credentials: "include",
-  }),
+export const reservationServiceStore = createApi({
+  tagTypes: ["Reservations", "Reservation"],
+  reducerPath: "reservationServiceStore",
+  baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    
-    createReservation: builder.mutation<
+    upsertReservation: builder.mutation<
       ApiResponse<ReservationEntity>,
-      ReservationDto
+      { reservationDto: ReservationDto; showMessage?: boolean }
     >({
-      query: (createReservationDto) => ({
-        url: "/",
-        method: "POST",
-        body: createReservationDto,
-      }),
+      query: ({ reservationDto }) => {
+        if (reservationDto.id) {
+          return {
+            url: `/${reservationDto.id}`,
+            method: "PUT",
+            body: reservationDto,
+          };
+        }
+        return {
+          url: "/",
+          method: "POST",
+          body: reservationDto,
+        };
+      },
+      invalidatesTags: ["Reservations"],
+      async onQueryStarted(
+        { reservationDto: dto, showMessage = true },
+        { dispatch, queryFulfilled }
+      ) {
+        try {
+          //* Validate before sending
+          const [_, errors] = reservationDto.create(dto);
+          if (errors) throw errors;
+          const { data } = await queryFulfilled;
+          dispatch(onSetCurrentReservation(data.data));
+          if (showMessage) startShowSuccess(data.message);
+        } catch (error) {
+          throw error;
+        }
+      },
     }),
 
-    updateReservation: builder.mutation<
-      ApiResponse<ReservationEntity>,
-      ReservationDto & { id: number }
-    >({
-      query: (updateReservationDto) => ({
-        url: "/" + updateReservationDto.id,
-        method: "PUT",
-        body: updateReservationDto,
-      }),
-    }),
-
-    getReservationById: builder.query<ApiResponse<ReservationEntity>, string>({
+    getReservationById: builder.query<ApiResponse<ReservationEntity>, number>({
       query: (id) => `/${id}`,
+      providesTags: ["Reservation"],
+      // async onQueryStarted(args, { dispatch, queryFulfilled }) {
+      //   try {
+      //     console.log({ args });
+      //     //* Validate before sending
+      //     if (!args) return;
+
+      //     const { data } = await queryFulfilled;
+      //     console.log({ data });
+      //     dispatch(onSetCurrentReservation(data.data));
+      //     // startShowSuccess(data.message);
+      //   } catch (error) {
+      //     console.error(error);
+      //     throw error;
+      //   }
+      // },
     }),
-    // updateReservation: builder.mutation<ApiResponse<ReservationEntity>, UpdateReservationDto>({
-    // query: (updateReservationDto) => ({
-    //     url: "/",
-    //     method: "PUT",
-    //     body: updateReservationDto,
-    // }),
-    // }),
 
     getAllReservations: builder.query<
       ApiResponse<ReservationEntity[]>,
-      Record<string, any>
+      GetReservationsDto
     >({
       query: (params) => {
         return {
@@ -66,13 +88,36 @@ export const reservationService = createApi({
           params,
         };
       },
+      providesTags: ["Reservations"],
+      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+        try {
+          //* Validate before sending
+          const [_, errors] = getReservationsDto.create(args);
+          if (errors) throw errors;
+
+          const { data } = await queryFulfilled;
+          dispatch(onSetReservations(data.data));
+          // startShowSuccess(data.message);
+        } catch (error) {
+          console.error(error);
+          throw error;
+        }
+      },
+      transformResponse: (response: ApiResponse<ReservationEntity[]>) => ({
+        ...response,
+        data: response.data.map((reservation) => ({
+          ...reservation,
+          startDate: dateFnsAdapter.parseISO(reservation.startDate as any),
+          endDate: dateFnsAdapter.parseISO(reservation.endDate as any),
+        })),
+      }),
     }),
   }),
 });
 
 export const {
   useGetReservationByIdQuery,
+  useGetAllReservationsQuery,
   useLazyGetAllReservationsQuery,
-  useCreateReservationMutation,
-  useUpdateReservationMutation,
-} = reservationService;
+  useUpsertReservationMutation,
+} = reservationServiceStore;

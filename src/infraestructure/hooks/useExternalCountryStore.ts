@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
-import { onSetExternalCountries, type AppState } from "../store";
+import { onSetExternalCountries } from "../store";
 import { useLazyGetAllExternalCountriesQuery } from "../store/services";
+import type { AppState } from "@/app/store";
 
 export const useExternalCountryStore = () => {
   const dispatch = useDispatch();

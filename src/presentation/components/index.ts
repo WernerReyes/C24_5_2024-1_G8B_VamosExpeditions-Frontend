@@ -7,6 +7,7 @@ export * from "./Card";
 export * from "./Checkbox";
 export * from "./Column";
 export * from "./ContextMenu";
+export * from "./ConfirmDialog";
 export * from "./DataTable";
 export * from "./DataView";
 export * from "./Dialog";
@@ -35,6 +36,9 @@ export * from "./Tag";
 export * from "./Toaster";
 export * from "./TreeSelect/TreeSelect";
 export * from "./OrderList";
+export * from "./Divider";
+export * from "./SelectButton";
+export * from "./ConfirmPopup";
 
 //* Alerts
 export * from "./alerts/ExpiredSessionCountdown";

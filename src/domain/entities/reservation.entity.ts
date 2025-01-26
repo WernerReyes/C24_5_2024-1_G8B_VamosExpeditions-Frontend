@@ -80,7 +80,7 @@ export const orderTypeRender: Record<
   },
 };
 
-const reservationEntitySchema = z.object({
+export const reservationEntitySchema = z.object({
   id: z.number().int().positive().min(1),
   numberOfPeople: z.number(),
   startDate: z.date(),

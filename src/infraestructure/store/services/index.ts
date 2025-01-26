@@ -2,9 +2,11 @@ export * from './quote.service';
 export * from './auth/auth.service';
 export * from './client/client.service';
 export * from './reservation/reservation.service';
-export * from './accommodationRoom/accommodationRoom.service';
 export * from './country/country.service';
 export * from './hotel/hotel.service';
+export * from './quotation/quotation.service';
+export * from './versionQuotation/versionQuotation.service';
+export * from './hotelRoomQuotation/hotelRoomQuotation.service';
 
 //* External
 export * from './external/country/country.service';

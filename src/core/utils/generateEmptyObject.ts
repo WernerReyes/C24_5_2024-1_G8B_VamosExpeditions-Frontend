@@ -24,9 +24,13 @@ export const generateEmptyObject = <T>(
     } else if (field instanceof z.ZodEnum || field instanceof z.ZodNativeEnum) {
       emptyState[key] = defaults[key] || "";
     } else if (field instanceof z.ZodUnion) {
-      emptyState[key] = defaults[key] || {};
+      emptyState[key] = defaults[key] || undefined;
     } else if (field instanceof z.ZodRecord) {
       emptyState[key] = defaults[key] || {};
+    } else if (field instanceof z.ZodNull) {
+      emptyState[key] = defaults[key] || null;
+    } else if (field instanceof z.ZodUndefined) {
+      emptyState[key] = defaults[key] || undefined;
     }
     else {
       emptyState[key] = ""; // Default case for unsupported types

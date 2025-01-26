@@ -1,41 +1,79 @@
 import { constantStorage } from "@/core/constants";
+import { LocalQuotationEntity } from "@/data";
+import type { QuotationEntity } from "@/domain/entities";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const { ITINERARY_DAYS_NUMBER, ITINERARY_INITIAL_DATE } = constantStorage;
+const { CURRENT_ACTIVE_STEP, ITINERARY_CURRENT_SELECTED_DAY } = constantStorage;
 
-export type QuotationSliceState = {
-  daysNumber: number;
-  initialDate: Date | null;
+export interface Day {
+  id: number;
+  number: number;
+  name: string;
+  date: string;
+  total: number;
+}
+
+type QuotationSliceState = {
+  currentQuotation: LocalQuotationEntity | null;
+  currentStep: number;
+  quotations: QuotationEntity[];
+  selectedDay: Day | null;
 };
 
 const initialState: QuotationSliceState = {
-  daysNumber: localStorage.getItem(ITINERARY_DAYS_NUMBER)
-    ? parseInt(localStorage.getItem(ITINERARY_DAYS_NUMBER) as string)
-    : 5,
-  initialDate: localStorage.getItem(ITINERARY_INITIAL_DATE)
-    ? new Date(localStorage.getItem(ITINERARY_INITIAL_DATE) as string)
-    : null,
+  currentQuotation: null,
+  currentStep: JSON.parse(localStorage.getItem(CURRENT_ACTIVE_STEP) || "0"),
+  quotations: [],
+  selectedDay: JSON.parse(
+    localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) || "null"
+  ),
 };
 
 export const quotationSlice = createSlice({
   name: "quotation",
   initialState,
   reducers: {
-    onSetDaysNumber: (state, { payload }: PayloadAction<number>) => {
-      localStorage.setItem(ITINERARY_DAYS_NUMBER, payload.toString());
+    onSetCurrentQuotation: (
+      state,
+      { payload }: PayloadAction<LocalQuotationEntity | null>
+    ) => {
       return {
         ...state,
-        daysNumber: payload,
+        currentQuotation: payload,
       };
     },
-    onSetInitialDate: (state, { payload }: PayloadAction<Date>) => {
-      localStorage.setItem(ITINERARY_INITIAL_DATE, payload.toISOString());
+
+    onSetCurrentStep: (state, { payload }: PayloadAction<number>) => {
+      localStorage.setItem(CURRENT_ACTIVE_STEP, JSON.stringify(payload));
       return {
         ...state,
-        initialDate: payload,
+        currentStep: payload,
+      };
+    },
+
+    onSetQuotations: (state, { payload }: PayloadAction<QuotationEntity[]>) => {
+      return {
+        ...state,
+        quotations: payload,
+      };
+    },
+
+    onSetSelectedDay: (state, { payload }: PayloadAction<Day | null>) => {
+      localStorage.setItem(
+        ITINERARY_CURRENT_SELECTED_DAY,
+        JSON.stringify(payload)
+      );
+      return {
+        ...state,
+        selectedDay: payload ?? null,
       };
     },
   },
 });
 
-export const { onSetDaysNumber, onSetInitialDate } = quotationSlice.actions;
+export const {
+  onSetCurrentQuotation,
+  onSetCurrentStep,
+  onSetQuotations,
+  onSetSelectedDay,
+} = quotationSlice.actions;

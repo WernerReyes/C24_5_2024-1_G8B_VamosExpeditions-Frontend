@@ -22,14 +22,19 @@ export const clientSlice = createSlice({
       };
     },
 
-    onSetNewClient: (state, { payload }: PayloadAction<ClientEntity>) => {
+    onSetUpsertClient: (state, { payload }: PayloadAction<ClientEntity>) => {
       return {
         ...state,
-        clients: [...state.clients, payload],
+        clients: state.clients.map((client) =>
+          client.id === payload.id ? payload : client
+        ),
       };
     },
 
-    onSetSelectedClient: (state, { payload }: PayloadAction<ClientEntity | null>) => {
+    onSetSelectedClient: (
+      state,
+      { payload }: PayloadAction<ClientEntity | null>
+    ) => {
       return {
         ...state,
         selectedClient: payload,
@@ -38,4 +43,5 @@ export const clientSlice = createSlice({
   },
 });
 
-export const { onSetClients, onSetNewClient, onSetSelectedClient } = clientSlice.actions;
+export const { onSetClients, onSetUpsertClient, onSetSelectedClient } =
+  clientSlice.actions;

@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ExternalCountryEntity } from "@/infraestructure/store/services";
 
-export type ExternalCountrySliceState = {
+type ExternalCountrySliceState = {
   externalCountries: ExternalCountryEntity[];
   selectedExternalCountry: ExternalCountryEntity | null;
 };

@@ -1,10 +1,9 @@
-import { Button } from "@/presentation/components";
-import { MainLayout } from "../layouts";
+
 import { ReservationTable } from "./components";
 
 const ReservationsPage = () => {
   return (
-    <MainLayout>
+    // <MainLayout>
       <div className="bg-white p-10 rounded-lg shadow-md">
         {/* <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
           <Button
@@ -17,7 +16,7 @@ const ReservationsPage = () => {
 
         <ReservationTable />
       </div>
-    </MainLayout>
+    
   );
 };
 

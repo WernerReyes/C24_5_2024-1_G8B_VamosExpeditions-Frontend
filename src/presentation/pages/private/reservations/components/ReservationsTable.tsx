@@ -1,3 +1,4 @@
+import type { AppState } from "@/app/store";
 import { dateFnsAdapter } from "@/core/adapters";
 import {
   orderTypeRender,
@@ -5,7 +6,8 @@ import {
   travelerStyleRender,
   type ReservationEntity,
 } from "@/domain/entities";
-import { useReservationStore } from "@/infraestructure/hooks";
+
+import { useGetAllReservationsQuery } from "@/infraestructure/store/services";
 import {
   Button,
   Column,
@@ -15,22 +17,17 @@ import {
   type DataTableSelectionMultipleChangeEvent,
 } from "@/presentation/components";
 import { Toolbar } from "primereact/toolbar";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
+import { useSelector } from "react-redux";
 
 export const ReservationTable = () => {
   const dt = useRef<DataTableRef>(null);
-  const { reservations, startGettingAllReservations } = useReservationStore();
+  useGetAllReservationsQuery({});
+  const { reservations } = useSelector((state: AppState) => state.reservation);
+
   const [selectedreservations, setSelectedreservations] = useState<
     ReservationEntity[]
   >([]);
-
-  console.log(reservations);
-
-  useEffect(() => {
-    startGettingAllReservations({
-      status: undefined,
-    });
-  }, []);
 
   return (
     <div>
@@ -74,7 +71,7 @@ export const ReservationTable = () => {
 
         <DataTable
           ref={dt}
-          value={reservations}
+          value={reservations ?? []}
           selection={selectedreservations}
           onSelectionChange={(
             e: DataTableSelectionMultipleChangeEvent<ReservationEntity[]>

@@ -7,9 +7,9 @@ import {
   onSetSincronizedCurrentReservationByClient,
 } from "../store";
 import {
-  useCreateReservationMutation,
+  useGetAllReservationsQuery,
   useLazyGetAllReservationsQuery,
-  useUpdateReservationMutation,
+  useUpsertReservationMutation,
 } from "../store/services";
 import {
   getReservationsDto,
@@ -19,6 +19,7 @@ import {
 } from "@/domain/dtos/reservation";
 import { useAlert } from "@/presentation/hooks";
 import type { ClientEntity, ReservationEntity } from "@/domain/entities";
+import { useState } from "react";
 
 export const useReservationStore = () => {
   const dispatch = useDispatch();
@@ -27,37 +28,21 @@ export const useReservationStore = () => {
   );
   const { startShowSuccess, startShowApiError, startShowError } = useAlert();
 
-  const [createReservation, createReservationResult] =
-    useCreateReservationMutation();
-  const [updateReservation, updateReservationResult] =
-    useUpdateReservationMutation();
+  const [
+    upsertReservation,
+    { isLoading: isUpsertingReservation, ...upsertReservationResult },
+  ] = useUpsertReservationMutation();
+
   const [
     getReservations,
     { isLoading: isGettingAllReservations, ...restGetAllReservations },
   ] = useLazyGetAllReservationsQuery();
 
-  const startCreatingReservation = async (reservationDto: ReservationDto) => {
-    await createReservation(reservationDto)
-      .unwrap()
-      .then(async ({ data, message }) => {
-        await reservationService.registerReservation(data);
-        dispatch(onSetCurrentReservation(data));
-        startShowSuccess(message);
-      })
-      .catch((error) => {
-        startShowApiError(error);
-      });
-  };
-
-  const startUpdatingReservation = async (
-    id: number,
+  const startUpsertingReservation = async (
     reservationDto: ReservationDto,
     showMessage = true
   ) => {
-    await updateReservation({
-      id,
-      ...reservationDto,
-    })
+    await upsertReservation(reservationDto)
       .unwrap()
       .then(async ({ data, message }) => {
         await reservationService.registerReservation(data);
@@ -73,25 +58,18 @@ export const useReservationStore = () => {
     travelDates: [Date, Date]
   ) => {
     if (!currentReservation) return;
-    const [reservationDtoValidated, errors] = reservationDto(
-      currentReservation.client,
-      currentReservation.numberOfPeople,
+    const [reservationDtoValidated, errors] = reservationDto({
+      ...currentReservation,
       travelDates,
-      currentReservation.code,
-      currentReservation.travelerStyle,
-      currentReservation.orderType,
-      currentReservation.cities.reduce(
+      destination: currentReservation.cities?.reduce(
         (acc, city) => ({ ...acc, [city.id]: true }),
         {}
-      ),
-      currentReservation.specialSpecifications ?? ""
-    ).create();
+      )!,
+      client: currentReservation.client!,
+      specialSpecifications: currentReservation.specialSpecifications ?? "",
+    }).create();
     if (errors) return startShowError(errors[0]);
-    await startUpdatingReservation(
-      currentReservation.id,
-      reservationDtoValidated!,
-      false
-    );
+    await startUpsertingReservation(reservationDtoValidated!, false);
   };
 
   const startUpdatingReservationClient = async (client: ClientEntity) => {
@@ -113,11 +91,9 @@ export const useReservationStore = () => {
     }
   };
 
-  const startGettingAllReservations = async ({
-    status,
-  }: GetReservationsDto) => {
+  const startGettingAllReservations = async (dto: GetReservationsDto) => {
     const [getReservationwDtoValidated, errors] =
-      getReservationsDto(status).create();
+      getReservationsDto(dto).create();
     if (errors) return startShowError(errors[0]);
     await getReservations(getReservationwDtoValidated!)
       .unwrap()
@@ -133,8 +109,7 @@ export const useReservationStore = () => {
   const startChangingCurrentReservation = async (
     reservation: ReservationEntity
   ) => {
-    await reservationService.registerReservation(reservation);
-    dispatch(onSetCurrentReservation(reservation));
+      dispatch(onSetCurrentReservation(reservation));
   };
 
   const startGettingCurrentReservation = async () => {
@@ -157,20 +132,22 @@ export const useReservationStore = () => {
 
   return {
     //* Atributtes
-    updateReservationResult,
-    createReservationResult,
+    upsertReservationResult: {
+      ...upsertReservationResult,
+      isUpsertingReservation,
+    },
+
     getAllReservationsResult: {
       ...restGetAllReservations,
       isGettingAllReservations,
       refetch: (getReservationsDto: GetReservationsDto) =>
-        getReservations(getReservationsDto),
+        startGettingAllReservations(getReservationsDto),
     },
     currentReservation,
     reservations,
 
     //* Functions
-    startCreatingReservation,
-    startUpdatingReservation,
+    startUpsertingReservation,
     startUpdatingReservatioTravelDates,
     startUpdatingReservationClient,
     startGettingAllReservations,

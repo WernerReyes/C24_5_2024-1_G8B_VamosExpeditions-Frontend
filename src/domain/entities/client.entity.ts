@@ -1,5 +1,5 @@
 import { generateEmptyObject } from "@/core/utils";
-import type { Continent } from "@/presentation/types";
+import { type Subregion, SUBREGIONS } from "@/presentation/types";
 import { z } from "zod";
 
 export const clientEntitySchema = z.object({
@@ -8,20 +8,12 @@ export const clientEntitySchema = z.object({
   email: z.string(),
   phone: z.string(),
   country: z.string(),
-  continent: z.string().refine((value): value is Continent => {
-    return [
-      "Africa",
-      "Antarctica",
-      "Asia",
-      "Europe",
-      "Oceania",
-      "South America",
-      "North America",
-    ].includes(value);
+  subregion: z.string().refine((value): value is Subregion => {
+    return SUBREGIONS.includes(value);
   }),
 });
 
-
 export type ClientEntity = z.infer<typeof clientEntitySchema>;
 
-export const clientEntityEmpty = generateEmptyObject<ClientEntity>(clientEntitySchema);
+export const clientEntityEmpty =
+  generateEmptyObject<ClientEntity>(clientEntitySchema);

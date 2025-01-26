@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  type ClientDto,
-  clientDtoEmpty,
-  clientDtoSchema,
-} from "@/domain/dtos/client";
+import { type ClientDto, clientDto } from "@/domain/dtos/client";
 import {
   Checkbox,
-  DefaultFallBackComponent,
   Dropdown,
   type DropdownChangeEvent,
   ErrorBoundary,
@@ -25,13 +20,16 @@ import {
 
 import Style from "../Style.module.css";
 
-import type { ExternalCountryEntity } from "@/infraestructure/store/services";
 import {
-  useClientStore,
-  useExternalCountryStore,
-  useReservationStore,
-} from "@/infraestructure/hooks";
+  useGetAllExternalCountriesQuery,
+  useUpsertClientMutation,
+  type ExternalCountryEntity,
+} from "@/infraestructure/store/services";
 import { getCountryPhoneMask } from "../../utils";
+import { SUBREGIONS } from "@/presentation/types";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppState } from "@/app/store";
+import { onSetSincronizedCurrentReservationByClient } from "@/infraestructure/store";
 
 const OPERATIONS = [
   {
@@ -47,82 +45,83 @@ const OPERATIONS = [
 ];
 
 export const ClientForm = () => {
-  const {
-    selectedClient,
-    startCreatingClient,
-    startUpdatingClient,
-    createClientResult: { isCreatingClient },
-    updateClientResult: { isUpdatingClient },
-  } = useClientStore();
-  const { startUpdatingReservationClient } = useReservationStore();
-  const {
-    externalCountries,
-    startGetAllExternalCountries,
-    getAllExternalCountriesResult: {
-      isGettingAllExternalCountries,
-      error,
-      refetch,
-      isFetching,
-    },
-  } = useExternalCountryStore();
+  const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ClientDto>({
-    resolver: zodResolver(clientDtoSchema),
+    resolver: zodResolver(clientDto.getSchema),
+    defaultValues: clientDto.getEmpty,
   });
+  const { selectedClient } = useSelector((state: AppState) => state.client);
+
+  const { currentReservation } = useSelector(
+    (state: AppState) => state.reservation
+  );
+
+  const [upsertClient, { isLoading: isUpsertingClient }] =
+    useUpsertClientMutation();
+  const {
+    data: externalCountries,
+    isLoading: isGettingAllExternalCountries,
+    isError,
+    error,
+  } = useGetAllExternalCountriesQuery();
   const [selectedCountry, setSelectedCountry] =
     useState<ExternalCountryEntity>();
   const [currentOp, setCurrentOp] = useState(OPERATIONS[0]);
-  const [suggestPhone, setSuggestPhone] = useState(false);
+  const [suggestPhone, setSuggestPhone] = useState(true);
   const [isContentLoading, setIsContentLoading] = useState(true);
 
   const handleOperation = (op: (typeof OPERATIONS)[number]) => {
     setCurrentOp(op);
     if (op === OPERATIONS[0]) {
-      reset(clientDtoEmpty);
+      reset(clientDto.getEmpty);
       setSelectedCountry(undefined);
       setSuggestPhone(false);
     }
 
     if (op === OPERATIONS[1] && selectedClient) {
-      const country = externalCountries.find(
+      const country = externalCountries?.data.find(
         (country) => country.name === selectedClient.country
       );
-      reset({
-        fullName: selectedClient.fullName,
-        email: selectedClient.email,
-        phone: selectedClient.phone,
-        country,
-      });
+      reset(clientDto.parse(selectedClient));
       setSelectedCountry(country);
       setSuggestPhone(true);
     }
   };
 
-  const handleForm = (clientDto: ClientDto) => {
-    if (selectedClient && currentOp === OPERATIONS[1]) {
-      startUpdatingClient(selectedClient.id, clientDto).then((client) => {
-        startUpdatingReservationClient(client);
-        reset();
+  const handleUpsertClient = (clientDto: ClientDto) => {
+    let client =
+      currentOp === OPERATIONS[1]
+        ? clientDto
+        : {
+            ...clientDto,
+            id: 0,
+          };
+    upsertClient(client)
+      .unwrap()
+      .then(({ data }) => {
+        if (currentOp === OPERATIONS[1]) { 
+        dispatch(
+          onSetSincronizedCurrentReservationByClient({
+            ...currentReservation!,
+            client: data,
+          })
+        );
+        }
+      }).catch((error) => {
+        console.error(error);
       });
-      return;
-    }
-    startCreatingClient(clientDto).then(() => {
-      reset();
-    });
   };
-
-  useEffect(() => {
-    startGetAllExternalCountries();
-  }, []);
 
   useEffect(() => {
     if (externalCountries && selectedCountry) {
       setSelectedCountry(
-        externalCountries.find(
+        externalCountries.data.find(
           (country) => country.code == selectedCountry.code
         )
       );
@@ -131,23 +130,16 @@ export const ClientForm = () => {
 
   useEffect(() => {
     if (selectedClient) {
-      const country = externalCountries.find(
+      const country = externalCountries?.data.find(
         (country) => country.name === selectedClient.country
       );
-
-      reset({
-        fullName: selectedClient.fullName,
-        email: selectedClient.email,
-        phone: selectedClient.phone,
-        country,
-      });
+      reset(clientDto.parse(selectedClient));
       setSelectedCountry(country);
       setSuggestPhone(true);
       setCurrentOp(OPERATIONS[1]);
     } else {
-      reset(clientDtoEmpty);
+      reset(clientDto.getEmpty);
       setSelectedCountry(undefined);
-      setSuggestPhone(false);
       setCurrentOp(OPERATIONS[0]);
     }
     setIsContentLoading(false);
@@ -158,7 +150,7 @@ export const ClientForm = () => {
   return (
     <form
       className={`${Style.form} flex-[1] `}
-      onSubmit={handleSubmit(handleForm)}
+      onSubmit={handleSubmit(handleUpsertClient)}
       noValidate
     >
       <div className={Style.container}>
@@ -214,15 +206,70 @@ export const ClientForm = () => {
 
       <div className={Style.container}>
         <ErrorBoundary
+          isLoader={isGettingAllExternalCountries}
           fallBackComponent={
             <>
-              <label htmlFor="country">País de origen</label>
-              <DefaultFallBackComponent
-                refetch={refetch}
-                isFetching={isFetching}
-                isLoading={isGettingAllExternalCountries}
-                message="No se pudo cargar los paises"
+              <Controller
+                control={control}
+                name="country"
+                defaultValue={undefined}
+                render={({ field, fieldState: { error } }) => {
+                  return (
+                    <InputText
+                      label={{
+                        htmlFor: "country",
+                        text: "País de origen",
+                      }}
+                      small={{
+                        text: error?.message,
+                        className: "text-red-500",
+                      }}
+                      loading={
+                        isContentLoading || isGettingAllExternalCountries
+                      }
+                      disabled={
+                        isContentLoading || isGettingAllExternalCountries
+                      }
+                      placeholder="País de origen"
+                      invalid={!!error}
+                      {...field}
+                    />
+                  );
+                }}
               />
+
+              <div className={Style.container + " mt-5"}>
+                <Controller
+                  control={control}
+                  name="subregion"
+                  defaultValue=""
+                  render={({ field, fieldState: { error } }) => (
+                    <Dropdown
+                      label={{
+                        htmlFor: "subregion",
+                        text: "Subregión",
+                      }}
+                      small={{
+                        text: error?.message,
+                        className: "text-red-500",
+                      }}
+                      loading={
+                        isContentLoading || isGettingAllExternalCountries
+                      }
+                      disabled={
+                        isContentLoading || isGettingAllExternalCountries
+                      }
+                      filter
+                      id="country"
+                      placeholder="Seleccione una subregión"
+                      invalid={!!error}
+                      options={SUBREGIONS}
+                      virtualScrollerOptions={{ itemSize: 38 }}
+                      {...field}
+                    />
+                  )}
+                />
+              </div>
             </>
           }
           error={!!error}
@@ -232,6 +279,10 @@ export const ClientForm = () => {
             name="country"
             defaultValue={undefined}
             render={({ field, fieldState: { error } }) => {
+              const country = externalCountries?.data.find(
+                (country) => country.name === field?.value
+              );
+
               return (
                 <Dropdown
                   label={{
@@ -250,12 +301,13 @@ export const ClientForm = () => {
                   id="country"
                   placeholder="Seleccione un país"
                   invalid={!!error}
-                  options={externalCountries}
+                  options={externalCountries?.data}
                   optionLabel="name"
-                  {...field}
+                  value={country}
                   virtualScrollerOptions={{ itemSize: 38 }}
                   onChange={(e: DropdownChangeEvent) => {
-                    field.onChange(e.value);
+                    field.onChange(e.value.name);
+                    setValue("subregion", e.value.subregion);
                     setSelectedCountry(e.value);
                   }}
                 />
@@ -330,33 +382,40 @@ export const ClientForm = () => {
             );
           }}
         />
-        <div className="flex justify-items-center mt-2">
-          <Checkbox
-            inputId="suggestPhone"
-            name="suggestPhone"
-            loading={isContentLoading}
-            value={suggestPhone}
-            onChange={(e) => setSuggestPhone(!!e.checked)}
-            label={{
-              text: "Sugerir formato de telefono",
-              htmlFor: "suggestPhone",
-              className: "ml-2 !text-sm !font-semibold",
-            }}
-            checked={suggestPhone}
-          />
-        </div>
+        {!isError && (
+          <div className="flex justify-items-center mt-2">
+            <Checkbox
+              inputId="suggestPhone"
+              name="suggestPhone"
+              loading={isContentLoading}
+              value={suggestPhone}
+              onChange={(e) => setSuggestPhone(!!e.checked)}
+              label={{
+                text: "Sugerir formato de telefono",
+                htmlFor: "suggestPhone",
+                className: "ml-2 !text-sm !font-semibold",
+              }}
+              checked={suggestPhone}
+            />
+          </div>
+        )}
       </div>
+
+      <Controller
+        control={control}
+        name="id"
+        render={({ field }) => <input type="hidden" id="id" {...field} />}
+      />
 
       <SplitButton
         label={
-          isCreatingClient || isUpdatingClient
-            ? currentOp.loading
-            : currentOp.label
+          // isCreatingClient || isUpdatingClient
+          isUpsertingClient ? currentOp.loading : currentOp.label
         }
-        loading={isContentLoading || isCreatingClient || isUpdatingClient}
+        loading={isContentLoading || isUpsertingClient}
         disabled={
           isContentLoading ||
-          isCreatingClient ||
+          isUpsertingClient ||
           isGettingAllExternalCountries ||
           Object.keys(errors).length > 0
         }
@@ -364,7 +423,7 @@ export const ClientForm = () => {
         menuClassName={classNamesAdapter({ hidden: !selectedClient })}
         dropdownIcon={!selectedClient ? "pi pi-ban" : undefined}
         onClick={() => {
-          handleSubmit(handleForm)();
+          handleSubmit(handleUpsertClient)();
         }}
         typeof="submit"
         className="mt-auto"
@@ -413,4 +472,3 @@ const selectedCountryTemplate = (option: ExternalCountryEntity, props: any) => {
 
   return <span>{props.placeholder}</span>;
 };
-

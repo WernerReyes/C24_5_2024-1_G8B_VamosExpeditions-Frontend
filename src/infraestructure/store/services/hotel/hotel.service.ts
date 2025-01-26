@@ -1,18 +1,15 @@
-import { constantEnvs } from "@/core/constants/env.const";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { ApiResponse } from "../response";
+import { getHotelsDto, type GetHotelsDto } from "@/domain/dtos/hotel";
 import type { HotelEntity } from "@/domain/entities";
-import type { GetHotelsDto } from "@/domain/dtos/hotel";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { requestConfig } from "../config";
+import type { ApiResponse } from "../response";
 
-const { VITE_API_URL } = constantEnvs;
 const PREFIX = "/hotel";
 
 export const hotelService = createApi({
   reducerPath: "hotelService",
-  baseQuery: fetchBaseQuery({
-    baseUrl: VITE_API_URL + PREFIX,
-    credentials: "include",
-  }),
+  tagTypes: ["Hotels", "Hotel"],
+  baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
     getHotels: builder.query<ApiResponse<HotelEntity[]>, GetHotelsDto>({
       query: (getHotelsDto) => {
@@ -22,10 +19,18 @@ export const hotelService = createApi({
           params: getHotelsDto,
         };
       },
+      providesTags: ["Hotels"],
+      async onQueryStarted(params, { queryFulfilled }) {
+        const [_, errors] = getHotelsDto.create(params);
+        if (errors) throw errors;
+        try {
+          await queryFulfilled;
+        } catch (error) {
+          throw error;
+        }
+      },
     }),
   }),
 });
 
-export const { 
-    useLazyGetHotelsQuery
- } = hotelService;
+export const { useLazyGetHotelsQuery, useGetHotelsQuery } = hotelService;

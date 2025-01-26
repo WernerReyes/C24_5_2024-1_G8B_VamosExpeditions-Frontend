@@ -5,7 +5,7 @@ export const transformDataToTree = (countries: CountryEntity[]) => {
       key: country.code,
       label: country.name,
       selectable: false,
-      children: country.cities.map((city: any) => ({
+      children: country.cities?.map((city) => ({
         key: city.id.toString(),
         label: city.name,
         selectable: true,

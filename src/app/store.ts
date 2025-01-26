@@ -4,18 +4,17 @@ import {
   quoteService,
   externalCountryService,
   clientService,
-  reservationService,
-  accommodationRoomService,
   countryService,
   hotelService,
-  
+  quotationServiceStore,
+  versionQuotationService,
+  hotelRoomQuotationService,
+  reservationServiceStore,
 } from "@/infraestructure/store/services";
 
 import {
   authSlice,
   quoteSlice,
-  accommodationRoomSlice,
-  accommodationQuoteSlice,
   quotationSlice,
   clientSlice,
   externalCountrySlice,
@@ -23,19 +22,19 @@ import {
   cookieExpirationSlice,
   reservationSlice,
   hotelSlice,
-  
+  versionquotationSlice,
+  hotelRoomQuotationSlice,
+
 } from "@/infraestructure/store";
-
-
 
 export const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
     quote: quoteSlice.reducer,
     hotel: hotelSlice.reducer,
-    accommodationRoom: accommodationRoomSlice.reducer,
-    accommodationQuote: accommodationQuoteSlice.reducer,
     quotation: quotationSlice.reducer,
+    versionQuotation: versionquotationSlice.reducer,
+    hotelRoomQuotation: hotelRoomQuotationSlice.reducer,
     client: clientSlice.reducer,
     externalCountry: externalCountrySlice.reducer,
     country: countrySlice.reducer,
@@ -46,10 +45,11 @@ export const store = configureStore({
     [countryService.reducerPath]: countryService.reducer,
     [clientService.reducerPath]: clientService.reducer,
     [hotelService.reducerPath]: hotelService.reducer,
-    [reservationService.reducerPath]: reservationService.reducer,
+    [quotationServiceStore.reducerPath]: quotationServiceStore.reducer,
+    [versionQuotationService.reducerPath]: versionQuotationService.reducer,
+    [hotelRoomQuotationService.reducerPath]: hotelRoomQuotationService.reducer,
+    [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
-    [accommodationRoomService.reducerPath]: accommodationRoomService.reducer,
-
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -60,10 +60,11 @@ export const store = configureStore({
       .concat(countryService.middleware)
       .concat(clientService.middleware)
       .concat(hotelService.middleware)
-      .concat(reservationService.middleware)
-      .concat(externalCountryService.middleware)
-      .concat(accommodationRoomService.middleware),
-      
+      .concat(reservationServiceStore.middleware)
+      .concat(quotationServiceStore.middleware)
+      .concat(versionQuotationService.middleware)
+      .concat(hotelRoomQuotationService.middleware)
+      .concat(externalCountryService.middleware),
 });
 
 export type AppState = ReturnType<typeof store.getState>;

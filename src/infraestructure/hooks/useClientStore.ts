@@ -1,11 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
 
-import { onSetNewClient, onSetClients, onSetSelectedClient } from "../store";
+import { onSetUpsertClient, onSetClients, onSetSelectedClient } from "../store";
 import { ClientDto } from "@/domain/dtos/client";
 import {
-  useCreateClientMutation,
   useLazyGetAllClientsQuery,
-  useUpdateClientMutation,
+  useUpsertClientMutation,
 } from "../store/services";
 import { useAlert } from "@/presentation/hooks";
 import type { AppState } from "@/app/store";
@@ -20,31 +19,20 @@ export const useClientStore = () => {
     { isLoading: isGettingAllClients, ...restGetAllClients },
   ] = useLazyGetAllClientsQuery();
   useLazyGetAllClientsQuery();
-  const [createClient, { isLoading: isCreatingClient, ...restCreateClient }] =
-    useCreateClientMutation();
-  const [updateClient, { isLoading: isUpdatingClient, ...restUpdateClient }] =
-    useUpdateClientMutation();
+  const [upsertClient, { isLoading: isUpsertingClient, ...restUpsertClient }] =
+    useUpsertClientMutation();
 
   const { startShowApiError, startShowSuccess } = useAlert();
 
-  const startCreatingClient = async (clientDto: ClientDto) => {
-    await createClient(clientDto)
-      .unwrap()
-      .then(({ data, message }) => {
-        dispatch(onSetNewClient(data));
-        startShowSuccess(message);
-      })
-      .catch((error) => {
-        startShowApiError(error);
-        throw error;
-      });
-  };
 
-  const startUpdatingClient = async (id: number, clientDto: ClientDto) => {
-    return await updateClient({ id, ...clientDto })
+  const startUpsertingClient = async (clientDto: ClientDto) => {
+    return await upsertClient(clientDto)
       .unwrap()
       .then(({ data, message }) => {
-        dispatch(onSetNewClient(data));
+        // if (data.id) {
+        //   dispatch(onSetSelectedClient(data));
+        // }
+        dispatch(onSetUpsertClient(data));
         startShowSuccess(message);
         return data;
       })
@@ -77,19 +65,14 @@ export const useClientStore = () => {
       ...restGetAllClients,
       isGettingAllClients,
     },
-    createClientResult: {
-      ...restCreateClient,
-      isCreatingClient,
-    },
-    updateClientResult: {
-      ...restUpdateClient,
-      isUpdatingClient,
+    upsertClientResult: {
+      ...restUpsertClient,
+      isUpsertingClient,
     },
 
     //* Functions
     startGettingAllClients,
-    startCreatingClient,
-    startUpdatingClient,
+    startUpsertingClient,
     startSelectingClient,
   };
 };

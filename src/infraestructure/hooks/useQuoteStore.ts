@@ -1,32 +1,37 @@
 import { useDispatch, useSelector } from "react-redux";
-import { quoteService } from "../services";
-import { onLoading, onSetError, onSetQuotes, type AppState } from "../store";
+import { onSetQuotes } from "../store";
+import { useLazyGetQuotesQuery } from "../store/services";
+import { AppState } from "@/app/store";
 
 export const useQuoteStore = () => {
   const dispatch = useDispatch();
-  const { isLoading, quotes, selectedQuote, error } = useSelector(
+  const { quotes, selectedQuote } = useSelector(
     (state: AppState) => state.quote
   );
 
+  const [getQuotes, { isLoading: isGettingQuotes, ...restGetQuotes }] =
+    useLazyGetQuotesQuery();
+
   const startGetQuotes = async () => {
-    dispatch(onLoading());
-    try {
-      const { data } = await quoteService.getAll();
-      dispatch(onSetQuotes(data));
-      dispatch(onSetError(null));
-    } catch (error: any) {
-      console.log({ error });
-      dispatch(onSetError(error));
-      throw error;
-    }
+    await getQuotes()
+      .unwrap()
+      .then((response) => {
+        dispatch(onSetQuotes(response));
+      })
+      .catch((error) => {
+        throw error;
+      });
   };
 
   return {
     //* Atributtes
-    error,
-    isLoading,
     quotes,
     selectedQuote,
+    getQuotesResult: {
+      isGettingQuotes,
+      ...restGetQuotes,
+      refetch: () => startGetQuotes(),
+    },
 
     //* Functions
     startGetQuotes,

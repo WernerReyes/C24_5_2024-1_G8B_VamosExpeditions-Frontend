@@ -7,7 +7,7 @@ export const externalCountryEntitySchema = z.object({
     png: z.string(),
     svg: z.string(),
   }),
-  continent: z.string(),
+  Subregion: z.string(),
 });
 
 export type ExternalCountryEntity = z.infer<typeof externalCountryEntitySchema>;

@@ -4,7 +4,7 @@ import {
   type ClientEntity,
   OrderType,
   TravelerStyle,
-  clientEntityEmpty,
+  ReservationEntity,
 } from "@/domain/entities";
 import { z } from "zod";
 
@@ -17,56 +17,15 @@ export type ReservationDto = {
   readonly orderType: OrderType;
   readonly destination: { [key: number]: boolean };
   readonly specialSpecifications: string;
+  readonly id: number;
 };
 
-export const reservationDto = (
-  client: ClientEntity,
-  numberOfPeople: number,
-  travelDates: Date[],
-  code: string,
-  travelerStyle: TravelerStyle,
-  orderType: OrderType,
-  destination: { [key: number]: boolean },
-  specialSpecifications: string
-) => {
-  return {
-    create: (): [ReservationDto?, string[]?] => {
-      const errors = requestValidator(
-        {
-          client,
-          numberOfPeople,
-          travelDates,
-          code,
-          travelerStyle,
-          orderType,
-          destination,
-          specialSpecifications,
-        },
-        reservationDtoSchema
-      );
-      if (errors) {
-        return [undefined, errors];
-      }
-      return [
-        {
-          client,
-          numberOfPeople,
-          travelDates,
-          code,
-          travelerStyle,
-          orderType,
-          destination,
-          specialSpecifications,
-        },
-        undefined,
-      ];
-    },
-  };
-};
-
-export const reservationDtoSchema = z.object({
+const reservationDtoSchema = z.object({
   client: z.object(clientEntitySchema.shape, {
+    message: "El campo cliente es requerido",
     required_error: "El campo cliente es requerido",
+  }).refine((value) => value.id !== 0, {
+    message: "El campo cliente es requerido",
   }),
   numberOfPeople: z
     .number({
@@ -101,22 +60,53 @@ export const reservationDtoSchema = z.object({
   orderType: z.nativeEnum(OrderType, {
     required_error: "El campo tipo de orden es requerido",
   }),
-  destination: z.record(z.boolean(), {
+  destination: z.record(z.boolean({
+    message: "El campo destino es requerido",
+  }), {
+    message: "El campo destino es requerido",
     required_error: "El campo destino es requerido",
+  }).refine((value) => JSON.stringify(value) !== "{}", {
+    message: "El campo destino es requerido",
   }),
   specialSpecifications: z.string().min(1, {
     message: "El campo especificaciones especiales es requerido",
   }),
+  id: z.number(),
 });
 
-const defaultValues = {
-  client: clientEntityEmpty,
-  travelerStyle: TravelerStyle.COMFORT,
-  orderType: OrderType.DIRECT,
+export const reservationDto = {
+  create: (reservationDto: ReservationDto): [ReservationDto?, string[]?] => {
+    const errors = requestValidator(reservationDto, reservationDtoSchema);
+    if (errors) {
+      return [undefined, errors];
+    }
+    return [reservationDto, undefined];
+  },
+
+  parse: (reservationEntity: ReservationEntity): ReservationDto => {
+    return {
+      client: reservationEntity.client!,
+      numberOfPeople: reservationEntity.numberOfPeople,
+      travelDates: [
+        new Date(reservationEntity.startDate),
+        new Date(reservationEntity.endDate),
+      ],
+      code: reservationEntity.code,
+      travelerStyle: reservationEntity.travelerStyle,
+      orderType: reservationEntity.orderType,
+      destination: reservationEntity.cities!.reduce(
+        (acc, city) => ({ ...acc, [city.id]: true }),
+        {}
+      ),
+      specialSpecifications: reservationEntity.specialSpecifications ?? "",
+      id: reservationEntity.id,
+    };
+  },
+
+  getEmpty: generateEmptyObject<ReservationDto>(reservationDtoSchema, {
+    travelerStyle: TravelerStyle.COMFORT,
+    orderType: OrderType.DIRECT,
+  }),
+
+  getSchema: reservationDtoSchema,
 };
-
-export const reservationDtoEmpty = generateEmptyObject<ReservationDto>(
-  reservationDtoSchema,
-  defaultValues
-);
-

@@ -5,10 +5,10 @@ export const quoteService = createApi({
   reducerPath: "quoteService",
   baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000" }),
   endpoints: (builder) => ({
-    getQuotes: builder.query<QuoteEntity[], null>({
+    getQuotes: builder.query<QuoteEntity[], void>({
       query: () => "/quotes",
     }),
   }),
 });
 
-export const { useGetQuotesQuery } = quoteService;
+export const { useLazyGetQuotesQuery } = quoteService;

@@ -3,6 +3,7 @@ import {
   Stepper as StepperPrimeReact,
   type StepperProps as StepperPropsPrimeReact,
   type StepperRefAttributes,
+  type StepperChangeEvent
 } from "primereact/stepper";
 import {
   StepperPanel as StepperPanelPrimeReact,
@@ -32,4 +33,8 @@ export const Stepper = forwardRef<StepperRefAttributes, StepperProps>(
     );
   }
 );
+
+export {
+  type StepperChangeEvent
+}
 

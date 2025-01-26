@@ -12,7 +12,7 @@ import { Skeleton, type SkeletonProps } from "./Skeleton";
 type DesingType = "label" | "floatLabel";
 
 interface Props extends InputTextProps {
-  label: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
+  label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
   small?: HTMLAttributes<HTMLElement> & { text?: string };
   desingType?: DesingType;
   iconField?: boolean;
@@ -36,15 +36,17 @@ const InputTextWithLabel = forwardRef<HTMLInputElement, Props>(
   ({ label, small, iconField, loading, skeleton, ...props }, ref) => {
     return (
       <>
-        <label
-          className={classNames(
-            "block text-sm font-medium text-gray-700",
-            label.className
-          )}
-          {...label}
-        >
-          {label.text}
-        </label>
+        {label && (
+          <label
+            className={classNames(
+              "block text-sm font-medium text-gray-700",
+              label.className
+            )}
+            {...label}
+          >
+            {label.text}
+          </label>
+        )}
         {loading ? (
           <Skeleton shape="rectangle" height="3rem" {...skeleton} />
         ) : (
@@ -75,7 +77,7 @@ const InputTextWithFloatLabel = forwardRef<HTMLInputElement, Props>(
             ) : (
               <InputTextPrimeReact {...props} ref={ref} />
             )}
-            <label {...label}>{label.text}</label>
+             {label && ( <label {...label}>{label.text}</label>)}
           </FloatLabel>
         )}
       </>

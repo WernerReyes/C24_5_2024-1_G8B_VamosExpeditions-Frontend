@@ -1,22 +1,22 @@
+import { AppState } from "@/app/store";
 import { classNamesAdapter } from "@/core/adapters";
+import { constantStorage } from "@/core/constants";
+import { reservationDto } from "@/domain/dtos/reservation";
+import type { CityEntity } from "@/domain/entities";
+import { Day, onSetSelectedDay } from "@/infraestructure/store";
+import { useUpsertReservationMutation } from "@/infraestructure/store/services";
 import { Button } from "@/presentation/components";
 import { Menu } from "primereact/menu";
 import { MenuItem } from "primereact/menuitem";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
 import { SelectItem } from "primereact/selectitem";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Accommodiations } from "./accommodation";
-import {
-  useQuotationStore,
-  useReservationStore,
-} from "@/infraestructure/hooks";
-import { constantStorage } from "@/core/constants";
-import type { CityEntity } from "@/domain/entities";
 
-const { ITINERARY_CURRENT_ACTIVITY, ITINERARY_CURRENT_SELECTED_DAY } =
-  constantStorage;
+const { ITINERARY_CURRENT_ACTIVITY } = constantStorage;
 
-const options: SelectItem[] = [
+const OPTIONS: SelectItem[] = [
   {
     label: "Servicios",
     icon: "pi pi-users",
@@ -31,33 +31,61 @@ const options: SelectItem[] = [
   },
 ];
 
-export interface Day {
-  id: number;
-  number: number;
-  name: string;
-  date: string;
-}
+const SERVICES: MenuItem[] = [
+  {
+    label: "Transporte",
+    icon: "pi pi-refresh",
+  },
+  {
+    separator: true,
+  },
+  {
+    label: "Actividades",
+    icon: "pi pi-upload",
+  },
+  {
+    separator: true,
+  },
+  {
+    label: "Alojamiento",
+    icon: "pi pi-upload",
+  },
+  {
+    separator: true,
+  },
+  {
+    label: "Guías",
+    icon: "pi pi-upload",
+  },
+];
+
 type Props = {
   selectedCity?: CityEntity;
 };
 
 export const Itinerary = ({ selectedCity }: Props) => {
-  const { startSetDaysNumber } = useQuotationStore();
-  const {
-    currentReservation,
-    startUpdatingReservatioTravelDates,
-  } = useReservationStore();
-  const [[startDate, endDate], setDaysRange] = useState<[Date, Date]>([
-    new Date(),
-    new Date(),
-  ]);
-  const [selectedDay, setSelectedDay] = useState<Day>();
+  const dispatch = useDispatch();
+  // const { startSetSelectedDay } = useQuotationStore();
+
+  const { selectedDay } = useSelector((state: AppState) => state.quotation);
+
+  const { currentReservation } = useSelector(
+    (state: AppState) => state.reservation
+  );
+
+  const [upsertReservation] = useUpsertReservationMutation();
+
+  const [[startDate, endDate], setDaysRange] = useState<
+    [Date | null, Date | null]
+  >([null, null]);
+
   const [generatedDays, setGeneratedDays] = useState<Day[]>();
   const [lastItineraryDate, setLastItineraryDate] = useState<Date>();
   const scrollContainerRef = useRef<HTMLUListElement>(null);
   const [value, setValue] = useState<string>(
-    localStorage.getItem(ITINERARY_CURRENT_ACTIVITY) || options[0].value
+    localStorage.getItem(ITINERARY_CURRENT_ACTIVITY) || OPTIONS[0].value
   );
+  const [totalDays, setTotalDays] = useState<number>(0);
   const menuLeft = useRef<Menu>(null);
 
   const handleAddDay = () => {
@@ -65,7 +93,16 @@ export const Itinerary = ({ selectedCity }: Props) => {
       lastItineraryDate?.setDate(lastItineraryDate.getDate() + 1);
 
       //* Update reservation travel dates
-      startUpdatingReservatioTravelDates([startDate, lastItineraryDate!]);
+      if (currentReservation) {
+        upsertReservation({
+          reservationDto: reservationDto.parse({
+            ...currentReservation,
+            startDate: startDate!,
+            endDate: lastItineraryDate!,
+          }),
+          showMessage: false,
+        });
+      }
 
       const newDay: Day = {
         id: generatedDays.length + 1,
@@ -77,14 +114,13 @@ export const Itinerary = ({ selectedCity }: Props) => {
           month: "long",
           year: "numeric",
         }),
+        total: totalDays + 1,
       };
       setGeneratedDays([...generatedDays, newDay]);
-      setSelectedDay(newDay);
 
-      //* Save new date in local storage
-      startSetDaysNumber(generatedDays.length + 1);
+      dispatch(onSetSelectedDay(newDay));
 
-      // Desplaza el contenedor hacia el final
+      //* Scroll to bottom after adding a new day at the end of the list
       setTimeout(() => {
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTo({
@@ -111,75 +147,50 @@ export const Itinerary = ({ selectedCity }: Props) => {
         Math.abs(
           (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
         ) + 1;
-      console.log({ daysNumber });
-      const days: Day[] = Array.from({ length: daysNumber }, (_, index) => {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + index);
+      new Promise<Day[]>((resolve) => {
+        const days = Array.from({ length: daysNumber }, (_, index) => {
+          const date = new Date(startDate);
+          date.setDate(date.getDate() + index);
 
-        // console.log({ date });
+          setLastItineraryDate(date);
+          return {
+            id: index + 1,
+            number: index + 1,
+            name: `Día ${index + 1}`,
+            date: date.toLocaleDateString("es-ES", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }),
+            total: daysNumber,
+          };
+        });
 
-        setLastItineraryDate(date);
-        return {
-          id: index + 1,
-          number: index + 1,
-          name: `Día ${index + 1}`,
-          date: date.toLocaleDateString("es-ES", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          }),
-        };
+        resolve(days);
+      }).then((days) => {
+        // if (days.length > 1) {
+          setGeneratedDays(days);
+          setTotalDays(daysNumber);
+        // }
       });
-      setGeneratedDays(days);
-      setSelectedDay(
-        (JSON.parse(
-          localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) as string
-        ) as Day) || days[0]
-      );
     }
   }, [startDate, endDate]);
 
   useEffect(() => {
-    if (selectedDay) {
-      localStorage.setItem(
-        ITINERARY_CURRENT_SELECTED_DAY,
-        JSON.stringify(selectedDay)
+    if (currentReservation && generatedDays) {
+      dispatch(
+        onSetSelectedDay(
+          generatedDays.find((day) => day.number === selectedDay?.number) ||
+            generatedDays[0]
+        )
       );
     }
-  }, [selectedDay]);
+  }, [currentReservation, generatedDays]);
 
   useEffect(() => {
     localStorage.setItem(ITINERARY_CURRENT_ACTIVITY, value);
   }, [value]);
-
-  const items: MenuItem[] = [
-    {
-      label: "Transporte",
-      icon: "pi pi-refresh",
-    },
-    {
-      separator: true,
-    },
-    {
-      label: "Actividades",
-      icon: "pi pi-upload",
-    },
-    {
-      separator: true,
-    },
-    {
-      label: "Alojamiento",
-      icon: "pi pi-upload",
-    },
-    {
-      separator: true,
-    },
-    {
-      label: "Guías",
-      icon: "pi pi-upload",
-    },
-  ];
 
   return (
     <div className="flex flex-col mt-5 lg:flex-row">
@@ -205,14 +216,19 @@ export const Itinerary = ({ selectedCity }: Props) => {
             )}
             // optionValue="value"
 
-            options={options}
+            options={OPTIONS}
           />
 
           {/* Content */}
           {value === "services" && (
             <>
               <div className="flex justify-end">
-                <Menu model={items} popup ref={menuLeft} id="popup_menu_left" />
+                <Menu
+                  model={SERVICES}
+                  popup
+                  ref={menuLeft}
+                  id="popup_menu_left"
+                />
                 <Button
                   label="Agregar Servicio"
                   icon="pi pi-plus-circle"
@@ -229,16 +245,7 @@ export const Itinerary = ({ selectedCity }: Props) => {
 
           {value === "accommodation" && (
             <>
-              <Accommodiations
-                selectedDay={
-                  selectedDay || {
-                    id: 1,
-                    number: 1,
-                    name: "Día 1",
-                    date: "Hoy",
-                  }
-                }
-              />
+              <Accommodiations />
             </>
           )}
         </div>
@@ -253,7 +260,14 @@ export const Itinerary = ({ selectedCity }: Props) => {
           {generatedDays?.map((day, index) => (
             <li
               key={day.id}
-              onClick={() => setSelectedDay(day)}
+              onClick={() =>
+                dispatch(
+                  onSetSelectedDay({
+                    ...day,
+                    total: totalDays,
+                  })
+                )
+              }
               className={`p-4 rounded-lg cursor-pointer text-sm md:text-base ${
                 selectedDay?.id === day.id
                   ? "bg-primary text-white"

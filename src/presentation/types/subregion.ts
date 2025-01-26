@@ -1,0 +1,26 @@
+export const SUBREGIONS = [
+  "Northern America",
+  "Central America",
+  "Caribbean",
+  "South America",
+  "Northern Europe",
+  "Western Europe",
+  "Eastern Europe",
+  "Southern Europe",
+  "Northern Africa",
+  "Western Africa",
+  "Eastern Africa",
+  "Middle Africa",
+  "Southern Africa",
+  "Western Asia",
+  "Central Asia",
+  "Eastern Asia",
+  "Southern Asia",
+  "Southeast Asia",
+  "Australia and New Zealand",
+  "Melanesia",
+  "Micronesia",
+  "Polynesia",
+];
+
+export type Subregion = (typeof SUBREGIONS)[number];

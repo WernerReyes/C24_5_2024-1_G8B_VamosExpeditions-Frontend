@@ -1,2 +1,2 @@
 export * from './serverity';
-export * from './contienent';
+export * from './subregion';

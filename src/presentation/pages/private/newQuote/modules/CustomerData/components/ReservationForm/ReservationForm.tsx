@@ -15,20 +15,26 @@ import {
   type TreeSelectChangeEvent,
   type TreeSelectSelectionKeysType,
 } from "@/presentation/components";
-import { useClientStore } from "@/infraestructure/hooks/useClientStore";
-import {
-  reservationDtoEmpty,
-  reservationDtoSchema,
-  type ReservationDto,
-} from "@/domain/dtos/reservation";
-import { useCountryStore, useReservationStore } from "@/infraestructure/hooks";
+import { reservationDto, type ReservationDto } from "@/domain/dtos/reservation";
+import { useCountryStore } from "@/infraestructure/hooks";
 
 import ReservationFormStyle from "./ReservationForm.module.css";
 import { OrderType, TravelerStyle } from "@/domain/entities";
 import { generateCode, transformDataToTree } from "../../utils";
 
 import Style from "../Style.module.css";
-
+import {
+  useGetAllClientsQuery,
+  useUpdateVersionQuotationMutation,
+  useUpsertReservationMutation,
+} from "@/infraestructure/store/services";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppState } from "@/app/store";
+import {
+  onSetCurrentReservation,
+  onSetSelectedClient,
+} from "@/infraestructure/store";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 
 const TRAVELER_CLASES = [
   { key: TravelerStyle.COMFORT, label: "Confort" },
@@ -37,85 +43,97 @@ const TRAVELER_CLASES = [
 ];
 
 export const ReservationForm = () => {
-  const { control, handleSubmit, reset, watch, setValue } =
-    useForm<ReservationDto>({
-      resolver: zodResolver(reservationDtoSchema),
-    });
+  const dispatch = useDispatch();
   const {
-    startCreatingReservation,
-    startUpdatingReservation,
-    startDeletingReservation,
-    currentReservation,
-    createReservationResult: { isLoading: isCreatingReservation },
-    updateReservationResult: { isLoading: isUpdatingReservation },
-  } = useReservationStore();
-  const {
-    clients,
-    startGettingAllClients,
-    startSelectingClient,
-    getAllClientsResult: { isGettingAllClients },
-  } = useClientStore();
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<ReservationDto>({
+    resolver: zodResolver(reservationDto.getSchema),
+    defaultValues: reservationDto.getEmpty,
+  });
+
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+
+  const { currentReservation } = useSelector(
+    (state: AppState) => state.reservation
+  );
+  const { selectedClient } = useSelector((state: AppState) => state.client);
+
+  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
+
+  const [upsertReservation, { isLoading: isUpsertingReservation }] =
+    useUpsertReservationMutation();
+  const { data: clients, isLoading: isGettingAllClients } =
+    useGetAllClientsQuery();
   const { countries, startGettingCountries } = useCountryStore();
+
   const [isContentLoading, setIsContentLoading] = useState(true);
 
   const handleReservation = (reservationDto: ReservationDto) => {
-    if (currentReservation) {
-      startUpdatingReservation(currentReservation.id, reservationDto);
-      return;
-    }
-    startCreatingReservation(reservationDto);
+    upsertReservation({ reservationDto })
+      .unwrap()
+      .then(({ data }) => {
+        if (reservationDto.id) return;
+        updateVersionQuotation(
+          versionQuotationDto.parse({
+            ...currentVersionQuotation!,
+            reservation: data,
+          })
+        )
+          .unwrap()
+          .then(() => {
+            dispatch(onSetCurrentReservation(data));
+          });
+      });
   };
 
   const handleCancelReservation = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    startDeletingReservation(currentReservation!.id);
-    reset(reservationDtoEmpty);
-    startSelectingClient(null);
+    if (!currentVersionQuotation) return;
+    updateVersionQuotation(
+      versionQuotationDto.parse({
+        ...currentVersionQuotation,
+        reservation: undefined,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(onSetCurrentReservation(null));
+        reset(reservationDto.getEmpty);
+        dispatch(onSetSelectedClient(null));
+      });
   };
 
   useEffect(() => {
-    startGettingAllClients();
     startGettingCountries();
   }, []);
 
   useEffect(() => {
     if (currentReservation) {
-      const {
-        client,
-        numberOfPeople,
-        startDate,
-        endDate,
-        code,
-        cities,
-        orderType,
-        travelerStyle,
-        specialSpecifications,
-      } = currentReservation;
-      reset({
-        client,
-        numberOfPeople,
-        travelDates: [startDate, endDate],
-        code,
-        travelerStyle,
-        orderType,
-        destination: cities?.reduce(
-          (acc, city) => ({ ...acc, [city.id]: true }),
-          {}
-        ),
-        specialSpecifications: specialSpecifications ?? "",
-      });
-    }
-
-    if (currentReservation?.client) {
-      startSelectingClient(currentReservation.client);
+      reset(reservationDto.parse(currentReservation));
+      if (currentReservation.client) {
+        dispatch(onSetSelectedClient(currentReservation.client));
+      }
     }
 
     setIsContentLoading(false);
   }, [currentReservation]);
 
+  // useEffect(() => {
+  //   if (selectedClient) {
+  //     setValue("client", selectedClient);
+  //   }
+  // }, [selectedClient]);
+
   useEffect(() => {
     const code = generateCode({
-      continent: watch("client.continent"),
+      subregion: watch("client.subregion"),
       orderType: watch("orderType"),
       startDate: watch("travelDates") && watch("travelDates")[0],
       travelerStyle: watch("travelerStyle"),
@@ -148,7 +166,7 @@ export const ReservationForm = () => {
                 <Dropdown
                   loading={isContentLoading || isGettingAllClients}
                   filter
-                  options={clients}
+                  options={clients?.data}
                   label={{
                     text: "Nombre del cliente",
                     htmlFor: "client",
@@ -157,13 +175,12 @@ export const ReservationForm = () => {
                   small={{
                     text: error?.message,
                   }}
-                  invalid={!!error}
-                  {...field}
                   value={field.value}
+                  invalid={!!error}
                   optionLabel="fullName"
                   onChange={(e: DropdownChangeEvent) => {
                     field.onChange(e.value);
-                    startSelectingClient(e.value);
+                    dispatch(onSetSelectedClient(e.value));
                   }}
                 />
               );
@@ -247,29 +264,32 @@ export const ReservationForm = () => {
           <Controller
             control={control}
             name="destination"
-            render={({ field, fieldState: { error } }) => (
-              <TreeSelect
-                options={transformDataToTree(countries)}
-                selectionMode="multiple"
-                showClear
-                filter
-                placeholder="Seleccione una ciudad"
-                label={{
-                  text: "Destino",
-                  htmlFor: "destino",
-                }}
-                loading={isContentLoading}
-                {...field}
-                invalid={!!error}
-                value={field.value as unknown as TreeSelectSelectionKeysType}
-                onChange={(e: TreeSelectChangeEvent) => {
-                  field.onChange(e.value);
-                }}
-                small={{
-                  text: error?.message,
-                }}
-              />
-            )}
+            render={({ field, fieldState: { error } }) => {
+              // console.log("error", field.value, error);
+              return (
+                <TreeSelect
+                  options={transformDataToTree(countries)}
+                  selectionMode="multiple"
+                  showClear
+                  filter
+                  placeholder="Seleccione una ciudad"
+                  label={{
+                    text: "Destino",
+                    htmlFor: "destino",
+                  }}
+                  loading={isContentLoading}
+                  // {...field}
+                  invalid={!!error}
+                  value={field.value as unknown as TreeSelectSelectionKeysType}
+                  onChange={(e: TreeSelectChangeEvent) => {
+                    field.onChange(e.value);
+                  }}
+                  small={{
+                    text: error?.message,
+                  }}
+                />
+              );
+            }}
           />
         </div>
       </div>
@@ -403,25 +423,32 @@ export const ReservationForm = () => {
         />
       </div>
 
+      <Controller
+        control={control}
+        name="id"
+        defaultValue={0}
+        render={({ field }) => {
+          return <input type="hidden" id="id" {...field} />;
+        }}
+      />
+
       <div className="flex justify-between">
         <Button
           icon={currentReservation ? "pi pi-pencil" : "pi pi-plus"}
           disabled={
-            isContentLoading || isCreatingReservation || isUpdatingReservation
+            isContentLoading ||
+            isUpsertingReservation ||
+            Object.keys(errors).length > 0
           }
           label={currentReservation ? "Actualizar Reserva" : "Crear Reserva"}
-          loading={
-            isContentLoading || isCreatingReservation || isUpdatingReservation
-          }
+          loading={isContentLoading || isUpsertingReservation}
         />
         {currentReservation && (
           <Button
             icon="pi pi-times"
             className="bg-primary"
             label="Cancelar Edición"
-            disabled={
-              isCreatingReservation || isUpdatingReservation || isContentLoading
-            }
+            disabled={isUpsertingReservation || isContentLoading}
             onClick={handleCancelReservation}
           />
         )}

@@ -2,15 +2,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { loginDtoSchema, type LoginDto } from "@/domain/dtos/auth";
-import { useAuthStore, useCookieExpirationStore } from "@/infraestructure/hooks";
+import {
+  useAuthStore,
+} from "@/infraestructure/hooks";
 import { Button, Image, InputText, Password } from "@/presentation/components";
 import { constantRoutes } from "@/core/constants";
-import { useLoginMutation } from "@/infraestructure/store/services";
-import { useAlert } from "@/presentation/hooks";
+
 
 const { DASHBOARD } = constantRoutes.private;
-
-const MAX_TOASTS = 3;
 
 const LoginPage = () => {
   const {
@@ -21,24 +20,15 @@ const LoginPage = () => {
     resolver: zodResolver(loginDtoSchema),
   });
   const navigate = useNavigate();
-  const [login, { isLoading }] = useLoginMutation();
-  const { startShowApiError, startShowSuccess } = useAlert(MAX_TOASTS);
-  const { startLogin, startLogout } = useAuthStore();
-  const { init } = useCookieExpirationStore()
+  const {
+    startLogin,
+    loginResult: { isLoggingIn },
+  } = useAuthStore();
 
   const handleLogin = async (data: LoginDto) => {
-    await login(data)
-      .unwrap()
-      .then((response) => {
-        startShowSuccess(response.message);
-        startLogin(response.data.user);
-        navigate(DASHBOARD);
-        init(response.data.expiresAt);
-      })
-      .catch((error) => {
-        startShowApiError(error);
-        startLogout();
-      });
+    await startLogin(data).then(() => {
+      navigate(DASHBOARD);
+    });
   };
 
   return (
@@ -122,8 +112,8 @@ const LoginPage = () => {
 
           <Button
             type="submit"
-            label={isLoading ? "Validando..." : "Iniciar Sesión"}
-            disabled={Object.keys(errors).length > 0 || isLoading}
+            label={isLoggingIn ? "Validando..." : "Iniciar Sesión"}
+            disabled={Object.keys(errors).length > 0 || isLoggingIn}
             // onClick={handleSubmit}
             className="w-full mt-8"
           />

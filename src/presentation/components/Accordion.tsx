@@ -1,6 +1,7 @@
 import {
   Accordion as AccordionPrimeReact,
   type AccordionProps as AccordionPropsPrimeReact,
+  type AccordionTabChangeEvent
 } from "primereact/accordion";
 
 import {
@@ -26,8 +27,10 @@ export const Accordion = ({
     <AccordionPrimeReact {...rest}>
       {includeTab &&
         tabContent.map((tab, index) => (
-          <AccordionTabPrimeReact key={index} {...tab} />
+          <AccordionTabPrimeReact {...tab} key={index}  />
         ))}
     </AccordionPrimeReact>
   );
 };
+
+export type { AccordionTabChangeEvent };

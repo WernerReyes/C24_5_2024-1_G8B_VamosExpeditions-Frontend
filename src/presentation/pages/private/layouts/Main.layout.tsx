@@ -37,3 +37,5 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     </section>
   );
 };
+
+export default MainLayout;

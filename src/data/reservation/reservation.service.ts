@@ -31,13 +31,6 @@ export const reservationService = {
       .then((reservations) => reservations[0]) as Promise<ReservationEntity>;
   },
 
-  //   async updateReservation(reservation) {
-  //     const db = await initDB();
-  //     const tx = db.transaction("reservations", "readwrite");
-  //     const store = tx.objectStore("reservations");
-  //     store.put(reservation);
-  //     return tx.done;
-  //   },
   async deleteReservation(id: number) {
     const db = await initDB();
     const tx = db.transaction("reservations", "readwrite");

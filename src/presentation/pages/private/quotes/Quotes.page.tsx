@@ -1,10 +1,11 @@
 import { Button } from "@/presentation/components";
 import { MainLayout } from "../layouts";
 import { QuotesTable } from "./components";
+import { NewQuotationButton } from "../components";
 
 const QuotesPage = () => {
   return (
-    <MainLayout>
+    // <MainLayout>
       <div className="bg-white p-10 rounded-lg shadow-md">
         <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
           <Button
@@ -12,12 +13,12 @@ const QuotesPage = () => {
             className="bg-transparent text-black border-[#D0D5DD]"
             icon="pi pi-download"
           />
-          <Button label="Nueva cotización" icon="pi pi-plus-circle" />
+          <NewQuotationButton />
         </div>
 
         <QuotesTable />
       </div>
-    </MainLayout>
+  
   );
 };
 

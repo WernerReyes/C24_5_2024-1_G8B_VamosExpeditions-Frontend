@@ -2,12 +2,13 @@ import { constantRoutes } from "@/core/constants";
 import {
   useAuthStore,
   useCookieExpirationStore,
+  useQuotationStore,
 } from "@/infraestructure/hooks";
-import { useUserAuthenticatedQuery } from "@/infraestructure/store/services";
 import {
+  ConfirmDialog,
+  ConfirmPopup,
   ExpiredSessionCountdown,
-  ProgressSpinner,
-  Toaster
+  Toaster,
 } from "@/presentation/components";
 import { AuthGuard } from "@/presentation/guards";
 import PrivateRoutes from "@/presentation/routes/Private.routes";
@@ -19,46 +20,37 @@ const LoginPage = lazy(
   () => import("../presentation/pages/public/login/Login.page")
 );
 
-//* Private pages
-// const UserRouter = lazy(() => import("./User.router"));
-// const AdminRouter = lazy(() => import("./Admin.router"));
-
 const {
   public: { LOGIN },
   private: { DASHBOARD },
 } = constantRoutes;
 
-// const { USER, ADMIN } = PrivateRoutes;
-
 export const AppRouter = () => {
-  const { data, isLoading, error } = useUserAuthenticatedQuery();
-  const { authUser, startLogin } = useAuthStore();
+  const {
+    authUser,
+    startVerifyUserAuthenticated,
+    userAuthenticatedResult: { isUserAuthenticatedLoading, error },
+  } = useAuthStore();
+  const { currentQuotation } = useQuotationStore();
   const [loadingUser, setLoadingUser] = useState(true);
-  const { init, isExpired } = useCookieExpirationStore();
+  const { isExpired } = useCookieExpirationStore();
 
   useEffect(() => {
-    if (data) {
-      startLogin(data.data.user);
-      setLoadingUser(false);
-      init(data.data.expiresAt);
-    }
-  }, [data]);
+    startVerifyUserAuthenticated().then(() => setLoadingUser(false));
+  }, []);
 
   useEffect(() => {
     if (error) setLoadingUser(false);
   }, [error]);
 
-  if (isLoading || loadingUser) {
-    return (
-      <div className="flex h-full max-h-full min-h-screen w-full items-center justify-center">
-        <ProgressSpinner />
-      </div>
-    );
-  }
+  if (isUserAuthenticatedLoading || loadingUser) return null;
+  
 
   return (
     <>
-      {isExpired && (<ExpiredSessionCountdown isExpired={isExpired} />)}
+      <ConfirmDialog />
+      <ConfirmPopup />
+      {isExpired && <ExpiredSessionCountdown isExpired={isExpired} />}
       <BrowserRouter
         future={{
           v7_startTransition: true,
@@ -68,7 +60,7 @@ export const AppRouter = () => {
         <Toaster />
         <Routes>
           {/* <RouterWithNotFound> */}
-          
+
           <Route
             path="/"
             element={<Navigate to={authUser?.id ? DASHBOARD : LOGIN} />}
