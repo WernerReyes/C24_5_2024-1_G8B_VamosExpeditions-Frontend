@@ -1,4 +1,3 @@
-import type { AppState } from "@/app/store";
 import { dateFnsAdapter } from "@/core/adapters";
 import {
   orderTypeRender,
@@ -18,7 +17,6 @@ import {
 } from "@/presentation/components";
 import { Toolbar } from "primereact/toolbar";
 import { useState, useRef } from "react";
-import { useSelector } from "react-redux";
 
 export const ReservationTable = () => {
   const dt = useRef<DataTableRef>(null);

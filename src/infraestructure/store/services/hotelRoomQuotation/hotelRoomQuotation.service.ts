@@ -101,7 +101,7 @@ export const hotelRoomQuotationService = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["HotelRoomQuotations"],
-      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(deleteHotelRoomQuotationCache(data.data));
