@@ -1,5 +1,4 @@
 import { Button } from "@/presentation/components";
-import { MainLayout } from "../layouts";
 import { QuotesTable } from "./components";
 import { NewQuotationButton } from "../components";
 

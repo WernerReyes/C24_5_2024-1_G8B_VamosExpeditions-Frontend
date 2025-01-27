@@ -1,4 +1,4 @@
-import { memo, useEffect } from "react";
+import { memo } from "react";
 import { ClientForm, ReservationForm } from "./components";
 import {
   DefaultFallBackComponent,
@@ -14,14 +14,12 @@ import {
   useUpdateVersionQuotationMutation,
   useUpsertReservationMutation,
 } from "@/infraestructure/store/services";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { AppState } from "@/app/store";
 import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
-import { onSetCurrentReservation } from "@/infraestructure/store";
 import { reservationDto } from "@/domain/dtos/reservation";
 
 export const CustomerDataModule = memo(() => {
-  const dispatch = useDispatch();
 
   const { currentReservation, reservations } = useSelector(
     (state: AppState) => state.reservation

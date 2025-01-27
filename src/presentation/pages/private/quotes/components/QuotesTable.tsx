@@ -1,7 +1,6 @@
 import { formatCurrency } from "@/core/utils";
 import type { QuoteEntity, VersionQuotationEntity } from "@/domain/entities";
 import {
-  Button,
   Column,
   DataTable,
   DefaultFallBackComponent,

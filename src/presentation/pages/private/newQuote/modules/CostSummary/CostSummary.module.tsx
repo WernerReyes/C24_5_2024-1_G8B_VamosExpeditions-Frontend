@@ -2,7 +2,6 @@ import { AppState } from "@/app/store";
 import { HotelRoomQuotationEntity } from "@/domain/entities";
 import {
   useHotelRoomQuotationStore,
-  // useAccommodationQuoteStore,
   useQuotationStore,
 } from "@/infraestructure/hooks";
 import {
@@ -32,7 +31,7 @@ interface ColumnMeta {
 
 export const CostSummaryModule = () => {
   const dispatch = useDispatch();
-  const { hotelRoomQuotations, hotelRoomQuotationsWithTotalCost } = useSelector(
+  const { hotelRoomQuotations } = useSelector(
     (state: AppState) => state.hotelRoomQuotation
   );
   const { selectedDay: currentDay } = useQuotationStore();
@@ -46,7 +45,6 @@ export const CostSummaryModule = () => {
   );
   const {
     // hotelRoomQuotations,
-    startGetHotelRoomsQuotation,
     startDeleteHotelRoomQuotation,
   } = useHotelRoomQuotationStore();
   const [hotelRoomQuotationsPerDay, setHotelRoomQuotationsPerDay] = useState<
