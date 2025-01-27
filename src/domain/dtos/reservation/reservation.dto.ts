@@ -5,6 +5,7 @@ import {
   OrderType,
   TravelerStyle,
   ReservationEntity,
+  ReservationStatus,
 } from "@/domain/entities";
 import { z } from "zod";
 
@@ -13,6 +14,7 @@ export type ReservationDto = {
   readonly numberOfPeople: number;
   readonly travelDates: Date[];
   readonly code: string;
+  readonly status?: ReservationStatus;
   readonly travelerStyle: TravelerStyle;
   readonly orderType: OrderType;
   readonly destination: { [key: number]: boolean };
@@ -54,6 +56,9 @@ const reservationDtoSchema = z.object({
     .min(1, {
       message: "El campo código es requerido",
     }),
+  status: z.nativeEnum(ReservationStatus, {
+    required_error: "El campo estado es requerido",
+  }),
   travelerStyle: z.nativeEnum(TravelerStyle, {
     required_error: "El campo estilo de viajero es requerido",
   }),
@@ -91,6 +96,7 @@ export const reservationDto = {
         new Date(reservationEntity.startDate),
         new Date(reservationEntity.endDate),
       ],
+      status: reservationEntity.status,
       code: reservationEntity.code,
       travelerStyle: reservationEntity.travelerStyle,
       orderType: reservationEntity.orderType,
@@ -106,7 +112,14 @@ export const reservationDto = {
   getEmpty: generateEmptyObject<ReservationDto>(reservationDtoSchema, {
     travelerStyle: TravelerStyle.COMFORT,
     orderType: OrderType.DIRECT,
+    status: ReservationStatus.PENDING,
   }),
 
   getSchema: reservationDtoSchema,
 };
+
+
+console.log(generateEmptyObject<ReservationDto>(reservationDtoSchema, {
+  travelerStyle: TravelerStyle.COMFORT,
+  orderType: OrderType.DIRECT,
+  status: ReservationStatus.PENDING}))

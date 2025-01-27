@@ -2,7 +2,7 @@ import { constantRoutes } from "@/core/constants";
 import { RoleEnum } from "@/domain/entities";
 import { lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { RoleGuard } from "../guards";
+import { NewQuotationGuard, RoleGuard } from "../guards";
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
 
@@ -18,7 +18,7 @@ const ReservationsPage = lazy(
   () => import("../pages/private/reservations/Reservations.page")
 );
 
-const NewQuotationGuard = lazy(() => import("../guards/NewQuotation.guard"));
+
 
 const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
 

@@ -261,7 +261,7 @@ const PopupWithLocalState = ({
     (state: AppState) => state.versionQuotation
   );
   const [createHotelRoomQuotation] = useCreateHotelRoomQuotationMutation();
-  const [localValue, setLocalValue] = useState<[number, number]>([1, 1]);
+  const [localValue, setLocalValue] = useState<[number, number]>([1, 2]);
 
   const handleAddHotelRoomQuotation = () => {
     Array.from({ length: localValue[1] - localValue[0] + 1 }).forEach(
@@ -285,6 +285,8 @@ const PopupWithLocalState = ({
     setRange(localValue);
   }, [localValue]);
 
+  console.log({ localValue });
+
   return (
     <div className="flex justify-center">
       <div className="w-48">
@@ -294,21 +296,38 @@ const PopupWithLocalState = ({
             htmlFor: "range",
             className: "text-sm",
           }}
+          disabled
+          min={1}
+          max={selectedDay.total}
+          keyfilter="int"
           value={`${localValue[0]} - ${localValue[1]}`}
+          // value={`${
+          //   localValue[0] ? localValue[0] > selectedDay.total
+          //     ? selectedDay.total
+          //     : localValue[0] : 1
+          // } - ${
+          //   localValue[1] ? localValue[1] > selectedDay.total
+          //     ? selectedDay.total
+          //     : localValue[1] : 1
+          // }`}
           onChange={(e) =>
             setLocalValue(
-              e.target.value.split(" - ").map((v) => Number(v)) as [
-                number,
-                number
-              ]
+              e.target.value.split(" - ").map((v) => {
+                if (Number.isNaN(Number(v)) || v === undefined) return 1;
+                return Number(v);
+              }) as [number, number]
             )
           }
-          invalid={localValue[0] > localValue[1]}
+          invalid={
+            localValue[0] > localValue[1] ||
+            localValue[1] > selectedDay.total ||
+            localValue[0] > selectedDay.total
+          }
           small={{
             className: "text-red-500",
             text: localValue[0] > localValue[1] ? "Rango inválido" : "",
           }}
-          className="w-full"
+          className="w-full p-inputtext-sm"
         />
 
         <Slider
@@ -316,9 +335,9 @@ const PopupWithLocalState = ({
           max={selectedDay.total}
           range
           value={localValue}
-          onChange={(e) =>
-            setLocalValue(e.value as [number, number])
-          }
+          onChange={(e) => {
+            setLocalValue(e.value as [number, number]);
+          }}
           className="w-full"
         />
       </div>
@@ -371,7 +390,8 @@ const ListTemplate = ({
       .then(() => {
         setVisible(false);
         setConfirm(false);
-      }).catch((error) => {
+      })
+      .catch(() => {
         setConfirm(false);
       });
   };
@@ -395,10 +415,7 @@ const ListTemplate = ({
 
   useEffect(() => {
     if (!confirm) return;
-
-    handleAddHotelRoomQuotation().catch((error) => {
-      console.error(error);
-    });
+    handleAddHotelRoomQuotation();
   }, [rangeState, confirm]);
 
   return (
@@ -439,10 +456,6 @@ const ListTemplate = ({
               peopleAmount === 0
             }
             onClick={confirm1}
-            // onClick={
-            //   // (e) => confirm1(e, index)
-            //   // handleAddHotelRoomQuotation(index)
-            // }
           />
         </div>
       </div>

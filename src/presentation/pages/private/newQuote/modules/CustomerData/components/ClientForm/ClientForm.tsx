@@ -94,6 +94,8 @@ export const ClientForm = () => {
     }
   };
 
+  console.log(externalCountries?.data)
+
   const handleUpsertClient = (clientDto: ClientDto) => {
     let client =
       currentOp === OPERATIONS[1]

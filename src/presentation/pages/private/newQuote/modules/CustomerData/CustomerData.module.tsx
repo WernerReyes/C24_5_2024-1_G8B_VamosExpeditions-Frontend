@@ -12,11 +12,13 @@ import { dateFnsAdapter } from "@/core/adapters";
 import {
   useGetAllReservationsQuery,
   useUpdateVersionQuotationMutation,
+  useUpsertReservationMutation,
 } from "@/infraestructure/store/services";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "@/app/store";
 import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 import { onSetCurrentReservation } from "@/infraestructure/store";
+import { reservationDto } from "@/domain/dtos/reservation";
 
 export const CustomerDataModule = memo(() => {
   const dispatch = useDispatch();
@@ -29,24 +31,27 @@ export const CustomerDataModule = memo(() => {
   );
 
   const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
+  const [upsertReservation] = useUpsertReservationMutation();
   const {
     isLoading: isGettingAllReservations,
     isFetching,
     error,
     refetch,
-  } = useGetAllReservationsQuery({
-    status: ReservationStatus.PENDING,
-    quotationId: currentVersionQuotation?.id.quotationId!,
-    versionNumber: currentVersionQuotation?.id.versionNumber!,
-  }, {
-    skip: !currentVersionQuotation,
-  });
-
+  } = useGetAllReservationsQuery(
+    {
+      status: ReservationStatus.PENDING,
+      quotationId: currentVersionQuotation?.id.quotationId!,
+      versionNumber: currentVersionQuotation?.id.versionNumber!,
+    },
+    {
+      skip: !currentVersionQuotation,
+    }
+  );
 
   const handleReservationChange = async (e: DropdownChangeEvent) => {
     if (!e.value) return;
     const reservation = e.value as ReservationEntity;
-    if (currentVersionQuotation) {
+    if (currentVersionQuotation && reservation) {
       await updateVersionQuotation(
         versionQuotationDto.parse({
           ...currentVersionQuotation,
@@ -54,8 +59,25 @@ export const CustomerDataModule = memo(() => {
         })
       )
         .unwrap()
-        .then(() => {
-          dispatch(onSetCurrentReservation(reservation));
+        .then(async() => {
+          await upsertReservation({
+            reservationDto: reservationDto.parse({
+              ...reservation,
+              status: ReservationStatus.ACTIVE,
+            }),
+            setCurrentReservation: true,
+            showMessage: false,
+          });
+          await upsertReservation({
+            reservationDto: reservationDto.parse({
+              ...currentReservation!,
+              status: ReservationStatus.PENDING,
+              
+            }),
+            setCurrentReservation: false,
+            showMessage: false,
+          });
+          // dispatch(onSetCurrentReservation(reservation));
         });
     }
   };

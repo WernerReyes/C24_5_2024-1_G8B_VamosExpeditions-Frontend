@@ -1,28 +1,57 @@
+import { AppState } from "@/app/store";
 import { HotelRoomQuotationEntity } from "@/domain/entities";
 import {
   useHotelRoomQuotationStore,
   // useAccommodationQuoteStore,
   useQuotationStore,
 } from "@/infraestructure/hooks";
-import { Button, TabView, Tag } from "@/presentation/components";
+import {
+  Button,
+  Column,
+  DataTable,
+  TabView,
+  Tag,
+} from "@/presentation/components";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { calculateCosts } from "./utils/calculateCosts";
+import { CostTableType } from "./types/costTable.type";
+import { CostTableEnum } from "./enums/costTable.enum";
+import { InputText } from "primereact/inputtext";
+import { Slider } from "primereact/slider";
+import { constantStorage } from "@/core/constants";
+import { onSetHotelRoomQuotationsWithTotalCost } from "@/infraestructure/store";
+
+const { INDIRECT_COSTS_PERCENTAGE } = constantStorage;
+
+interface ColumnMeta {
+  field: string;
+  header: string;
+}
 
 export const CostSummaryModule = () => {
+  const dispatch = useDispatch();
+  const { hotelRoomQuotations, hotelRoomQuotationsWithTotalCost } = useSelector(
+    (state: AppState) => state.hotelRoomQuotation
+  );
   const { selectedDay: currentDay } = useQuotationStore();
   const [selectedDay, setSelectedDay] = useState<number>(1);
+  const [totalPerService, setTotalPerService] = useState<CostTableType[]>([]);
+  const [columsTable, setColumsTable] = useState<ColumnMeta[]>([]);
+  const [value, setValue] = useState<number>(
+    localStorage.getItem(INDIRECT_COSTS_PERCENTAGE)
+      ? Number(localStorage.getItem(INDIRECT_COSTS_PERCENTAGE))
+      : 5
+  );
   const {
-    hotelRoomQuotations,
+    // hotelRoomQuotations,
     startGetHotelRoomsQuotation,
     startDeleteHotelRoomQuotation,
   } = useHotelRoomQuotationStore();
   const [hotelRoomQuotationsPerDay, setHotelRoomQuotationsPerDay] = useState<
     HotelRoomQuotationEntity[]
   >([]);
-
-  // useEffect(() => {
-  //   startGetHotelRoomsQuotation();
-  // }, []);
 
   useEffect(() => {
     if (selectedDay) {
@@ -31,6 +60,60 @@ export const CostSummaryModule = () => {
       );
     }
   }, [selectedDay, hotelRoomQuotations]);
+
+  useEffect(() => {
+    if (hotelRoomQuotations.length > 0) {
+      const uniqueHotelRoomQuotations = hotelRoomQuotations.filter(
+        (quote, index, self) =>
+          index ===
+          self.findIndex(
+            (t) =>
+              t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
+              t.hotelRoom?.roomType === quote.hotelRoom?.roomType
+          )
+      );
+
+      const calculateCostsPerService = calculateCosts(
+        hotelRoomQuotations,
+        value
+      );
+
+     
+        dispatch(
+          onSetHotelRoomQuotationsWithTotalCost(
+            uniqueHotelRoomQuotations.map((quote, index) => {
+              const totalCost =
+                (
+                  calculateCostsPerService[index].total as {
+                    [key: string]: {
+                      total: number;
+                      indirectCost: number;
+                      directCost: number;
+                      totalCost: number;
+                    };
+                  }
+                )[
+                  `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`
+                ]?.totalCost ?? 0;
+
+              return {
+                ...quote,
+                totalCost,
+              };
+            })
+          )
+        );
+      
+
+      setTotalPerService(calculateCostsPerService);
+      setColumsTable(
+        uniqueHotelRoomQuotations.map((quote) => ({
+          field: "total",
+          header: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
+        }))
+      );
+    }
+  }, [hotelRoomQuotations, value]);
 
   return (
     <div className="p-6 w-full bg-gray-100">
@@ -60,7 +143,7 @@ export const CostSummaryModule = () => {
                           Ningún alojamiento por ahora
                         </p>
                       ) : (
-                        <div className="w-full grid lg:grid-cols-2 gap-x-4 gap-y-8 justify-items-center jus bg-white">
+                        <div className="w-full grid md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 justify-items-center jus bg-white">
                           {hotelRoomQuotationsPerDay.map((quote) => (
                             <div
                               key={quote.id}
@@ -132,46 +215,81 @@ export const CostSummaryModule = () => {
         )}
       />
 
+      <DataTable value={totalPerService} header="Costos por Hotel">
+        <Column
+          field="name"
+          header="Nombre"
+          body={(rowData) => (
+            <div>
+              {rowData.name !== CostTableEnum.TOTAL_INDIRECT_COSTS ? (
+                <div className="font-bold mb-2">{rowData.name}</div>
+              ) : (
+                <div className="flex items-center gap-x-5">
+                  <div className="font-bold mb-2">Costos Indirectos</div>
+                  <div className="">
+                    <InputText
+                      disabled
+                      className="p-inputtext-sm"
+                      value={value.toString() + "%"}
+                    />
+                    <Slider
+                      value={value}
+                      min={0}
+                      max={100}
+                      onChange={(e) => {
+                        setValue((e.value as number) ?? 5);
+                        localStorage.setItem(
+                          INDIRECT_COSTS_PERCENTAGE,
+                          e.value.toString() ?? "5"
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* {renderCustomRow(rowData)} */}
+            </div>
+          )}
+        ></Column>
+        {columsTable.map((column, index) => (
+          <Column
+            key={index}
+            field={column.field}
+            body={(rowData, { rowIndex }) => {
+              return (
+                <div className="font-bold">
+                  {rowIndex === 0 && (
+                    <>$ {rowData.total[column.header]?.serviceCost ?? 0}</>
+                  )}
+
+                  {rowIndex === 1 && (
+                    <>$ {rowData.total[column.header]?.total ?? 0}</>
+                  )}
+
+                  {rowIndex === 2 && (
+                    <>$ {rowData.total[column.header]?.directCost ?? 0}</>
+                  )}
+                  {rowIndex === 3 && (
+                    <>
+                      ${" "}
+                      {rowData.total[column.header]?.indirectCost.toFixed(2) ??
+                        0}{" "}
+                    </>
+                  )}
+
+                  {rowIndex === 4 && (
+                    <>$ {rowData.total[column.header]?.totalCost ?? 0} </>
+                  )}
+                </div>
+              );
+            }}
+            header={column.header}
+          />
+        ))}
+      </DataTable>
+
       {/* Tabla resumen */}
-      <div className="bg-white p-4 rounded shadow-md">
-        {/* Tabla */}
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2">Nombre</th>
-              <th className="py-2">Hotel 1</th>
-              <th className="py-2">Hotel 2</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b">
-              <td className="py-2">Servicios Totales</td>
-              <td className="py-2">$0</td>
-              <td className="py-2">$0</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">AlojamientosTotales</td>
-              <td className="py-2">$100</td>
-              <td className="py-2">$200 </td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">Total Costos Directos</td>
-              <td className="py-2">0</td>
-              <td className="py-2">0</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">Total Costos Indirectos</td>
-              <td className="py-2">0</td>
-              <td className="py-2">0</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2">Total de Costos</td>
-              <td className="py-2">0</td>
-              <td className="py-2">0</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 };

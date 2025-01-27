@@ -1,5 +1,5 @@
 import { formatCurrency } from "@/core/utils";
-import type { QuoteEntity } from "@/domain/entities";
+import type { QuoteEntity, VersionQuotationEntity } from "@/domain/entities";
 import {
   Button,
   Column,
@@ -24,6 +24,7 @@ import { QuoteVersionsTable } from "./QuoteVersionsTable";
 import { TableActions } from "./TableActions";
 import { dateFnsAdapter } from "@/core/adapters";
 import { useQuoteStore } from "@/infraestructure/hooks";
+import { useGetAllVersionQuotationsQuery } from "@/infraestructure/store/services";
 
 const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
   {
@@ -48,20 +49,23 @@ export const QuotesTable = () => {
   const {
     quotes,
     startGetQuotes,
-    getQuotesResult: {
-      isGettingQuotes,
-      isFetching,
-      error,
-      refetch,
-    }
-   } = useQuoteStore()
+    getQuotesResult: { isGettingQuotes, isFetching, error, refetch },
+  } = useQuoteStore();
+  const {
+    data: versionsQuotations,
+    isFetching: isFetchingVersionsQuotations,
+    isLoading: isLoadingVersionsQuotations,
+    error: errorVersionsQuotations,
+    isError,
+    refetch: refetchVersionsQuotations,
+  } = useGetAllVersionQuotationsQuery();
   const [representatives, setRepresentatives] = useState<
     { id: number; name: string }[]
   >([]);
 
-  useEffect(() => {
-    startGetQuotes();
-  }, []);
+  // useEffect(() => {
+  //   startGetQuotes();
+  // }, []);
 
   useEffect(() => {
     if (!quotes.length && !!error) return;
@@ -74,7 +78,7 @@ export const QuotesTable = () => {
     setRepresentatives(uniqueRepresentatives);
   }, [quotes]);
 
-  console.log(quotes);
+  console.log(versionsQuotations?.data);
 
   return (
     <ErrorBoundary
@@ -86,20 +90,20 @@ export const QuotesTable = () => {
           message={
             <div className="p-4">
               <DefaultFallBackComponent
-                refetch={refetch}
-                isFetching={isFetching}
-                isLoading={isGettingQuotes}
+                refetch={refetchVersionsQuotations}
+                isFetching={isFetchingVersionsQuotations}
+                isLoading={isLoadingVersionsQuotations}
                 message="No se pudieron cargar las cotizaciones"
               />
             </div>
           }
         />
       }
-      error={!!error}
+      error={isError}
     >
       <div className="card">
         <Table
-          quotes={quotes}
+          quotes={versionsQuotations?.data || []}
           representatives={representatives}
           isLoading={isGettingQuotes}
         />
@@ -109,7 +113,7 @@ export const QuotesTable = () => {
 };
 
 type TableProps = {
-  quotes: QuoteEntity[];
+  quotes: VersionQuotationEntity[];
   representatives: { id: number; name: string }[];
   isLoading: boolean;
   message?: React.ReactNode | string;
@@ -120,14 +124,16 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
     DataTableExpandedRows | DataTableValueArray | undefined
   >(undefined);
 
-  const handleExpandAll = () => {
-    let _expandedRows: DataTableExpandedRows = {};
-    quotes.forEach((p) => {
-      if (p.versions.length > 0) _expandedRows[p.id] = true;
-    });
-    setExpandedRows(_expandedRows);
-  };
-  const handleCollapseAll = () => setExpandedRows(undefined);
+  // const handleExpandAll = () => {
+  //   let _expandedRows: DataTableExpandedRows = {};
+  //   quotes.forEach((p) => {
+  //     if (p.versions.length > 0) _expandedRows[p.id] = true;
+  //   });
+  //   setExpandedRows(_expandedRows);
+  // };
+  // const handleCollapseAll = () => setExpandedRows(undefined);
+
+  console.log(quotes);
 
   return (
     <DataTable
@@ -144,11 +150,11 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
       paginatorClassName="text-sm lg:text-[15px]"
       size="small"
       className="text-sm lg:text-[15px] mt-5"
-      dataKey="id"
+      // dataKey="id"
       loading={isLoading}
       header={
         <div className="flex flex-wrap justify-content-end gap-2">
-          <Button
+          {/* <Button
             icon="pi pi-plus"
             label="Expandir Todo"
             onClick={handleExpandAll}
@@ -159,7 +165,7 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
             label="Colapsar Todo"
             onClick={handleCollapseAll}
             text
-          />
+          /> */}
         </div>
       }
       tableStyle={{ minWidth: "60rem" }}
@@ -183,12 +189,12 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         "No hay cotizaciones"
       }
     >
-      <Column
+      {/* <Column
         expander={(quote) => quote.versions.length > 0}
         style={{ width: "5rem" }}
-      />
+      /> */}
       <Column
-        field="customer.name"
+        field="reservation.client.fullName"
         filter
         showFilterOperator={false}
         showAddButton={false}
@@ -199,11 +205,11 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         filterClear={(options) => <FilterClearButton {...options} />}
         filterApply={(options) => <FilterApplyButton {...options} />}
       />
-      <Column field="customer.country" header="País" sortable />
-      <Column field="passengers" header="Pasajeros" sortable />
+      <Column field="reservation.client.country" header="País" sortable />
+      <Column field="reservation.numberOfPeople" header="Pasajeros" sortable />
 
       <Column
-        field="startDate"
+        field="reservation.startDate"
         header="Fecha de inicio"
         className="min-w-32"
         filterMenuStyle={{ width: "16rem" }}
@@ -216,14 +222,16 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         filterField="startDate"
         filterClear={(options) => <FilterClearButton {...options} />}
         filterApply={(options) => <FilterApplyButton {...options} />}
-        body={(e: QuoteEntity) => dateFnsAdapter.format(e.startDate)}
+        body={(e: VersionQuotationEntity) =>
+          e.reservation ? dateFnsAdapter.format(e.reservation.startDate) : ""
+        }
         filterElement={(options) => (
           <FilterByDate options={options} placeholder="Fecha de inicio" />
         )}
       />
 
       <Column
-        field="endDate"
+        field="reservation.endDate"
         header="Fecha fin"
         sortable
         className="min-w-32"
@@ -236,13 +244,15 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         filterField="endDate"
         filterClear={(options) => <FilterClearButton {...options} />}
         filterApply={(options) => <FilterApplyButton {...options} />}
-        body={(e: QuoteEntity) => dateFnsAdapter.format(e.endDate)}
+        body={(e: VersionQuotationEntity) =>
+          e.reservation ? dateFnsAdapter.format(e.reservation.endDate) : ""
+        }
         filterElement={(options) => (
           <FilterByDate options={options} placeholder="Fecha de fin" />
         )}
       />
       <Column
-        field="representative.name"
+        field="user.fullname"
         header="Representante"
         showFilterMatchModes={false}
         showFilterOperator={false}
@@ -250,8 +260,8 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         filterMenuStyle={{ width: "16rem" }}
         filter
         filterMatchMode="custom"
-        sortField="representative.name"
-        filterField="representative"
+        sortField="user.fullname"
+        filterField="user"
         filterFunction={filterByName}
         sortable
         filterClear={(options) => <FilterClearButton {...options} />}
@@ -264,14 +274,14 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         )}
       />
       <Column
-        field="amount"
+        field="finalPrice"
         header="Precio"
         sortable
-        body={(rowData: QuoteEntity) => formatCurrency(rowData.total)}
+        body={(rowData: VersionQuotationEntity) => formatCurrency(rowData.finalPrice || 0)}
       />
 
       <Column
-        field="inventoryStatus"
+        field="status"
         header="Status"
         sortable
         body={(rowData: QuoteEntity) => (

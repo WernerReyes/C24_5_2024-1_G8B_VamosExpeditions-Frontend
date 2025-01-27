@@ -22,9 +22,8 @@ import { useSelector } from "react-redux";
 
 export const ReservationTable = () => {
   const dt = useRef<DataTableRef>(null);
-  useGetAllReservationsQuery({});
-  const { reservations } = useSelector((state: AppState) => state.reservation);
-
+  const { data: reservations } = useGetAllReservationsQuery({});
+  
   const [selectedreservations, setSelectedreservations] = useState<
     ReservationEntity[]
   >([]);
@@ -69,9 +68,11 @@ export const ReservationTable = () => {
           }
         />
 
+        
+
         <DataTable
           ref={dt}
-          value={reservations ?? []}
+          value={reservations?.data ?? []}
           selection={selectedreservations}
           onSelectionChange={(
             e: DataTableSelectionMultipleChangeEvent<ReservationEntity[]>

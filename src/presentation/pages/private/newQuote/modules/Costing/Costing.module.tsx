@@ -43,7 +43,6 @@ export const CostingModule = () => {
     Date | null,
     Date | null
   ]) => {
-    console.log(startDate, endDate);
     if (startDate && endDate && currentReservation) {
       upsertReservation({
         reservationDto: reservationDto.parse({
@@ -67,6 +66,8 @@ export const CostingModule = () => {
       setDateRange([currentReservation.startDate, currentReservation.endDate]);
     }
   }, [currentReservation]);
+
+  
 
   useEffect(() => {
     if (hotels?.data) {

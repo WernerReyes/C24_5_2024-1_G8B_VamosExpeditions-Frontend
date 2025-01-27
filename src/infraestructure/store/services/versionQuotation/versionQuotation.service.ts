@@ -8,6 +8,7 @@ import {
 } from "@/domain/dtos/versionQuotation";
 import { onSetCurrentVersionQuotation } from "../../slices/versionQuotation.slice";
 import { startShowApiError } from "@/core/utils";
+import { dateFnsAdapter } from "@/core/adapters";
 
 const PREFIX = "/version-quotation";
 
@@ -16,6 +17,33 @@ export const versionQuotationService = createApi({
   tagTypes: ["VersionQuotations", "VersionQuotation"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
+    getAllVersionQuotations: builder.query<
+      ApiResponse<VersionQuotationEntity[]>,
+      void
+    >({
+      query: () => "/",
+      providesTags: ["VersionQuotations"],
+      transformResponse: (response: ApiResponse<VersionQuotationEntity[]>) => {
+        return {
+          ...response,
+          data: response.data.map((versionQuotation) => {
+            return {
+              ...versionQuotation,
+              reservation: versionQuotation.reservation ? {
+                ...versionQuotation.reservation,
+                startDate: dateFnsAdapter.parseISO(
+                  versionQuotation?.reservation?.startDate as any
+                ),
+                endDate: dateFnsAdapter.parseISO(
+                  versionQuotation?.reservation?.endDate as any
+                ),
+              }: undefined,
+            };
+          }),
+        };
+      },
+    }),
+
     updateVersionQuotation: builder.mutation<
       ApiResponse<VersionQuotationEntity>,
       VersionQuotationDto
@@ -68,6 +96,7 @@ export const versionQuotationService = createApi({
 });
 
 export const {
+  useGetAllVersionQuotationsQuery,
   useUpdateVersionQuotationMutation,
   useGetVersionQuotationByIdQuery,
 } = versionQuotationService;

@@ -24,7 +24,7 @@ export const reservationServiceStore = createApi({
   endpoints: (builder) => ({
     upsertReservation: builder.mutation<
       ApiResponse<ReservationEntity>,
-      { reservationDto: ReservationDto; showMessage?: boolean }
+      { reservationDto: ReservationDto; showMessage?: boolean, setCurrentReservation?: boolean }
     >({
       query: ({ reservationDto }) => {
         if (reservationDto.id) {
@@ -42,7 +42,7 @@ export const reservationServiceStore = createApi({
       },
       invalidatesTags: ["Reservations"],
       async onQueryStarted(
-        { reservationDto: dto, showMessage = true },
+        { reservationDto: dto, showMessage = true, setCurrentReservation = true },
         { dispatch, queryFulfilled }
       ) {
         try {
@@ -50,7 +50,7 @@ export const reservationServiceStore = createApi({
           const [_, errors] = reservationDto.create(dto);
           if (errors) throw errors;
           const { data } = await queryFulfilled;
-          dispatch(onSetCurrentReservation(data.data));
+          if (setCurrentReservation) dispatch(onSetCurrentReservation(data.data));
           if (showMessage) startShowSuccess(data.message);
         } catch (error) {
           throw error;

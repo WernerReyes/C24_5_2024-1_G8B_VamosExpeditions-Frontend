@@ -3,10 +3,14 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type HotelRoomQuotationSliceState = {
   hotelRoomQuotations: HotelRoomQuotationEntity[];
+  hotelRoomQuotationsWithTotalCost: (HotelRoomQuotationEntity & {
+    totalCost: number;
+  })[];
 };
 
 const initialState: HotelRoomQuotationSliceState = {
   hotelRoomQuotations: [],
+  hotelRoomQuotationsWithTotalCost: [],
 };
 
 export const hotelRoomQuotationSlice = createSlice({
@@ -35,6 +39,18 @@ export const hotelRoomQuotationSlice = createSlice({
       };
     },
 
+    onSetHotelRoomQuotationsWithTotalCost: (
+      state,
+      {
+        payload,
+      }: PayloadAction<(HotelRoomQuotationEntity & { totalCost: number })[]>
+    ) => {
+      return {
+        ...state,
+        hotelRoomQuotationsWithTotalCost: payload,
+      };
+    },
+
     onDeleteHotelRoomQuotation: (state, { payload }: PayloadAction<number>) => {
       return {
         ...state,
@@ -49,5 +65,6 @@ export const hotelRoomQuotationSlice = createSlice({
 export const {
   onAddHotelRoomQuotation,
   onSetHotelRoomQuotations,
+  onSetHotelRoomQuotationsWithTotalCost,
   onDeleteHotelRoomQuotation,
 } = hotelRoomQuotationSlice.actions;

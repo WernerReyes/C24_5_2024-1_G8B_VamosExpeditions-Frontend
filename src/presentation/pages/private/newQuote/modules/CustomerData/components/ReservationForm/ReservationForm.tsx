@@ -19,7 +19,7 @@ import { reservationDto, type ReservationDto } from "@/domain/dtos/reservation";
 import { useCountryStore } from "@/infraestructure/hooks";
 
 import ReservationFormStyle from "./ReservationForm.module.css";
-import { OrderType, TravelerStyle } from "@/domain/entities";
+import { OrderType, ReservationStatus, TravelerStyle } from "@/domain/entities";
 import { generateCode, transformDataToTree } from "../../utils";
 
 import Style from "../Style.module.css";
@@ -76,7 +76,12 @@ export const ReservationForm = () => {
   const [isContentLoading, setIsContentLoading] = useState(true);
 
   const handleReservation = (reservationDto: ReservationDto) => {
-    upsertReservation({ reservationDto })
+    upsertReservation({
+      reservationDto: {
+        ...reservationDto,
+        status: ReservationStatus.ACTIVE,
+      },
+    })
       .unwrap()
       .then(({ data }) => {
         if (reservationDto.id) return;
@@ -103,7 +108,14 @@ export const ReservationForm = () => {
       })
     )
       .unwrap()
-      .then(() => {
+      .then(async () => {
+        await upsertReservation({
+          reservationDto: reservationDto.parse({
+            ...currentReservation!,
+            status: ReservationStatus.PENDING,
+          }),
+          showMessage: false,
+        });
         dispatch(onSetCurrentReservation(null));
         reset(reservationDto.getEmpty);
         dispatch(onSetSelectedClient(null));
@@ -147,6 +159,8 @@ export const ReservationForm = () => {
     watch().travelerStyle,
     watch().numberOfPeople,
   ]);
+
+  // console.log({ errors, values: watch(), empyt: reservationDto.getEmpty });
 
   return (
     <form
@@ -423,6 +437,15 @@ export const ReservationForm = () => {
         />
       </div>
 
+      {/* <Controller
+        control={control}
+        name="status"
+        defaultValue={ReservationStatus.ACTIVE}
+        render={({ field }) => {
+          return <input type="hidden" id="status" {...field} />;
+        }}
+      /> */}
+
       <Controller
         control={control}
         name="id"
@@ -432,13 +455,15 @@ export const ReservationForm = () => {
         }}
       />
 
+
+
       <div className="flex justify-between">
         <Button
           icon={currentReservation ? "pi pi-pencil" : "pi pi-plus"}
           disabled={
             isContentLoading ||
-            isUpsertingReservation ||
-            Object.keys(errors).length > 0
+            isUpsertingReservation 
+            // || Object.keys(errors).length > 0
           }
           label={currentReservation ? "Actualizar Reserva" : "Crear Reserva"}
           loading={isContentLoading || isUpsertingReservation}

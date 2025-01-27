@@ -24,7 +24,12 @@ export const hotelRoomQuotationService = createApi({
       ApiResponse<HotelRoomQuotationEntity[]>,
       GetHotelRoomQuotationsDto
     >({
-      query: () => "/",
+      query: (params) => {
+        return {
+          url: "/",
+          params,
+        };
+      },
       providesTags: ["HotelRoomQuotations"],
       async onQueryStarted(params, { dispatch, queryFulfilled }) {
         const [_, errors] = getHotelRoomQuotationsDto.create(params);

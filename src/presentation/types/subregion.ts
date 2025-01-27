@@ -1,26 +1,44 @@
-export const SUBREGIONS = [
-  "Northern America",
-  "Central America",
-  "Caribbean",
-  "South America",
+export const SUBREGIONS: string[] = [
+  "Southern Asia",
   "Northern Europe",
-  "Western Europe",
-  "Eastern Europe",
   "Southern Europe",
   "Northern Africa",
-  "Western Africa",
-  "Eastern Africa",
+  "Polynesia",
   "Middle Africa",
-  "Southern Africa",
+  "Caribbean",
+  "Antarctica",
+  "South America",
   "Western Asia",
-  "Central Asia",
-  "Eastern Asia",
-  "Southern Asia",
-  "Southeast Asia",
   "Australia and New Zealand",
+  "Central Europe",
+  "Eastern Europe",
+  "Western Europe",
+  "Central America",
+  "Western Africa",
+  "Northern America",
+  "Southern Africa",
+  "South Antarctic Ocean",
+  "Eastern Africa",
+  "South-Eastern Asia",
+  "Eastern Asia",
   "Melanesia",
   "Micronesia",
-  "Polynesia",
+  "Central Asia",
 ];
 
 export type Subregion = (typeof SUBREGIONS)[number];
+
+export const generateRecordFirstLetter = <T extends string>(
+  subregions: T[],
+  defaultLetters: { [key: string]: string } = {}
+): Record<T, string> => {
+  return subregions.reduce((acc, subregion) => {
+    acc[subregion] = defaultLetters[subregion] || subregion[0];
+    return acc;
+  }, {} as Record<T, string>);
+};
+
+export const firstLetterSubregions = generateRecordFirstLetter(SUBREGIONS, {
+  "South America": "L", // L* for Latin America
+});
+
