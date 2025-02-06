@@ -10,6 +10,7 @@ import {
   versionQuotationService,
   hotelRoomQuotationService,
   reservationServiceStore,
+  reportService,
 } from "@/infraestructure/store/services";
 
 import {
@@ -50,6 +51,7 @@ export const store = configureStore({
     [hotelRoomQuotationService.reducerPath]: hotelRoomQuotationService.reducer,
     [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
+    [reportService.reducerPath]: reportService.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -64,7 +66,8 @@ export const store = configureStore({
       .concat(quotationServiceStore.middleware)
       .concat(versionQuotationService.middleware)
       .concat(hotelRoomQuotationService.middleware)
-      .concat(externalCountryService.middleware),
+      .concat(externalCountryService.middleware)
+      .concat(reportService.middleware),
 });
 
 export type AppState = ReturnType<typeof store.getState>;

@@ -9,3 +9,4 @@ export * from "./useCountryStore";
 export * from "./useCookieExpirationStore";
 export * from "./useHotelStore";
 export * from "./useHotelRoomQuotationStore";
+export * from "./useReportStore";

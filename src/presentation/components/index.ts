@@ -39,6 +39,8 @@ export * from "./OrderList";
 export * from "./Divider";
 export * from "./SelectButton";
 export * from "./ConfirmPopup";
+export * from "./Chip";
+export * from "./ToggleButton";
 
 //* Alerts
 export * from "./alerts/ExpiredSessionCountdown";

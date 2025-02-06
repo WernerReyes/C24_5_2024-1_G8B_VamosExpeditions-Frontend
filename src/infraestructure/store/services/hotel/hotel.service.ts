@@ -30,7 +30,14 @@ export const hotelService = createApi({
         }
       },
     }),
+    getHotelPdf: builder.query<Blob, { id: number }>({
+      query: ({ id }) => ({
+        url: `/pdf/${id}`,  // Aquí pasamos el ID como parte de la URL
+        method: "GET",      // Usamos el método GET
+        responseHandler: (response) => response.blob(),  // Transformamos la respuesta en un Blob (archivo)
+      }),
+    }),
   }),
 });
 
-export const { useLazyGetHotelsQuery, useGetHotelsQuery } = hotelService;
+export const { useLazyGetHotelsQuery, useGetHotelsQuery,useGetHotelPdfQuery } = hotelService;
