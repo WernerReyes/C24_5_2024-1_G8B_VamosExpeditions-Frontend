@@ -18,14 +18,12 @@ import {
   quoteSlice,
   quotationSlice,
   clientSlice,
-  externalCountrySlice,
   countrySlice,
   cookieExpirationSlice,
   reservationSlice,
   hotelSlice,
   versionquotationSlice,
   hotelRoomQuotationSlice,
-
 } from "@/infraestructure/store";
 
 export const store = configureStore({
@@ -37,7 +35,6 @@ export const store = configureStore({
     versionQuotation: versionquotationSlice.reducer,
     hotelRoomQuotation: hotelRoomQuotationSlice.reducer,
     client: clientSlice.reducer,
-    externalCountry: externalCountrySlice.reducer,
     country: countrySlice.reducer,
     reservation: reservationSlice.reducer,
     cookieExpiration: cookieExpirationSlice.reducer,

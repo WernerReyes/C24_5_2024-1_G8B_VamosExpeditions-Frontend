@@ -1,9 +1,5 @@
 .form {
-  @apply px-3 py-3
-/*       bg-white rounded-lg
-      shadow-xl
-      border-2 border-secondary */
-      flex flex-col;
+  @apply py-3 flex flex-col w-full;
 }
 
 .form .container {

@@ -1,16 +1,32 @@
+import { useEffect } from "react";
 import { classNamesAdapter } from "@/core/adapters";
-import React from "react";
 import { useWindowSize } from "@/presentation/hooks";
 import { Navbar, Sidebar } from "../components";
 import { useSidebar } from "../hooks";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppState } from "@/app/store";
+import { quotationService } from "@/data";
+import { onSetCurrentQuotation } from "@/infraestructure/store";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
-  const { visible, setVisible } = useSidebar();
+  const dispatch = useDispatch();
+  const { currentQuotation } = useSelector(
+    (state: AppState) => state.quotation
+  );
   const { width, TABLET } = useWindowSize();
+  const { visible, setVisible } = useSidebar();
+ 
+
+  useEffect(() => {
+    if (currentQuotation) return;
+    quotationService
+      .getCurrentQuotation()
+      .then((quotation) => dispatch(onSetCurrentQuotation(quotation) ?? null));
+  }, [currentQuotation]);
 
   return (
     <section className="w-screen min-h-screen flex max-w-full">

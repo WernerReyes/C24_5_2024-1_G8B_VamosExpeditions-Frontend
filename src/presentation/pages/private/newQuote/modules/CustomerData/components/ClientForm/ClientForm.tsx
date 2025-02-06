@@ -51,7 +51,7 @@ export const ClientForm = () => {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ClientDto>({
     resolver: zodResolver(clientDto.getSchema),
     defaultValues: clientDto.getEmpty,
@@ -94,8 +94,6 @@ export const ClientForm = () => {
     }
   };
 
-  console.log(externalCountries?.data)
-
   const handleUpsertClient = (clientDto: ClientDto) => {
     let client =
       currentOp === OPERATIONS[1]
@@ -107,15 +105,16 @@ export const ClientForm = () => {
     upsertClient(client)
       .unwrap()
       .then(({ data }) => {
-        if (currentOp === OPERATIONS[1]) { 
-        dispatch(
-          onSetSincronizedCurrentReservationByClient({
-            ...currentReservation!,
-            client: data,
-          })
-        );
+        if (currentOp === OPERATIONS[1]) {
+          dispatch(
+            onSetSincronizedCurrentReservationByClient({
+              ...currentReservation!,
+              client: data,
+            })
+          );
         }
-      }).catch((error) => {
+      })
+      .catch((error) => {
         console.error(error);
       });
   };
@@ -151,7 +150,7 @@ export const ClientForm = () => {
 
   return (
     <form
-      className={`${Style.form} flex-[1] `}
+      className={Style.form}
       onSubmit={handleSubmit(handleUpsertClient)}
       noValidate
     >
@@ -209,6 +208,18 @@ export const ClientForm = () => {
       <div className={Style.container}>
         <ErrorBoundary
           isLoader={isGettingAllExternalCountries}
+          loadingComponent={
+            <InputText
+              label={{
+                htmlFor: "country",
+                text: "País de origen",
+              }}
+              loading
+              disabled
+              placeholder="País de origen"
+              id="country"
+            />
+          }
           fallBackComponent={
             <>
               <Controller
@@ -255,9 +266,6 @@ export const ClientForm = () => {
                         text: error?.message,
                         className: "text-red-500",
                       }}
-                      loading={
-                        isContentLoading || isGettingAllExternalCountries
-                      }
                       disabled={
                         isContentLoading || isGettingAllExternalCountries
                       }
@@ -410,16 +418,13 @@ export const ClientForm = () => {
       />
 
       <SplitButton
-        label={
-          // isCreatingClient || isUpdatingClient
-          isUpsertingClient ? currentOp.loading : currentOp.label
-        }
+        label={isUpsertingClient ? currentOp.loading : currentOp.label}
         loading={isContentLoading || isUpsertingClient}
         disabled={
           isContentLoading ||
           isUpsertingClient ||
           isGettingAllExternalCountries ||
-          Object.keys(errors).length > 0
+          Object.keys(errors).length > 0 || !isDirty
         }
         icon={currentOp.icon}
         menuClassName={classNamesAdapter({ hidden: !selectedClient })}

@@ -1,6 +1,7 @@
+import type { AppState } from "@/app/store";
 import { constantRoutes } from "@/core/constants";
-import { RoleEnum } from "@/domain/entities";
-import { useAuthStore } from "@/infraestructure/hooks";
+import type { RoleEnum } from "@/domain/entities";
+import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 
 const { LOGIN } = constantRoutes.public;
@@ -10,7 +11,7 @@ type Props = {
 };
 
 export const RoleGuard = ({ roles }: Props) => {
-  const { authUser } = useAuthStore();
+  const { authUser } = useSelector((state: AppState) => state.auth);
   return authUser?.id && roles.includes(authUser.role.name) ? (
     <Outlet />
   ) : (

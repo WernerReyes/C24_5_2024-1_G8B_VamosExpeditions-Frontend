@@ -48,6 +48,7 @@ export const reservationServiceStore = createApi({
         try {
           //* Validate before sending
           const [_, errors] = reservationDto.create(dto);
+          console.log(errors)
           if (errors) throw errors;
           const { data } = await queryFulfilled;
           if (setCurrentReservation) dispatch(onSetCurrentReservation(data.data));

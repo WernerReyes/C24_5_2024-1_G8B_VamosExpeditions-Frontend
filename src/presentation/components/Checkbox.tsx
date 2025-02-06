@@ -5,7 +5,7 @@ import {
 import { forwardRef, LabelHTMLAttributes } from "react";
 import { Skeleton, type SkeletonProps } from "./Skeleton";
 
-export interface Props extends CheckboxProps {
+interface Props extends CheckboxProps {
   label: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
   loading?: boolean;
   skeleton?: SkeletonProps;

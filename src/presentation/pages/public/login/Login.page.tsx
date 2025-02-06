@@ -1,13 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { loginDtoSchema, type LoginDto } from "@/domain/dtos/auth";
-import {
-  useAuthStore,
-} from "@/infraestructure/hooks";
+import { loginDto, type LoginDto } from "@/domain/dtos/auth";
 import { Button, Image, InputText, Password } from "@/presentation/components";
 import { constantRoutes } from "@/core/constants";
-
+import { useLoginMutation } from "@/infraestructure/store/services";
+import { useCookieExpirationStore } from "@/infraestructure/hooks";
 
 const { DASHBOARD } = constantRoutes.private;
 
@@ -17,18 +15,19 @@ const LoginPage = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginDto>({
-    resolver: zodResolver(loginDtoSchema),
+    resolver: zodResolver(loginDto.getSchema),
   });
   const navigate = useNavigate();
-  const {
-    startLogin,
-    loginResult: { isLoggingIn },
-  } = useAuthStore();
+  const { init } = useCookieExpirationStore();
+  const [login, { isLoading: isLoggingIn }] = useLoginMutation();
 
-  const handleLogin = async (data: LoginDto) => {
-    await startLogin(data).then(() => {
-      navigate(DASHBOARD);
-    });
+  const handleLogin = async (loginDto: LoginDto) => {
+    await login(loginDto)
+      .unwrap()
+      .then(({ data }) => {
+        navigate(DASHBOARD);
+        init(data.expiresAt);
+      });
   };
 
   return (

@@ -1,7 +1,7 @@
-import type { ApiResponse } from "@/config";
-import { CountryEntity } from "@/domain/entities";
+import type { CountryEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { requestConfig } from "../config";
+import type { ApiResponse } from "../response";
 
 const PREFIX = "/country";
 
@@ -15,6 +15,4 @@ export const countryService = createApi({
   }),
 });
 
-export const {
-  useLazyGetCountriesQuery
-} = countryService;
+export const { useLazyGetCountriesQuery, useGetCountriesQuery } = countryService;

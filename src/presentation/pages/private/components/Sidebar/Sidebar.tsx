@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { classNamesAdapter } from "@/core/adapters";
+import { constantRoutes } from "@/core/constants";
 import {
   Image,
   Link,
@@ -7,18 +7,9 @@ import {
   PanelMenu,
   Sidebar as SidebarComponent,
 } from "@/presentation/components";
-import { classNamesAdapter } from "@/core/adapters";
-import { constantRoutes } from "@/core/constants";
 import { useWindowSize } from "@/presentation/hooks";
-import { confirmReplaceQuotation } from "../NewQuotationButton";
-import {
-  onSetCurrentQuotation,
-  onSetCurrentStep,
-} from "@/infraestructure/store";
-import { quotationService } from "@/data";
-import { useDispatch, useSelector } from "react-redux";
-import { AppState } from "@/app/store";
-import { useCreateQuotationMutation } from "@/infraestructure/store/services";
+import { useLocation } from "react-router-dom";
+import { NewQuotationDialog } from "../NewQuotationDialog";
 
 import "./Sidebar.css";
 interface SidebarProps {
@@ -28,75 +19,44 @@ interface SidebarProps {
 
 const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
 
+const items: MenuItem[] = [
+  {
+    label: "Dashboard",
+    icon: "pi pi-home",
+    url: DASHBOARD,
+    template: (e) => <Template menuItem={e} />,
+  },
+  {
+    label: "Reservaciones",
+    icon: "pi pi-bookmark",
+    url: RESERVATIONS,
+    template: (e) => <Template menuItem={e} />,
+  },
+  {
+    id: "quotations",
+    label: "Cotizaciones",
+    icon: "pi  pi-book",
+    expanded: true,
+    items: [
+      {
+        label: "Nueva Cotización",
+        icon: "pi pi-plus-circle",
+        template: (e) => <Template menuItem={e} />,
+        url: NEW_QUOTE,
+      },
+      {
+        label: "Listado de Cotizaciones",
+        icon: "pi pi-book",
+        template: (e) => <Template menuItem={e} />,
+
+        url: QUOTES,
+      },
+    ],
+  },
+];
+
 export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const { width, DESKTOP, MACBOOK } = useWindowSize();
-  const { currentQuotation } = useSelector(
-    (state: AppState) => state.quotation
-  );
-  const [createQuotation] = useCreateQuotationMutation();
-
-  const handleNewQuote = async () => {
-    if (currentQuotation) {
-      const confirm = await confirmReplaceQuotation();
-      if (confirm) {
-        await quotationService.deleteCurrentQuotation();
-        dispatch(onSetCurrentQuotation(null));
-        dispatch(onSetCurrentStep(0));
-        await createQuotation();
-      }
-    } else {
-      await createQuotation();
-    }
-    navigate(NEW_QUOTE);
-  };
-
-  useEffect(() => {
-    if (currentQuotation) return;
-    quotationService
-      .getCurrentQuotation()
-      .then((quotation) => dispatch(onSetCurrentQuotation(quotation) ?? null));
-  }, [currentQuotation]);
-
-  const items: MenuItem[] = [
-    {
-      label: "Dashboard",
-      icon: "pi pi-home",
-      url: DASHBOARD,
-      template: (e) => <Template menuItem={e} />,
-    },
-    {
-      label: "Reservaciones",
-      icon: "pi pi-bookmark",
-      url: RESERVATIONS,
-      template: (e) => <Template menuItem={e} />,
-    },
-    {
-      label: "Cotizaciones",
-      icon: "pi  pi-book",
-
-      items: [
-        {
-          label: "Nueva Cotización",
-          icon: "pi pi-plus-circle",
-          template: (e) => <Template menuItem={e} />,
-          command: () => {
-            if (pathname === NEW_QUOTE) return;
-            handleNewQuote();
-          },
-        },
-        {
-          label: "Listado de Cotizaciones",
-          icon: "pi pi-book",
-          template: (e) => <Template menuItem={e} />,
-
-          url: QUOTES,
-        },
-      ],
-    },
-  ];
+  const { width, DESKTOP, MACBOOK, TABLET } = useWindowSize();
 
   return (
     <SidebarComponent
@@ -108,7 +68,7 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
       className="w-72"
       baseZIndex={width < MACBOOK ? 1000 : 0}
       blockScroll={false}
-      modal={width < MACBOOK}
+      modal={width < TABLET}
       dismissable={width < DESKTOP}
     >
       <hr className="mt-3 mb-2 border-2 border-gray-300 " />
@@ -119,9 +79,10 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
 
 const Template = ({ menuItem }: { menuItem: MenuItem }) => {
   const { pathname } = useLocation();
+
   return (
     <div
-      className="p-component p-panelmenu-header dark:border-blue-900/40 text-red-400 dark:text-red-100  rounded-md transition-shadow duration-200  dark:hover:bg-gray-800/80  hover:text-red-400 ark:hover:text-red-400"
+      className="p-component p-panelmenu-header dark:border-blue-900/40 rounded-md transition-shadow duration-200  dark:hover:bg-gray-800/80"
       aria-label={menuItem.label}
       aria-expanded="false"
       aria-controls="pr_id_52_1_content"
@@ -135,21 +96,40 @@ const Template = ({ menuItem }: { menuItem: MenuItem }) => {
         })}
         data-pc-section="headercontent"
       >
-        <Link
-          to={menuItem.url || ""}
-          className={classNamesAdapter("p-panelmenu-header-link", {
-            "!text-white": menuItem.url === pathname,
-          })}
-          data-pc-section="headeraction"
-        >
-          <span
-            className={classNamesAdapter("p-menuitem-icon", menuItem.icon)}
-            data-pc-section="headericon"
-          ></span>
-          <span className="p-menuitem-text" data-pc-section="headerlabel">
-            {menuItem.label}
-          </span>
-        </Link>
+        {pathname !== NEW_QUOTE && menuItem.url === NEW_QUOTE ? (
+          <NewQuotationDialog>
+            <a
+              className={classNamesAdapter("p-panelmenu-header-link", {
+                "!text-white": menuItem.url === pathname,
+              })}
+              data-pc-section="headeraction"
+            >
+              <span
+                className={classNamesAdapter("p-menuitem-icon", menuItem.icon)}
+                data-pc-section="headericon"
+              ></span>
+              <span className="p-menuitem-text" data-pc-section="headerlabel">
+                {menuItem.label}
+              </span>
+            </a>
+          </NewQuotationDialog>
+        ) : (
+          <Link
+            to={menuItem.url || ""}
+            className={classNamesAdapter("p-panelmenu-header-link", {
+              "!text-white": menuItem.url === pathname,
+            })}
+            data-pc-section="headeraction"
+          >
+            <span
+              className={classNamesAdapter("p-menuitem-icon", menuItem.icon)}
+              data-pc-section="headericon"
+            ></span>
+            <span className="p-menuitem-text" data-pc-section="headerlabel">
+              {menuItem.label}
+            </span>
+          </Link>
+        )}
       </div>
     </div>
   );

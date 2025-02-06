@@ -1,6 +1,6 @@
 import { Button } from "@/presentation/components";
 import { QuotesTable } from "./components";
-import { NewQuotationButton } from "../components";
+import { NewQuotationDialog } from "../components";
 
 const QuotesPage = () => {
   return (
@@ -12,7 +12,7 @@ const QuotesPage = () => {
             className="bg-transparent text-black border-[#D0D5DD]"
             icon="pi pi-download"
           />
-          <NewQuotationButton />
+          <NewQuotationDialog />
         </div>
 
         <QuotesTable />

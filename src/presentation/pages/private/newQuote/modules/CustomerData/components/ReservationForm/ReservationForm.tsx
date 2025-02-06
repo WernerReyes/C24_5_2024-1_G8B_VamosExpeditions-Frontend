@@ -4,8 +4,10 @@ import { Controller, useForm } from "react-hook-form";
 import {
   Button,
   Calendar,
+  DefaultFallBackComponent,
   Dropdown,
   type DropdownChangeEvent,
+  ErrorBoundary,
   InputNumber,
   InputText,
   InputTextarea,
@@ -16,7 +18,6 @@ import {
   type TreeSelectSelectionKeysType,
 } from "@/presentation/components";
 import { reservationDto, type ReservationDto } from "@/domain/dtos/reservation";
-import { useCountryStore } from "@/infraestructure/hooks";
 
 import ReservationFormStyle from "./ReservationForm.module.css";
 import { OrderType, ReservationStatus, TravelerStyle } from "@/domain/entities";
@@ -25,6 +26,7 @@ import { generateCode, transformDataToTree } from "../../utils";
 import Style from "../Style.module.css";
 import {
   useGetAllClientsQuery,
+  useGetCountriesQuery,
   useUpdateVersionQuotationMutation,
   useUpsertReservationMutation,
 } from "@/infraestructure/store/services";
@@ -50,7 +52,7 @@ export const ReservationForm = () => {
     reset,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ReservationDto>({
     resolver: zodResolver(reservationDto.getSchema),
     defaultValues: reservationDto.getEmpty,
@@ -63,7 +65,6 @@ export const ReservationForm = () => {
   const { currentReservation } = useSelector(
     (state: AppState) => state.reservation
   );
-  const { selectedClient } = useSelector((state: AppState) => state.client);
 
   const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
 
@@ -71,7 +72,14 @@ export const ReservationForm = () => {
     useUpsertReservationMutation();
   const { data: clients, isLoading: isGettingAllClients } =
     useGetAllClientsQuery();
-  const { countries, startGettingCountries } = useCountryStore();
+
+  const {
+    data: countries,
+    isLoading: isGettingCountries,
+    isError: isGettingCountriesError,
+    isFetching: isFetchingCountries,
+    refetch: refetchingCountries,
+  } = useGetCountriesQuery();
 
   const [isContentLoading, setIsContentLoading] = useState(true);
 
@@ -123,10 +131,6 @@ export const ReservationForm = () => {
   };
 
   useEffect(() => {
-    startGettingCountries();
-  }, []);
-
-  useEffect(() => {
     if (currentReservation) {
       reset(reservationDto.parse(currentReservation));
       if (currentReservation.client) {
@@ -136,12 +140,6 @@ export const ReservationForm = () => {
 
     setIsContentLoading(false);
   }, [currentReservation]);
-
-  // useEffect(() => {
-  //   if (selectedClient) {
-  //     setValue("client", selectedClient);
-  //   }
-  // }, [selectedClient]);
 
   useEffect(() => {
     const code = generateCode({
@@ -160,13 +158,8 @@ export const ReservationForm = () => {
     watch().numberOfPeople,
   ]);
 
-  // console.log({ errors, values: watch(), empyt: reservationDto.getEmpty });
-
   return (
-    <form
-      className={`${Style.form} flex-[2]`}
-      onSubmit={handleSubmit(handleReservation)}
-    >
+    <form className={Style.form} onSubmit={handleSubmit(handleReservation)}>
       {/*  */}
       <div className={ReservationFormStyle.column}>
         {/*  */}
@@ -182,10 +175,10 @@ export const ReservationForm = () => {
                   filter
                   options={clients?.data}
                   label={{
-                    text: "Nombre del cliente",
+                    text: "Cliente",
                     htmlFor: "client",
                   }}
-                  placeholder="Nombre del cliente"
+                  placeholder="Escoge un cliente"
                   small={{
                     text: error?.message,
                   }}
@@ -212,14 +205,15 @@ export const ReservationForm = () => {
                 <InputNumber
                   label={{
                     htmlFor: "Número de Personas",
-                    text: "Número de Personas",
+                    text: "Nro. Personas",
                   }}
                   small={{
                     text: error?.message,
                   }}
+                  inputClassName="w-full"
                   loading={isContentLoading}
                   id="numberOfPeople"
-                  placeholder="Número de Personas"
+                  placeholder="Nro. Personas"
                   invalid={!!error}
                   value={field.value}
                   onChange={(e) => {
@@ -264,6 +258,7 @@ export const ReservationForm = () => {
                 dateFormat="dd/mm/yy"
                 placeholder="Seleccione una fecha"
                 selectionMode="range"
+                inputClassName="w-full"
                 readOnlyInput
                 icon={
                   isContentLoading ? "pi pi-spin pi-spinner" : "pi pi-calendar"
@@ -275,36 +270,75 @@ export const ReservationForm = () => {
           />
         </div>
         <div className={Style.container}>
-          <Controller
-            control={control}
-            name="destination"
-            render={({ field, fieldState: { error } }) => {
-              // console.log("error", field.value, error);
-              return (
-                <TreeSelect
-                  options={transformDataToTree(countries)}
-                  selectionMode="multiple"
-                  showClear
-                  filter
-                  placeholder="Seleccione una ciudad"
+          <ErrorBoundary
+            isLoader={isGettingCountries}
+            loadingComponent={
+              <div className="font-bold flex flex-col gap-2 mb-5">
+                <InputText
                   label={{
                     text: "Destino",
                     htmlFor: "destino",
                   }}
-                  loading={isContentLoading}
-                  // {...field}
-                  invalid={!!error}
-                  value={field.value as unknown as TreeSelectSelectionKeysType}
-                  onChange={(e: TreeSelectChangeEvent) => {
-                    field.onChange(e.value);
+                  loading={isFetchingCountries}
+                  skeleton={{
+                    height: "4rem",
                   }}
-                  small={{
-                    text: error?.message,
-                  }}
+                  disabled
+                  id="destino"
+                  placeholder="Destino"
                 />
-              );
-            }}
-          />
+              </div>
+            }
+            fallBackComponent={
+              <div className="mb-5">
+                <label className="font-bold text-gray-700" htmlFor="destino">
+                  Destino
+                </label>
+                <DefaultFallBackComponent
+                  refetch={refetchingCountries}
+                  isFetching={isFetchingCountries}
+                  isLoading={isGettingCountries}
+                  message="No se pudo cargar la lista de destinos"
+                />
+              </div>
+            }
+            error={isGettingCountriesError}
+          >
+            <Controller
+              control={control}
+              name="destination"
+              render={({ field, fieldState: { error } }) => {
+                return (
+                  <TreeSelect
+                    options={transformDataToTree(countries?.data || [])}
+                    selectionMode="multiple"
+                    showClear
+                    filter
+                    // className="bg-green-200"
+                    // panelClassName="w-10"
+                    pt={{
+                      labelContainer: { className: "w-10" }
+                    }}
+                    placeholder="Seleccione una ciudad"
+                    label={{
+                      text: "Destino",
+                      htmlFor: "destino",
+                    }}
+                    invalid={!!error}
+                    value={
+                      field.value as unknown as TreeSelectSelectionKeysType
+                    }
+                    onChange={(e: TreeSelectChangeEvent) => {
+                      field.onChange(e.value);
+                    }}
+                    small={{
+                      text: error?.message,
+                    }}
+                  />
+                );
+              }}
+            />
+          </ErrorBoundary>
         </div>
       </div>
       <div className="flex justify-between">
@@ -437,15 +471,6 @@ export const ReservationForm = () => {
         />
       </div>
 
-      {/* <Controller
-        control={control}
-        name="status"
-        defaultValue={ReservationStatus.ACTIVE}
-        render={({ field }) => {
-          return <input type="hidden" id="status" {...field} />;
-        }}
-      /> */}
-
       <Controller
         control={control}
         name="id"
@@ -455,15 +480,14 @@ export const ReservationForm = () => {
         }}
       />
 
-
-
-      <div className="flex justify-between">
+      <div className="flex flex-col gap-y-4 sm:justify-between sm:flex-row">
         <Button
           icon={currentReservation ? "pi pi-pencil" : "pi pi-plus"}
           disabled={
             isContentLoading ||
-            isUpsertingReservation 
-            // || Object.keys(errors).length > 0
+            isUpsertingReservation ||
+            Object.keys(errors).length > 0 ||
+            !isDirty
           }
           label={currentReservation ? "Actualizar Reserva" : "Crear Reserva"}
           loading={isContentLoading || isUpsertingReservation}

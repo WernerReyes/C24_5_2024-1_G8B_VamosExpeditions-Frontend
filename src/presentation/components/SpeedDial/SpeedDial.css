@@ -1,0 +1,22 @@
+.p-speeddial-opened .p-speeddial-list {
+    pointer-events: auto;
+  }
+  
+.p-speeddial-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: initial;
+  transition: top 0s linear 0.2s;
+  pointer-events: none;
+  overflow-y: auto;
+}
+
+/* Scrollbar Styling */
+.p-speeddial-list::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+

@@ -53,8 +53,7 @@
   color-scheme: light;
 }
 
-/* Scrollbar Styling */
-
+/* General Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 15px;
   height: 15px;
@@ -75,7 +74,21 @@
   background-color: var(--tertiary-color);
 }
 
+/* Invisible Scrollbar */
+.invisible-scrollbar::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
 
+
+/* Thin Scrollbar */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+
+/* General Styling */
 @font-face {
   font-family: "Inter var";
   font-weight: 100 900;

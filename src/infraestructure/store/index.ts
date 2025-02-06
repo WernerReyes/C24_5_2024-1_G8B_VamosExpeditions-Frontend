@@ -1,7 +1,6 @@
 //* <-- SLICES EXPORT -->
 export * from './slices/auth.slice';
 export * from './slices/client.slice';
-export * from './slices/externalCountry.slice';
 export * from './slices/country.slice';
 export * from './slices/quotation.slice';
 export * from './slices/quote.slice';

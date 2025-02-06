@@ -1,34 +1,26 @@
 import type { HotelRoomQuotationEntity } from "@/domain/entities";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+type DeleteDirection = "middle" | "start" | "end" | undefined;
+
 type HotelRoomQuotationSliceState = {
   hotelRoomQuotations: HotelRoomQuotationEntity[];
   hotelRoomQuotationsWithTotalCost: (HotelRoomQuotationEntity & {
     totalCost: number;
   })[];
+  deleteDirection: DeleteDirection;
 };
 
 const initialState: HotelRoomQuotationSliceState = {
   hotelRoomQuotations: [],
   hotelRoomQuotationsWithTotalCost: [],
+  deleteDirection: undefined,
 };
 
 export const hotelRoomQuotationSlice = createSlice({
   name: "hotelRoomQuotation",
   initialState,
   reducers: {
-    onAddHotelRoomQuotation: (
-      state,
-      { payload }: PayloadAction<HotelRoomQuotationEntity | null>
-    ) => {
-      return {
-        ...state,
-        hotelRoomQuotations: payload
-          ? [...state.hotelRoomQuotations, payload]
-          : [],
-      };
-    },
-
     onSetHotelRoomQuotations: (
       state,
       { payload }: PayloadAction<HotelRoomQuotationEntity[]>
@@ -51,20 +43,17 @@ export const hotelRoomQuotationSlice = createSlice({
       };
     },
 
-    onDeleteHotelRoomQuotation: (state, { payload }: PayloadAction<number>) => {
+    onDeleteDirection: (state, { payload }: PayloadAction<DeleteDirection>) => {
       return {
         ...state,
-        hotelRoomQuotations: state.hotelRoomQuotations.filter(
-          (hotelRoomQuotation) => hotelRoomQuotation.id !== payload
-        ),
+        deleteDirection: payload,
       };
     },
   },
 });
 
 export const {
-  onAddHotelRoomQuotation,
   onSetHotelRoomQuotations,
   onSetHotelRoomQuotationsWithTotalCost,
-  onDeleteHotelRoomQuotation,
+  onDeleteDirection,
 } = hotelRoomQuotationSlice.actions;

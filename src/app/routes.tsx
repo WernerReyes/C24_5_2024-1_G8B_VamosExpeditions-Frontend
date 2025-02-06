@@ -1,18 +1,14 @@
 import { constantRoutes } from "@/core/constants";
+import { useCookieExpirationStore } from "@/infraestructure/hooks";
+import { useUserAuthenticatedQuery } from "@/infraestructure/store/services";
 import {
-  useAuthStore,
-  useCookieExpirationStore,
-  useQuotationStore,
-} from "@/infraestructure/hooks";
-import {
-  ConfirmDialog,
   ConfirmPopup,
   ExpiredSessionCountdown,
   Toaster,
 } from "@/presentation/components";
 import { AuthGuard } from "@/presentation/guards";
 import PrivateRoutes from "@/presentation/routes/Private.routes";
-import { lazy, useEffect, useState } from "react";
+import { lazy, useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 //* Public pages
@@ -26,30 +22,25 @@ const {
 } = constantRoutes;
 
 export const AppRouter = () => {
+
   const {
-    authUser,
-    startVerifyUserAuthenticated,
-    userAuthenticatedResult: { isUserAuthenticatedLoading, error },
-  } = useAuthStore();
-  const { currentQuotation } = useQuotationStore();
-  const [loadingUser, setLoadingUser] = useState(true);
-  const { isExpired } = useCookieExpirationStore();
+    data: userAuthenticatedData,
+    isFetching: isUserAuthenticatedFetching,
+    isLoading: isUserAuthenticatedLoading,
+  } = useUserAuthenticatedQuery();
+
+  const { isExpired, init } = useCookieExpirationStore();
 
   useEffect(() => {
-    startVerifyUserAuthenticated().then(() => setLoadingUser(false));
-  }, []);
+    if (userAuthenticatedData) {
+      init(userAuthenticatedData.data.expiresAt);
+    }
+  }, [userAuthenticatedData]);
 
-  useEffect(() => {
-    if (error) setLoadingUser(false);
-  }, [error]);
-
-  if (isUserAuthenticatedLoading || loadingUser) return null;
-  
+  if (isUserAuthenticatedLoading || isUserAuthenticatedFetching) return null;
 
   return (
     <>
-      <ConfirmDialog />
-      <ConfirmPopup />
       {isExpired && <ExpiredSessionCountdown isExpired={isExpired} />}
       <BrowserRouter
         future={{
@@ -57,13 +48,19 @@ export const AppRouter = () => {
           v7_relativeSplatPath: true,
         }}
       >
+        
+        <ConfirmPopup />
         <Toaster />
         <Routes>
           {/* <RouterWithNotFound> */}
 
           <Route
             path="/"
-            element={<Navigate to={authUser?.id ? DASHBOARD : LOGIN} />}
+            element={
+              <Navigate
+                to={userAuthenticatedData?.data?.user.id ? DASHBOARD : LOGIN}
+              />
+            }
           />
           {/* <Route path={LANDING} element={<LandingPage />} /> */}
           <Route path={LOGIN} element={<LoginPage />} />

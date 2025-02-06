@@ -5,16 +5,30 @@ import {
 } from "primereact/splitbutton";
 
 import "./SplitButton.css";
+import { type SkeletonProps, Skeleton } from "../Skeleton";
 
+interface Props extends SplitButtonProps {
+  skeleton?: SkeletonProps;
+}
 
-interface Props extends SplitButtonProps {}
-
-export const SplitButton = ({ size, ...props }: Props) => {
+export const SplitButton = ({ size, loading, skeleton, ...props }: Props) => {
   const { width, TABLET } = useWindowSize();
   return (
-    <SplitButtonPrimeReact
-      {...props}
-      size={size ?? width < TABLET ? "small" : undefined}
-    />
+    <>
+      {loading && skeleton ? (
+        
+        <Skeleton
+          shape="rectangle"
+          height="3rem"
+          {...skeleton}
+          width={width < TABLET ? "100%" : skeleton.width}
+        />
+      ) : (
+        <SplitButtonPrimeReact
+          {...props}
+          size={size ?? width < TABLET ? "small" : undefined}
+        />
+      )}
+    </>
   );
 };

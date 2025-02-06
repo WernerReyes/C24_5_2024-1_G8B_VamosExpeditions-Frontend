@@ -5,31 +5,11 @@ import { requestValidator } from "@/core/utils";
 const { EMAIL, PASSWORD } = regex;
 
 export type LoginDto = {
-  
   readonly email: string;
   readonly password: string;
-
 };
 
-export const loginDto = (email: string, password: string) => {
-  return {
-    create: (): [LoginDto?, string[]?] => {
-      const errors = requestValidator(
-        {
-          email,
-          password,
-        },
-        loginDtoSchema
-      );
-      if (errors) {
-        return [undefined, errors];
-      }
-      return [{ email, password }, undefined];
-    },
-  };
-};
-
-export const loginDtoSchema = z.object({
+const loginDtoSchema = z.object({
   email: z
     .string()
     .min(1, {
@@ -48,3 +28,17 @@ export const loginDtoSchema = z.object({
         "Password invalid, debe tener al menos 8 caracteres, una letra mayuscula, una letra minuscula y un numero",
     }),
 });
+
+
+export const loginDto = {
+  create: (dto: LoginDto): [LoginDto?, string[]?] => {
+    const errors = requestValidator(dto, loginDtoSchema);
+    if (errors) {
+      return [undefined, errors];
+    }
+    return [dto, undefined];
+  },
+
+  getSchema: loginDtoSchema,
+};
+
