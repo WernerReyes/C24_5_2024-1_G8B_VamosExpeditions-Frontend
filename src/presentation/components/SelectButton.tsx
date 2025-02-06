@@ -5,14 +5,24 @@ import {
 import { type SkeletonProps, Skeleton } from "./Skeleton";
 import type { SelectItem } from "primereact/selectitem";
 import { classNamesAdapter } from "@/core/adapters";
+import { HTMLAttributes, LabelHTMLAttributes } from "react";
 
 interface Props extends SelectButtonProps {
+  label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
+  small?: HTMLAttributes<HTMLElement> & { text?: string };
   loading?: boolean;
   skeleton?: SkeletonProps;
 }
-export const SelectButton = ({ loading, skeleton, ...props }: Props) => {
+export const SelectButton = ({
+  label,
+  small,
+  loading,
+  skeleton,
+  ...props
+}: Props) => {
   return (
     <>
+      {label && <label {...label}>{label.text}</label>}
       {loading ? (
         <div className="flex">
           {props.options?.map((option: SelectItem, index) => (
@@ -32,7 +42,7 @@ export const SelectButton = ({ loading, skeleton, ...props }: Props) => {
       ) : (
         <SelectButtonPrimeReact {...props} />
       )}
+      {small && <small {...small}>{small.text}</small>}
     </>
   );
 };
-
