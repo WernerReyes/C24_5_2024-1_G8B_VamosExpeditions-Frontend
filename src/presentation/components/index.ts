@@ -39,15 +39,11 @@ export * from "./OrderList";
 export * from "./Divider";
 export * from "./SelectButton";
 export * from "./ConfirmPopup";
-<<<<<<< HEAD
 export * from "./Chip";
 export * from "./ToggleButton";
-=======
 export * from "./Slider";
 export * from "./SpeedDial/SpeedDial";
 export * from "./Tooltip";
-
->>>>>>> a0d591d879f98735f99fe90877482885da6a9321
 
 //* Alerts
 export * from "./alerts/ExpiredSessionCountdown";
