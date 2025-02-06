@@ -4,3 +4,4 @@ export * from "./getValidationError";
 export * from "./generateEmptyObject";
 export * from "./convertToRequestParam";
 export * from "./showAlert"
+export * from "./measureExecutionTime";

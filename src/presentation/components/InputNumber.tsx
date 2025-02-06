@@ -8,7 +8,7 @@ import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
 import { Skeleton, type SkeletonProps } from "./Skeleton";
 
 interface Props extends InputNumberProps {
-  label: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
+  label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
   small?: HTMLAttributes<HTMLElement> & { text?: string };
   loading?: boolean;
   skeleton?: SkeletonProps;
@@ -18,7 +18,7 @@ export const InputNumber = forwardRef<InputNumberPrimeReact, Props>(
   ({ label, small, loading, skeleton, ...props }, ref) => {
     return (
       <>
-        <label
+        {label && ( <label
           className={classNames(
             "block text-sm font-medium text-gray-700",
             label.className
@@ -26,7 +26,7 @@ export const InputNumber = forwardRef<InputNumberPrimeReact, Props>(
           {...label}
         >
           {label.text}
-        </label>
+        </label> )}
         {loading ? (
           <Skeleton shape="rectangle" height="3rem" {...skeleton} />
         ) : (

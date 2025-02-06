@@ -9,6 +9,7 @@ import {
 import { onSetCurrentVersionQuotation } from "../../slices/versionQuotation.slice";
 import { startShowApiError } from "@/core/utils";
 import { dateFnsAdapter } from "@/core/adapters";
+import { quotationService } from "@/data";
 
 const PREFIX = "/version-quotation";
 
@@ -86,8 +87,10 @@ export const versionQuotationService = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(onSetCurrentVersionQuotation(data.data));
-        } catch (error) {
-          console.error(error);
+        } catch (error: any) {
+          if (error.error.data) {
+            await quotationService.deleteCurrentQuotation();
+          }
           throw error;
         }
       },

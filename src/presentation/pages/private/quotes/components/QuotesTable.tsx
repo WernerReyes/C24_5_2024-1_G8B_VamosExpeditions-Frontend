@@ -1,5 +1,8 @@
+import React, { useState } from "react";
+import { dateFnsAdapter } from "@/core/adapters";
 import { formatCurrency } from "@/core/utils";
 import type { QuoteEntity, VersionQuotationEntity } from "@/domain/entities";
+import { useGetAllVersionQuotationsQuery } from "@/infraestructure/store/services";
 import {
   Column,
   DataTable,
@@ -11,7 +14,6 @@ import {
   type DataTableExpandedRows,
   type DataTableValueArray,
 } from "@/presentation/components";
-import React, { useEffect, useState } from "react";
 import {
   FilterApplyButton,
   FilterByDate,
@@ -21,9 +23,6 @@ import {
 import { filterByName, getQuoteSeverity } from "../utils";
 import { QuoteVersionsTable } from "./QuoteVersionsTable";
 import { TableActions } from "./TableActions";
-import { dateFnsAdapter } from "@/core/adapters";
-import { useQuoteStore } from "@/infraestructure/hooks";
-import { useGetAllVersionQuotationsQuery } from "@/infraestructure/store/services";
 
 const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
   {
@@ -45,46 +44,22 @@ const FILTER_MATCH_MODES: ColumnFilterMatchModeOptions[] = [
 ];
 
 export const QuotesTable = () => {
-  const {
-    quotes,
-    startGetQuotes,
-    getQuotesResult: { isGettingQuotes, isFetching, error, refetch },
-  } = useQuoteStore();
+
+ 
   const {
     data: versionsQuotations,
     isFetching: isFetchingVersionsQuotations,
     isLoading: isLoadingVersionsQuotations,
-    error: errorVersionsQuotations,
     isError,
     refetch: refetchVersionsQuotations,
   } = useGetAllVersionQuotationsQuery();
-  const [representatives, setRepresentatives] = useState<
-    { id: number; name: string }[]
-  >([]);
 
-  // useEffect(() => {
-  //   startGetQuotes();
-  // }, []);
-
-  useEffect(() => {
-    if (!quotes.length && !!error) return;
-    const uniqueRepresentatives = Array.from(
-      new Set(quotes.map((quote) => quote.representative.id))
-    ).map((id) => {
-      return quotes.find((quote) => quote.representative.id === id)!
-        .representative;
-    });
-    setRepresentatives(uniqueRepresentatives);
-  }, [quotes]);
-
-  console.log(versionsQuotations?.data);
 
   return (
     <ErrorBoundary
       fallBackComponent={
         <Table
           quotes={[]}
-          representatives={[]}
           isLoading={false}
           message={
             <div className="p-4">
@@ -103,8 +78,7 @@ export const QuotesTable = () => {
       <div className="card">
         <Table
           quotes={versionsQuotations?.data || []}
-          representatives={representatives}
-          isLoading={isGettingQuotes}
+          isLoading={isLoadingVersionsQuotations}
         />
       </div>
     </ErrorBoundary>
@@ -113,12 +87,11 @@ export const QuotesTable = () => {
 
 type TableProps = {
   quotes: VersionQuotationEntity[];
-  representatives: { id: number; name: string }[];
   isLoading: boolean;
   message?: React.ReactNode | string;
 };
 
-const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
+const Table = ({ quotes,  isLoading, message }: TableProps) => {
   const [expandedRows, setExpandedRows] = useState<
     DataTableExpandedRows | DataTableValueArray | undefined
   >(undefined);
@@ -132,8 +105,6 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
   // };
   // const handleCollapseAll = () => setExpandedRows(undefined);
 
-  console.log(quotes);
-
   return (
     <DataTable
       value={quotes}
@@ -143,7 +114,7 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         <QuoteVersionsTable
           quote={quote}
           filterMatchModeOptions={FILTER_MATCH_MODES}
-          representatives={representatives}
+          representatives={[]}
         />
       )}
       paginatorClassName="text-sm lg:text-[15px]"
@@ -199,6 +170,9 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         showAddButton={false}
         header="Cliente"
         sortable
+        // body={(e: VersionQuotationEntity) =>
+        //  e?.client.fullName ? e?.client.fullName : "No registrado aun"  
+        // }
         filterPlaceholder="Buscar por nombre"
         filterMatchModeOptions={FILTER_MATCH_MODES}
         filterClear={(options) => <FilterClearButton {...options} />}
@@ -268,7 +242,7 @@ const Table = ({ quotes, representatives, isLoading, message }: TableProps) => {
         filterElement={(options) => (
           <FilterByRepresentative
             options={options}
-            representatives={representatives}
+            representatives={[]}
           />
         )}
       />

@@ -1,1 +1,2 @@
-export * from './Itineraty';
+export * from './SidebarDays';
+export * from './accommodation/Accommodiations'

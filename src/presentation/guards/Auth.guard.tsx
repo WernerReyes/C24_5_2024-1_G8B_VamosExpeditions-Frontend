@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { constantRoutes } from "@/core/constants";
-import { useAuthStore } from "@/infraestructure/hooks";
+import { useSelector } from "react-redux";
+import type { AppState } from "@/app/store";
 
 const {
   public: { LOGIN },
@@ -11,7 +12,7 @@ type Props = {
 };
 
 export const AuthGuard = ({ privateValidation }: Props) => {
-  const { authUser } = useAuthStore();
+  const { authUser } = useSelector((state: AppState) => state.auth);
   return authUser?.id ? (
     privateValidation ? (
       <Outlet />

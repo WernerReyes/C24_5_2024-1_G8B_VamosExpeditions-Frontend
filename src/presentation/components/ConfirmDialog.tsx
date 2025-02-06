@@ -3,7 +3,7 @@ import {
   type ConfirmDialogProps,
 } from "primereact/confirmdialog";
 import { Button } from "./Button";
-import { confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from "primereact/confirmdialog";
 
 interface Props extends ConfirmDialogProps {}
 export const ConfirmDialog = ({ ...props }: Props) => {
@@ -58,6 +58,5 @@ const ConfirmDialogHeadless = ({ accept, reject, ...props }: Props) => {
   );
 };
 
-export {
-  confirmDialog,
-}
+
+export { confirmDialog };

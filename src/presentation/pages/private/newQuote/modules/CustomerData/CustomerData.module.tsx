@@ -1,27 +1,26 @@
-import { memo } from "react";
-import { ClientForm, ReservationForm } from "./components";
-import {
-  DefaultFallBackComponent,
-  Dropdown,
-  type DropdownChangeEvent,
-  ErrorBoundary,
-} from "@/presentation/components";
-import { ReservationStatus, ReservationEntity } from "@/domain/entities";
-import { dateFnsAdapter } from "@/core/adapters";
-
+import type { AppState } from "@/app/store";
+import { reservationDto } from "@/domain/dtos/reservation";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+import { ReservationEntity, ReservationStatus } from "@/domain/entities";
 import {
   useGetAllReservationsQuery,
   useUpdateVersionQuotationMutation,
   useUpsertReservationMutation,
 } from "@/infraestructure/store/services";
+import {
+  DefaultFallBackComponent,
+  Divider,
+  Dropdown,
+  type DropdownChangeEvent,
+  ErrorBoundary,
+} from "@/presentation/components";
+import { useWindowSize } from "@/presentation/hooks";
 import { useSelector } from "react-redux";
-import { AppState } from "@/app/store";
-import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
-import { reservationDto } from "@/domain/dtos/reservation";
+import { ClientForm, PendingReservation, ReservationForm } from "./components";
 
-export const CustomerDataModule = memo(() => {
-
-  const { currentReservation, reservations } = useSelector(
+export const CustomerDataModule = () => {
+  const { width, DESKTOP } = useWindowSize();
+  const { currentReservation } = useSelector(
     (state: AppState) => state.reservation
   );
   const { currentVersionQuotation } = useSelector(
@@ -35,6 +34,7 @@ export const CustomerDataModule = memo(() => {
     isFetching,
     error,
     refetch,
+    data: reservationsData,
   } = useGetAllReservationsQuery(
     {
       status: ReservationStatus.PENDING,
@@ -57,7 +57,7 @@ export const CustomerDataModule = memo(() => {
         })
       )
         .unwrap()
-        .then(async() => {
+        .then(async () => {
           await upsertReservation({
             reservationDto: reservationDto.parse({
               ...reservation,
@@ -70,40 +70,16 @@ export const CustomerDataModule = memo(() => {
             reservationDto: reservationDto.parse({
               ...currentReservation!,
               status: ReservationStatus.PENDING,
-              
             }),
             setCurrentReservation: false,
             showMessage: false,
           });
-          // dispatch(onSetCurrentReservation(reservation));
         });
     }
   };
 
-  // useEffect(() => {
-  //   if (currentVersionQuotation) {
-  //     updateVersionQuotation(
-  //       versionQuotationDto().parse({
-  //         ...currentVersionQuotation,
-  //         reservation: currentReservation ?? undefined,
-  //       })
-  //     );
-  //   }
-  // }, [currentReservation]);
-
-  // useEffect(() => {
-  //   if (selectedClient && currentReservation) {
-  //     dispatch(
-  //       onSetCurrentReservation({
-  //         ...currentReservation,
-  //         client: selectedClient,
-  //       })
-  //     );
-  //   }
-  // }, [selectedClient]);
-
   return (
-    <>
+    <div className="me-5">
       <ErrorBoundary
         isLoader={isGettingAllReservations}
         loadingComponent={
@@ -141,9 +117,10 @@ export const CustomerDataModule = memo(() => {
           <Dropdown
             label={{
               text: "Reservas pendientes",
+              className: "text-lg",
               htmlFor: "reservation",
             }}
-            options={reservations}
+            options={reservationsData?.data || []}
             value={currentReservation}
             onChange={handleReservationChange}
             placeholder="Seleccione una reserva"
@@ -154,34 +131,39 @@ export const CustomerDataModule = memo(() => {
               if (!reservation && !currentReservation)
                 return <span>{props.placeholder}</span>;
               return (
-                <ItemTemplate reservation={reservation || currentReservation} />
+                <PendingReservation
+                  reservation={reservation || currentReservation}
+                />
               );
             }}
             checkmark
             itemTemplate={(reservation: ReservationEntity) => (
-              <ItemTemplate reservation={reservation} />
+              <PendingReservation reservation={reservation} />
             )}
           />
         </div>
       </ErrorBoundary>
-      <div className="flex flex-col xl:flex-row gap-4">
-        <ClientForm />
-        <ReservationForm />
+      <div className="flex flex-col xl:flex-row gap-4 mt-8">
+        <div className="flex-1">
+          <div className="flex items-center mb-2 gap-x-2 text-lg">
+            <i className="pi pi-user text-primary text-xl"></i>
+            <h5 className="font-bold ">Datos del cliente</h5>
+          </div>
+          <ClientForm />
+        </div>
+        <Divider
+          className="my-4"
+          layout={width >= DESKTOP ? "vertical" : "horizontal"}
+        />
+        {/* <ClientForm /> */}
+        <div className="flex-[2]">
+          <div className="flex items-center mb-2 gap-x-2 text-lg">
+            <i className="pi pi-calendar text-primary text-xl"></i>
+            <h5 className="font-bold ">Datos de la reserva</h5>
+          </div>
+          <ReservationForm />
+        </div>
       </div>
-    </>
+    </div>
   );
-});
-
-const ItemTemplate = ({ reservation }: { reservation: ReservationEntity }) => (
-  <div className="flex flex-col">
-    <span className="font-medium">
-      {reservation.client?.fullName} - {reservation.code}
-    </span>
-    <span className="text-sm text-gray-500">
-      {dateFnsAdapter.format(reservation.startDate, "yyyy-MM-dd")} hasta{" "}
-      {dateFnsAdapter.format(reservation.endDate, "yyyy-MM-dd")} -{" "}
-      {reservation.numberOfPeople}{" "}
-      {reservation.numberOfPeople > 1 ? "personas" : "persona"}
-    </span>
-  </div>
-);
+};

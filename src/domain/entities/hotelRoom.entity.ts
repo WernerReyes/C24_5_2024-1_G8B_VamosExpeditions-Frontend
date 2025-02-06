@@ -4,9 +4,12 @@ import { distritEntitySchema } from "./distrit.entity";
 export const hotelRoomEntitySchema = z.object({
   id: z.number(),
   roomType: z.string(),
-  priceUsd: z.number(),
-  pricePen: z.number(),
   capacity: z.number(),
+  seasonType: z.string().optional(),
+  serviceTax: z.number().optional(),
+  rateUsd: z.number().optional(),
+  priceUsd: z.number().optional(),
+  pricePen: z.number().optional(),
   hotel: z
     .object({
       id: z.number(),

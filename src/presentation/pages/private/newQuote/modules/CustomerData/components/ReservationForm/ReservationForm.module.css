@@ -1,5 +1,5 @@
 .column {
-  @apply flex flex-col md:flex-row md:gap-x-5;
+  @apply flex flex-col md:flex-row w-full md:gap-x-5;
 }
 
 .confort{

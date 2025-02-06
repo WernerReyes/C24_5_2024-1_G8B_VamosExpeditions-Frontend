@@ -112,15 +112,40 @@ export const hotelRoomQuotationService = createApi({
         }
       },
     }),
+
+    deleteManyHotelRoomQuotationsByDayNumber: builder.mutation<
+      ApiResponse<HotelRoomQuotationEntity[]>,
+      number
+    >({
+      query: (dayNumber) => ({
+        url: `/day/${dayNumber}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["HotelRoomQuotations"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          data.data.forEach((hotelRoomQuotation) => {
+            dispatch(deleteHotelRoomQuotationCache(hotelRoomQuotation));
+          });
+          console.log(data.message)
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          console.error(error)
+          startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
   }),
 });
 
 export const {
-  useLazyGetAllHotelRoomQuotationsQuery,
   useGetAllHotelRoomQuotationsQuery,
   useCreateHotelRoomQuotationMutation,
   useCreateManyHotelRoomQuotationsMutation,
   useDeleteHotelRoomQuotationMutation,
+  useDeleteManyHotelRoomQuotationsByDayNumberMutation,
 } = hotelRoomQuotationService;
 
 //* Cache update

@@ -39,6 +39,10 @@ export * from "./OrderList";
 export * from "./Divider";
 export * from "./SelectButton";
 export * from "./ConfirmPopup";
+export * from "./Slider";
+export * from "./SpeedDial/SpeedDial";
+export * from "./Tooltip";
+
 
 //* Alerts
 export * from "./alerts/ExpiredSessionCountdown";

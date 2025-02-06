@@ -1,9 +1,6 @@
-import { AppState } from "@/app/store";
-import { HotelRoomQuotationEntity } from "@/domain/entities";
-import {
-  useHotelRoomQuotationStore,
-  useQuotationStore,
-} from "@/infraestructure/hooks";
+import type { AppState } from "@/app/store";
+import { constantStorage } from "@/core/constants";
+import { useDeleteHotelRoomQuotationMutation } from "@/infraestructure/store/services";
 import {
   Button,
   Column,
@@ -12,106 +9,58 @@ import {
   Tag,
 } from "@/presentation/components";
 import { Accordion, AccordionTab } from "primereact/accordion";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { calculateCosts } from "./utils/calculateCosts";
-import { CostTableType } from "./types/costTable.type";
-import { CostTableEnum } from "./enums/costTable.enum";
 import { InputText } from "primereact/inputtext";
 import { Slider } from "primereact/slider";
-import { constantStorage } from "@/core/constants";
-import { onSetHotelRoomQuotationsWithTotalCost } from "@/infraestructure/store";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { CostTableEnum } from "./enums/costTable.enum";
+import { CostTableType } from "./types/costTable.type";
+import { calculateCosts } from "./utils/calculateCosts";
+import { HotelRoomQuotationEntity } from "@/domain/entities";
 
 const { INDIRECT_COSTS_PERCENTAGE } = constantStorage;
 
-interface ColumnMeta {
-  field: string;
-  header: string;
-}
-
 export const CostSummaryModule = () => {
-  const dispatch = useDispatch();
   const { hotelRoomQuotations } = useSelector(
     (state: AppState) => state.hotelRoomQuotation
   );
-  const { selectedDay: currentDay } = useQuotationStore();
+  const { selectedDay: currentDay } = useSelector(
+    (state: AppState) => state.quotation
+  );
+  const [deleteHotelRoomQuotation] = useDeleteHotelRoomQuotationMutation();
   const [selectedDay, setSelectedDay] = useState<number>(1);
-  const [totalPerService, setTotalPerService] = useState<CostTableType[]>([]);
-  const [columsTable, setColumsTable] = useState<ColumnMeta[]>([]);
   const [value, setValue] = useState<number>(
     localStorage.getItem(INDIRECT_COSTS_PERCENTAGE)
       ? Number(localStorage.getItem(INDIRECT_COSTS_PERCENTAGE))
       : 5
   );
-  const {
-    // hotelRoomQuotations,
-    startDeleteHotelRoomQuotation,
-  } = useHotelRoomQuotationStore();
-  const [hotelRoomQuotationsPerDay, setHotelRoomQuotationsPerDay] = useState<
-    HotelRoomQuotationEntity[]
-  >([]);
 
-  useEffect(() => {
-    if (selectedDay) {
-      setHotelRoomQuotationsPerDay(
-        hotelRoomQuotations.filter((quote) => quote.day === selectedDay)
-      );
-    }
+  const hotelRoomQuotationsPerDay: HotelRoomQuotationEntity[] = useMemo(() => {
+    return hotelRoomQuotations.filter((quote) => quote.day === selectedDay);
   }, [selectedDay, hotelRoomQuotations]);
 
-  useEffect(() => {
-    if (hotelRoomQuotations.length > 0) {
-      const uniqueHotelRoomQuotations = hotelRoomQuotations.filter(
-        (quote, index, self) =>
-          index ===
-          self.findIndex(
-            (t) =>
-              t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
-              t.hotelRoom?.roomType === quote.hotelRoom?.roomType
-          )
-      );
+  const uniqueHotelRoomQuotations: HotelRoomQuotationEntity[] = useMemo(() => {
+    return hotelRoomQuotations.filter(
+      (quote, index, self) =>
+        index ===
+        self.findIndex(
+          (t) =>
+            t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
+            t.hotelRoom?.roomType === quote.hotelRoom?.roomType
+        )
+    );
+  }, [hotelRoomQuotations]);
 
-      const calculateCostsPerService = calculateCosts(
-        hotelRoomQuotations,
-        value
-      );
-
-     
-        dispatch(
-          onSetHotelRoomQuotationsWithTotalCost(
-            uniqueHotelRoomQuotations.map((quote, index) => {
-              const totalCost =
-                (
-                  calculateCostsPerService[index].total as {
-                    [key: string]: {
-                      total: number;
-                      indirectCost: number;
-                      directCost: number;
-                      totalCost: number;
-                    };
-                  }
-                )[
-                  `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`
-                ]?.totalCost ?? 0;
-
-              return {
-                ...quote,
-                totalCost,
-              };
-            })
-          )
-        );
-      
-
-      setTotalPerService(calculateCostsPerService);
-      setColumsTable(
-        uniqueHotelRoomQuotations.map((quote) => ({
-          field: "total",
-          header: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
-        }))
-      );
-    }
+  const calculateCostsPerService: CostTableType[] = useMemo(() => {
+    return calculateCosts(hotelRoomQuotations, value);
   }, [hotelRoomQuotations, value]);
+
+  const columsTable = useMemo(() => {
+    return uniqueHotelRoomQuotations.map((quote) => ({
+      field: "total",
+      header: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
+    }));
+  }, [uniqueHotelRoomQuotations]);
 
   return (
     <div className="p-6 w-full bg-gray-100">
@@ -180,7 +129,7 @@ export const CostSummaryModule = () => {
                                       className="p-0 text-white"
                                       text
                                       onClick={() =>
-                                        startDeleteHotelRoomQuotation(quote.id)
+                                        deleteHotelRoomQuotation(quote.id)
                                       }
                                     />
                                   </div>
@@ -196,7 +145,7 @@ export const CostSummaryModule = () => {
                                     <span className="font-medium">Costo</span>
                                   </div>
                                   <span className="text-2xl font-bold text-primary">
-                                    ${quote.hotelRoom?.priceUsd}
+                                    ${quote.hotelRoom?.rateUsd}
                                   </span>
                                 </div>
                               </div>
@@ -213,10 +162,17 @@ export const CostSummaryModule = () => {
         )}
       />
 
-      <DataTable value={totalPerService} header="Costos por Hotel">
+      <DataTable
+        value={calculateCostsPerService}
+        showGridlines
+
+        header="Costos por Hotel"
+      >
         <Column
           field="name"
           header="Nombre"
+          headerClassName="bg-primary text-white"
+          className="w-20"
           body={(rowData) => (
             <div>
               {rowData.name !== CostTableEnum.TOTAL_INDIRECT_COSTS ? (
@@ -227,7 +183,7 @@ export const CostSummaryModule = () => {
                   <div className="">
                     <InputText
                       disabled
-                      className="p-inputtext-sm"
+                      className="p-inputtext-sm w-full"
                       value={value.toString() + "%"}
                     />
                     <Slider
@@ -253,6 +209,8 @@ export const CostSummaryModule = () => {
         {columsTable.map((column, index) => (
           <Column
             key={index}
+            headerClassName="bg-primary text-white"
+            className="w-36"
             field={column.field}
             body={(rowData, { rowIndex }) => {
               return (
@@ -277,7 +235,7 @@ export const CostSummaryModule = () => {
                   )}
 
                   {rowIndex === 4 && (
-                    <>$ {rowData.total[column.header]?.totalCost ?? 0} </>
+                    <>$ {rowData.total[column.header]?.totalCost.toFixed(2) ?? 0} </>
                   )}
                 </div>
               );

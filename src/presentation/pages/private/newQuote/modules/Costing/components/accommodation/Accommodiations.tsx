@@ -1,7 +1,7 @@
 import { Button } from "@/presentation/components";
 import { useState } from "react";
-import { HotelList } from "./components/HotelList";
-import { HotelListDetails } from "./components/HotelListDetails";
+import { HotelListDetails } from "./components/HotelListDetails/HotelListDetails";
+import { HotelList } from "./components/HotelList/HotelList";
 
 export const Accommodiations = () => {
   const [visible, setVisible] = useState(false);

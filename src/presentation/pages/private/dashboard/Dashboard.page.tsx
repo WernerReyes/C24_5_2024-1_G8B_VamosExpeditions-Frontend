@@ -1,15 +1,16 @@
+import type { AppState } from "@/app/store";
+import { useSelector } from "react-redux";
+import { NewQuotationDialog } from "../components";
 import {
   ActiveReserves,
   RecentQuotes,
   StatisticsSummaryGraph,
   StatsOverviewCard,
 } from "./components";
-import { useAuthStore } from "@/infraestructure/hooks";
-import { NewQuotationButton } from "../components";
 
 
 const DashboardPage = () => {
-  const { authUser } = useAuthStore();
+  const { authUser } = useSelector((state: AppState) => state.auth);
 
   return (
     <>
@@ -17,7 +18,7 @@ const DashboardPage = () => {
         <h1 className="text-xl sm:text-3xl text-start font-bold text-primary">
           Bienvenido, {authUser?.fullname} 👋
         </h1>
-        <NewQuotationButton />
+        <NewQuotationDialog />
       </div>
 
       <div className="grid grid-cols-4 grid-flow-row gap-x-4 gap-y-6 mt-4">

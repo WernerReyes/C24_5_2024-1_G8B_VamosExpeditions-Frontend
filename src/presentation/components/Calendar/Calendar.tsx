@@ -7,6 +7,7 @@ import { HTMLAttributes, LabelHTMLAttributes } from "react";
 
 import "./Calendar.css";
 import { Skeleton, type SkeletonProps } from "../Skeleton";
+import { useWindowSize } from "@/presentation/hooks";
 
 type Props = CalendarProps & {
   label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
@@ -23,15 +24,21 @@ export const Calendar = ({
   skeleton,
   ...props
 }: Props) => {
+  const { width, TABLET } = useWindowSize();
   if (locale === "es") addLocale("es", spanishLocaleOptions);
 
   return (
     <>
       {label && <label {...label}>{label.text}</label>}
       {loading ? (
-        <Skeleton shape="rectangle" height="3rem" {...skeleton} />
+        <Skeleton
+          shape="rectangle"
+          height="3rem"
+          {...skeleton}
+          width={width < TABLET ? "100%" : skeleton?.width}
+        />
       ) : (
-        <CalendarPrimeReact locale={locale} {...props}  />
+        <CalendarPrimeReact locale={locale} {...props} />
       )}
       {small ? <small {...small}>{small.text}</small> : null}
     </>

@@ -82,6 +82,8 @@ export const GenerateModule = () => {
       dispatch(onSetCurrentStep(0));
       dispatch(onSetSelectedDay(null));
       localStorage.removeItem(INDIRECT_COSTS_PERCENTAGE);
+      localStorage.removeItem(CURRENT_ACTIVE_STEP);
+      localStorage.removeItem(ITINERARY_CURRENT_SELECTED_DAY);
       dispatch(onSetCurrentQuotation(null));
       startShowSuccess("Cotización guardada correctamente");
 
@@ -240,7 +242,6 @@ export const GenerateModule = () => {
           label="Generar Cotización"
           onClick={() => handleSaveQuotation()}
         />
-        {/* <Button icon="pi pi-file-pdf" label="Exportar en PDF " /> */}
       </div>
     </>
   );

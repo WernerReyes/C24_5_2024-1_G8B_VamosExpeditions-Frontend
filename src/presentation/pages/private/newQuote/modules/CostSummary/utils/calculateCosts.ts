@@ -28,13 +28,13 @@ export const calculateCosts = (
         serviceCost,
       };
     }
-    acc[hotelKey].total += quote?.hotelRoom?.priceUsd || 0; // Sumamos el precio
-    acc[hotelKey].directCost += quote?.hotelRoom?.priceUsd || 0;  + serviceCost; // Calculamos el costo directo
+    acc[hotelKey].total += quote?.hotelRoom?.rateUsd || 0; // Sumamos el precio
+    acc[hotelKey].directCost += quote?.hotelRoom?.rateUsd || 0;  + serviceCost; // Calculamos el costo directo
     acc[hotelKey].indirectCost +=
-      (quote?.hotelRoom?.priceUsd || 0) * (indirectCostPercentage / 100); // Calculamos el costo indirecto
+      (quote?.hotelRoom?.rateUsd || 0) * (indirectCostPercentage / 100); // Calculamos el costo indirecto
     acc[hotelKey].totalCost +=
-      (quote?.hotelRoom?.priceUsd || 0 + serviceCost) +
-      (quote?.hotelRoom?.priceUsd || 0) * (indirectCostPercentage / 100); // Calculamos el costo total
+      (quote?.hotelRoom?.rateUsd || 0 + serviceCost) +
+      (quote?.hotelRoom?.rateUsd || 0) * (indirectCostPercentage / 100); // Calculamos el costo total
     return acc;
   }, {} as Record<string, { total: number; serviceCost: number; hotelName: string; indirectCost: number; directCost: number; totalCost: number }>);
 
