@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
-import { classNamesAdapter, dateFnsAdapter } from "@/core/adapters";
+import { classNamesAdapter } from "@/core/adapters";
 import { reservationDto } from "@/domain/dtos/reservation";
-import { type Day, onSetSelectedDay } from "@/infraestructure/store";
+import { type Day, onSetDays, onSetSelectedDay } from "@/infraestructure/store";
 import { useUpsertReservationMutation } from "@/infraestructure/store/services";
 import {
   Button,
@@ -60,12 +60,13 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
 
       // //* Update reservation travel dates
       handleUpdateReservation(startDate!, lastItineraryDate!);
-      
+
       const newDay: Day = {
         id: generatedDays.length + 1,
         number: generatedDays.length + 1,
         name: `Día ${generatedDays.length + 1}`,
-        date: lastItineraryDate!.toLocaleDateString("es-ES", {
+        date: lastItineraryDate!,
+        formattedDate: lastItineraryDate!.toLocaleDateString("es-ES", {
           weekday: "long",
           day: "numeric",
           month: "long",
@@ -99,13 +100,19 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
   }, [currentReservation]);
 
   useEffect(() => {
+    if (generatedDays) {
+      dispatch(onSetDays(generatedDays));
+    }
+  }, [generatedDays]);
+
+  useEffect(() => {
     if (startDate && endDate) {
       const { result: days, executionTime } = measureExecutionTime(function () {
         const daysNumber =
           Math.abs(
             (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
           ) + 1;
-        const days = Array.from({ length: daysNumber }, (_, index) => {
+        const days: Day[] = Array.from({ length: daysNumber }, (_, index) => {
           const date = new Date(startDate);
           date.setDate(date.getDate() + index);
 
@@ -114,7 +121,8 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
             id: index + 1,
             number: index + 1,
             name: `Día ${index + 1}`,
-            date: date.toLocaleDateString("es-ES", {
+            date,
+            formattedDate: date.toLocaleDateString("es-ES", {
               weekday: "long",
               day: "numeric",
               month: "long",
@@ -162,10 +170,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
 
     // If the first day was deleted, adjust the remaining dates
     if (selectedDayIndex === 0 && newDays.length > 0) {
-      let previousDate = dateFnsAdapter.parse(
-        newDays[0].date, // 📌 Usamos la fecha del nuevo primer día como referencia
-        "EEEE, d 'de' MMMM 'de' yyyy"
-      );
+      let previousDate = newDays[0].date;
 
       for (let i = 0; i < newDays.length; i++) {
         if (i === 0) {
@@ -174,14 +179,15 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
 
           //* Update the first day's date in the reservation
           handleUpdateReservation(previousDate, endDate!);
-        } 
+        }
 
         newDays[i] = {
           ...newDays[i],
           id: i + 1,
           name: `Día ${i + 1}`,
           number: i + 1,
-          date: previousDate.toLocaleDateString("es-ES", {
+          date: previousDate,
+          formattedDate: previousDate.toLocaleDateString("es-ES", {
             weekday: "long",
             day: "numeric",
             month: "long",
@@ -193,10 +199,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
       //* Adjust the remaining dates
       if (selectedDayIndex !== newDays.length) {
         for (let i = selectedDayIndex; i < newDays.length; i++) {
-          let previousDate = dateFnsAdapter.parse(
-            newDays[i].date,
-            "EEEE, d 'de' MMMM 'de' yyyy"
-          );
+          let previousDate = newDays[i].date
           previousDate.setDate(previousDate.getDate() - 1);
 
           newDays[i] = {
@@ -204,7 +207,8 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
             id: i + 1,
             name: `Día ${i + 1}`,
             number: i + 1,
-            date: previousDate.toLocaleDateString("es-ES", {
+            date: previousDate,
+          formattedDate: previousDate.toLocaleDateString("es-ES", {
               weekday: "long",
               day: "numeric",
               month: "long",
@@ -214,24 +218,23 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
         }
       }
 
-  
       //* Update the rest of the days' dates in the reservation
       handleUpdateReservation(
         startDate!,
-        dateFnsAdapter.parse(
+        
           newDays[newDays.length - 1].date,
-          "EEEE, d 'de' MMMM 'de' yyyy"
-        )
+         
+        
       );
     }
 
     //* Update reservation travel dates
     if (newDays.length > 0) {
       setLastItineraryDate(
-        dateFnsAdapter.parse(
+       
           newDays[newDays.length - 1].date,
-          "EEEE, d 'de' MMMM 'de' yyyy"
-        )
+          
+        
       );
     }
 
@@ -335,7 +338,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
                     </p>
                     <div className="flex items-start flex-col">
                       <p className="font-semibold">{day.name}</p>
-                      <p className="text-xs md:text-sm">{day.date}</p>
+                      <p className="text-xs md:text-sm">{day.formattedDate}</p>
                     </div>
                   </div>
                 </li>
@@ -360,7 +363,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
             model={[
               ...(generatedDays?.map((day, index) => ({
                 icon: index + 1,
-                label: day.date,
+                label: day.formattedDate,
                 className: classNamesAdapter(
                   selectedDay?.id === day.id
                     ? "bg-primary text-white"

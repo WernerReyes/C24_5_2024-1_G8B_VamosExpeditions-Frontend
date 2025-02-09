@@ -15,8 +15,8 @@ export const dateFnsAdapter = {
     });
     return toZonedTime(date, "UTC");
   },
-  parseISO(dateString: string) {
-    const date = parseISO(dateString);
+  parseISO(dateString: string | Date): Date {
+    const date = parseISO(dateString as any as string);
     return toZonedTime(date, "UTC");
   },
   toISO(date: Date): string {

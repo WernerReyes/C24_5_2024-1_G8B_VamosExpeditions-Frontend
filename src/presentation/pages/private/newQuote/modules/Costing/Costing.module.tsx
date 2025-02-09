@@ -10,7 +10,7 @@ import {
   Skeleton,
   SplitButton,
 } from "@/presentation/components";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SidebarDays, Accommodiations } from "./components";
 
 import type { AppState } from "@/app/store";
@@ -18,7 +18,7 @@ import { reservationDto } from "@/domain/dtos/reservation";
 import type { CityEntity } from "@/domain/entities";
 import { onSetHotels } from "@/infraestructure/store";
 import {
-  useDeleteManyHotelRoomQuotationsByDayNumberMutation,
+  useDeleteManyHotelRoomQuotationsMutation,
   useGetHotelsQuery,
   useUpsertReservationMutation,
 } from "@/infraestructure/store/services";
@@ -86,8 +86,10 @@ export const CostingModule = () => {
 
   const [upsertReservation] = useUpsertReservationMutation();
 
-  const [deleteManyHotelRoomQuotationsByDayNumber] =
-    useDeleteManyHotelRoomQuotationsByDayNumberMutation();
+  const [
+    deleteManyHotelRoomQuotations,
+    { isLoading: isDeletingManyHotelRoomQuotations },
+  ] = useDeleteManyHotelRoomQuotationsMutation();
 
   const [[startDate, endDate], setDateRange] = useState<
     [Date | null, Date | null]
@@ -115,23 +117,26 @@ export const CostingModule = () => {
   const menuLeft = useRef<MenuRef>(null);
 
   const handleAccept = () => {
-    if (selectedDay) {
-      const { startDate, endDate } = currentReservation!;
-      const currentDateFormatted = dateFnsAdapter.parse(
-        selectedDay.date,
-        "EEEE, d 'de' MMMM 'de' yyyy"
-      );
-
-      if (dateFnsAdapter.isSameDay(endDate, currentDateFormatted)) {
-        deleteManyHotelRoomQuotationsByDayNumber(selectedDay.number).then(
-          () => {
-            setIsDayDeleted(true);
-            setVisible(false);
-          }
-        );
-      }
+    if (hotelRoomQuotationIdsPerDay.length > 0) {
+      // console.log(hotelRoomQuotationIdsPerDay);
+      deleteManyHotelRoomQuotations(hotelRoomQuotationIdsPerDay).then(() => {
+        console.log("Deleted");
+        // setIsDayDeleted(true);
+        // setVisible(false);
+      });
     }
   };
+
+  const hotelRoomQuotationIdsPerDay = useMemo(() => {
+    if (selectedDay) {
+      return hotelRoomQuotations
+        .filter((quote) =>
+          dateFnsAdapter.isSameDay(quote.date, selectedDay.date)
+        )
+        .map((quote) => quote.id);
+    }
+    return [];
+  }, [selectedDay, hotelRoomQuotations]);
 
   const handleUpsertReservation = ([startDate, endDate]: [
     Date | null,
@@ -151,7 +156,6 @@ export const CostingModule = () => {
 
   useEffect(() => {
     if (currentReservation?.cities && !selectedCity) {
-      console.log(currentReservation.cities[0]);
       setSelectedCity(currentReservation.cities[0]);
     }
   }, [currentReservation]);
@@ -255,20 +259,23 @@ export const CostingModule = () => {
                       {selectedDay?.name} - {selectedCity?.name}
                     </h2>
                     <p className="max-sm:text-sm text-primary">
-                      {selectedDay?.date}
+                      {selectedDay?.formattedDate}
                     </p>
                   </div>
 
                   {selectedDay && selectedDay.total > 1 && (
                     <Button
+                      disabled={isDeletingManyHotelRoomQuotations}
                       icon="pi pi-trash"
                       className="mb-auto"
                       loading={!selectedDay}
                       onClick={() => {
                         const existHotelRoomQuotations =
-                          hotelRoomQuotations?.find(
-                            (hotelRoomQuotation) =>
-                              hotelRoomQuotation.day === selectedDay?.number
+                          hotelRoomQuotations?.find((hotelRoomQuotation) =>
+                            dateFnsAdapter.isSameDay(
+                              hotelRoomQuotation.date,
+                              selectedDay.date
+                            )
                           );
                         if (existHotelRoomQuotations) {
                           setVisible(true);

@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { HotelListDetailsSkeleton } from "./HotelListDetailsSkeleton";
 import { measureExecutionTime } from "@/core/utils";
+import { dateFnsAdapter } from "@/core/adapters";
 
 export const HotelListDetails = () => {
   const { hotelRoomQuotations } = useSelector(
@@ -22,7 +23,7 @@ export const HotelListDetails = () => {
     if (selectedDay) {
       const { result, executionTime } = measureExecutionTime(function () {
         return hotelRoomQuotations.filter(
-          (quote) => quote.day === selectedDay.number
+          (quote) => dateFnsAdapter.isSameDay(quote.date, selectedDay.date)
         );
       });
 
@@ -34,6 +35,8 @@ export const HotelListDetails = () => {
     }
     return [];
   }, [selectedDay, hotelRoomQuotations]);
+
+  // console.log(hotelRoomQuotations, dateFnsAdapter.parse(selectedDay!.date, "EEEE, d 'de' MMMM 'de' yyyy"));
 
   return (
     <>

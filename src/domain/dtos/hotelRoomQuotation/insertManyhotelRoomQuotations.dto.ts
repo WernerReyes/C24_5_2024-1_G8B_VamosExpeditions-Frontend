@@ -7,7 +7,7 @@ export type InsertManyhotelRoomQuotationsDto = {
     readonly quotationId: number;
     readonly versionNumber: number;
   };
-  readonly dayRange: [number, number];
+  readonly dateRange: [Date, Date];
   readonly numberOfPeople: number;
 };
 
@@ -17,7 +17,7 @@ const insertManyhotelRoomQuotationsDtoSchema = z.object({
     quotationId: z.number(),
     versionNumber: z.number(),
   }),
-  dayRange: z.array(z.number()).min(2).max(2),
+  dateRange: z.array(z.date()).min(2).max(2),
   numberOfPeople: z.number(),
 });
 

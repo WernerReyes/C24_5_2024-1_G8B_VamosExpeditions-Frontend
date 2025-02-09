@@ -9,7 +9,7 @@ type Props = {
 
 export const DaysNumberToAddRoom = ({ setRange }: Props) => {
   const { selectedDay } = useSelector((state: AppState) => state.quotation);
-  const [localValue, setLocalValue] = useState<[number, number]>([1, 2]);
+  const [localValue, setLocalValue] = useState<[number, number]>([1, 1]);
 
   useEffect(() => {
     setRange(localValue);
@@ -24,17 +24,22 @@ export const DaysNumberToAddRoom = ({ setRange }: Props) => {
             htmlFor: "range",
             className: "text-sm",
           }}
-          disabled
+          // disabled
           min={1}
           max={selectedDay!.total}
           keyfilter="int"
           value={`${localValue[0]} - ${localValue[1]}`}
           onChange={(e) =>
             setLocalValue(
-              e.target.value.split(" - ").map((v) => {
-                if (Number.isNaN(Number(v)) || v === undefined) return 1;
-                return Number(v);
-              }) as [number, number]
+              e.target.value
+                .trim()
+                .split("-")
+                .map((v) => {
+                  if (Number.isNaN(Number(v)) || v === undefined) return 1;
+                  if (Number(v) < 1) return 1;
+                  if (Number(v) > selectedDay!.total) return selectedDay!.total;
+                  return Number(v);
+                }) as [number, number]
             )
           }
           invalid={
@@ -44,7 +49,12 @@ export const DaysNumberToAddRoom = ({ setRange }: Props) => {
           }
           small={{
             className: "text-red-500",
-            text: localValue[0] > localValue[1] ? "Rango inválido" : "",
+            text:
+              localValue[0] > localValue[1] ||
+              localValue[1] > selectedDay!.total ||
+              localValue[0] > selectedDay!.total
+                ? "Rango inválido"
+                : "",
           }}
           className="w-full p-inputtext-sm"
         />

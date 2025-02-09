@@ -12,6 +12,7 @@ import {
 } from "@/domain/dtos/hotelRoomQuotation";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
 import { onSetHotelRoomQuotations } from "../../slices/hotelRoomQuotation.slice";
+import { dateFnsAdapter } from "@/core/adapters";
 
 const PREFIX = "/hotel-room-quotation";
 
@@ -40,6 +41,19 @@ export const hotelRoomQuotationService = createApi({
         } catch (error) {
           throw error;
         }
+      },
+      transformResponse: (
+        response: ApiResponse<HotelRoomQuotationEntity[]>
+      ) => {
+        return {
+          ...response,
+          data: response.data.map((hotelRoomQuotation) => {
+            return {
+              ...hotelRoomQuotation,
+              date: dateFnsAdapter.parseISO(hotelRoomQuotation.date),
+            };
+          }),
+        };
       },
     }),
     createHotelRoomQuotation: builder.mutation<
@@ -87,7 +101,7 @@ export const hotelRoomQuotationService = createApi({
           });
           startShowSuccess(data.message);
         } catch (error: any) {
-          startShowApiError(error.error);
+          if (error.error) startShowApiError(error.error);
           throw error;
         }
       },
@@ -113,13 +127,19 @@ export const hotelRoomQuotationService = createApi({
       },
     }),
 
-    deleteManyHotelRoomQuotationsByDayNumber: builder.mutation<
+    deleteManyHotelRoomQuotations: builder.mutation<
       ApiResponse<HotelRoomQuotationEntity[]>,
-      number
+      number[]
     >({
-      query: (dayNumber) => ({
-        url: `/day/${dayNumber}`,
+      query: (ids) => ({
+        url: "/many",
         method: "DELETE",
+        body: {
+          ids,
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
       }),
       invalidatesTags: ["HotelRoomQuotations"],
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
@@ -128,11 +148,10 @@ export const hotelRoomQuotationService = createApi({
           data.data.forEach((hotelRoomQuotation) => {
             dispatch(deleteHotelRoomQuotationCache(hotelRoomQuotation));
           });
-          console.log(data.message)
           startShowSuccess(data.message);
         } catch (error: any) {
-          console.error(error)
-          startShowApiError(error.error);
+          console.error(error);
+          // startShowApiError(error.error);
           throw error;
         }
       },
@@ -145,7 +164,7 @@ export const {
   useCreateHotelRoomQuotationMutation,
   useCreateManyHotelRoomQuotationsMutation,
   useDeleteHotelRoomQuotationMutation,
-  useDeleteManyHotelRoomQuotationsByDayNumberMutation,
+  useDeleteManyHotelRoomQuotationsMutation,
 } = hotelRoomQuotationService;
 
 //* Cache update

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AppState } from "@/app/store";
+import type { AppState } from "@/app/store";
 import { constantRoutes } from "@/core/constants";
 import { quotationService } from "@/data";
 import {

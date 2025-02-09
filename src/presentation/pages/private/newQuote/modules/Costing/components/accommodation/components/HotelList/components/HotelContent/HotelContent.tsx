@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { HotelEntity, HotelRoomEntity } from "@/domain/entities";
 import type { AppState } from "@/app/store";
@@ -21,6 +21,7 @@ type Props = {
 };
 
 export const HotelContent = ({ hotel, setVisible }: Props) => {
+  const { days } = useSelector((state: AppState) => state.quotation);
   const { currentVersionQuotation } = useSelector(
     (state: AppState) => state.versionQuotation
   );
@@ -31,6 +32,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   const [selectedRoom, setSelectedRoom] = useState<HotelRoomEntity | null>();
   const [peopleAmount, setPeopleAmount] = useState<number>(0);
   const [rangeState, setRangeState] = useState<[number, number]>([1, 1]);
+  // const [rangeDate, setRangeDate] = useState<[Date, Date]>([]);
   const [confirm, setConfirm] = useState(false);
 
   const handleTabChange = (e: AccordionTabChangeEvent) => {
@@ -48,7 +50,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   const handleAddHotelRoomQuotation = async () => {
     await createManyHotelRoomQuotations({
       versionQuotationId: currentVersionQuotation!.id,
-      dayRange: rangeState,
+      dateRange: dateRange,
       hotelRoomId: selectedRoom!.id,
       numberOfPeople: peopleAmount,
     })
@@ -62,7 +64,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
       });
   };
 
-  const confirm1 = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleConfirmAddDays = (event: React.MouseEvent<HTMLButtonElement>) => {
     confirmPopup({
       target: event.currentTarget,
       message: <DaysNumberToAddRoom setRange={setRangeState} />,
@@ -72,6 +74,16 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
       },
     });
   };
+
+  const dateRange: [Date, Date] = useMemo(() => {
+    const startDate = days[rangeState[0] - 1];
+    const endDate = days[rangeState[1] - 1] ?? days[rangeState[0] - 1];
+    // console.log(startDate, endDate);
+    return [
+      startDate.date,
+      endDate.date
+    ];
+  }, [days, rangeState]);
 
   useEffect(() => {
     if (!confirm) return;
@@ -114,7 +126,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
               selectedRoom.capacity < peopleAmount ||
               peopleAmount === 0
             }
-            onClick={confirm1}
+            onClick={handleConfirmAddDays}
           />
         </div>
       </div>

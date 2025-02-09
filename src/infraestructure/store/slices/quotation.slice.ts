@@ -9,7 +9,8 @@ export interface Day {
   id: number;
   number: number;
   name: string;
-  date: string;
+  date: Date;
+  formattedDate: string;
   total: number;
 }
 
@@ -17,6 +18,7 @@ type QuotationSliceState = {
   currentQuotation: LocalQuotationEntity | null;
   currentStep: number;
   quotations: QuotationEntity[];
+  days: Day[];
   selectedDay: Day | null;
 };
 
@@ -24,6 +26,7 @@ const initialState: QuotationSliceState = {
   currentQuotation: null,
   currentStep: JSON.parse(localStorage.getItem(CURRENT_ACTIVE_STEP) || "0"),
   quotations: [],
+  days: [],
   selectedDay: JSON.parse(
     localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) || "null"
   ),
@@ -68,6 +71,13 @@ export const quotationSlice = createSlice({
         selectedDay: payload ?? null,
       };
     },
+
+    onSetDays: (state, { payload }: PayloadAction<Day[]>) => {
+      return {
+        ...state,
+        days: payload,
+      };
+    }
   },
 });
 
@@ -76,4 +86,5 @@ export const {
   onSetCurrentStep,
   onSetQuotations,
   onSetSelectedDay,
+  onSetDays,
 } = quotationSlice.actions;

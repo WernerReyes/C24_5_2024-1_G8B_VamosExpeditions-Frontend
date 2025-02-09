@@ -98,7 +98,7 @@ const NewQuotePage = memo(() => {
       dispatch(onSetCurrentStep(currentStep - 1));
     }
   };
-
+  
   const handleChangeStep = (event: StepperChangeEvent) => {
     dispatch(onSetCurrentStep(event.index));
   };
