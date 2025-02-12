@@ -23,6 +23,8 @@ import {
   useGetVersionQuotationByIdQuery,
 } from "@/infraestructure/store/services";
 import { useDispatch, useSelector } from "react-redux";
+import { classNamesAdapter } from "@/core/adapters";
+import { EditableQuotationName } from "./components";
 
 interface Title {
   header: string;
@@ -63,6 +65,9 @@ const NewQuotePage = memo(() => {
   const { currentReservation } = useSelector(
     (state: AppState) => state.reservation
   );
+  const { hotelRoomQuotations } = useSelector(
+    (state: AppState) => state.hotelRoomQuotation
+  );
 
   const versionQuotationId = currentQuotation?.currentVersion?.id;
   const reservationId = currentVersionQuotation?.reservation?.id;
@@ -84,7 +89,6 @@ const NewQuotePage = memo(() => {
   const { data: reservationData } = useGetReservationByIdQuery(reservationId!, {
     skip: !reservationId || currentReservation !== null,
   });
-
   const [isLoadingStep, setIsLoadingStep] = useState(true);
 
   const handleNext = () => {
@@ -98,7 +102,7 @@ const NewQuotePage = memo(() => {
       dispatch(onSetCurrentStep(currentStep - 1));
     }
   };
-  
+
   const handleChangeStep = (event: StepperChangeEvent) => {
     dispatch(onSetCurrentStep(event.index));
   };
@@ -110,7 +114,17 @@ const NewQuotePage = memo(() => {
   }, [reservationData]);
 
   useEffect(() => {
-    setIsLoadingStep(true);
+    if (!isLoadingStep) {
+      if (currentStep > 0) {
+        if (!currentReservation) dispatch(onSetCurrentStep(0));
+        if (currentStep === 2 && hotelRoomQuotations.length === 0) {
+          dispatch(onSetCurrentStep(1));
+        }
+        if (currentStep === 3 && !currentVersionQuotation) {
+          dispatch(onSetCurrentStep(2));
+        }
+      }
+    }
     setTimeout(() => {
       setIsLoadingStep(false);
     }, 500);
@@ -118,17 +132,21 @@ const NewQuotePage = memo(() => {
 
   return (
     <section className="bg-white pe-7 py-5 md:p-10 rounded-lg my-auto shadow-md min-h-screen">
+      <EditableQuotationName />
       <Stepper
         linear
         orientation={width > DESKTOP ? "horizontal" : "vertical"}
-        includePanel
         activeStep={currentStep}
         onChangeStep={handleChangeStep}
         panelContent={steps.map((step, index) => ({
           header: step.header,
 
           children: !isLoadingStep ? (
-            <>
+            <div
+              className={classNamesAdapter(
+                currentStep !== 3 && currentStep !== 1 && "pe-4 sm:pe-0"
+              )}
+            >
               {renderStepContent(index)}
               {/* {stepContentMemo(index)} */}
               <div className="flex pt-4 justify-between">
@@ -152,11 +170,14 @@ const NewQuotePage = memo(() => {
                     tooltip={width <= MOVILE ? "Continuar" : undefined}
                     tooltipOptions={{ position: "top" }}
                     onClick={handleNext}
-                    disabled={index === 0 && !currentReservation}
+                    disabled={
+                      (index === 0 && !currentReservation) ||
+                      (index === 1 && hotelRoomQuotations.length === 0)
+                    }
                   />
                 )}
               </div>
-            </>
+            </div>
           ) : (
             <div className="flex justify-center items-center h-96 lg:h-[30rem]">
               <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>

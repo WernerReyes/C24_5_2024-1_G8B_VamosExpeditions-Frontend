@@ -1,4 +1,4 @@
-import { QuoteEntity, VersionEntity } from "@/domain/entities";
+import { QuoteEntity, VersionEntity, VersionQuotationEntity } from "@/domain/entities";
 import { useReportStore } from "@/infraestructure/hooks";
 import {
   Button,
@@ -16,14 +16,21 @@ import { Controller, useForm } from "react-hook-form";
 import { EmailDto, emailDtoSchema } from "@/domain/dtos/email";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SelectButtonChangeEvent } from "primereact/selectbutton";
+import { useSelector } from "react-redux";
+import type { AppState } from "@/app/store";
 
 type TyoeTableActions = {
-  rowData: QuoteEntity | VersionEntity;
+  rowData: VersionQuotationEntity
   type: "principal" | "secondary";
 };
 
 export const TableActions = ({ type, rowData }: TyoeTableActions) => {
+
+
+  
+
   const { downloadPdf, isLoading } = useReportStore();
+
 
   const [visible, setVisible] = useState(false);
 
@@ -57,11 +64,12 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         className=""
         rounded
         text
+        disabled={isLoading || !rowData.reservation}
         onClick={() => {
-          console.log(rowData);
-          downloadPdf(1, "rolando");
+          if (!rowData.reservation) return;
+          downloadPdf(rowData?.reservation?.id, "rolando");
         }}
-        disabled={isLoading}
+        // disabled={isLoading}
       />
       {type === "principal" && (
         <Button

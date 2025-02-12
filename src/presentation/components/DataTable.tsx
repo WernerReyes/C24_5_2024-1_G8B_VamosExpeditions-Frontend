@@ -30,7 +30,10 @@ export const DataTable = forwardRef(function DataTable2<
     exportCSV: () => dataTableRef.current?.exportCSV(),
   }));
 
-  return <DataTablePrimeReact ref={dataTableRef} {...props} />;
+  return <DataTablePrimeReact ref={dataTableRef} {...props} pt={{
+    header: { className: "bg-primary text-white max-sm:text-sm" },
+    wrapper: { className: "thin-scrollbar" }, ...props.pt,
+  }} />;
 });
 
 export type { DataTableValueArray, DataTableExpandedRows };

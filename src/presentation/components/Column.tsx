@@ -5,7 +5,7 @@ import {
   type ColumnFilterClearTemplateOptions,
   type ColumnFilterElementTemplateOptions,
   type ColumnFilterMetaDataWithConstraint,
-  type ColumnFilterMatchModeOptions
+  type ColumnFilterMatchModeOptions,
 } from "primereact/column";
 
 interface Props extends ColumnProps {}
@@ -19,5 +19,5 @@ export type {
   ColumnFilterClearTemplateOptions,
   ColumnFilterElementTemplateOptions,
   ColumnFilterMetaDataWithConstraint,
-  ColumnFilterMatchModeOptions
+  ColumnFilterMatchModeOptions,
 };

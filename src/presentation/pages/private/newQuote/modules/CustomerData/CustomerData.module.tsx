@@ -79,7 +79,7 @@ export const CustomerDataModule = () => {
   };
 
   return (
-    <div className="me-5">
+    <div className="">
       <ErrorBoundary
         isLoader={isGettingAllReservations}
         loadingComponent={

@@ -8,6 +8,7 @@ import {
 import { classNames } from "primereact/utils";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
 import { Skeleton, type SkeletonProps } from "./Skeleton";
+import { useWindowSize } from "../hooks";
 
 type DesingType = "label" | "floatLabel";
 
@@ -77,7 +78,7 @@ const InputTextWithFloatLabel = forwardRef<HTMLInputElement, Props>(
             ) : (
               <InputTextPrimeReact {...props} ref={ref} />
             )}
-             {label && ( <label {...label}>{label.text}</label>)}
+            {label && <label {...label}>{label.text}</label>}
           </FloatLabel>
         )}
       </>
@@ -89,9 +90,13 @@ const InputTextWithIcon = forwardRef<
   HTMLInputElement,
   Omit<Props, "label" | "small" | "desingType" | "iconField">
 >(({ iconFieldProps, iconProps, ...props }, ref) => {
+  const { width, TABLET } = useWindowSize();
   return (
-    <IconField {...iconFieldProps}>
-      <InputIcon {...iconProps}> </InputIcon>
+    <IconField
+      {...iconFieldProps}
+      iconPosition={width < TABLET ? "right" : iconFieldProps?.iconPosition}
+    >
+      <InputIcon {...iconProps} />
       <InputTextPrimeReact {...props} ref={ref} />
     </IconField>
   );

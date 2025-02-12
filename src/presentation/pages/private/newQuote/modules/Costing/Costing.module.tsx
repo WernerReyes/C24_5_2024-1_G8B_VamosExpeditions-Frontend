@@ -16,10 +16,14 @@ import { SidebarDays, Accommodiations } from "./components";
 import type { AppState } from "@/app/store";
 import { reservationDto } from "@/domain/dtos/reservation";
 import type { CityEntity } from "@/domain/entities";
-import { onSetHotels } from "@/infraestructure/store";
+import {
+  onFetchHotelRoomQuotations,
+  onSetHotels,
+} from "@/infraestructure/store";
 import {
   useDeleteManyHotelRoomQuotationsMutation,
   useGetHotelsQuery,
+  useUpdateManyHotelRoomQuotationsByDateMutation,
   useUpsertReservationMutation,
 } from "@/infraestructure/store/services";
 import { useDispatch, useSelector } from "react-redux";
@@ -74,9 +78,15 @@ const SERVICES: MenuItem[] = [
 
 export const CostingModule = () => {
   const dispatch = useDispatch();
+  
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+
   const { currentReservation } = useSelector(
     (state: AppState) => state.reservation
   );
+
 
   const { hotelRoomQuotations } = useSelector(
     (state: AppState) => state.hotelRoomQuotation
@@ -90,6 +100,11 @@ export const CostingModule = () => {
     deleteManyHotelRoomQuotations,
     { isLoading: isDeletingManyHotelRoomQuotations },
   ] = useDeleteManyHotelRoomQuotationsMutation();
+
+  const [
+    updateManyHotelRoomQuotations,
+    { isLoading: isUpdatingManyHotelRoomQuotations },
+  ] = useUpdateManyHotelRoomQuotationsByDateMutation();
 
   const [[startDate, endDate], setDateRange] = useState<
     [Date | null, Date | null]
@@ -117,13 +132,44 @@ export const CostingModule = () => {
   const menuLeft = useRef<MenuRef>(null);
 
   const handleAccept = () => {
+    const { startDate, endDate } = currentReservation!;
     if (hotelRoomQuotationIdsPerDay.length > 0) {
-      // console.log(hotelRoomQuotationIdsPerDay);
       deleteManyHotelRoomQuotations(hotelRoomQuotationIdsPerDay).then(() => {
-        console.log("Deleted");
-        // setIsDayDeleted(true);
-        // setVisible(false);
+        if (
+          dateFnsAdapter.isSameDay(startDate, selectedDay!.date) ||
+          dateFnsAdapter.isSameDay(endDate, selectedDay!.date)
+        ) {
+          setIsDayDeleted(true);
+          setVisible(false);
+        } else {
+          updateManyHotelRoomQuotations({
+            versionQuotationId: currentVersionQuotation!.id,
+            startDate: selectedDay!.date,
+          }).then(() => {
+            setIsDayDeleted(true);
+            setVisible(false);
+          });
+        }
       });
+    }
+  };
+
+  const handleUpsertReservation = ([startDate, endDate]: [
+    Date | null,
+    Date | null
+  ]) => {
+    if (startDate && endDate && currentReservation) {
+      console.log(hotelRoomQuotations.filter((quote) =>
+        !dateFnsAdapter.isWithinInterval(quote.date, startDate, endDate)
+      ));
+      // upsertReservation({
+      //   reservationDto: reservationDto.parse({
+      //     ...currentReservation,
+      //     startDate,
+      //     endDate,
+      //   }),
+      //   showMessage: false,
+      // });
     }
   };
 
@@ -138,21 +184,6 @@ export const CostingModule = () => {
     return [];
   }, [selectedDay, hotelRoomQuotations]);
 
-  const handleUpsertReservation = ([startDate, endDate]: [
-    Date | null,
-    Date | null
-  ]) => {
-    if (startDate && endDate && currentReservation) {
-      upsertReservation({
-        reservationDto: reservationDto.parse({
-          ...currentReservation,
-          startDate,
-          endDate,
-        }),
-        showMessage: false,
-      });
-    }
-  };
 
   useEffect(() => {
     if (currentReservation?.cities && !selectedCity) {
@@ -176,8 +207,16 @@ export const CostingModule = () => {
     localStorage.setItem(ITINERARY_CURRENT_ACTIVITY, activity);
   }, [activity]);
 
+  useEffect(() => {
+    dispatch(
+      onFetchHotelRoomQuotations(
+        isUpdatingManyHotelRoomQuotations || isDeletingManyHotelRoomQuotations
+      )
+    );
+  }, [isUpdatingManyHotelRoomQuotations, isDeletingManyHotelRoomQuotations]);
+
   return (
-    <>
+    <div className="w-full">
       <ConfirmDialog
         group="declarative"
         visible={visible}
@@ -188,7 +227,6 @@ export const CostingModule = () => {
         acceptLabel="Sí"
         accept={handleAccept}
         rejectLabel="No"
-        // reject={handleReject}
       />
       <div className="max-w-screen-2xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between gap-y-4 mb-10">
@@ -213,7 +251,7 @@ export const CostingModule = () => {
           />
 
           <Calendar
-            loading={!startDate || !endDate}
+            loading={!startDate && !endDate}
             dateFormat="dd/mm/yy"
             showIcon
             skeleton={{
@@ -346,6 +384,6 @@ export const CostingModule = () => {
           />
         </div>
       </div>
-    </>
+    </div>
   );
 };

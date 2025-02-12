@@ -12,6 +12,7 @@ export enum VersionQuotationStatus {
 
 export const versionQuotationEntitySchema = z.object({
   id: z.object({ quotationId: z.number(), versionNumber: z.number() }),
+  name: z.string(),
   status: z.nativeEnum(VersionQuotationStatus),
   createdAt: z.date(),
   updatedAt: z.date(),

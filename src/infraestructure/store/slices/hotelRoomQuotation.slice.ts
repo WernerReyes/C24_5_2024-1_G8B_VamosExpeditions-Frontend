@@ -1,20 +1,20 @@
 import type { HotelRoomQuotationEntity } from "@/domain/entities";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type DeleteDirection = "middle" | "start" | "end" | undefined;
+
 
 type HotelRoomQuotationSliceState = {
   hotelRoomQuotations: HotelRoomQuotationEntity[];
   hotelRoomQuotationsWithTotalCost: (HotelRoomQuotationEntity & {
     totalCost: number;
   })[];
-  deleteDirection: DeleteDirection;
+  isFetchingHotelRoomQuotations: boolean;
 };
 
 const initialState: HotelRoomQuotationSliceState = {
   hotelRoomQuotations: [],
   hotelRoomQuotationsWithTotalCost: [],
-  deleteDirection: undefined,
+  isFetchingHotelRoomQuotations: false,
 };
 
 export const hotelRoomQuotationSlice = createSlice({
@@ -43,10 +43,10 @@ export const hotelRoomQuotationSlice = createSlice({
       };
     },
 
-    onDeleteDirection: (state, { payload }: PayloadAction<DeleteDirection>) => {
+    onFetchHotelRoomQuotations: (state, { payload }: PayloadAction<boolean>) => {
       return {
         ...state,
-        deleteDirection: payload,
+        isFetchingHotelRoomQuotations: payload,
       };
     },
   },
@@ -55,5 +55,5 @@ export const hotelRoomQuotationSlice = createSlice({
 export const {
   onSetHotelRoomQuotations,
   onSetHotelRoomQuotationsWithTotalCost,
-  onDeleteDirection,
+  onFetchHotelRoomQuotations,
 } = hotelRoomQuotationSlice.actions;

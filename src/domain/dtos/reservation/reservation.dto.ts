@@ -117,9 +117,3 @@ export const reservationDto = {
 
   getSchema: reservationDtoSchema,
 };
-
-
-console.log(generateEmptyObject<ReservationDto>(reservationDtoSchema, {
-  travelerStyle: TravelerStyle.COMFORT,
-  orderType: OrderType.DIRECT,
-  status: ReservationStatus.PENDING}))

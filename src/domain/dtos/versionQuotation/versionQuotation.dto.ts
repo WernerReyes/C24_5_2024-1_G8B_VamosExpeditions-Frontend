@@ -10,6 +10,7 @@ export type VersionQuotationDto = {
     readonly quotationId: number;
     readonly versionNumber: number;
   };
+  readonly name: string;
   readonly reservationId?: number;
   readonly status: VersionQuotationStatus;
   readonly official: boolean;
@@ -34,6 +35,7 @@ export const versionQuotationDto =  {
     parse: (entity: VersionQuotationEntity): VersionQuotationDto => {
       return {
         id: entity.id,
+        name: entity.name,
         status: entity.status,
         official: entity.official,
         reservationId: entity.reservation ? entity.reservation.id : undefined,
@@ -51,6 +53,7 @@ export const versionQuotationDtoSchema = z.object({
     quotationId: z.number(),
     versionNumber: z.number(),
   }),
+  name: z.string(),
   status: z.nativeEnum(VersionQuotationStatus),
   official: z.boolean(),
   indirectCostMargin: z.number().optional(),

@@ -9,6 +9,8 @@ import {
   type HotelRoomQuotationDto,
   type InsertManyhotelRoomQuotationsDto,
   insertManyhotelRoomQuotationsDto,
+  updateManyHotelRoomQuotationsByDateDto,
+  UpdateManyHotelRoomQuotationsByDateDto,
 } from "@/domain/dtos/hotelRoomQuotation";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
 import { onSetHotelRoomQuotations } from "../../slices/hotelRoomQuotation.slice";
@@ -106,6 +108,34 @@ export const hotelRoomQuotationService = createApi({
         }
       },
     }),
+
+    updateManyHotelRoomQuotationsByDate: builder.mutation<
+      ApiResponse<HotelRoomQuotationEntity[]>,
+      UpdateManyHotelRoomQuotationsByDateDto
+    >({
+      query: (params) => ({
+        url: "/many/date",
+        method: "PUT",
+        body: params,
+      }),
+      invalidatesTags: ["HotelRoomQuotations"],
+      async onQueryStarted(body, { dispatch, queryFulfilled }) {
+        try {
+          const [_, errors] =
+            updateManyHotelRoomQuotationsByDateDto.create(body);
+          if (errors) throw errors;
+          const { data } = await queryFulfilled;
+          data.data.forEach((hotelRoomQuotation) => {
+            dispatch(updateHotelRoomQuotationCache(hotelRoomQuotation));
+          });
+          // startShowSuccess(data.message);
+        } catch (error: any) {
+          startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
+
     deleteHotelRoomQuotation: builder.mutation<
       ApiResponse<HotelRoomQuotationEntity>,
       number
@@ -132,7 +162,7 @@ export const hotelRoomQuotationService = createApi({
       number[]
     >({
       query: (ids) => ({
-        url: "/many",
+        url: "/many/date",
         method: "DELETE",
         body: {
           ids,
@@ -148,9 +178,8 @@ export const hotelRoomQuotationService = createApi({
           data.data.forEach((hotelRoomQuotation) => {
             dispatch(deleteHotelRoomQuotationCache(hotelRoomQuotation));
           });
-          startShowSuccess(data.message);
+          // startShowSuccess(data.message);
         } catch (error: any) {
-          console.error(error);
           // startShowApiError(error.error);
           throw error;
         }
@@ -163,6 +192,7 @@ export const {
   useGetAllHotelRoomQuotationsQuery,
   useCreateHotelRoomQuotationMutation,
   useCreateManyHotelRoomQuotationsMutation,
+  useUpdateManyHotelRoomQuotationsByDateMutation,
   useDeleteHotelRoomQuotationMutation,
   useDeleteManyHotelRoomQuotationsMutation,
 } = hotelRoomQuotationService;

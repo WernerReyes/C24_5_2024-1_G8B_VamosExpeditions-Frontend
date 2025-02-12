@@ -5,32 +5,59 @@ import {
   type TabViewProps,
 } from "primereact/tabview";
 import { classNames } from "primereact/utils";
+import { useWindowSize } from "../hooks";
+import { classNamesAdapter } from "@/core/adapters";
 
 interface Props extends TabViewProps {
   tabPanelContent: TabPanelProps[];
+  loading?: boolean;
+  loadingTemplate?: React.ReactNode;
 }
 
 interface TabPanelProps extends TabPanelPropsPrimeReact {}
 
-export const TabView = ({ tabPanelContent, ...props }: Props) => {
+export const TabView = ({
+  tabPanelContent,
+  loading,
+  loadingTemplate,
+  ...props
+}: Props) => {
+  const { width, TABLET } = useWindowSize();
   return (
     <TabViewPrimeReact
       {...props}
       pt={{
         ...Tailwind,
+        panelContainer: {
+          className: classNamesAdapter("h-full", width < TABLET && "p-0"),
+        },
         nav: {
           className:
-            "flex justify-evenly list-none overflow-x-auto overflow-y-hidden border border-gray-300  border-0 border-b-2",
+            "flex justify-evenly list-none thin-scrollbar overflow-x-auto overflow-y-hidden border border-gray-300  border-0 border-b-2",
         },
+        inkbar: {
+          className: "border-transparent p-0 border-none hidden",
+        },
+        ...props.pt,
       }}
     >
       {tabPanelContent.map((tabPanel, index) => (
-        <TabPanelPrimeReact {...tabPanel} key={index} />
+        <TabPanelPrimeReact
+          key={index}
+          {...tabPanel}
+          pt={{
+            root: {
+              className: "h-full",
+            },
+
+            ...tabPanel.pt,
+          }}
+          children={loading ? loadingTemplate : tabPanel.children}
+        />
       ))}
     </TabViewPrimeReact>
   );
 };
-
 
 export const TabPanel = ({ children, ...props }: TabPanelProps) => {
   return <TabPanelPrimeReact {...props}>{children}</TabPanelPrimeReact>;
@@ -44,7 +71,7 @@ const Tailwind = {
         { "overflow-hidden": props.scrollable } // Overflow condition.
       ),
     }),
-    navContent: 
+    navContent:
       "overflow-y-hidden overscroll-container overscroll-auto scroll-smooth [&::-webkit-scrollbar]:hidden", // Overflow and scrollbar styles.
     previousButton: {
       className: classNames(
@@ -93,7 +120,7 @@ const Tailwind = {
       style: { marginBottom: "-2px" }, // Negative margin style.
     }),
     headerTitle: {
-      className: classNames("leading-none whitespace-nowrap"), // Leading and whitespace styles.
+      className: classNames("leading-none whitespace-nowrap max-sm:text-sm"), // Leading and whitespace styles.
     },
     content: {
       className: classNames(

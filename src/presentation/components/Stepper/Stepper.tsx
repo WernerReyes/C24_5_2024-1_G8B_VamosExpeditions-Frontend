@@ -13,7 +13,6 @@ import {
 import './Stepper.css';
 
 interface StepperProps extends StepperPropsPrimeReact {
-  includePanel?: boolean;
   panelContent?: StepperPanelProps[];
 }
 
@@ -22,11 +21,11 @@ interface StepperPanelProps extends StepperPanelPropsPrimeReact {
 }
 
 export const Stepper = forwardRef<StepperRefAttributes, StepperProps>(
-  ({ includePanel, panelContent, ...props }, ref) => {
+  ({ panelContent, ...props }, ref) => {
     return (
       <StepperPrimeReact ref={ref} {...props}>
-        {includePanel &&
-          panelContent?.map((panel, index) => (
+        {panelContent && panelContent.length > 0 &&
+          panelContent.map((panel, index) => (
             <StepperPanelPrimeReact {...panel} key={index} />
           ))}
       </StepperPrimeReact>

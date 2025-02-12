@@ -1,37 +1,44 @@
 import { AppState } from "@/app/store";
 import { constantRoutes, constantStorage } from "@/core/constants";
-import {
-  Button,
-  Column,
-  DataTable,
-  InputText,
-} from "@/presentation/components";
-import { Slider } from "primereact/slider";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { calculateCosts } from "../CostSummary/utils/calculateCosts";
+import { startShowSuccess } from "@/core/utils";
+import { quotationService } from "@/data";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+import { VersionQuotationStatus } from "@/domain/entities";
 import {
   onSetCurrentQuotation,
   onSetCurrentReservation,
   onSetCurrentStep,
   onSetCurrentVersionQuotation,
   onSetHotelRoomQuotationsWithTotalCost,
+  onSetProfitPercentage,
   onSetReservations,
+  onSetSelectedClient,
   onSetSelectedDay,
 } from "@/infraestructure/store";
+import { useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
+import {
+  Button,
+  Column,
+  Confetti,
+  DataTable,
+  Dialog,
+  InputText,
+} from "@/presentation/components";
 import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "primereact/row";
-import { useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
-import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
-import { VersionQuotationStatus } from "@/domain/entities";
-import { startShowSuccess } from "@/core/utils";
+import { Slider } from "primereact/slider";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { quotationService } from "@/data";
+import { calculateCosts } from "../CostSummary/utils/calculateCosts";
+import { useWindowSize } from "@/presentation/hooks";
+import { QuotationSuccessDialog } from "./components";
 
 const {
   INDIRECT_COSTS_PERCENTAGE,
   CURRENT_ACTIVE_STEP,
   ITINERARY_CURRENT_SELECTED_DAY,
+  PROFIT_MARGIN,
 } = constantStorage;
 
 const { QUOTES } = constantRoutes.private;
@@ -39,6 +46,11 @@ const { QUOTES } = constantRoutes.private;
 export const GenerateModule = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { width, TABLET } = useWindowSize();
+  const { indirectCostPercentage, profitPercentage } = useSelector(
+    (state: AppState) => state.quotation
+  );
+
   const { currentVersionQuotation } = useSelector(
     (state: AppState) => state.versionQuotation
   );
@@ -47,36 +59,26 @@ export const GenerateModule = () => {
   );
 
   const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
-  const [margin, setMargin] = useState<number>(80);
-  const [value] = useState<number>(
-    localStorage.getItem(INDIRECT_COSTS_PERCENTAGE)
-      ? Number(localStorage.getItem(INDIRECT_COSTS_PERCENTAGE))
-      : 5
-  );
+
   const [finalPrice, setFinalPrice] = useState<number>(0);
+  const [isExploding, setIsExploding] = useState(false);
 
   const handleSaveQuotation = () => {
-    console.log({
-        ...currentVersionQuotation,
-        finalPrice,
-        indirectCostMargin: value,
-        profitMargin: margin,
-        status: VersionQuotationStatus.DRAFT,
-    })
     updateVersionQuotation(
       versionQuotationDto.parse({
         ...currentVersionQuotation!,
         finalPrice,
-        indirectCostMargin: value,
-        profitMargin: margin,
+        indirectCostMargin: indirectCostPercentage,
+        profitMargin: profitPercentage,
         status: VersionQuotationStatus.DRAFT,
       })
     ).then(async () => {
-    //   navigate(QUOTES);
+      //   navigate(QUOTES);
       await quotationService.deleteCurrentQuotation();
       dispatch(onSetCurrentQuotation(null));
       dispatch(onSetHotelRoomQuotationsWithTotalCost([]));
       dispatch(onSetReservations([]));
+      dispatch(onSetSelectedClient(null));
       dispatch(onSetCurrentReservation(null));
       dispatch(onSetCurrentVersionQuotation(null));
       dispatch(onSetCurrentStep(0));
@@ -84,15 +86,12 @@ export const GenerateModule = () => {
       localStorage.removeItem(INDIRECT_COSTS_PERCENTAGE);
       localStorage.removeItem(CURRENT_ACTIVE_STEP);
       localStorage.removeItem(ITINERARY_CURRENT_SELECTED_DAY);
+      localStorage.removeItem(PROFIT_MARGIN);
       dispatch(onSetCurrentQuotation(null));
       startShowSuccess("Cotización guardada correctamente");
 
-    //   //   navigate(QUOTES);
-
-    //   // dispatch(onSetCurrentReservation(reservation));
+      
     });
-
-    // dispatch(onSaveQuotation());
   };
 
   useEffect(() => {
@@ -110,7 +109,7 @@ export const GenerateModule = () => {
 
       const calculateCostsPerService = calculateCosts(
         hotelRoomQuotations,
-        value
+        indirectCostPercentage
       );
 
       dispatch(
@@ -142,105 +141,164 @@ export const GenerateModule = () => {
       hotelRoomQuotationsWithTotalCost.reduce((acc, quote) => {
         return (
           acc +
-          parseFloat((quote.totalCost / (margin / 100)).toFixed(2)) *
+          parseFloat((quote.totalCost / (profitPercentage / 100)).toFixed(2)) *
             quote.numberOfPeople
         );
       }, 0)
     );
-  }, [hotelRoomQuotations, value, hotelRoomQuotationsWithTotalCost]);
+  }, [
+    hotelRoomQuotations,
+    indirectCostPercentage,
+    hotelRoomQuotationsWithTotalCost,
+  ]);
 
   useEffect(() => {
     setFinalPrice(
       hotelRoomQuotationsWithTotalCost.reduce((acc, quote) => {
         return (
           acc +
-          parseFloat((quote.totalCost / (margin / 100)).toFixed(2)) *
+          parseFloat((quote.totalCost / (profitPercentage / 100)).toFixed(2)) *
             quote.numberOfPeople
         );
       }, 0)
     );
-  }, [finalPrice, value, hotelRoomQuotationsWithTotalCost]);
+  }, [finalPrice, indirectCostPercentage, hotelRoomQuotationsWithTotalCost]);
 
   return (
     <>
+      {isExploding && <Confetti />}
+
+      <QuotationSuccessDialog visible={isExploding} setVisible={setIsExploding} />
+
       {/* Control de margen */}
-      <h3 className="text-lg font-bold mb-4">Cálculo de margen</h3>
-      <div className="max-w-64 mx-auto mb-4">
+      <div className="w-full sm:max-w-64 2xl:max-w-96 mx-auto mb-4">
         <InputText
-          value={margin.toString() + "%"}
-          // onChange={(e) => setMargin(+e.target.value)}
+          label={{
+            text: "Margen de Utilidad",
+            className: "text-primary text-sm font-semibold",
+          }}
+          value={profitPercentage.toString() + "%"}
           disabled
           className="w-full"
         />
         <Slider
-          value={margin}
-          onChange={(e) => setMargin(+e.value)}
+          value={profitPercentage}
+          onChange={(e) => dispatch(onSetProfitPercentage(e.value as number))}
           className="w-full"
         />
       </div>
 
-      <DataTable
+      {/* <DataTable
+        header="Cotización final"
         value={hotelRoomQuotationsWithTotalCost}
-        className="w-full text-left border-collapse mb-5"
+        className="w-full border-collapse mb-5 font-bold"
         footerColumnGroup={
           <ColumnGroup>
             <Row>
               <Column
                 footer={
-                  <div className="text-white text-lg">
-                    <i className="pi pi-money-bill mx-3"></i>
-                    <span>Total:</span>
+                  <div className="text-white flex items-center md:text-lg">
+                    <i className="pi pi-money-bill me-3"></i>
+                    <span>
+                      Total:
+                      {width < TABLET && (
+                        <strong className="ms-2">
+                          ${finalPrice.toFixed(2)}
+                        </strong>
+                      )}
+                    </span>
                   </div>
                 }
-                colSpan={5}
+                colSpan={width > TABLET ? 5 : 6}
                 className="bg-primary text-white"
-                footerStyle={{ textAlign: "right" }}
+                footerStyle={{ textAlign: width > TABLET ? "right" : "left" }}
               />
-              <Column
-                className="bg-primary p-0 text-white text-lg"
-                footer={<span>$ {finalPrice}</span>}
-              />
+              {width > TABLET && (
+                <Column
+                  align={"center"}
+                  className="bg-primary p-0 text-white text-lg"
+                  footer={<span>$ {finalPrice.toFixed(2)}</span>}
+                />
+              )}
             </Row>
           </ColumnGroup>
         }
       >
-        <Column field="hotelRoom.hotel.name" header="Hotel" />
         <Column
+          alignHeader={"center"}
+          headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
+          header="Hotel"
+          className="max-sm:text-xs max-md:text-sm text-center min-w-48"
+          field="hotelRoom.hotel.name"
+          body={(rowData) => (
+            <>
+              {rowData.hotelRoom?.hotel?.name}-{rowData.hotelRoom?.roomType}
+            </>
+          )}
+        />
+        <Column
+          alignHeader={"center"}
+          align={"center"}
+          headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
+          className="max-sm:text-xs max-md:text-sm"
           field="totalCost"
           header="Total de Costos"
-          body={(rowData) => <>${rowData.totalCost}</>}
+          body={(rowData) => <>${rowData.totalCost.toFixed(2)}</>}
         />
-        <Column header="Margen" body={<span>{margin}%</span>} />
-        <Column field="numberOfPeople" header="Number de personas" />
         <Column
+          alignHeader={"center"}
+          align={"center"}
+          headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
+          className="max-sm:text-xs max-md:text-sm"
+          header="Margen"
+          body={<span>{profitPercentage}%</span>}
+        />
+        <Column
+          alignHeader={"center"}
+          align={"center"}
+          headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
+          className="max-sm:text-xs max-md:text-sm w-20"
+          field="numberOfPeople"
+          header="Número de personas"
+        />
+        <Column
+          alignHeader={"center"}
+          align={"center"}
+          headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
+          className="max-sm:text-xs max-md:text-sm"
           header="Utilidad"
           body={(rowData) => (
             <span>
               $
               {(
-                parseFloat((rowData.totalCost / (margin / 100)).toFixed(2)) -
-                rowData.totalCost
+                parseFloat(
+                  (rowData.totalCost / (profitPercentage / 100)).toFixed(2)
+                ) - rowData.totalCost
               ).toFixed(2)}
             </span>
           )}
         />
         <Column
+          alignHeader={"center"}
+          align={"center"}
+          headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
+          className="max-sm:text-xs max-md:text-sm"
           header="Precio venta"
           body={(rowData) => {
             const calculatedSalesPrice = parseFloat(
-              (rowData.totalCost / (margin / 100)).toFixed(2)
+              (rowData.totalCost / (profitPercentage / 100)).toFixed(2)
             );
 
             return <span>${calculatedSalesPrice}</span>;
           }}
         />
-      </DataTable>
+      </DataTable> */}
 
       <div className="flex justify-end">
         <Button
           icon="pi pi-file-check"
-          label="Generar Cotización"
-          onClick={() => handleSaveQuotation()}
+          label="Completar cotización"
+          onClick={() => setIsExploding(true)}
         />
       </div>
     </>

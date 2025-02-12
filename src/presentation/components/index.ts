@@ -6,6 +6,7 @@ export * from "./Calendar/Calendar";
 export * from "./Card";
 export * from "./Checkbox";
 export * from "./Column";
+export * from "./Confetti";
 export * from "./ContextMenu";
 export * from "./ConfirmDialog";
 export * from "./DataTable";

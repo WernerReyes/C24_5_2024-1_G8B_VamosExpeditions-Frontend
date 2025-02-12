@@ -1,1 +1,1 @@
-export * from './DaysNumberToAddRoom';
+export * from './DaysNumberToAddRoom/DaysNumberToAddRoom';

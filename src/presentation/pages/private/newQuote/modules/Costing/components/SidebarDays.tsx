@@ -4,7 +4,9 @@ import type { AppState } from "@/app/store";
 import { classNamesAdapter } from "@/core/adapters";
 import { reservationDto } from "@/domain/dtos/reservation";
 import { type Day, onSetDays, onSetSelectedDay } from "@/infraestructure/store";
-import { useUpsertReservationMutation } from "@/infraestructure/store/services";
+import {
+  useUpsertReservationMutation,
+} from "@/infraestructure/store/services";
 import {
   Button,
   Skeleton,
@@ -29,7 +31,11 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
     (state: AppState) => state.reservation
   );
 
+  const { isFetchingHotelRoomQuotations
+   } = useSelector((state: AppState) => state.hotelRoomQuotation);
+
   const [upsertReservation] = useUpsertReservationMutation();
+  
   const [contentLoading, setContentLoading] = useState<boolean>(true);
   const [[startDate, endDate], setDaysRange] = useState<
     [Date | null, Date | null]
@@ -199,7 +205,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
       //* Adjust the remaining dates
       if (selectedDayIndex !== newDays.length) {
         for (let i = selectedDayIndex; i < newDays.length; i++) {
-          let previousDate = newDays[i].date
+          let previousDate = newDays[i].date;
           previousDate.setDate(previousDate.getDate() - 1);
 
           newDays[i] = {
@@ -208,7 +214,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
             name: `Día ${i + 1}`,
             number: i + 1,
             date: previousDate,
-          formattedDate: previousDate.toLocaleDateString("es-ES", {
+            formattedDate: previousDate.toLocaleDateString("es-ES", {
               weekday: "long",
               day: "numeric",
               month: "long",
@@ -221,21 +227,14 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
       //* Update the rest of the days' dates in the reservation
       handleUpdateReservation(
         startDate!,
-        
-          newDays[newDays.length - 1].date,
-         
-        
+
+        newDays[newDays.length - 1].date
       );
     }
 
     //* Update reservation travel dates
     if (newDays.length > 0) {
-      setLastItineraryDate(
-       
-          newDays[newDays.length - 1].date,
-          
-        
-      );
+      setLastItineraryDate(newDays[newDays.length - 1].date);
     }
 
     //* Update the selected day
@@ -262,6 +261,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
     setIsDayDeleted(false);
   }, [isDayDeleted]);
 
+  
   return (
     <>
       {width > MACBOOK ? (
@@ -270,7 +270,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
             ref={scrollContainerRef}
             className="thin-scrollbar max-h-screen space-y-2 overflow-y-auto"
           >
-            {contentLoading &&
+            {(contentLoading || isFetchingHotelRoomQuotations) &&
               Array.from({ length: 5 }).map((_, index) => (
                 <li
                   key={index}
@@ -306,7 +306,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
                 </li>
               ))}
 
-            {!contentLoading &&
+            {(!contentLoading || !isFetchingHotelRoomQuotations) &&
               generatedDays?.map((day, index) => (
                 <li
                   key={day.id}

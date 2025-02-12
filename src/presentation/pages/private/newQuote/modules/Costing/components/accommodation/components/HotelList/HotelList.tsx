@@ -151,7 +151,7 @@ export const HotelList = ({ visible, setVisible }: Props) => {
           listTemplate={(hotels: HotelEntity[]) => (
             <div
               className={classNamesAdapter(
-                "grid gap-6 items-start mt-10",
+                "grid grid-cols-1 gap-6 items-start mt-3",
                 dialogMaximized ? "md:grid-cols-3" : "md:grid-cols-2"
               )}
             >
@@ -165,7 +165,13 @@ export const HotelList = ({ visible, setVisible }: Props) => {
             </div>
           )}
           paginator
-          rows={3}
+          paginatorClassName=""
+          paginatorPosition="both"
+          paginatorTemplate={
+            "FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+          }
+          rowsPerPageOptions={[5, 10, 15]}
+          rows={5}
         />
       </div>
     </Dialog>

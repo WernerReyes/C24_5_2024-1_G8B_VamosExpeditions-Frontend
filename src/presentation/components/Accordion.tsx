@@ -14,20 +14,22 @@ interface AccordionTabProps extends AccordionTabPropsPrimeReact {
 }
 
 interface AccordionProps extends AccordionPropsPrimeReact {
-  includeTab?: boolean;
   tabContent?: AccordionTabProps[];
 }
 
 export const Accordion = ({
-  includeTab,
   tabContent = [],
   ...rest
 }: AccordionProps) => {
   return (
     <AccordionPrimeReact {...rest}>
-      {includeTab &&
+      {tabContent.length > 0 &&
         tabContent.map((tab, index) => (
-          <AccordionTabPrimeReact {...tab} key={index}  />
+          <AccordionTabPrimeReact {...tab} key={index} pt={{
+            headerTitle: {
+              className: "max-sm:text-sm",
+            }
+          }}  />
         ))}
     </AccordionPrimeReact>
   );

@@ -32,7 +32,6 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   const [selectedRoom, setSelectedRoom] = useState<HotelRoomEntity | null>();
   const [peopleAmount, setPeopleAmount] = useState<number>(0);
   const [rangeState, setRangeState] = useState<[number, number]>([1, 1]);
-  // const [rangeDate, setRangeDate] = useState<[Date, Date]>([]);
   const [confirm, setConfirm] = useState(false);
 
   const handleTabChange = (e: AccordionTabChangeEvent) => {
@@ -79,10 +78,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
     const startDate = days[rangeState[0] - 1];
     const endDate = days[rangeState[1] - 1] ?? days[rangeState[0] - 1];
     // console.log(startDate, endDate);
-    return [
-      startDate.date,
-      endDate.date
-    ];
+    return [startDate.date, endDate.date];
   }, [days, rangeState]);
 
   useEffect(() => {
@@ -95,12 +91,12 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
       {/* Hotel Details */}
       <div className="flex items-center justify-between gap-4">
         <header>
-          <h5 className="text-2xl font-bold text-gray-900">{hotel.name}</h5>
+          <h5 className="text-lg md:text-2xl font-bold text-gray-900">{hotel.name}</h5>
           <p className="text-sm text-gray-600">{hotel.address}</p>
           <p className="text-sm text-gray-600">{hotel.email}</p>
           <div className="flex items-center gap-2 mt-2">
             <i className="pi pi-star-fill text-yellow-500"></i>
-            <span className="text-lg font-medium text-gray-800">
+            <span className="text-sm md:text-lg font-medium text-gray-800">
               {hotel.category}
             </span>
           </div>
@@ -146,7 +142,6 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
         )}
 
         <Accordion
-          includeTab
           className="mt-5"
           activeIndex={activeRoom}
           onTabClose={handleTabChange}
@@ -172,7 +167,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
               </div>
             ),
             children: (
-              <div className="mt-3">
+              <div className="max-md:text-sm">
                 <div className="flex items-center">
                   <span className="font-medium text-gray-700">
                     Capacidad para hasta{" "}

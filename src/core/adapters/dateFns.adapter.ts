@@ -1,4 +1,4 @@
-import { parseISO, format, parse, isSameDay } from "date-fns";
+import { parseISO, format, parse, isSameDay, isWithinInterval } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale/es";
 
@@ -35,5 +35,9 @@ export const dateFnsAdapter = {
 
   isSameDay(date1: Date, date2: Date): boolean {
     return isSameDay(date1, date2);
-  }
+  },
+
+  isWithinInterval(date: Date, startDate: Date, endDate: Date): boolean {
+    return isWithinInterval(date, { start: startDate, end: endDate });
+  },
 };
