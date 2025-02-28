@@ -29,7 +29,7 @@ import { getCountryPhoneMask } from "../../utils";
 import { SUBREGIONS } from "@/presentation/types";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
-import { onSetSincronizedCurrentReservationByClient } from "@/infraestructure/store";
+import { onSetSincronizedCurrentTripDetailsByClient } from "@/infraestructure/store";
 
 const OPERATIONS = [
   {
@@ -58,8 +58,8 @@ export const ClientForm = () => {
   });
   const { selectedClient } = useSelector((state: AppState) => state.client);
 
-  const { currentReservation } = useSelector(
-    (state: AppState) => state.reservation
+  const { currentTripDetails } = useSelector(
+    (state: AppState) => state.tripDetails
   );
 
   const [upsertClient, { isLoading: isUpsertingClient }] =
@@ -86,7 +86,7 @@ export const ClientForm = () => {
 
     if (op === OPERATIONS[1] && selectedClient) {
       const country = externalCountries?.data.find(
-        (country) => country.name === selectedClient.country
+        (country) => country.name === selectedClient.country.name
       );
       reset(clientDto.parse(selectedClient));
       setSelectedCountry(country);
@@ -107,8 +107,8 @@ export const ClientForm = () => {
       .then(({ data }) => {
         if (currentOp === OPERATIONS[1]) {
           dispatch(
-            onSetSincronizedCurrentReservationByClient({
-              ...currentReservation!,
+            onSetSincronizedCurrentTripDetailsByClient({
+              ...currentTripDetails!,
               client: data,
             })
           );
@@ -132,7 +132,7 @@ export const ClientForm = () => {
   useEffect(() => {
     if (selectedClient) {
       const country = externalCountries?.data.find(
-        (country) => country.name === selectedClient.country
+        (country) => country.name === selectedClient.country.name
       );
       reset(clientDto.parse(selectedClient));
       setSelectedCountry(country);

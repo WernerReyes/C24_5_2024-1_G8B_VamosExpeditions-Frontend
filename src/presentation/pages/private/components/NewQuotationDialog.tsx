@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import type { AppState } from "@/app/store";
 import { constantRoutes } from "@/core/constants";
-import { quotationService } from "@/data";
 import {
-  onSetCurrentQuotation,
   onSetCurrentStep,
+  onSetOperationType,
 } from "@/infraestructure/store";
 import { useCreateQuotationMutation } from "@/infraestructure/store/services";
 import { Button, ConfirmDialog } from "@/presentation/components";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useCleanStore } from "@/infraestructure/hooks";
 
 const { NEW_QUOTE } = constantRoutes.private;
 
@@ -24,20 +24,28 @@ export const NewQuotationDialog = ({ children }: Props) => {
     (state: AppState) => state.quotation
   );
   const [createQuotation] = useCreateQuotationMutation();
+  const { cleanGenerateNewQuotation, cleanChangeEditQuotation, cleanChangeNewQuotation } =
+    useCleanStore();
   const [visible, setVisible] = useState(false);
 
   const handleAccept = async () => {
-    setVisible(false);
-    await quotationService.deleteCurrentQuotation();
-    dispatch(onSetCurrentQuotation(null));
-    dispatch(onSetCurrentStep(0));
-    await createQuotation();
-    navigate(NEW_QUOTE);
+    cleanGenerateNewQuotation();
+    await createQuotation()
+      .unwrap()
+      .then(() => {
+        dispatch(onSetOperationType("replace"));
+
+        dispatch(onSetCurrentStep(0));
+        navigate(NEW_QUOTE);
+        setVisible(false);
+      });
   };
 
   const handleReject = () => {
+    cleanChangeEditQuotation();
     setVisible(false);
     navigate(NEW_QUOTE);
+    dispatch(onSetOperationType("create"));
   };
 
   return (
@@ -60,6 +68,7 @@ export const NewQuotationDialog = ({ children }: Props) => {
             if (currentQuotation) {
               setVisible(true);
             } else {
+              cleanChangeNewQuotation();
               await createQuotation().then(() => {
                 navigate(NEW_QUOTE);
               });
@@ -70,10 +79,11 @@ export const NewQuotationDialog = ({ children }: Props) => {
         <Button
           label="Nueva cotización"
           icon="pi pi-plus-circle"
-          onClick={async() => {
+          onClick={async () => {
             if (currentQuotation) {
               setVisible(true);
             } else {
+              cleanChangeNewQuotation();
               await createQuotation().then(() => {
                 navigate(NEW_QUOTE);
               });

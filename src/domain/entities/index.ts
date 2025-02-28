@@ -8,6 +8,7 @@ export * from './hotelRoom.entity';
 export * from './client.entity';
 export * from './reservation.entity';
 export * from './hotel.entity';
+export * from './tripDetails.entity';
 export * from './quotation.entity'
 export * from './versionQuotation.entity'
-export * from './hotelRoomQuotation.entity'
+export * from './hotelRoomTripDetails.entity'

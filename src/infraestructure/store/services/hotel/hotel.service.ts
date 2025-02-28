@@ -40,4 +40,4 @@ export const hotelService = createApi({
   }),
 });
 
-export const { useLazyGetHotelsQuery, useGetHotelsQuery,useGetHotelPdfQuery } = hotelService;
+export const { useLazyGetHotelsQuery, useGetHotelsQuery } = hotelService;

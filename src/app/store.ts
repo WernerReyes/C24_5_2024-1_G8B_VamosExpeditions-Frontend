@@ -1,21 +1,21 @@
 import { configureStore } from "@reduxjs/toolkit";
 import {
   authService,
-  quoteService,
   externalCountryService,
   clientService,
   countryService,
   hotelService,
   quotationServiceStore,
   versionQuotationService,
-  hotelRoomQuotationService,
+  hotelRoomTripDetailsService,
   reservationServiceStore,
   reportService,
+  tripDetailsServiceStore,
+  userService,
 } from "@/infraestructure/store/services";
 
 import {
   authSlice,
-  quoteSlice,
   quotationSlice,
   clientSlice,
   countrySlice,
@@ -23,29 +23,31 @@ import {
   reservationSlice,
   hotelSlice,
   versionquotationSlice,
-  hotelRoomQuotationSlice,
+  hotelRoomTripDetailsSlice,
+  tripDetailsSlice,
 } from "@/infraestructure/store";
 
 export const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
-    quote: quoteSlice.reducer,
     hotel: hotelSlice.reducer,
     quotation: quotationSlice.reducer,
     versionQuotation: versionquotationSlice.reducer,
-    hotelRoomQuotation: hotelRoomQuotationSlice.reducer,
+    hotelRoomTripDetails: hotelRoomTripDetailsSlice.reducer,
     client: clientSlice.reducer,
     country: countrySlice.reducer,
     reservation: reservationSlice.reducer,
+    tripDetails: tripDetailsSlice.reducer,
     cookieExpiration: cookieExpirationSlice.reducer,
-    [quoteService.reducerPath]: quoteService.reducer,
+    [tripDetailsServiceStore.reducerPath]: tripDetailsServiceStore.reducer,
     [authService.reducerPath]: authService.reducer,
+    [userService.reducerPath]: userService.reducer,
     [countryService.reducerPath]: countryService.reducer,
     [clientService.reducerPath]: clientService.reducer,
     [hotelService.reducerPath]: hotelService.reducer,
     [quotationServiceStore.reducerPath]: quotationServiceStore.reducer,
     [versionQuotationService.reducerPath]: versionQuotationService.reducer,
-    [hotelRoomQuotationService.reducerPath]: hotelRoomQuotationService.reducer,
+    [hotelRoomTripDetailsService.reducerPath]: hotelRoomTripDetailsService.reducer,
     [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
     [reportService.reducerPath]: reportService.reducer,
@@ -54,15 +56,16 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: false,
     })
-      .concat(quoteService.middleware)
       .concat(authService.middleware)
+      .concat(userService.middleware)
       .concat(countryService.middleware)
       .concat(clientService.middleware)
       .concat(hotelService.middleware)
       .concat(reservationServiceStore.middleware)
+      .concat(tripDetailsServiceStore.middleware)
       .concat(quotationServiceStore.middleware)
       .concat(versionQuotationService.middleware)
-      .concat(hotelRoomQuotationService.middleware)
+      .concat(hotelRoomTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
       .concat(reportService.middleware),
 });

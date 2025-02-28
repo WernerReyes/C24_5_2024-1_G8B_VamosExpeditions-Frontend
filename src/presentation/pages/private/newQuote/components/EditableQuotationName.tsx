@@ -17,9 +17,11 @@ export const EditableQuotationName = () => {
   const [name, setName] = useState("");
 
   const handleSave = async () => {
-    await updateVersionQuotation(
-      versionQuotationDto.parse({ ...currentVersionQuotation!, name })
-    );
+    if (name && name.trim().toUpperCase() !== currentVersionQuotation?.name) {
+      await updateVersionQuotation(
+        versionQuotationDto.parse({ ...currentVersionQuotation!, name })
+      );
+    }
 
     setIsEditing(false);
   };
@@ -34,7 +36,7 @@ export const EditableQuotationName = () => {
   }, [currentVersionQuotation]);
 
   return (
-    <div className="flex items-center mx-auto max-sm:ml-8 p-4 justify-center text-2xl rounded-lg shadow-sm border border-gray-100 mb-6">
+    <div className="flex items-center mx-auto max-sm:ml-8 p-4 justify-center text-2xl rounded-lg">
       <div className="flex items-center gap-3">
         {isEditing ? (
           <div className="flex justify-center items-center gap-2">

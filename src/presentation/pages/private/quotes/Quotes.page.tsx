@@ -4,8 +4,8 @@ import { NewQuotationDialog } from "../components";
 
 const QuotesPage = () => {
   return (
-    // <MainLayout>
-      <div className="bg-white p-10 rounded-lg shadow-md">
+   
+      <div className="bg-white p-10 rounded-lg shadow-md overflow-x-hidden">
         <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
           <Button
             label="Exportar"

@@ -57,7 +57,7 @@ export const clientDto = {
       fullName: entity.fullName,
       email: entity.email,
       phone: entity.phone,
-      country: entity.country,
+      country: entity.country.name,
       subregion: entity.subregion,
       id: entity.id,
     };

@@ -1,8 +1,10 @@
 import { constantRoutes } from "@/core/constants";
 import { RoleEnum } from "@/domain/entities";
 import { lazy } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route } from "react-router-dom";
 import { NewQuotationGuard, RoleGuard } from "../guards";
+import { RouterWithNotFound } from "./RouterWithNotFound";
+import { removeBaseRoute } from "@/core/utils";
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
 
@@ -18,15 +20,15 @@ const ReservationsPage = lazy(
   () => import("../pages/private/reservations/Reservations.page")
 );
 
+const { BASE } = constantRoutes.private;
 
-
-const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
+const { DASHBOARD, QUOTES, NEW_QUOTE, EDIT_QUOTE, RESERVATIONS } =
+  removeBaseRoute(constantRoutes.private, BASE);
 
 const PrivateRoutes = () => {
   return (
     <MainLayout>
-      <Routes>
-        <Route path={"/"} element={<Navigate to={DASHBOARD} />} />
+      <RouterWithNotFound>
         <Route
           element={
             <RoleGuard
@@ -40,12 +42,16 @@ const PrivateRoutes = () => {
           <Route element={<NewQuotationGuard />}>
             <Route path={NEW_QUOTE} element={<NewQuotePage />} />
           </Route>
+          <Route
+            path={EDIT_QUOTE + "/:quoteId/:version"}
+            element={<NewQuotePage />}
+          />
 
           <Route path={RESERVATIONS} element={<ReservationsPage />} />
 
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* <Route path="*" element={<Navigate to="/" />} /> */}
         </Route>
-      </Routes>
+      </RouterWithNotFound>
     </MainLayout>
   );
 };

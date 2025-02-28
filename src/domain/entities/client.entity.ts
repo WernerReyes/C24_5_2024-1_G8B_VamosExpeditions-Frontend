@@ -7,10 +7,18 @@ export const clientEntitySchema = z.object({
   fullName: z.string(),
   email: z.string(),
   phone: z.string(),
-  country: z.string(),
+  country: z.object({
+    name: z.string(),
+    image: z.object({
+      png: z.string(),
+      svg: z.string(),
+    }),
+  }),
   subregion: z.string().refine((value): value is Subregion => {
     return SUBREGIONS.includes(value);
   }),
+  cretedAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export type ClientEntity = z.infer<typeof clientEntitySchema>;

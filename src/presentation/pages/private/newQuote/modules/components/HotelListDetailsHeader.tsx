@@ -1,13 +1,42 @@
-import { HotelRoomQuotationEntity } from "@/domain/entities";
-import { useDeleteHotelRoomQuotationMutation } from "@/infraestructure/store/services";
+import type { AppState } from "@/app/store";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+import { HotelRoomTripDetailsEntity, VersionQuotationStatus } from "@/domain/entities";
+import { useDeleteHotelRoomTripDetailsMutation, useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
 import { Button, Tag } from "@/presentation/components";
+import { useSelector } from "react-redux";
 
 type Props = {
-    quote: HotelRoomQuotationEntity;
-}
+  quote: HotelRoomTripDetailsEntity;
+};
 
 export const HotelListDetailsHeader = ({ quote }: Props) => {
-    const [deleteHotelRoomQuotation] = useDeleteHotelRoomQuotationMutation();
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+  const { hotelRoomTripDetails } = useSelector(
+    (state: AppState) => state.hotelRoomTripDetails
+  );
+  const [deleteHotelRoomTripDetails] = useDeleteHotelRoomTripDetailsMutation();
+  const [
+    updateVersionQuotation,
+  ] = useUpdateVersionQuotationMutation();
+
+  const handleDelete = () => {
+    deleteHotelRoomTripDetails(quote.id).then(({ data }) => {
+       const restHotelRooms = hotelRoomTripDetails.filter((hotel) => hotel.id !== data!.data.id)
+       if (restHotelRooms.length === 0) {
+          updateVersionQuotation(versionQuotationDto.parse({
+            ...currentVersionQuotation!,
+            status: VersionQuotationStatus.DRAFT,
+            finalPrice: undefined,
+            profitMargin: undefined,
+            indirectCostMargin: undefined,
+            completionPercentage: 25,
+          }));
+        }     
+    });
+  };
+
   return (
     <div className="bg-primary text-white p-4 items-center justify-between">
       <div className="flex items-center justify-between">
@@ -15,10 +44,7 @@ export const HotelListDetailsHeader = ({ quote }: Props) => {
           value="hotel"
           className="bg-white text-primary rounded-lg px-5 py-0"
         />
-        <Button
-          icon="pi pi-trash"
-          onClick={() => deleteHotelRoomQuotation(quote.id)}
-        />
+        <Button icon="pi pi-trash" onClick={handleDelete} />
       </div>
       <div className="flex items-center justify-between">
         <div className="flex gap-2">

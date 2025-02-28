@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import type { HotelEntity, HotelRoomEntity } from "@/domain/entities";
+import { VersionQuotationStatus, type HotelEntity, type HotelRoomEntity } from "@/domain/entities";
 import type { AppState } from "@/app/store";
-import { useCreateManyHotelRoomQuotationsMutation } from "@/infraestructure/store/services";
+import {
+  useCreateManyHotelRoomTripDetailsMutation,
+  useUpdateVersionQuotationMutation,
+} from "@/infraestructure/store/services";
 import {
   Accordion,
   type AccordionTabChangeEvent,
@@ -14,6 +17,7 @@ import {
 import { classNamesAdapter } from "@/core/adapters";
 import { DaysNumberToAddRoom } from "./components";
 import { getHotelRoomRenderProperties } from "./utils";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 
 type Props = {
   hotel: HotelEntity;
@@ -22,11 +26,23 @@ type Props = {
 
 export const HotelContent = ({ hotel, setVisible }: Props) => {
   const { days } = useSelector((state: AppState) => state.quotation);
+
   const { currentVersionQuotation } = useSelector(
     (state: AppState) => state.versionQuotation
   );
-  const [createManyHotelRoomQuotations] =
-    useCreateManyHotelRoomQuotationsMutation();
+
+  const { currentTripDetails } = useSelector(
+    (state: AppState) => state.tripDetails
+  );
+
+  const { hotelRoomTripDetails } = useSelector(
+    (state: AppState) => state.hotelRoomTripDetails
+  );
+
+  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
+
+  const [createManyHotelRoomTripDetails] =
+    useCreateManyHotelRoomTripDetailsMutation();
 
   const [activeRoom, setActiveRoom] = useState<number>();
   const [selectedRoom, setSelectedRoom] = useState<HotelRoomEntity | null>();
@@ -47,8 +63,8 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   };
 
   const handleAddHotelRoomQuotation = async () => {
-    await createManyHotelRoomQuotations({
-      versionQuotationId: currentVersionQuotation!.id,
+    await createManyHotelRoomTripDetails({
+      tripDetailsId: currentTripDetails!.id,
       dateRange: dateRange,
       hotelRoomId: selectedRoom!.id,
       numberOfPeople: peopleAmount,
@@ -57,6 +73,19 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
       .then(() => {
         setVisible(false);
         setConfirm(false);
+        if (hotelRoomTripDetails.length === 0 && currentVersionQuotation) {
+          console.log("updateVersionQuotation");
+          updateVersionQuotation(
+            versionQuotationDto.parse({
+              ...currentVersionQuotation,
+              status: VersionQuotationStatus.DRAFT,
+              finalPrice: undefined,
+            profitMargin: undefined,
+            indirectCostMargin: undefined,
+              completionPercentage: 50,
+            })
+          );
+        }
       })
       .catch(() => {
         setConfirm(false);
@@ -91,7 +120,9 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
       {/* Hotel Details */}
       <div className="flex items-center justify-between gap-4">
         <header>
-          <h5 className="text-lg md:text-2xl font-bold text-gray-900">{hotel.name}</h5>
+          <h5 className="text-lg md:text-2xl font-bold text-gray-900">
+            {hotel.name}
+          </h5>
           <p className="text-sm text-gray-600">{hotel.address}</p>
           <p className="text-sm text-gray-600">{hotel.email}</p>
           <div className="flex items-center gap-2 mt-2">

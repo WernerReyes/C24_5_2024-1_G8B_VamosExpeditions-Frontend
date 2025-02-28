@@ -1,16 +1,17 @@
 import {
   Column as ColumnPrimeReact,
-  type ColumnProps,
+  type ColumnProps as ColumnPropsPrimeReact,
   type ColumnFilterApplyTemplateOptions,
   type ColumnFilterClearTemplateOptions,
   type ColumnFilterElementTemplateOptions,
   type ColumnFilterMetaDataWithConstraint,
   type ColumnFilterMatchModeOptions,
+  type ColumnEditorOptions,
 } from "primereact/column";
 
-interface Props extends ColumnProps {}
+export interface ColumnProps extends ColumnPropsPrimeReact {}
 
-export const Column = (props: Props) => {
+export const Column = (props: ColumnProps) => {
   return <ColumnPrimeReact {...props} />;
 };
 
@@ -20,4 +21,5 @@ export type {
   ColumnFilterElementTemplateOptions,
   ColumnFilterMetaDataWithConstraint,
   ColumnFilterMatchModeOptions,
+  ColumnEditorOptions,
 };

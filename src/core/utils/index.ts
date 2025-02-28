@@ -5,3 +5,5 @@ export * from "./generateEmptyObject";
 export * from "./convertToRequestParam";
 export * from "./showAlert"
 export * from "./measureExecutionTime";
+export * from "./removeBaseRoute";
+export * from "./deepEqual";

@@ -13,10 +13,11 @@ export interface DataTableSelectionMultipleChangeEvent<
   TValue extends DataTableValueArray
 > extends DataTableSelectionMultipleChangeEventPrimeReact<TValue> {}
 
-type Props<TValue extends DataTableValueArray> =
+export type DataTableProps<TValue extends DataTableValueArray> = (
   | DataTablePropsSingle<TValue>
   | DataTablePropsCell<TValue>
-  | DataTablePropsMultiple<TValue>;
+  | DataTablePropsMultiple<TValue>
+) & {};
 
 export interface DataTableRef {
   exportCSV(): void;
@@ -24,16 +25,26 @@ export interface DataTableRef {
 
 export const DataTable = forwardRef(function DataTable2<
   TValue extends DataTableValueArray
->(props: Props<TValue>, ref: React.Ref<DataTableRef>) {
+>(
+  props: DataTableProps<TValue>,
+  ref: React.Ref<DataTableRef>
+) {
   const dataTableRef = createRef<DataTablePrimeReact<TValue>>();
   useImperativeHandle(ref, () => ({
     exportCSV: () => dataTableRef.current?.exportCSV(),
   }));
 
-  return <DataTablePrimeReact ref={dataTableRef} {...props} pt={{
-    header: { className: "bg-primary text-white max-sm:text-sm" },
-    wrapper: { className: "thin-scrollbar" }, ...props.pt,
-  }} />;
+  return (
+    <DataTablePrimeReact
+      ref={dataTableRef}
+      {...props}
+      pt={{
+        header: { className: "bg-primary text-white max-sm:text-sm" },
+        wrapper: { className: "thin-scrollbar" },
+        ...props.pt,
+      }}
+    />
+  );
 });
 
 export type { DataTableValueArray, DataTableExpandedRows };

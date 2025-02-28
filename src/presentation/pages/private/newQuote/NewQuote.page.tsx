@@ -1,10 +1,11 @@
 import {
   Button,
+  Divider,
   Stepper,
   type StepperChangeEvent,
 } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
-import { memo, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   CostingModule,
   CostSummaryModule,
@@ -13,24 +14,24 @@ import {
 } from "./modules";
 
 import type { AppState } from "@/app/store";
+import { dateFnsAdapter } from "@/core/adapters";
+
 import {
-  onSetCurrentReservation,
-  onSetCurrentStep,
-} from "@/infraestructure/store";
-import {
-  useGetAllHotelRoomQuotationsQuery,
-  useGetReservationByIdQuery,
+  useGetAllHotelRoomTripDetailsQuery,
+  useGetTripDetailsByVersionQuotationIdQuery,
   useGetVersionQuotationByIdQuery,
 } from "@/infraestructure/store/services";
 import { useDispatch, useSelector } from "react-redux";
-import { classNamesAdapter } from "@/core/adapters";
-import { EditableQuotationName } from "./components";
+import { EditableQuotationName, ProgressBarQuotation } from "./components";
+import { useParams } from "react-router-dom";
+import { useCleanStore } from "@/infraestructure/hooks";
+import { onSetCurrentStep, onSetOperationType } from "@/infraestructure/store";
 
 interface Title {
   header: string;
 }
 
-const steps: Title[] = [
+const STEPS: Title[] = [
   { header: "Datos del Cliente" },
   { header: "Itinerario" },
   { header: "Resumen de Costos" },
@@ -54,45 +55,60 @@ const renderStepContent = (step: number): React.ReactNode => {
 
 const NewQuotePage = memo(() => {
   const dispatch = useDispatch();
+  const { quoteId, version } = useParams<{
+    quoteId: string;
+    version: string;
+  }>();
+  const { cleanChangeEditQuotation, cleanChangeNewQuotation } = useCleanStore();
   const { width, DESKTOP, MOVILE } = useWindowSize();
 
-  const { currentQuotation, currentStep } = useSelector(
+  const { currentQuotation, currentStep, days, operationType } = useSelector(
     (state: AppState) => state.quotation
   );
-  const { currentVersionQuotation } = useSelector(
-    (state: AppState) => state.versionQuotation
-  );
-  const { currentReservation } = useSelector(
-    (state: AppState) => state.reservation
-  );
-  const { hotelRoomQuotations } = useSelector(
-    (state: AppState) => state.hotelRoomQuotation
+
+  const { currentTripDetails } = useSelector(
+    (state: AppState) => state.tripDetails
   );
 
-  const versionQuotationId = currentQuotation?.currentVersion?.id;
-  const reservationId = currentVersionQuotation?.reservation?.id;
+  const { hotelRoomTripDetails } = useSelector(
+    (state: AppState) => state.hotelRoomTripDetails
+  );
 
-  useGetAllHotelRoomQuotationsQuery(
-    {
-      versionNumber: versionQuotationId?.versionNumber,
-      quotationId: versionQuotationId?.quotationId,
-    },
-    {
+  const versionQuotationId =
+    quoteId && version
+      ? {
+          quotationId: Number(quoteId),
+          versionNumber: Number(version),
+        }
+      : currentQuotation?.currentVersion?.id;
+
+  const { refetch: refetchGetVersionQuotationById } =
+    useGetVersionQuotationByIdQuery(versionQuotationId!, {
       skip: !versionQuotationId,
-    }
-  );
+    });
 
-  useGetVersionQuotationByIdQuery(versionQuotationId!, {
-    skip: !versionQuotationId,
-  });
+  const { refetch: refetchGetTripDetailsByVersionQuotationId } =
+    useGetTripDetailsByVersionQuotationIdQuery(versionQuotationId!, {
+      skip: !versionQuotationId,
+    });
 
-  const { data: reservationData } = useGetReservationByIdQuery(reservationId!, {
-    skip: !reservationId || currentReservation !== null,
-  });
+    // console.log(currentTripDetails === null)
+
+  const { refetch: refetchGetAllHotelRoomTripDetails } =
+    useGetAllHotelRoomTripDetailsQuery(
+      {
+        tripDetailsId: currentTripDetails?.id ?? 0,
+      },
+      {
+        skip: !currentTripDetails,
+      }
+    );
+
   const [isLoadingStep, setIsLoadingStep] = useState(true);
+  const [verifyStep, setVerifyStep] = useState(false)
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < STEPS.length - 1) {
       dispatch(onSetCurrentStep(currentStep + 1));
     }
   };
@@ -107,86 +123,158 @@ const NewQuotePage = memo(() => {
     dispatch(onSetCurrentStep(event.index));
   };
 
-  useEffect(() => {
-    if (reservationData) {
-      dispatch(onSetCurrentReservation(reservationData.data));
-    }
-  }, [reservationData]);
+  const handleRefetch = useCallback(() => {
+    refetchGetVersionQuotationById()
+      .unwrap()
+      .then(() => {
+        refetchGetTripDetailsByVersionQuotationId()
+          .unwrap()
+          .then(() => {
+            refetchGetAllHotelRoomTripDetails();
+          })
+          .catch(() => {
+            dispatch(onSetCurrentStep(0));
+          });
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {
+        dispatch(onSetOperationType(null));
+      });
+}, [
+  refetchGetVersionQuotationById, 
+  refetchGetTripDetailsByVersionQuotationId, 
+  refetchGetAllHotelRoomTripDetails, 
+  dispatch
+]);
+
 
   useEffect(() => {
-    if (!isLoadingStep) {
-      if (currentStep > 0) {
-        if (!currentReservation) dispatch(onSetCurrentStep(0));
-        if (currentStep === 2 && hotelRoomQuotations.length === 0) {
-          dispatch(onSetCurrentStep(1));
-        }
-        if (currentStep === 3 && !currentVersionQuotation) {
-          dispatch(onSetCurrentStep(2));
-        }
-      }
+    if (operationType === "edit" && quoteId && version) {
+      //* Clean state when change edit quotation
+      cleanChangeEditQuotation();
+
+      setVerifyStep(false);
+      
+
+      handleRefetch();
     }
-    setTimeout(() => {
+
+    if (operationType === "create" && !quoteId && !version) {
+      //* Clean state when change new quotation
+      cleanChangeNewQuotation();
+
+      setVerifyStep(false);
+    
+
+      handleRefetch();
+    }
+  }, [operationType, quoteId, version]);
+
+  useEffect(() => {
+    if (!isLoadingStep) return;
+    const timeout = setTimeout(() => {
       setIsLoadingStep(false);
     }, 500);
-  }, [currentStep]);
+    
+    return () => clearTimeout(timeout);
+}, [currentStep]);
+
+
+useEffect(() => {
+  if (isLoadingStep) return;
+  if (currentStep >= 0 && currentStep < STEPS.length) {
+    if (!currentTripDetails) {
+      dispatch(onSetCurrentStep(0));
+    } else if (currentStep > 1 && hotelRoomTripDetails.length === 0) {
+      dispatch(onSetCurrentStep(1));
+    }
+  } else dispatch(onSetCurrentStep(0));
+
+ 
+    setVerifyStep(true);
+ 
+}, [isLoadingStep, verifyStep, currentStep]);
+
+
+
+  const existDaysWithQuotations = useMemo(() => {
+    if (!days || !hotelRoomTripDetails) return false;
+    return days.every((day) =>
+      hotelRoomTripDetails.some((hotelRoom) =>
+        dateFnsAdapter.isSameDay(day.date, hotelRoom.date)
+      )
+    );
+  }, [days, hotelRoomTripDetails]);
+
+  
 
   return (
-    <section className="bg-white pe-7 py-5 md:p-10 rounded-lg my-auto shadow-md min-h-screen">
+    <section className="bg-white py-5 md:p-10 rounded-lg my-auto shadow-md min-h-screen">
       <EditableQuotationName />
-      <Stepper
-        linear
-        orientation={width > DESKTOP ? "horizontal" : "vertical"}
-        activeStep={currentStep}
-        onChangeStep={handleChangeStep}
-        panelContent={steps.map((step, index) => ({
-          header: step.header,
-
-          children: !isLoadingStep ? (
-            <div
-              className={classNamesAdapter(
-                currentStep !== 3 && currentStep !== 1 && "pe-4 sm:pe-0"
-              )}
-            >
-              {renderStepContent(index)}
-              {/* {stepContentMemo(index)} */}
-              <div className="flex pt-4 justify-between">
-                {index > 0 && (
-                  <Button
-                    label={width > MOVILE ? "Atrás" : undefined}
-                    severity="secondary"
-                    icon="pi pi-arrow-left"
-                    iconPos="left"
-                    tooltip={width <= MOVILE ? "Atrás" : undefined}
-                    tooltipOptions={{ position: "top" }}
-                    onClick={handleBack}
-                  />
-                )}
-
-                {index < steps.length - 1 && (
-                  <Button
-                    label={width > MOVILE ? "Continuar" : undefined}
-                    icon="pi pi-arrow-right"
-                    iconPos="right"
-                    tooltip={width <= MOVILE ? "Continuar" : undefined}
-                    tooltipOptions={{ position: "top" }}
-                    onClick={handleNext}
-                    disabled={
-                      (index === 0 && !currentReservation) ||
-                      (index === 1 && hotelRoomQuotations.length === 0)
-                    }
-                  />
-                )}
+      <ProgressBarQuotation />
+      <Divider />
+  
+      {/* Only render Stepper when verifyStep is true */}
+      {verifyStep ? (
+        <Stepper
+          linear
+          orientation={width > DESKTOP ? "horizontal" : "vertical"}
+          activeStep={currentStep}
+          onChangeStep={handleChangeStep}
+          panelContent={STEPS.map((step, index) => ({
+            header: step.header,
+            children: !isLoadingStep ? (
+              <div className={"pe-4 sm:pe-0"}>
+                {renderStepContent(index)}
+                <div className="flex pt-4 justify-between">
+                  {index > 0 && (
+                    <Button
+                      label={width > MOVILE ? "Atrás" : undefined}
+                      severity="secondary"
+                      icon="pi pi-arrow-left"
+                      iconPos="left"
+                      tooltip={width <= MOVILE ? "Atrás" : undefined}
+                      tooltipOptions={{ position: "top" }}
+                      onClick={handleBack}
+                    />
+                  )}
+  
+                  {index < STEPS.length - 1 && (
+                    <Button
+                      label={width > MOVILE ? "Continuar" : undefined}
+                      icon="pi pi-arrow-right"
+                      iconPos="right"
+                      tooltip={width <= MOVILE ? "Continuar" : undefined}
+                      tooltipOptions={{ position: "top" }}
+                      onClick={handleNext}
+                      disabled={
+                        (index === 0 && !currentTripDetails) ||
+                        (index === 1 &&
+                          (hotelRoomTripDetails.length === 0 ||
+                            !existDaysWithQuotations))
+                      }
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex justify-center items-center h-96 lg:h-[30rem]">
-              <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
-            </div>
-          ),
-        }))}
-      />
+            ) : (
+              <div className="flex justify-center items-center h-96 lg:h-[30rem]">
+                <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
+              </div>
+            ),
+          }))}
+        />
+      ) : (
+        // Show a loading state while verifyStep is false
+        <div className="flex justify-center items-center h-96 lg:h-[30rem]">
+          <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
+        </div>
+      )}
     </section>
   );
+  
 });
 
 export default NewQuotePage;

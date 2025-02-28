@@ -10,6 +10,7 @@ export const CostSummaryModule = () => {
   const { selectedDay: currentDay } = useSelector(
     (state: AppState) => state.quotation
   );
+  const { currentTripDetails } = useSelector((state: AppState) => state.tripDetails);
   const [selectedDay, setSelectedDay] = useState<Date | undefined>();
   const [[firstAccordion, secondAccordion], setAccordion] = useState<
     [boolean, boolean]
@@ -18,8 +19,8 @@ export const CostSummaryModule = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    setSelectedDay(currentDay?.date);
-  }, [currentDay]);
+    setSelectedDay(currentTripDetails?.startDate);
+  }, [currentTripDetails]);
 
   useEffect(() => {
     setLoading(true);
@@ -37,7 +38,7 @@ export const CostSummaryModule = () => {
         )}
         onBeforeTabChange={(e) => {
           const { executionTime } = measureExecutionTime(() => {
-            const nextDay = new Date(currentDay?.date ?? new Date());
+            const nextDay = new Date(currentTripDetails?.startDate ?? new Date());
             nextDay.setDate(nextDay.getDate() + e.index);
             setSelectedDay(nextDay);
           });

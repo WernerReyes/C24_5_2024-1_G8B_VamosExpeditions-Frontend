@@ -1,6 +1,7 @@
 import {
   SelectButton as SelectButtonPrimeReact,
   type SelectButtonProps,
+  type SelectButtonChangeEvent,
 } from "primereact/selectbutton";
 import { type SkeletonProps, Skeleton } from "./Skeleton";
 import type { SelectItem } from "primereact/selectitem";
@@ -46,3 +47,8 @@ export const SelectButton = ({
     </>
   );
 };
+
+
+export {
+  type SelectButtonChangeEvent
+}

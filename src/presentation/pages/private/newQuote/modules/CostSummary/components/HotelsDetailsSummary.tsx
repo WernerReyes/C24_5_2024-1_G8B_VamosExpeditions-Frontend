@@ -1,6 +1,6 @@
 import type { AppState } from "@/app/store";
 import { dateFnsAdapter } from "@/core/adapters";
-import type { HotelRoomQuotationEntity } from "@/domain/entities";
+import type { HotelRoomTripDetailsEntity } from "@/domain/entities";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { HotelListDetailsHeader } from "../../components";
@@ -10,26 +10,26 @@ type Props = {
 };
 
 export const HotelsDetailsSummary = ({ selectedDay }: Props) => {
-  const { hotelRoomQuotations } = useSelector(
-    (state: AppState) => state.hotelRoomQuotation
+  const { hotelRoomTripDetails } = useSelector(
+    (state: AppState) => state.hotelRoomTripDetails
   );
 
-
-  const hotelRoomQuotationsPerDay: HotelRoomQuotationEntity[] = useMemo(() => {
-    return hotelRoomQuotations.filter((quote) =>
+  const hotelRoomTripDetailsPerDay: HotelRoomTripDetailsEntity[] = useMemo(() => {
+    if (!selectedDay || hotelRoomTripDetails.length === 0) return [];
+    return hotelRoomTripDetails.filter((quote) =>
       dateFnsAdapter.isSameDay(quote.date, selectedDay!)
     );
-  }, [selectedDay, hotelRoomQuotations]);
+  }, [selectedDay, hotelRoomTripDetails]);
 
   return (
     <div>
-      {hotelRoomQuotationsPerDay.length === 0 ? (
+      {hotelRoomTripDetailsPerDay.length === 0 ? (
         <p className="text-center bg-secondary p-2 md:w-3/4 mx-auto rounded-md text-gray-500">
           Ningún alojamiento por ahora
         </p>
       ) : (
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 3xl:grid-cols-3 gap-x-4 gap-y-8 justify-items-center jus bg-white">
-          {hotelRoomQuotationsPerDay.map((quote) => (
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 3xl:grid-cols-2 gap-x-4 gap-y-8 justify-items-center jus bg-white">
+          {hotelRoomTripDetailsPerDay.map((quote) => (
             <div
               key={quote.id}
               className="w-full max-w-sm bg-white shadow-lg rounded-lg overflow-hidden"

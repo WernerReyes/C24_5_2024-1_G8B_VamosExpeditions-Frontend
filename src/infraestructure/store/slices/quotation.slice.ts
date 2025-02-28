@@ -1,14 +1,8 @@
 import { constantStorage } from "@/core/constants";
 import { LocalQuotationEntity } from "@/data";
-import type { QuotationEntity } from "@/domain/entities";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const {
-  CURRENT_ACTIVE_STEP,
-  ITINERARY_CURRENT_SELECTED_DAY,
-  INDIRECT_COSTS_PERCENTAGE,
-  PROFIT_MARGIN
-} = constantStorage;
+const { CURRENT_ACTIVE_STEP, ITINERARY_CURRENT_SELECTED_DAY } = constantStorage;
 
 export interface Day {
   id: number;
@@ -22,27 +16,20 @@ export interface Day {
 type QuotationSliceState = {
   currentQuotation: LocalQuotationEntity | null;
   currentStep: number;
-  quotations: QuotationEntity[];
   days: Day[];
   selectedDay: Day | null;
-  indirectCostPercentage: number;
-  profitPercentage: number;
+  operationType: "create" | "edit" | "replace" | null;
 };
 
 const initialState: QuotationSliceState = {
   currentQuotation: null,
   currentStep: JSON.parse(localStorage.getItem(CURRENT_ACTIVE_STEP) || "0"),
-  quotations: [],
   days: [],
   selectedDay: JSON.parse(
     localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) || "null"
   ),
-  indirectCostPercentage: JSON.parse(
-    localStorage.getItem(INDIRECT_COSTS_PERCENTAGE) || "5"
-  ),
-  profitPercentage: JSON.parse(
-    localStorage.getItem(PROFIT_MARGIN) || "80"
-  ),
+
+  operationType: null,
 };
 
 export const quotationSlice = createSlice({
@@ -67,12 +54,7 @@ export const quotationSlice = createSlice({
       };
     },
 
-    onSetQuotations: (state, { payload }: PayloadAction<QuotationEntity[]>) => {
-      return {
-        ...state,
-        quotations: payload,
-      };
-    },
+    
 
     onSetSelectedDay: (state, { payload }: PayloadAction<Day | null>) => {
       localStorage.setItem(
@@ -92,36 +74,22 @@ export const quotationSlice = createSlice({
       };
     },
 
-    onSetIndirectCostPercentage: (
+    onSetOperationType: (
       state,
-      { payload }: PayloadAction<number>
+      { payload }: PayloadAction<"create" | "edit" | "replace" | null>
     ) => {
-      localStorage.setItem(INDIRECT_COSTS_PERCENTAGE, JSON.stringify(payload));
       return {
         ...state,
-        indirectCostPercentage: payload,
+        operationType: payload,
       };
-    },
-
-    onSetProfitPercentage: (
-      state,
-      { payload }: PayloadAction<number>
-    ) => {
-      localStorage.setItem(PROFIT_MARGIN, JSON.stringify(payload));
-      return {
-        ...state,
-        profitPercentage: payload,
-      };
-    },
+    }
   },
 });
 
 export const {
   onSetCurrentQuotation,
   onSetCurrentStep,
-  onSetQuotations,
   onSetSelectedDay,
   onSetDays,
-  onSetIndirectCostPercentage,
-  onSetProfitPercentage,
+  onSetOperationType,
 } = quotationSlice.actions;

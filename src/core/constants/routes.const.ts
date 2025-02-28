@@ -1,29 +1,14 @@
 type PublicRoutes = {
   LOGIN: string;
-  //     REGISTER: string;
-  //     FORGOT_PASSWORD: string;
-  //     RESET_PASSWORD: string;
-  //     VERIFY_EMAIL: string;
-  //     DASHBOARD: string;
-  //     PROFILE: string;
-  //     SETTINGS: string;
-  //     NOT_FOUND: string;
 };
 
 type PrivateRoutes = {
+  BASE: string
   DASHBOARD: string;
   QUOTES: string;
   NEW_QUOTE: string;
+  EDIT_QUOTE: string;
   RESERVATIONS: string;
-
-
-  //     HOME: string;
-  //     LOGIN: string;
-  //     REGISTER: string;
-  //     FORGOT_PASSWORD: string;
-  //     RESET_PASSWORD: string;
-  //     VERIFY_EMAIL: string;
-  //     NOT_FOUND: string;
 };
 
 type Routes = {
@@ -31,30 +16,19 @@ type Routes = {
   private: PrivateRoutes;
 };
 
+const PRIVATE_BASE = "/app";
+
 export const constantRoutes: Routes = {
   public: {
     LOGIN: "/login",
-    //     REGISTER: PublicRoutes.REGISTER,
-    //     FORGOT_PASSWORD: PublicRoutes.FORGOT_PASSWORD,
-    //     RESET_PASSWORD: PublicRoutes.RESET_PASSWORD,
-    //     VERIFY_EMAIL: PublicRoutes.VERIFY_EMAIL,
-    //     DASHBOARD: PublicRoutes.DASHBOARD,
-    //     PROFILE: PublicRoutes.PROFILE,
-    //     SETTINGS: PublicRoutes.SETTINGS,
-    //     NOT_FOUND: PublicRoutes.NOT_FOUND,
   },
 
   private: {
-    DASHBOARD: "/dashboard",
-    QUOTES: "/quotes",
-    NEW_QUOTE: "/new-quote",
-    RESERVATIONS: "/reservations",
+    BASE: PRIVATE_BASE,
+    DASHBOARD: "/app/dashboard",
+    QUOTES: `${PRIVATE_BASE}/quotes`,
+    NEW_QUOTE: `${PRIVATE_BASE}/quote/new`,
+    EDIT_QUOTE: `${PRIVATE_BASE}/quote/edit`,
+    RESERVATIONS: `${PRIVATE_BASE}/reservations`,
   },
-  //     HOME: PublicRoutes.HOME,
-  //     LOGIN: PublicRoutes.LOGIN,
-  //     REGISTER: PublicRoutes.REGISTER,
-  //     FORGOT_PASSWORD: PublicRoutes.FORGOT_PASSWORD,
-  //     RESET_PASSWORD: PublicRoutes.RESET_PASSWORD,
-  //     VERIFY_EMAIL: PublicRoutes.VERIFY_EMAIL,
-  //     NOT_FOUND: PublicRoutes.NOT_FOUND,
 };

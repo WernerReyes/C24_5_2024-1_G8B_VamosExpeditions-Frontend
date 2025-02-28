@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 
-const { DASHBOARD } = constantRoutes.private;
+const { QUOTES } = constantRoutes.private;
 
 export const NewQuotationGuard = () => {
   const dispatch = useDispatch();
-  const { currentQuotation } = useSelector((state: AppState) => state.quotation);
+  const { currentQuotation, operationType } = useSelector((state: AppState) => state.quotation);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export const NewQuotationGuard = () => {
 
   if (isLoading) return null;
 
-  return currentQuotation ? <Outlet /> : <Navigate to={DASHBOARD} />;
+  return currentQuotation || operationType ? <Outlet /> : <Navigate to={QUOTES} />;
 };
 
 export default NewQuotationGuard;

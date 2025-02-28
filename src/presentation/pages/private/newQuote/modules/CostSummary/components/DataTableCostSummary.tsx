@@ -1,51 +1,132 @@
 import type { AppState } from "@/app/store";
-import type { HotelRoomQuotationEntity } from "@/domain/entities";
-import { onSetIndirectCostPercentage } from "@/infraestructure/store";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+import type { HotelRoomTripDetailsEntity } from "@/domain/entities";
+import { useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
 import {
+  Badge,
   Column,
   DataTable,
   InputText,
   Slider,
 } from "@/presentation/components";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { CostTableEnum } from "../enums/costTable.enum";
-import type { CostTableType } from "../types/costTable.type";
-import { calculateCosts } from "../utils/calculateCosts";
+import type { CostTableType } from "../../types/costTable.type";
+import { calculateCosts } from "../../utils/calculateCosts";
+import { onSetHotelRoomTripDetailsWithTotalCost } from "@/infraestructure/store";
 
 export const DataTableCostSummary = () => {
   const dispatch = useDispatch();
 
-  const { indirectCostPercentage } = useSelector(
-    (state: AppState) => state.quotation
+  const { currentStep } = useSelector((state: AppState) => state.quotation);
+
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
   );
 
-  const { hotelRoomQuotations } = useSelector(
-    (state: AppState) => state.hotelRoomQuotation
+  const { hotelRoomTripDetails } = useSelector(
+    (state: AppState) => state.hotelRoomTripDetails
   );
 
-  const uniqueHotelRoomQuotations: HotelRoomQuotationEntity[] = useMemo(() => {
-    return hotelRoomQuotations.filter(
-      (quote, index, self) =>
-        index ===
-        self.findIndex(
-          (t) =>
-            t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
-            t.hotelRoom?.roomType === quote.hotelRoom?.roomType
-        )
-    );
-  }, [hotelRoomQuotations]);
+  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
+  const [indirectCostMargin, setIndirectCostMargin] = useState<number>(5);
+
+  const handleUpdateIndirectCostPercentage = (value: number) => {
+    if (!currentVersionQuotation) return;
+    // if (currentVersionQuotation.indirectCostMargin !== value) {
+      updateVersionQuotation(
+        versionQuotationDto.parse({
+          ...currentVersionQuotation,
+          indirectCostMargin: value,
+          finalPrice: undefined,
+            profitMargin: undefined,
+           
+          completionPercentage: 75,
+        })
+      ).then(() => {
+        setIndirectCostMargin(value);
+      });
+    // }
+  };
+
+  const uniqueHotelRoomTripDetails: (HotelRoomTripDetailsEntity & {
+    number: number;
+  })[] = useMemo(() => {
+    return hotelRoomTripDetails
+      .map((quote) => {
+        return {
+          ...quote,
+          number: hotelRoomTripDetails.filter(
+            (t) =>
+              t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
+              t.hotelRoom?.roomType === quote.hotelRoom?.roomType
+          ).length,
+        };
+      })
+      .filter(
+        (quote, index, self) =>
+          index ===
+          self.findIndex(
+            (t) =>
+              t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
+              t.hotelRoom?.roomType === quote.hotelRoom?.roomType
+          )
+      );
+  }, [hotelRoomTripDetails]);
 
   const calculateCostsPerService: CostTableType[] = useMemo(() => {
-    return calculateCosts(hotelRoomQuotations, indirectCostPercentage);
-  }, [hotelRoomQuotations, indirectCostPercentage]);
+    return calculateCosts(hotelRoomTripDetails, indirectCostMargin);
+  }, [hotelRoomTripDetails, indirectCostMargin]);
 
   const columsTable = useMemo(() => {
-    return uniqueHotelRoomQuotations.map((quote) => ({
-      field: "total",
+    return uniqueHotelRoomTripDetails.map((quote) => ({
       header: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
+      number: quote.number,
     }));
-  }, [uniqueHotelRoomQuotations]);
+  }, [uniqueHotelRoomTripDetails]);
+
+  useEffect(() => {
+    dispatch(
+      onSetHotelRoomTripDetailsWithTotalCost(
+        uniqueHotelRoomTripDetails.map((quote, index) => {
+          const totalCost =
+            (
+              calculateCostsPerService[index].total as {
+                [key: string]: {
+                  total: number;
+                  indirectCost: number;
+                  directCost: number;
+                  totalCost: number;
+                };
+              }
+            )[`${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`]
+              ?.totalCost ?? 0;
+
+          return {
+            ...quote,
+            totalCost,
+          };
+        })
+      )
+    );
+  }, [uniqueHotelRoomTripDetails, calculateCostsPerService]);
+
+  useEffect(() => {
+    if (!currentVersionQuotation) return;
+    if (!currentVersionQuotation.indirectCostMargin) return;
+    setIndirectCostMargin(currentVersionQuotation.indirectCostMargin);
+  }, [currentVersionQuotation]);
+
+  useEffect(() => {
+    if (currentStep !== 2) return;
+    if (
+      currentVersionQuotation?.indirectCostMargin &&
+      currentVersionQuotation?.completionPercentage >= 75
+    )
+      return;
+    handleUpdateIndirectCostPercentage(indirectCostMargin);
+  }, [currentStep]);
 
   return (
     <DataTable
@@ -69,15 +150,16 @@ export const DataTableCostSummary = () => {
                   <InputText
                     disabled
                     className="p-inputtext-sm w-full"
-                    value={indirectCostPercentage.toString() + "%"}
+                    value={indirectCostMargin.toString() + "%"}
                   />
                   <Slider
-                    value={indirectCostPercentage}
+                    value={indirectCostMargin}
                     min={0}
                     max={100}
-                    onChange={(e) => {
-                      dispatch(onSetIndirectCostPercentage(e.value as number));
-                    }}
+                    onSlideEnd={(e) =>
+                      handleUpdateIndirectCostPercentage(e.value as number)
+                    }
+                    onChange={(e) => setIndirectCostMargin(e.value as number)}
                   />
                 </div>
               </div>
@@ -90,12 +172,14 @@ export const DataTableCostSummary = () => {
           key={index}
           headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
           className="max-sm:text-xs max-md:text-sm"
-          field={column.field}
           body={(rowData, { rowIndex }) => {
             return (
               <div className="font-bold">
                 {rowIndex === 0 && (
-                  <>$ {rowData.total[column.header]?.serviceCost.toFixed(2) ?? 0}</>
+                  <>
+                    ${" "}
+                    {rowData.total[column.header]?.serviceCost.toFixed(2) ?? 0}
+                  </>
                 )}
 
                 {rowIndex === 1 && (
@@ -103,7 +187,9 @@ export const DataTableCostSummary = () => {
                 )}
 
                 {rowIndex === 2 && (
-                  <>$ {rowData.total[column.header]?.directCost.toFixed(2) ?? 0}</>
+                  <>
+                    $ {rowData.total[column.header]?.directCost.toFixed(2) ?? 0}
+                  </>
                 )}
                 {rowIndex === 3 && (
                   <>
@@ -120,7 +206,12 @@ export const DataTableCostSummary = () => {
               </div>
             );
           }}
-          header={column.header}
+          header={
+            <>
+              {column.header}
+              <Badge className="ms-2 bg-tertiary" value={column.number} />
+            </>
+          }
         />
       ))}
     </DataTable>

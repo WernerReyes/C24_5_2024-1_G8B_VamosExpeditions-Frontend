@@ -1,30 +1,29 @@
+import { UserEntity } from "@/domain/entities";
+import { useGetUsersQuery } from "@/infraestructure/store/services";
 import {
   type ColumnFilterElementTemplateOptions,
   MultiSelect,
   type MultiSelectChangeEvent,
 } from "@/presentation/components";
+import { UserInfo } from "../components";
 
 type Props = {
   options: ColumnFilterElementTemplateOptions;
-  representatives: { id: number; name: string }[];
 };
 
-export const FilterByRepresentative = ({ options, representatives }: Props) => {;
+export const FilterByRepresentative = ({ options }: Props) => {
+  const { data: usersData } = useGetUsersQuery();
+
   return (
     <MultiSelect
       value={options.value || []}
-      options={representatives}
+      options={usersData?.data || []}
       display="chip"
-      itemTemplate={(option: { id: number; name: string }) => (
-        <div className="flex align-items-center gap-2">
-          <span>{option.name}</span>
-        </div>
-      )}
-      onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value)}
+      itemTemplate={(user: UserEntity) => <UserInfo user={user} />}
+      onChange={(e: MultiSelectChangeEvent) => options.filterApplyCallback(e.value, options.index)}
       dataKey="id"
-      optionLabel="name"
+      optionLabel="fullname"
       placeholder="Selecciona representantes"
-      filterBy="name"
       maxSelectedLabels={2}
       className="p-column-filter"
     />

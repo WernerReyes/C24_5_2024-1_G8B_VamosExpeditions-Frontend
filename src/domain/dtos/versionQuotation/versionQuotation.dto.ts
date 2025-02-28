@@ -11,12 +11,11 @@ export type VersionQuotationDto = {
     readonly versionNumber: number;
   };
   readonly name: string;
-  readonly reservationId?: number;
   readonly status: VersionQuotationStatus;
   readonly official: boolean;
+  readonly completionPercentage?: number;
   readonly indirectCostMargin?: number;
   readonly profitMargin?: number;
-  readonly totalCost?: number;
   readonly finalPrice?: number;
 };
 
@@ -38,10 +37,9 @@ export const versionQuotationDto =  {
         name: entity.name,
         status: entity.status,
         official: entity.official,
-        reservationId: entity.reservation ? entity.reservation.id : undefined,
+        completionPercentage: entity.completionPercentage,
         indirectCostMargin: entity.indirectCostMargin,
         profitMargin: entity.profitMargin,
-        totalCost: entity.totalCost,
         finalPrice: entity.finalPrice,
       };
     },
@@ -56,9 +54,9 @@ export const versionQuotationDtoSchema = z.object({
   name: z.string(),
   status: z.nativeEnum(VersionQuotationStatus),
   official: z.boolean(),
+  completionPercentage: z.number().optional(),
   indirectCostMargin: z.number().optional(),
   profitMargin: z.number().optional(),
-  totalCost: z.number().optional(),
   finalPrice: z.number().optional(),
   reservationId: z.number().optional(),
 });

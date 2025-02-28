@@ -8,8 +8,9 @@ import {
 } from "@/presentation/components";
 import { AuthGuard } from "@/presentation/guards";
 import PrivateRoutes from "@/presentation/routes/Private.routes";
+import { RouterWithNotFound } from "@/presentation/routes/RouterWithNotFound";
 import { lazy, useEffect } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route} from "react-router-dom";
 
 //* Public pages
 const LoginPage = lazy(
@@ -18,7 +19,7 @@ const LoginPage = lazy(
 
 const {
   public: { LOGIN },
-  private: { DASHBOARD },
+  private: { BASE, DASHBOARD },
 } = constantRoutes;
 
 export const AppRouter = () => {
@@ -51,7 +52,7 @@ export const AppRouter = () => {
         
         <ConfirmPopup />
         <Toaster />
-        <Routes>
+        <RouterWithNotFound>
           {/* <RouterWithNotFound> */}
 
           <Route
@@ -68,12 +69,9 @@ export const AppRouter = () => {
           {/* <Route path={MANAGER + "/*"} element={<PrivateRoutes />} /> */}
 
           <Route element={<AuthGuard privateValidation />}>
-            <Route path={"/*"} element={<PrivateRoutes />} />
+          <Route path={BASE} element={<Navigate to={DASHBOARD} />} />
+            <Route path={`${BASE}/*`} element={<PrivateRoutes />} />
           </Route>
-
-          {/* <PrivateRoutes /> */}
-
-          {/* <Route path={REGISTER} element={<RegisterPage />} /> */}
 
           {/* {!isLoading && (
           <Route element={<AuthGuard privateValidation />}>
@@ -89,8 +87,8 @@ export const AppRouter = () => {
         )} */}
           {/* </RouterWithNotFound> */}
 
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        
+        </RouterWithNotFound>
       </BrowserRouter>
     </>
   );
