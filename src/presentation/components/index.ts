@@ -45,6 +45,7 @@ export * from "./ToggleButton";
 export * from "./Slider";
 export * from "./SpeedDial/SpeedDial";
 export * from "./Tooltip";
+export  * from "./OverlayPanel";
 
 //* Alerts
 export * from "./alerts/ExpiredSessionCountdown";

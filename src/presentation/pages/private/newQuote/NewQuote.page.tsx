@@ -192,11 +192,7 @@ const NewQuotePage = () => {
 
   useEffect(() => {
     const storedStep = Number(localStorage.getItem(constantStorage.CURRENT_ACTIVE_STEP));
-    console.log({
-      storedStep,
-      currentStep
-    });
-  
+    
     if (storedStep !== currentStep) {
       dispatch(onSetCurrentStep(storedStep)); // Solo si hay diferencia
     }

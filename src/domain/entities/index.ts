@@ -1,3 +1,4 @@
+
 export * from './user.entity';
 export * from './role.entity';
 export * from './city.entity';
@@ -11,3 +12,4 @@ export * from './tripDetails.entity';
 export * from './quotation.entity'
 export * from './versionQuotation.entity'
 export * from './hotelRoomTripDetails.entity'
+export * from "./notificationMessage.entity";

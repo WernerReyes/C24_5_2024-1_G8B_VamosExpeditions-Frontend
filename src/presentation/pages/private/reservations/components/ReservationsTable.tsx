@@ -80,7 +80,10 @@ export const ReservationTable = () => {
 
   useEffect(() => {
     if (!isError) return;
-    const tdEmpty = document.querySelector(".p-datatable-emptymessage td");
+    const tdEmpty = document.querySelector(
+      "#fallback-reservations .p-datatable-emptymessage td"
+    );
+
     if (tdEmpty) {
       tdEmpty.setAttribute("colspan", "12");
     }
@@ -161,6 +164,7 @@ export const ReservationTable = () => {
                   className: "!bg-secondary",
                 },
               }}
+              id="fallback-reservations"
               showGridlines
               headerColumnGroup={headerColumnGroup}
               value={[]}

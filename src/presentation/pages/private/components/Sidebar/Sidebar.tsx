@@ -86,7 +86,9 @@ const Template = ({ menuItem }: { menuItem: MenuItem }) => {
 
   return (
     <div
-      className="p-component p-panelmenu-header dark:border-blue-900/40 rounded-md transition-shadow duration-200  dark:hover:bg-gray-800/80"
+      className="p-component p-panelmenu-header
+       dark:border-blue-900/40 rounded-md 
+       transition-shadow duration-200  dark:hover:bg-gray-800/80"
       aria-label={menuItem.label}
       aria-expanded="false"
       aria-controls="pr_id_52_1_content"

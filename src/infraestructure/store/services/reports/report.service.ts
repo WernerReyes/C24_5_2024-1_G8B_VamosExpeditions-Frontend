@@ -1,23 +1,38 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { requestConfig } from "../config";
 
-const PREFIX = "/reservation";
+const PREFIX = "/trip-details";
 
 export const reportService = createApi({
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    getHotelPdf: builder.query<Blob, { id: number }>({
+    getHotelPdf: builder.query<Blob, { id: number; name?: string }>({
       query: ({ id }) => ({
-        url: `/pdf/${id}`, // Aquí pasamos el ID como parte de la URL
-        method: "GET", // Usamos el método GET
-        responseHandler: (response) => response.blob(), // Transformamos la respuesta en un Blob (archivo)
+        url: `/pdf/${id}`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+        
       }),
-      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+      async onQueryStarted({ id, name  }, { queryFulfilled }) {
         try {
-          console.log("onQueryStarted", id);
-          await queryFulfilled;
+          const { data } = await queryFulfilled;
+
+          
+          const blobURL = URL.createObjectURL(data);
+          const hiddenElement = document.createElement("a");
+          hiddenElement.href = blobURL;
+          hiddenElement.download = `${name}.pdf`;
+          document.body.appendChild(hiddenElement);
+          hiddenElement.click();
+          document.body.removeChild(hiddenElement);
+          setTimeout(() => {
+            window.URL.revokeObjectURL(blobURL);
+          }, 1000); 
+          
+
+          console.log("Descarga iniciada para ID:", id);
         } catch (error) {
-          throw error;
+          console.error("Error al descargar el PDF:", error);
         }
       },
     }),

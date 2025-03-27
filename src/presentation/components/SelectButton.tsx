@@ -1,16 +1,20 @@
+import { cn } from "@/core/adapters";
 import {
   SelectButton as SelectButtonPrimeReact,
-  type SelectButtonProps,
   type SelectButtonChangeEvent,
+  type SelectButtonProps,
 } from "primereact/selectbutton";
-import { type SkeletonProps, Skeleton } from "./Skeleton";
 import type { SelectItem } from "primereact/selectitem";
-import { cn } from "@/core/adapters";
 import { HTMLAttributes, LabelHTMLAttributes } from "react";
+import { Skeleton, type SkeletonProps } from "./Skeleton";
 
 interface Props extends SelectButtonProps {
-  label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };
-  small?: HTMLAttributes<HTMLElement> & { text?: string };
+  label?: {
+    text?: string;
+  } & LabelHTMLAttributes<HTMLLabelElement>;
+  small?: {
+    text?: string;
+  } & HTMLAttributes<HTMLElement>;
   loading?: boolean;
   skeleton?: SkeletonProps;
 }
@@ -51,4 +55,4 @@ export const SelectButton = ({
 
 export {
   type SelectButtonChangeEvent
-}
+};
