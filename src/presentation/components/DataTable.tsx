@@ -8,6 +8,8 @@ import {
   type DataTableExpandedRows,
 } from "primereact/datatable";
 import React, { createRef, forwardRef, useImperativeHandle } from "react";
+import { useWindowSize } from "../hooks";
+import { cn } from "@/core/adapters";
 
 export interface DataTableSelectionMultipleChangeEvent<
   TValue extends DataTableValueArray
@@ -26,9 +28,11 @@ export interface DataTableRef {
 export const DataTable = forwardRef(function DataTable2<
   TValue extends DataTableValueArray
 >(
-  props: DataTableProps<TValue>,
+  { size, className, pt, ...rest }: DataTableProps<TValue>,
   ref: React.Ref<DataTableRef>
 ) {
+  const { width, TABLET } = useWindowSize();
+
   const dataTableRef = createRef<DataTablePrimeReact<TValue>>();
   useImperativeHandle(ref, () => ({
     exportCSV: () => dataTableRef.current?.exportCSV(),
@@ -36,13 +40,15 @@ export const DataTable = forwardRef(function DataTable2<
 
   return (
     <DataTablePrimeReact
+      size={size ?? width < TABLET ? "small" : "normal"}
       ref={dataTableRef}
-      {...props}
+      {...rest}
       pt={{
         header: { className: "bg-primary text-white max-sm:text-sm" },
         wrapper: { className: "thin-scrollbar" },
-        ...props.pt,
+        ...pt,
       }}
+      className={cn("max-sm:text-xs", className)}
     />
   );
 });

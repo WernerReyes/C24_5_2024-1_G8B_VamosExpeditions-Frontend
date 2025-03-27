@@ -10,7 +10,7 @@ const { QUOTES } = constantRoutes.private;
 
 export const NewQuotationGuard = () => {
   const dispatch = useDispatch();
-  const { currentQuotation, operationType } = useSelector((state: AppState) => state.quotation);
+  const { currentQuotation } = useSelector((state: AppState) => state.quotation);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export const NewQuotationGuard = () => {
 
   if (isLoading) return null;
 
-  return currentQuotation || operationType ? <Outlet /> : <Navigate to={QUOTES} />;
+  return currentQuotation ? <Outlet /> : <Navigate to={QUOTES} />;
 };
 
 export default NewQuotationGuard;

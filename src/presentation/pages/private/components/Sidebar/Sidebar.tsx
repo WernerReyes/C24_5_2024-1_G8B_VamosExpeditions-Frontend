@@ -1,4 +1,4 @@
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 import { constantRoutes } from "@/core/constants";
 import {
   Image,
@@ -12,14 +12,12 @@ import { useLocation } from "react-router-dom";
 import { NewQuotationDialog } from "../NewQuotationDialog";
 
 import "./Sidebar.css";
-interface SidebarProps {
-  visible: boolean;
-  setVisible: (value: boolean) => void;
-}
+import { useSidebar } from "../../hooks";
+
 
 const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
 
-const items: MenuItem[] = [
+const ITEMS: MenuItem[] = [
   {
     label: "Dashboard",
     icon: "pi pi-home",
@@ -35,6 +33,8 @@ const items: MenuItem[] = [
   {
     id: "quotations",
     label: "Cotizaciones",
+    // style: {  },
+    className: "text-xs",
     icon: "pi  pi-book",
     expanded: true,
     items: [
@@ -55,15 +55,19 @@ const items: MenuItem[] = [
   },
 ];
 
-export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
+export const Sidebar = () => {
   const { width, DESKTOP, MACBOOK, TABLET } = useWindowSize();
+  const { toggleSidebar, visible } = useSidebar();
 
   return (
     <SidebarComponent
       header={
         <Image src="/images/logo.png" alt="Logo" width="200" height="200" />
       }
-      onHide={() => setVisible(false)}
+      onHide={() => {
+        toggleSidebar();
+        
+      }}
       visible={visible}
       className="w-72"
       baseZIndex={width < MACBOOK ? 1000 : 0}
@@ -72,7 +76,7 @@ export const Sidebar = ({ visible, setVisible }: SidebarProps) => {
       dismissable={width < DESKTOP}
     >
       <hr className="mt-3 mb-2 border-2 border-gray-300 " />
-      <PanelMenu model={items} className="w-full" />
+      <PanelMenu model={ITEMS} className="w-full" />
     </SidebarComponent>
   );
 };
@@ -91,7 +95,7 @@ const Template = ({ menuItem }: { menuItem: MenuItem }) => {
       data-pc-section="header"
     >
       <div
-        className={classNamesAdapter("p-panelmenu-header-content", {
+        className={cn("p-panelmenu-header-content", {
           "!bg-primary": menuItem.url === pathname,
         })}
         data-pc-section="headercontent"
@@ -99,13 +103,13 @@ const Template = ({ menuItem }: { menuItem: MenuItem }) => {
         {pathname !== NEW_QUOTE && menuItem.url === NEW_QUOTE ? (
           <NewQuotationDialog>
             <a
-              className={classNamesAdapter("p-panelmenu-header-link", {
+              className={cn("p-panelmenu-header-link", {
                 "!text-white": menuItem.url === pathname,
               })}
               data-pc-section="headeraction"
             >
               <span
-                className={classNamesAdapter("p-menuitem-icon", menuItem.icon)}
+                className={cn("p-menuitem-icon", menuItem.icon)}
                 data-pc-section="headericon"
               ></span>
               <span className="p-menuitem-text" data-pc-section="headerlabel">
@@ -116,13 +120,13 @@ const Template = ({ menuItem }: { menuItem: MenuItem }) => {
         ) : (
           <Link
             to={menuItem.url || ""}
-            className={classNamesAdapter("p-panelmenu-header-link", {
+            className={cn("p-panelmenu-header-link", {
               "!text-white": menuItem.url === pathname,
             })}
             data-pc-section="headeraction"
           >
             <span
-              className={classNamesAdapter("p-menuitem-icon", menuItem.icon)}
+              className={cn("p-menuitem-icon", menuItem.icon)}
               data-pc-section="headericon"
             ></span>
             <span className="p-menuitem-text" data-pc-section="headerlabel">

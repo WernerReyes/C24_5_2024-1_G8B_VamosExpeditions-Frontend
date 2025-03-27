@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 import { useWindowSize } from "@/presentation/hooks";
 import { Navbar, Sidebar } from "../components";
 import { useSidebar } from "../hooks";
@@ -18,8 +18,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     (state: AppState) => state.quotation
   );
   const { width, TABLET } = useWindowSize();
-  const { visible, setVisible } = useSidebar();
- 
+  const { visible } = useSidebar();
 
   useEffect(() => {
     if (currentQuotation) return;
@@ -31,12 +30,12 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <section className="w-screen min-h-screen flex max-w-full">
       <div
-        className={classNamesAdapter(
+        className={cn(
           "bg-red-400 transition-all",
           visible ? "sidebar-fixed bg-red-500" : "hidden"
         )}
       >
-        <Sidebar visible={visible} setVisible={setVisible} />
+        <Sidebar />
       </div>
 
       <div
@@ -46,9 +45,9 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         }}
         className="ml-auto bg-secondary transition-all"
       >
-        <Navbar setVisible={setVisible} />
+        <Navbar />
 
-        <main className="px-5 pt-28 pb-10 md:px-10 xl:px-20">{children}</main>
+        <main className="px-5 pt-28 pb-10 md:px-10 h-full xl:px-20">{children}</main>
       </div>
     </section>
   );

@@ -14,17 +14,17 @@ export const GenerateModule = () => {
     quoteId: string;
     version: string;
   }>();
-  const { currentStep } = useSelector((state: AppState) => state.quotation);
-
+  
   const { currentVersionQuotation } = useSelector(
     (state: AppState) => state.versionQuotation
   );
   const { hotelRoomTripDetailsWithTotalCost } = useSelector(
     (state: AppState) => state.hotelRoomTripDetails
   );
+  
 
   const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
-  const [profitMargin, setProfitMargin] = useState<number>(80);
+  const [profitMargin, setProfitMargin] = useState<number>(currentVersionQuotation?.profitMargin ?? 80);
   const [finalPrice, setFinalPrice] = useState<number>(0);
   const [isExploding, setIsExploding] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
@@ -58,18 +58,6 @@ export const GenerateModule = () => {
   };
 
   useEffect(() => {
-    if (currentStep !== 3) return;
-    if (!currentVersionQuotation) return;
-    if (currentVersionQuotation?.profitMargin) return;
-    updateVersionQuotation(
-      versionQuotationDto.parse({
-        ...currentVersionQuotation!,
-        profitMargin,
-      })
-    );
-  }, [currentStep]);
-
-  useEffect(() => {
     if (!currentVersionQuotation) return;
     if (!currentVersionQuotation.profitMargin) return;
     setProfitMargin(currentVersionQuotation.profitMargin);
@@ -86,22 +74,23 @@ export const GenerateModule = () => {
         );
       }, 0)
     );
-  }, [finalPrice, currentVersionQuotation, hotelRoomTripDetailsWithTotalCost]);
+  }, [finalPrice, currentVersionQuotation, profitMargin, hotelRoomTripDetailsWithTotalCost]);
 
   useEffect(() => {
     if (
       deepEqual(currentVersionQuotation, {
         ...currentVersionQuotation!,
-        finalPrice,
+        finalPrice: +finalPrice.toFixed(2),
         profitMargin,
         completionPercentage: 100,
         status: VersionQuotationStatus.COMPLETED,
-      })
+      }) &&
+      !isExploding
     ) {
       setDisableButton(true);
       return;
     } else setDisableButton(false);
-  }, [currentVersionQuotation, finalPrice, profitMargin]);
+  }, [currentVersionQuotation, finalPrice, profitMargin, isExploding]);
 
 
   return (
@@ -125,14 +114,7 @@ export const GenerateModule = () => {
           className="w-full"
         />
         <Slider
-          onSlideEnd={(e) => {
-            updateVersionQuotation(
-              versionQuotationDto.parse({
-                ...currentVersionQuotation!,
-                profitMargin: e.value as number,
-              })
-            );
-          }}
+         
           value={profitMargin}
           min={0}
           onChange={(e) => setProfitMargin(e.value as number)}
@@ -141,7 +123,7 @@ export const GenerateModule = () => {
       </div>
 
       {/* Tabla de costos */}
-      <GenerateTable finalPrice={finalPrice} />
+      <GenerateTable finalPrice={finalPrice} profitMargin={profitMargin} />
 
       <div className="flex justify-end">
         <Button

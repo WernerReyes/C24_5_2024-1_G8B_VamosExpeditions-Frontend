@@ -1,12 +1,5 @@
-import { requestValidator } from "@/core/utils";
+import { dtoValidator } from "@/core/utils";
 import { z } from "zod";
-
-export type HotelRoomTripDetailsDto = {
-  readonly tripDetailsId: number;
-  readonly hotelRoomId: number;
-  readonly day: number;
-  readonly numberOfPeople: number;
-};
 
 const hotelRoomTripDetailsDtoSchema = z.object({
   tripDetailsId: z.number(),
@@ -15,11 +8,14 @@ const hotelRoomTripDetailsDtoSchema = z.object({
   numberOfPeople: z.number(),
 });
 
+export type HotelRoomTripDetailsDto = z.infer<
+  typeof hotelRoomTripDetailsDtoSchema>
+
 export const hotelRoomTripDetailsDto = {
   create: (
     dto: HotelRoomTripDetailsDto
   ): [HotelRoomTripDetailsDto?, string[]?] => {
-    const errors = requestValidator(dto, hotelRoomTripDetailsDtoSchema);
+    const errors = dtoValidator(dto, hotelRoomTripDetailsDtoSchema);
     if (errors) {
       return [undefined, errors];
     }

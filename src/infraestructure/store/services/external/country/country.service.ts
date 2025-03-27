@@ -14,11 +14,11 @@ export const externalCountryService = createApi({
       void
     >({
       query: () => "/",
+      keepUnusedDataFor: 1000 * 60 * 60 * 60, //* 24 hours
     }),
   }),
 });
 
 export const {
-  useLazyGetAllExternalCountriesQuery,
   useGetAllExternalCountriesQuery,
 } = externalCountryService;

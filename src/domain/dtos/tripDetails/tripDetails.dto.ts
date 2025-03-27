@@ -1,26 +1,11 @@
-import { generateEmptyObject, requestValidator } from "@/core/utils";
+import { dateFnsAdapter } from "@/core/adapters";
+import { generateEmptyObject, dtoValidator } from "@/core/utils";
 import {
   OrderType,
   TravelerStyle,
   TripDetailsEntity
 } from "@/domain/entities";
 import { z } from "zod";
-
-export type TripDetailsDto = {
-  readonly versionQuotationId: {
-    readonly quotationId: number;
-    readonly versionNumber: number;
-  },
-  readonly clientId: number;
-  readonly numberOfPeople: number;
-  readonly travelDates: Date[];
-  readonly code: string;
-  readonly travelerStyle: TravelerStyle;
-  readonly orderType: OrderType;
-  readonly destination: { [key: number]: boolean };
-  readonly specialSpecifications: string;
-  readonly id: number;
-};
 
 const tripDetailsDtoSchema = z.object({
   versionQuotationId: z.object({
@@ -76,9 +61,11 @@ const tripDetailsDtoSchema = z.object({
   id: z.number(),
 });
 
+export type TripDetailsDto = z.infer<typeof tripDetailsDtoSchema>;
+
 export const tripDetailsDto = {
   create: (tripDetailsDto: TripDetailsDto): [TripDetailsDto?, string[]?] => {
-    const errors = requestValidator(tripDetailsDto, tripDetailsDtoSchema);
+    const errors = dtoValidator(tripDetailsDto, tripDetailsDtoSchema);
     if (errors) {
       return [undefined, errors];
     }
@@ -91,8 +78,8 @@ export const tripDetailsDto = {
       clientId: tripDetailsEntity.client!.id,
       numberOfPeople: tripDetailsEntity.numberOfPeople,
       travelDates: [
-        new Date(tripDetailsEntity.startDate),
-        new Date(tripDetailsEntity.endDate),
+       tripDetailsEntity.startDate,
+       tripDetailsEntity.endDate,
       ],
       code: tripDetailsEntity.code,
       travelerStyle: tripDetailsEntity.travelerStyle,

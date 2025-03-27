@@ -12,15 +12,16 @@ import {
   reportService,
   tripDetailsServiceStore,
   userService,
+  rtkQueryErrorLogger,
 } from "@/infraestructure/store/services";
 
 import {
+  sidebarSlice,
   authSlice,
   quotationSlice,
   clientSlice,
   countrySlice,
   cookieExpirationSlice,
-  reservationSlice,
   hotelSlice,
   versionquotationSlice,
   hotelRoomTripDetailsSlice,
@@ -29,6 +30,7 @@ import {
 
 export const store = configureStore({
   reducer: {
+    sidebar: sidebarSlice.reducer,
     auth: authSlice.reducer,
     hotel: hotelSlice.reducer,
     quotation: quotationSlice.reducer,
@@ -36,7 +38,6 @@ export const store = configureStore({
     hotelRoomTripDetails: hotelRoomTripDetailsSlice.reducer,
     client: clientSlice.reducer,
     country: countrySlice.reducer,
-    reservation: reservationSlice.reducer,
     tripDetails: tripDetailsSlice.reducer,
     cookieExpiration: cookieExpirationSlice.reducer,
     [tripDetailsServiceStore.reducerPath]: tripDetailsServiceStore.reducer,
@@ -67,7 +68,8 @@ export const store = configureStore({
       .concat(versionQuotationService.middleware)
       .concat(hotelRoomTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
-      .concat(reportService.middleware),
+      .concat(reportService.middleware)
+      .concat(rtkQueryErrorLogger),
 });
 
 export type AppState = ReturnType<typeof store.getState>;

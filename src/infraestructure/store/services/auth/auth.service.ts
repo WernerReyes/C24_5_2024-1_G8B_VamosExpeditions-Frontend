@@ -5,6 +5,7 @@ import type { LoginResponse } from "./auth.response";
 import type { ApiResponse } from "../response";
 import { onLogin, onLogout } from "../../slices/auth.slice";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
+import { onSetCookieExpiration, onSetExpired } from "../../slices/cookieExpiration.slice";
 
 const PREFIX = "/auth";
 
@@ -13,21 +14,43 @@ export const authService = createApi({
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
     login: builder.mutation<ApiResponse<LoginResponse>, LoginDto>({
-      query: (loginDto) => ({
+      query: (body) => {
+        //* Validate before sending
+        const [dto, errors] = loginDto.create(body);
+        if (errors) throw errors;
+        return {
         url: "/login",
         method: "POST",
-        body: loginDto,
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        const [_, errors] = loginDto.create(arg);
-        if (errors) throw errors;
+        body: dto,
+      }},
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(onLogin(data.data.user));
           startShowSuccess(data.message);
         } catch (error: any) {
-          console.log("error", error);
           startShowApiError(error.error);
+        }
+      },
+    }),
+
+    reLogin: builder.mutation<ApiResponse<LoginResponse>, void>({
+      query: () => {
+        return {
+          url: "/re-login",
+          method: "POST",
+        };
+      },
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(onLogin(data.data.user));
+          console.log(data.data.expiresAt);
+          dispatch(onSetCookieExpiration(data.data.expiresAt));
+          dispatch(onSetExpired(false));
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
         }
       },
     }),
@@ -41,15 +64,17 @@ export const authService = createApi({
         } catch (error: any) {}
       },
     }),
-    logout: builder.query<null, void>({
-      query: () => "/logout",
+    logout: builder.mutation<void, void>({
+      query: () => ({
+        url: "/logout",
+        method: "POST",
+      }),
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
           dispatch(onLogout());
         } catch (error: any) {
-          console.log("error", error);
-          startShowApiError(error.error);
+          if (error.error) startShowApiError(error.error);
         }
       },
     }),
@@ -58,7 +83,8 @@ export const authService = createApi({
 
 export const {
   useLoginMutation,
+  useReLoginMutation,
   useLazyUserAuthenticatedQuery,
   useUserAuthenticatedQuery,
-  useLazyLogoutQuery,
+  useLogoutMutation,
 } = authService;

@@ -5,7 +5,7 @@ import {
 } from "primereact/selectbutton";
 import { type SkeletonProps, Skeleton } from "./Skeleton";
 import type { SelectItem } from "primereact/selectitem";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 import { HTMLAttributes, LabelHTMLAttributes } from "react";
 
 interface Props extends SelectButtonProps {
@@ -31,7 +31,7 @@ export const SelectButton = ({
               key={index}
               shape="rectangle"
               height="3rem"
-              className={classNamesAdapter(
+              className={cn(
                 props.value === option.value && "bg-primary text-white"
               )}
               {...skeleton}

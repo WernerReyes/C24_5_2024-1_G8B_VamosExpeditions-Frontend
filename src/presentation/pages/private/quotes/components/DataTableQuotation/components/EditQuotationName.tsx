@@ -15,7 +15,7 @@ export const EditQuotationName = ({ options }: Props) => {
     <InputText
       disabled={isUpdating}
       value={options.rowData.name}
-      className="max-w-32 text-sm"
+      className="max-w-48 text-sm"
       onChange={(e) => options.editorCallback?.(e.target.value)}
       onBlur={() => {
         if (options.value === frozenName || !options.value.trim()) return;

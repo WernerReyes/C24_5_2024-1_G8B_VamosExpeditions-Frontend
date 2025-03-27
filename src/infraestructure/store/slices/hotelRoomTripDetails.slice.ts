@@ -5,6 +5,7 @@ type HotelRoomTripDetailsSliceState = {
   hotelRoomTripDetails: HotelRoomTripDetailsEntity[];
   hotelRoomTripDetailsWithTotalCost: (HotelRoomTripDetailsEntity & {
     totalCost: number;
+    number?: number;
   })[];
   isFetchingHotelRoomTripDetails: boolean;
 };
@@ -33,7 +34,7 @@ export const hotelRoomTripDetailsSlice = createSlice({
       state,
       {
         payload,
-      }: PayloadAction<(HotelRoomTripDetailsEntity & { totalCost: number })[]>
+      }: PayloadAction<(HotelRoomTripDetailsEntity & { totalCost: number, number?: number })[]>
     ) => {
       return {
         ...state,

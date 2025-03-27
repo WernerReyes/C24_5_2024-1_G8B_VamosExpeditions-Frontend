@@ -1,23 +1,32 @@
-import { useUpdateOfficialVersionQuotationMutation } from "@/infraestructure/store/services";
-import { ColumnEditorOptions, Dropdown, Tag } from "@/presentation/components";
+import { cn } from "@/core/adapters";
+import { ReservationStatus, VersionQuotationStatus } from "@/domain/entities";
+import {
+  useUpdateOfficialVersionQuotationMutation,
+  useUpsertReservationMutation,
+} from "@/infraestructure/store/services";
+import { type ColumnEditorOptions, Dropdown } from "@/presentation/components";
+
 type Props = {
   options: ColumnEditorOptions;
 };
+
 export const EditorQuotationOfficial = ({ options }: Props) => {
-  const [
-    updateOfficialVersionQuotation,
-  ] = useUpdateOfficialVersionQuotationMutation();
+  const [updateOfficialVersionQuotation] =
+    useUpdateOfficialVersionQuotationMutation();
+  const [upsertReservation] = useUpsertReservationMutation();
 
   return (
     <Dropdown
       value={options.rowData.official}
       options={[{ label: "Oficial", value: true }]}
-      itemTemplate={(option) => <Tag value={option.label} severity="success" />}
+      itemTemplate={() => <i className="pi pi-check-circle" />}
       valueTemplate={() => {
         return (
-          <Tag
-            value={options.value ? "Oficial" : "No oficial"}
-            severity={options.value ? "success" : "warning"}
+          <i
+            className={cn(
+              "pi",
+              options.value ? "pi-check-circle" : "pi-times-circle"
+            )}
           />
         );
       }}
@@ -26,9 +35,25 @@ export const EditorQuotationOfficial = ({ options }: Props) => {
         updateOfficialVersionQuotation({
           versionNumber: options.rowData.id.versionNumber,
           quotationId: options.rowData.id.quotationId,
-        }).unwrap().then(() => {
-          options.editorCallback?.(e.value);
         })
+          .unwrap()
+          .then(({ data }) => {
+            options.editorCallback?.(e.value);
+            console.log(data)
+            if (data.newOfficial.status === VersionQuotationStatus.APPROVED) {
+              upsertReservation({
+                id: 0,
+                quotationId: options.rowData.id.quotationId,
+                status: ReservationStatus.PENDING
+              })
+              .then(() => {
+                console.log("Reservation updated");
+              })
+              .catch((error) => {
+                console.error(error);
+              })
+            }
+          });
       }}
       placeholder="Seleccionar tipo de cotización"
       className="w-full"

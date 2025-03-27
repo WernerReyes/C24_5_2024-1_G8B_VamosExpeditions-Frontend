@@ -12,23 +12,24 @@ export const hotelService = createApi({
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
     getHotels: builder.query<ApiResponse<HotelEntity[]>, GetHotelsDto>({
-      query: (getHotelsDto) => {
+      query: (params) => {
+        const [_, errors] = getHotelsDto.create(params);
+        if (errors) throw errors;
         return {
           url: "/",
           method: "GET",
-          params: getHotelsDto,
+          params
         };
       },
       providesTags: ["Hotels"],
-      async onQueryStarted(params, { queryFulfilled }) {
-        const [_, errors] = getHotelsDto.create(params);
-        if (errors) throw errors;
+      async onQueryStarted(_, { queryFulfilled }) {
         try {
           await queryFulfilled;
         } catch (error) {
           throw error;
         }
       },
+      keepUnusedDataFor: 1000 * 60 * 60, //* 1 hour
     }),
     getHotelPdf: builder.query<Blob, { id: number }>({
       query: ({ id }) => ({
@@ -40,4 +41,4 @@ export const hotelService = createApi({
   }),
 });
 
-export const { useLazyGetHotelsQuery, useGetHotelsQuery } = hotelService;
+export const {  useGetHotelsQuery } = hotelService;

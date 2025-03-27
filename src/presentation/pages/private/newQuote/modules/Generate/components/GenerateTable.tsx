@@ -1,108 +1,53 @@
 import type { AppState } from "@/app/store";
-import { classNamesAdapter } from "@/core/adapters";
-import { HotelRoomTripDetailsEntity } from "@/domain/entities";
+import { cn } from "@/core/adapters";
 import { Badge, Column, DataTable } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
 import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "primereact/row";
-import { useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { onSetHotelRoomTripDetailsWithTotalCost } from "@/infraestructure/store";
-import type { CostTableType } from "../../types/costTable.type";
-import { calculateCosts } from "../../utils/calculateCosts";
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { useCalculateCostsPerService } from "../../../hooks/useCalculateCostsPerService";
 
 type Props = {
   finalPrice: number;
+  profitMargin: number;
 };
 
-export const GenerateTable = ({ finalPrice }: Props) => {
-  const dispatch = useDispatch();
+export const GenerateTable = ({ finalPrice, profitMargin }: Props) => {
   const { width, TABLET } = useWindowSize();
 
-  const { currentVersionQuotation } = useSelector(
-    (state: AppState) => state.versionQuotation
-  );
-
-  const { hotelRoomTripDetailsWithTotalCost, hotelRoomTripDetails } =
+  const { hotelRoomTripDetailsWithTotalCost } =
     useSelector((state: AppState) => state.hotelRoomTripDetails);
 
-  const uniqueHotelRoomTripDetails: (HotelRoomTripDetailsEntity & {
-    number: number;
-  })[] = useMemo(() => {
-    if (hotelRoomTripDetails.length === 0) return [];
-    return hotelRoomTripDetailsWithTotalCost.length === 0
-      ? hotelRoomTripDetails
-          .map((quote) => {
-            return {
-              ...quote,
-              number: hotelRoomTripDetails.filter(
-                (t) =>
-                  t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
-                  t.hotelRoom?.roomType === quote.hotelRoom?.roomType
-              ).length,
-            };
-          })
-          .filter(
-            (quote, index, self) =>
-              index ===
-              self.findIndex(
-                (t) =>
-                  t.hotelRoom?.hotel?.id === quote.hotelRoom?.hotel?.id &&
-                  t.hotelRoom?.roomType === quote.hotelRoom?.roomType
-              )
-          )
-      : [];
-  }, [hotelRoomTripDetails, hotelRoomTripDetailsWithTotalCost]);
+  const {  } = useCalculateCostsPerService();
 
-  const calculateCostsPerService: CostTableType[] = useMemo(() => {
-    if (hotelRoomTripDetails.length === 0) return [];
-    return hotelRoomTripDetailsWithTotalCost.length === 0
-      ? calculateCosts(
-          hotelRoomTripDetails,
-          currentVersionQuotation?.indirectCostMargin
-        )
-      : [];
-  }, [
-    hotelRoomTripDetails,
-    hotelRoomTripDetailsWithTotalCost,
-    currentVersionQuotation?.indirectCostMargin,
-  ]);
 
-  useEffect(() => {
-    if (
-      uniqueHotelRoomTripDetails.length === 0 &&
-      calculateCostsPerService.length === 0
-    )
-      return;
-    dispatch(
-      onSetHotelRoomTripDetailsWithTotalCost(
-        uniqueHotelRoomTripDetails.map((quote, index) => {
-          const totalCost =
-            (
-              calculateCostsPerService[index].total as {
-                [key: string]: {
-                  total: number;
-                  indirectCost: number;
-                  directCost: number;
-                  totalCost: number;
-                };
-              }
-            )[`${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`]
-              ?.totalCost ?? 0;
-
-          return {
-            ...quote,
-            totalCost,
-          };
-        })
-      )
-    );
-  }, [uniqueHotelRoomTripDetails, calculateCostsPerService]);
+  const calculateSalesPrice = useMemo(() => {
+    return hotelRoomTripDetailsWithTotalCost.map((quote) => {
+      const calculatedSalesPrice = parseFloat(
+        (
+          quote.totalCost /
+          ((profitMargin) / 100)
+        ).toFixed(2)
+      );
+      return {
+        utility: parseFloat(
+          (calculatedSalesPrice - quote.totalCost).toFixed(2)
+        ),
+        hotelName: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
+        margin: profitMargin,
+        numberOfPeople: quote.numberOfPeople,
+        totalCost: +quote.totalCost.toFixed(2),
+        salesPrice: calculatedSalesPrice,
+        number: quote.number,
+      };
+    });
+  }, [hotelRoomTripDetailsWithTotalCost, profitMargin]);
 
   return (
     <DataTable
       header="Cotización final"
-      value={hotelRoomTripDetailsWithTotalCost}
+      value={calculateSalesPrice}
       className="w-full border-collapse mb-5 font-bold"
       footerColumnGroup={
         <ColumnGroup>
@@ -110,7 +55,7 @@ export const GenerateTable = ({ finalPrice }: Props) => {
             <Column
               footer={
                 <div
-                  className={classNamesAdapter(
+                  className={cn(
                     "text-white md:text-lg",
                     width < TABLET && "flex items-center"
                   )}
@@ -125,7 +70,7 @@ export const GenerateTable = ({ finalPrice }: Props) => {
                 </div>
               }
               colSpan={width > TABLET ? 5 : 6}
-              className={classNamesAdapter(
+              className={cn(
                 "bg-primary text-white",
                 width > TABLET && "text-right"
               )}
@@ -149,8 +94,8 @@ export const GenerateTable = ({ finalPrice }: Props) => {
         field="hotelRoom.hotel.name"
         body={(rowData) => (
           <>
-            {rowData.hotelRoom?.hotel?.name}-{rowData.hotelRoom?.roomType}
-            <Badge className="ms-2 bg-tertiary" value={rowData.number} />
+            {rowData.hotelName}
+            <Badge className="ms-2 bg-tertiary" value={rowData?.number} />
           </>
         )}
       />
@@ -161,7 +106,7 @@ export const GenerateTable = ({ finalPrice }: Props) => {
         className="max-sm:text-xs max-md:text-sm"
         field="totalCost"
         header="Total de Costos"
-        body={(rowData) => <>${rowData.totalCost.toFixed(2)}</>}
+        body={(rowData) => <>${rowData.totalCost}</>}
       />
       <Column
         alignHeader={"center"}
@@ -169,7 +114,7 @@ export const GenerateTable = ({ finalPrice }: Props) => {
         headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
         className="max-sm:text-xs max-md:text-sm"
         header="Margen"
-        body={<span>{currentVersionQuotation?.profitMargin}%</span>}
+        body={<span>{profitMargin}%</span>}
       />
 
       <Column
@@ -187,19 +132,7 @@ export const GenerateTable = ({ finalPrice }: Props) => {
         className="max-sm:text-xs max-md:text-sm"
         header="Utilidad"
         body={(rowData) => {
-          const calculatedSalesPrice = parseFloat(
-            (
-              rowData.totalCost /
-              ((currentVersionQuotation?.profitMargin ?? 80) / 100)
-            ).toFixed(2)
-          );
-          return (
-            <span>
-              ${parseFloat(
-                (calculatedSalesPrice - rowData.totalCost).toFixed(2)
-              ).toFixed(2)}
-            </span>
-          );
+          return <span>${rowData.utility}</span>;
         }}
       />
       <Column
@@ -209,16 +142,11 @@ export const GenerateTable = ({ finalPrice }: Props) => {
         className="max-sm:text-xs max-md:text-sm"
         header="Precio venta"
         body={(rowData) => {
-          const calculatedSalesPrice = parseFloat(
-            (
-              rowData.totalCost /
-              ((currentVersionQuotation?.profitMargin ?? 80) / 100)
-            ).toFixed(2)
-          );
-
-          return <span>${calculatedSalesPrice}</span>;
+          return <span>${rowData.salesPrice}</span>;
         }}
       />
     </DataTable>
   );
 };
+
+// const calculatePinal

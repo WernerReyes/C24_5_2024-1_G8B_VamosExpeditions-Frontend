@@ -1,5 +1,4 @@
 export * from './user.entity';
-export * from './quote.entity';
 export * from './role.entity';
 export * from './city.entity';
 export * from './country.entity';

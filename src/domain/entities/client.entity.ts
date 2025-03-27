@@ -1,27 +1,18 @@
-import { generateEmptyObject } from "@/core/utils";
-import { type Subregion, SUBREGIONS } from "@/presentation/types";
-import { z } from "zod";
+import type { Subregion } from "@/presentation/types";
 
-export const clientEntitySchema = z.object({
-  id: z.number().int().positive().min(1),
-  fullName: z.string(),
-  email: z.string(),
-  phone: z.string(),
-  country: z.object({
-    name: z.string(),
-    image: z.object({
-      png: z.string(),
-      svg: z.string(),
-    }),
-  }),
-  subregion: z.string().refine((value): value is Subregion => {
-    return SUBREGIONS.includes(value);
-  }),
-  cretedAt: z.string(),
-  updatedAt: z.string(),
-});
-
-export type ClientEntity = z.infer<typeof clientEntitySchema>;
-
-export const clientEntityEmpty =
-  generateEmptyObject<ClientEntity>(clientEntitySchema);
+export interface ClientEntity {
+  readonly id: number;
+  readonly fullName: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly country: {
+    readonly name: string;
+    readonly image?: {
+      readonly png: string;
+      readonly svg: string;
+    };
+  };
+  readonly subregion: Subregion;
+  readonly cretedAt: string;
+  readonly updatedAt: string;
+}

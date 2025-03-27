@@ -1,7 +1,7 @@
 import type { AppState } from "@/app/store";
 import { constantRoutes } from "@/core/constants";
-import { useCleanStore } from "@/infraestructure/hooks";
-import { onSetOperationType } from "@/infraestructure/store";
+import { quotationService } from "@/data";
+import { onSetCurrentQuotation, onSetDays } from "@/infraestructure/store";
 import { Button, Dialog } from "@/presentation/components";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -14,40 +14,45 @@ type Props = {
 const { QUOTES, EDIT_QUOTE } = constantRoutes.private;
 
 export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
+  const dispatch = useDispatch();
   const { quoteId, version } = useParams<{
     quoteId: string;
     version: string;
   }>();
-  const { cleanGenerateNewQuotation } = useCleanStore();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { currentVersionQuotation } = useSelector(
     (state: AppState) => state.versionQuotation
   );
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     if (visible) {
       setVisible(false);
       if (!quoteId && !version) {
-        dispatch(onSetOperationType("edit"));
-        navigate(
-          `${EDIT_QUOTE}/${currentVersionQuotation?.id.quotationId}/${currentVersionQuotation?.id.versionNumber}`
-        );
-        cleanGenerateNewQuotation();
+        navigate(EDIT_QUOTE(currentVersionQuotation?.id));
+        
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        
+        await quotationService.deleteCurrentQuotation().then(() => {
+          dispatch(onSetCurrentQuotation(null));
+          // dispatch(onSetDays([]));
+        })
         return;
       }
     }
   };
 
-  const handleWatchQuotes = () => {
+  const handleWatchQuotes = async() => {
     if (visible) {
-      if (!quoteId && !version) {
-        cleanGenerateNewQuotation();
-      } else {
-        navigate(QUOTES);
-      }
+      navigate(QUOTES);
       setVisible(false);
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      await quotationService.deleteCurrentQuotation().then(() => {
+        dispatch(onSetCurrentQuotation(null));
+        // dispatch(onSetDays([]));
+      })
     }
   };
 
@@ -70,7 +75,8 @@ export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
         </div>
         <div className="text-center space-y-2">
           <h3 className="text-2xl font-semibold tracking-tight">
-            ¡Cotización {currentVersionQuotation?.name} creada!
+            ¡Cotización <strong>{currentVersionQuotation?.name}</strong>{" "}
+            {quoteId ? "actualizada" : "creada"}!
           </h3>
           <p className="text-[#00A7B5] font-medium"></p>
           <p className="text-gray-500 text-sm">

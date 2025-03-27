@@ -1,4 +1,4 @@
 export * from './StatisticsSummaryGraph';
 export * from './StatsOverviewCard';
-export * from './RecentQuotes';
-export * from './ActiveReserves';
+export * from './RecentQuotes/RecentQuotes';
+export * from './ActiveReserves/ActiveReserves';

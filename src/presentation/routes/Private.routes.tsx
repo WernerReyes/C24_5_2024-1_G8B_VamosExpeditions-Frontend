@@ -1,10 +1,13 @@
-import { constantRoutes } from "@/core/constants";
+import { constantRoutes, constantStorage } from "@/core/constants";
 import { RoleEnum } from "@/domain/entities";
-import { lazy } from "react";
+import { lazy, useEffect } from "react";
 import { Route } from "react-router-dom";
 import { NewQuotationGuard, RoleGuard } from "../guards";
 import { RouterWithNotFound } from "./RouterWithNotFound";
 import { removeBaseRoute } from "@/core/utils";
+import { ExpiredSessionCountdown } from "../components";
+import { useCookieExpirationStore } from "../../infraestructure/hooks/useCookieExpirationStore";
+import { useLocation } from "react-use";
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
 
@@ -20,15 +23,28 @@ const ReservationsPage = lazy(
   () => import("../pages/private/reservations/Reservations.page")
 );
 
-const { BASE } = constantRoutes.private;
+const ProfilePage = lazy(() => import("../pages/private/profile/Profile.page"));
 
-const { DASHBOARD, QUOTES, NEW_QUOTE, EDIT_QUOTE, RESERVATIONS } =
-  removeBaseRoute(constantRoutes.private, BASE);
+const { BASE, VIEW_QUOTE, EDIT_QUOTE, ...rest } = constantRoutes.private;
+
+const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, PROFILE } = removeBaseRoute(
+  rest,
+  BASE
+);
 
 const PrivateRoutes = () => {
+  const { isExpired } = useCookieExpirationStore();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (!pathname) return;
+    localStorage.setItem(constantStorage.CURRENT_ROUTE, pathname);
+  }, [pathname]);
+
   return (
     <MainLayout>
-      <RouterWithNotFound>
+      {isExpired && <ExpiredSessionCountdown isExpired={isExpired} />}
+      <RouterWithNotFound type="private">
         <Route
           element={
             <RoleGuard
@@ -42,12 +58,11 @@ const PrivateRoutes = () => {
           <Route element={<NewQuotationGuard />}>
             <Route path={NEW_QUOTE} element={<NewQuotePage />} />
           </Route>
-          <Route
-            path={EDIT_QUOTE + "/:quoteId/:version"}
-            element={<NewQuotePage />}
-          />
-
+          <Route path={EDIT_QUOTE()} element={<NewQuotePage />} />
+          <Route path={VIEW_QUOTE()} element={<NewQuotePage />} />
           <Route path={RESERVATIONS} element={<ReservationsPage />} />
+
+          <Route path={PROFILE} element={<ProfilePage />} />
 
           {/* <Route path="*" element={<Navigate to="/" />} /> */}
         </Route>

@@ -1,13 +1,8 @@
 import { z } from "zod";
 import { regex } from "@/core/constants";
-import { requestValidator } from "@/core/utils";
+import { dtoValidator } from "@/core/utils";
 
 const { EMAIL, PASSWORD } = regex;
-
-export type LoginDto = {
-  readonly email: string;
-  readonly password: string;
-};
 
 const loginDtoSchema = z.object({
   email: z
@@ -29,10 +24,12 @@ const loginDtoSchema = z.object({
     }),
 });
 
+export type LoginDto = z.infer<typeof loginDtoSchema>;
+
 
 export const loginDto = {
   create: (dto: LoginDto): [LoginDto?, string[]?] => {
-    const errors = requestValidator(dto, loginDtoSchema);
+    const errors = dtoValidator(dto, loginDtoSchema);
     if (errors) {
       return [undefined, errors];
     }

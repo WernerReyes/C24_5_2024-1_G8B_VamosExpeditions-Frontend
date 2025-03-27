@@ -4158,6 +4158,8 @@
     background: #ecfeff;
     color: #0e7490;
   }
+  
+
   .p-column-filter-menu-button:focus-visible {
     outline: 0 none;
     outline-offset: 0;
@@ -5177,8 +5179,7 @@
   .p-card {
     background: #ffffff;
     color: #4b5563;
-    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
-      0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
     border-radius: 6px;
   }
   .p-card .p-card-body {
@@ -5333,6 +5334,9 @@
   .p-splitter .p-splitter-gutter-resizing {
     background: #e5e7eb;
   }
+  
+
+
   .p-stepper .p-stepper-nav {
     display: flex;
     justify-content: space-between;
@@ -7191,6 +7195,13 @@
     padding: 1.25rem;
     font-weight: 700;
   }
+
+  @media screen and (max-width: 640px) {
+    .p-panelmenu .p-panelmenu-header-link {
+      font-size: small;
+    }
+  }
+
   .p-panelmenu
     .p-panelmenu-header
     .p-panelmenu-header-content

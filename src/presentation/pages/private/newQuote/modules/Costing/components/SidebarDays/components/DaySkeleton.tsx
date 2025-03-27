@@ -1,5 +1,5 @@
 import type { AppState } from "@/app/store";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 import { Skeleton } from "@/presentation/components";
 import { useSelector } from "react-redux";
 
@@ -12,7 +12,7 @@ export const DaySkeleton = ({ length }: Props) => {
   return Array.from({ length }).map((_, index) => (
     <li
       key={index}
-      className={classNamesAdapter(
+      className={cn(
         "p-4 flex items-center rounded-lg h-24 animate-pulse",
         selectedDay?.id === index + 1
           ? "bg-primary text-white"

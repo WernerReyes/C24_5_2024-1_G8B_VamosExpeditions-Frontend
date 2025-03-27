@@ -1,20 +1,25 @@
-import { classNamesAdapter, dateFnsAdapter } from "@/core/adapters";
+import { cn, dateFnsAdapter } from "@/core/adapters";
 import {
   Button,
   Calendar,
   ConfirmDialog,
   Menu,
   MenuItem,
-  type MenuRef,
   SelectButton,
   Skeleton,
   SplitButton,
+  type MenuRef,
 } from "@/presentation/components";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SidebarDays, Accommodiations } from "./components";
+import { Accommodiations, SidebarDays } from "./components";
 
 import type { AppState } from "@/app/store";
-import { VersionQuotationStatus, type CityEntity, type HotelRoomTripDetailsEntity } from "@/domain/entities";
+import { constantStorage } from "@/core/constants";
+import { tripDetailsDto } from "@/domain/dtos/tripDetails";
+import {
+  type CityEntity,
+  type HotelRoomTripDetailsEntity,
+} from "@/domain/entities";
 import {
   onFetchHotelRoomTripDetails,
   onSetHotels,
@@ -23,15 +28,11 @@ import {
   useDeleteManyHotelRoomTripDetailsMutation,
   useGetHotelsQuery,
   useUpdateManyHotelRoomTripDetailsByDateMutation,
-  useUpdateVersionQuotationMutation,
   useUpsertTripDetailsMutation,
 } from "@/infraestructure/store/services";
-import { useDispatch, useSelector } from "react-redux";
-import { constantStorage } from "@/core/constants";
-import { SelectItem } from "primereact/selectitem";
 import { SelectButtonChangeEvent } from "primereact/selectbutton";
-import { tripDetailsDto } from "@/domain/dtos/tripDetails";
-import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+import { SelectItem } from "primereact/selectitem";
+import { useDispatch, useSelector } from "react-redux";
 
 const { ITINERARY_CURRENT_ACTIVITY } = constantStorage;
 
@@ -81,12 +82,12 @@ const SERVICES: MenuItem[] = [
 export const CostingModule = () => {
   const dispatch = useDispatch();
 
-  const { currentVersionQuotation } = useSelector(
-    (state: AppState) => state.versionQuotation
-  );
-
   const { currentTripDetails } = useSelector(
     (state: AppState) => state.tripDetails
+  );
+
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
   );
 
   const { hotelRoomTripDetails } = useSelector(
@@ -94,8 +95,6 @@ export const CostingModule = () => {
   );
 
   const { selectedDay } = useSelector((state: AppState) => state.quotation);
-
-  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
 
   const [upsertTripDetails] = useUpsertTripDetailsMutation();
 
@@ -142,32 +141,10 @@ export const CostingModule = () => {
     type?: "delete" | "updateAndDeleteMany";
   }>({ visible: false, message: "" });
 
-  const handleUpdateCompletionPorcentaje = (
-    hotelRoomsDeleted: HotelRoomTripDetailsEntity[]
-  ) => {
-    const restHotelRooms = hotelRoomTripDetails.filter(
-      (hotel) =>
-        !hotelRoomsDeleted.some((deletedHotel) => deletedHotel.id === hotel.id)
-    );
-
-    if (restHotelRooms.length === 0) {
-      updateVersionQuotation(
-        versionQuotationDto.parse({
-          ...currentVersionQuotation!,
-          status: VersionQuotationStatus.DRAFT, 
-          finalPrice: undefined,
-            profitMargin: undefined,
-            indirectCostMargin: undefined,
-          completionPercentage: 25,
-        })
-      );
-    } 
-  };
-
   const handleDelete = () => {
     if (hotelRoomQuotationIdsPerDay.length > 0 && startDate && endDate) {
       deleteManyHotelRoomTripDetails(hotelRoomQuotationIdsPerDay).then(
-        async ({ data }) => {
+        async () => {
           if (
             dateFnsAdapter.isSameDay(startDate, selectedDay!.date) ||
             dateFnsAdapter.isSameDay(endDate, selectedDay!.date)
@@ -184,9 +161,6 @@ export const CostingModule = () => {
               setConfirmDialog({ visible: false });
             });
           }
-
-         //* Change the porcentaje
-         handleUpdateCompletionPorcentaje(data!.data);
         }
       );
     }
@@ -198,31 +172,30 @@ export const CostingModule = () => {
   ]) => {
     if (!currentTripDetails) return;
     await upsertTripDetails({
-      tripDetailsDto: tripDetailsDto.parse({
-        ...currentTripDetails,
-        startDate,
-        endDate,
-      }),
+      tripDetailsDto: {
+        ...tripDetailsDto.parse({
+          ...currentTripDetails,
+          startDate,
+          endDate,
+        }),
+        versionQuotationId: currentVersionQuotation!.id,
+      },
       showMessage: false,
     });
   };
 
   const handleDeleteManyDays = () => {
     if (hotelsQuotationsOutSideDateRange.length > 0 && startDate && endDate) {
+      console.log({ startDate, endDate });
       handleUpsertTripDetails([startDate, endDate]).then(() => {
         deleteManyHotelRoomTripDetails(
           hotelsQuotationsOutSideDateRange.map((quote) => quote.id)
-        ).then(({ data }) => {
-          setIsDayDeleted(true);
+        ).then(() => {
           setConfirmDialog({ visible: false });
-
-          //* Change the porcentaje
-         handleUpdateCompletionPorcentaje(data!.data);
         });
       });
     }
   };
-
 
   const hotelRoomQuotationIdsPerDay = useMemo(() => {
     if (selectedDay && hotelRoomTripDetails.length > 0) {
@@ -266,7 +239,7 @@ export const CostingModule = () => {
   }, [isUpdatingManyHotelRoomTripDetails, isDeletingManyHotelRoomTripDetails]);
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <ConfirmDialog
         group="declarative"
         visible={visible}
@@ -277,6 +250,17 @@ export const CostingModule = () => {
         className="max-w-lg"
         acceptLabel="Sí"
         accept={type === "delete" ? handleDelete : handleDeleteManyDays}
+        // reject={
+        //   type === "delete"
+        //     ? undefined
+        //     : () => {
+        //         setDateRange(
+        //           currentTripDetails
+        //             ? [currentTripDetails.startDate, currentTripDetails.endDate]
+        //             : [null, null]
+        //         );
+        //       }
+        // }
         rejectLabel="No"
       />
       <div className="max-w-screen-2xl mx-auto">
@@ -291,7 +275,7 @@ export const CostingModule = () => {
               currentTripDetails?.cities?.map((city: CityEntity) => ({
                 label: city.name,
                 command: () => setSelectedCity(city),
-                className: classNamesAdapter(
+                className: cn(
                   "border-[#D0D5DD]",
                   selectedCity === city
                     ? "bg-secondary"
@@ -330,6 +314,7 @@ export const CostingModule = () => {
                   });
                   setHotelsQuotationsOutSideDateRange(daysToDelete);
                 } else {
+                  console.log("e.value", e.value);
                   handleUpsertTripDetails(e.value as [Date, Date]);
                 }
               }
@@ -410,16 +395,12 @@ export const CostingModule = () => {
                 onChange={(e: SelectButtonChangeEvent) =>
                   setActivity(e.value ?? activity)
                 }
-                // className="max-w-[50rem] mx-auto"
-
                 itemTemplate={(option) => (
                   <span className="max-sm:text-xs flex flex-col sm:flex-row font-bold justify-center mx-auto gap-x-2 items-center">
                     <i className={`${option.icon}`}></i>
                     <span>{option.label}</span>
                   </span>
                 )}
-                // optionValue="value"
-
                 options={OPTIONS}
               />
 

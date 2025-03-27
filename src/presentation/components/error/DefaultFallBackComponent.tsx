@@ -1,4 +1,4 @@
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 import { Button } from "../Button";
 
 type Props = {
@@ -25,7 +25,7 @@ export const DefaultFallBackComponent = ({
           refetch();
         }}
         text
-        icon={classNamesAdapter({
+        icon={cn({
           "pi pi-spin pi-spinner": isFetching,
           "pi pi-refresh": !isFetching,
         })}

@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense} from "react";
 import { Provider } from "react-redux";
 import { PrimeReactProvider } from "primereact/api";
 import { AppRouter } from "./routes";
@@ -8,6 +8,7 @@ import "./App.css";
 import "primeicons/primeicons.css";
 
 function App() {
+  
   return (
     <>
       <Provider store={store}>

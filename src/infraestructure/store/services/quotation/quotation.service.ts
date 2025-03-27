@@ -4,7 +4,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { requestConfig } from "../config";
 import type { ApiResponse } from "../response";
 import { onSetCurrentQuotation } from "../../slices/quotation.slice";
-import { onUpsertVersionQuotation } from "../../slices/versionQuotation.slice";
+import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
+import { AppState } from "@/app/store";
 
 const PREFIX = "/quotation";
 
@@ -13,32 +14,27 @@ export const quotationServiceStore = createApi({
   tagTypes: ["Quotations", "Quotation"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    getAllQuotations: builder.query<ApiResponse<QuotationEntity[]>, void>({
-      query: () => "/",
-      providesTags: ["Quotations"],
-    }),
     createQuotation: builder.mutation<ApiResponse<QuotationEntity>, void>({
       query: () => ({
         url: "/",
         method: "POST",
       }),
       invalidatesTags: ["Quotations"],
-      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled, getState }) {
         try {
           const { data } = await queryFulfilled;
-
-       
-          if (data.data.versions) {
-            console.log(data.data.versions[0])
-            dispatch(onUpsertVersionQuotation(data.data.versions[0]));
-          }
 
           const transformedData = transformQuotation(data.data);
 
           await quotationService.upsertQuotation(transformedData);
           dispatch(onSetCurrentQuotation(transformedData));
+
+          versionQuotationCache.updateVersionQuotationFromAnotherService(
+            data.data!.versions![0],
+            dispatch,
+            getState as () => AppState
+          );
         } catch (error) {
-          console.error(error);
           throw error;
         }
       },
@@ -46,8 +42,7 @@ export const quotationServiceStore = createApi({
   }),
 });
 
-export const { useLazyGetAllQuotationsQuery, useCreateQuotationMutation } =
-  quotationServiceStore;
+export const { useCreateQuotationMutation } = quotationServiceStore;
 
 const transformQuotation = (data: QuotationEntity): LocalQuotationEntity => {
   const version = data.versions?.[0];
@@ -58,5 +53,3 @@ const transformQuotation = (data: QuotationEntity): LocalQuotationEntity => {
     },
   };
 };
-
-

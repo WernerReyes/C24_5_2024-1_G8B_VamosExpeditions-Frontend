@@ -5,7 +5,7 @@ import {
   MultiSelect,
   type MultiSelectChangeEvent,
 } from "@/presentation/components";
-import { UserInfo } from "../components";
+import { UserInfo } from "../../components";
 
 type Props = {
   options: ColumnFilterElementTemplateOptions;
@@ -20,7 +20,7 @@ export const FilterByRepresentative = ({ options }: Props) => {
       options={usersData?.data || []}
       display="chip"
       itemTemplate={(user: UserEntity) => <UserInfo user={user} />}
-      onChange={(e: MultiSelectChangeEvent) => options.filterApplyCallback(e.value, options.index)}
+      onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value, options.index)}
       dataKey="id"
       optionLabel="fullname"
       placeholder="Selecciona representantes"

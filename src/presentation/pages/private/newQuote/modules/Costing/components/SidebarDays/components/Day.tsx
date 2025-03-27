@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 import { onSetSelectedDay } from "@/infraestructure/store";
 
 export const Day = () => {
@@ -15,7 +15,7 @@ export const Day = () => {
         <li
           key={day.id}
           onClick={() => dispatch(onSetSelectedDay(day))}
-          className={classNamesAdapter(
+          className={cn(
             "p-4 rounded-lg cursor-pointer text-sm md:text-base",
             selectedDay?.id === day.id
               ? "bg-primary text-white"
@@ -24,7 +24,7 @@ export const Day = () => {
         >
           <div className="flex items-center space-x-5">
             <p
-              className={classNamesAdapter(
+              className={cn(
                 "font-semibold rounded-full flex items-center justify-center min-w-8 min-h-8",
                 selectedDay?.id === day.id
                   ? "bg-white text-primary"

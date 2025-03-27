@@ -9,7 +9,7 @@ import { measureExecutionTime } from "@/core/utils";
 import { DaySkeleton } from "./components/DaySkeleton";
 import { Day as DayComponent } from "./components/Day";
 import { tripDetailsDto } from "@/domain/dtos/tripDetails";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 
 type Props = {
   setIsDayDeleted: (isDayDeleted: boolean) => void;
@@ -24,6 +24,10 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
 
   const { currentTripDetails } = useSelector(
     (state: AppState) => state.tripDetails
+  );
+
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
   );
 
   const { isFetchingHotelRoomTripDetails } = useSelector(
@@ -43,16 +47,23 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
 
   const [isDeletingDay, setIsDeletingDay] = useState<boolean>(false);
 
-  const handleUpdateReservation = (startDate: Date, endDate: Date) => {
-    if (currentTripDetails && generatedDays) {
-      upsertTripDetails({
-        tripDetailsDto: tripDetailsDto.parse({
-          ...currentTripDetails,
-          startDate,
-          endDate,
-        }),
+  const handleUpdateTripDetails = async (startDate: Date, endDate: Date) => {
+    try {
+      if (!currentTripDetails) return;
+      await upsertTripDetails({
+        tripDetailsDto: {
+          ...tripDetailsDto.parse({
+            ...currentTripDetails,
+            startDate,
+            endDate,
+          }),
+          versionQuotationId: currentVersionQuotation!.id,
+        },
         showMessage: false,
       });
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   };
 
@@ -61,8 +72,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
       lastItineraryDate?.setDate(lastItineraryDate.getDate() + 1);
 
       // //* Update reservation travel dates
-      handleUpdateReservation(startDate!, lastItineraryDate!);
-
+      handleUpdateTripDetails(startDate!, lastItineraryDate!);
       const newDay: Day = {
         id: generatedDays.length + 1,
         number: generatedDays.length + 1,
@@ -180,7 +190,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
           previousDate.setDate(previousDate.getDate());
 
           //* Update the first day's date in the reservation
-          handleUpdateReservation(previousDate, endDate!);
+          handleUpdateTripDetails(previousDate, endDate!);
         }
 
         newDays[i] = {
@@ -221,7 +231,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
       }
 
       //* Update the rest of the days' dates in the reservation
-      handleUpdateReservation(
+      handleUpdateTripDetails(
         startDate!,
         newDays.length > 0 ? newDays[newDays.length - 1].date : startDate!
       );
@@ -235,19 +245,19 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
     //* Update the selected day
     let newDaySelected: Day | undefined;
     if (newDays.length === 0) {
-          const date = {
-            id: 1,
-            name: "Día 1",
-            number: 1,
-            date: startDate!,
-            formattedDate: startDate!.toLocaleDateString("es-ES", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }),
-            total: 1
-          };
+      const date = {
+        id: 1,
+        name: "Día 1",
+        number: 1,
+        date: startDate!,
+        formattedDate: startDate!.toLocaleDateString("es-ES", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+        total: 1,
+      };
       newDaySelected = date;
     } else if (selectedDayIndex === 0) {
       newDaySelected = newDays[0]; //* Now the first day is the one that had the date of the second before
@@ -303,7 +313,7 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
               ...(generatedDays?.map((day, index) => ({
                 icon: index + 1,
                 label: day.formattedDate,
-                className: classNamesAdapter(
+                className: cn(
                   selectedDay?.id === day.id
                     ? "bg-primary text-white"
                     : "bg-secondary text-slate-400 hover:bg-gray-300 hover:text-slate-500"

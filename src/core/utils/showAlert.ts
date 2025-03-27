@@ -30,6 +30,9 @@ const startShowAlert = (
     case AlertType.ERROR:
       toastId = toasterAdapter.error(message);
       break;
+    case AlertType.WARNING:
+      toastId = toasterAdapter.warning(message);
+      break;
     default:
       break;
   }
@@ -43,6 +46,10 @@ export const startShowSuccess = (message: string, maxToasts?: number) => {
 
 export const startShowError = (message: string, maxToasts?: number) => {
   startShowAlert(message, AlertType.ERROR, maxToasts);
+};
+
+export const startShowWarning = (message: string, maxToasts?: number) => {
+  startShowAlert(message, AlertType.WARNING, maxToasts);
 };
 
 export const startShowApiError = (error: ApiError, maxToasts?: number) => {

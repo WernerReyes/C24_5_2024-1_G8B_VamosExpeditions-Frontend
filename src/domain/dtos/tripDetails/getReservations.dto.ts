@@ -1,12 +1,6 @@
-import { requestValidator } from "@/core/utils";
+import { dtoValidator } from "@/core/utils";
 import { ReservationStatus } from "@/domain/entities";
 import { z } from "zod";
-
-export type GetReservationsDto = {
-  readonly status?: ReservationStatus;
-  readonly quotationId?: number;
-  readonly versionNumber?: number;
-};
 
 const getReservationsDtoSchema = z.object({
   status: z.optional(z.nativeEnum(ReservationStatus)),
@@ -14,9 +8,11 @@ const getReservationsDtoSchema = z.object({
   versionNumber: z.number().min(1).optional(),
 });
 
+export type GetReservationsDto = z.infer<typeof getReservationsDtoSchema>;
+
 export const getReservationsDto = {
   create: (dto: GetReservationsDto): [GetReservationsDto?, string[]?] => {
-    const errors = requestValidator(dto, getReservationsDtoSchema);
+    const errors = dtoValidator(dto, getReservationsDtoSchema);
     if (errors) return [undefined, errors];
     return [dto, undefined];
   },

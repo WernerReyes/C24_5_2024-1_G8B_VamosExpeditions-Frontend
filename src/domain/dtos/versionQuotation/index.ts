@@ -1,2 +1,3 @@
 export * from './versionQuotation.dto'
-export * from './DuplicateMultipleVersionQuotation'
+export * from './duplicateMultipleVersionQuotation.dto'
+export * from './getVersionQuotations.dto'

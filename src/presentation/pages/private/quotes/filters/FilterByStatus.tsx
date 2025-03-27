@@ -28,7 +28,8 @@ export const FilterByStatus = ({ options }: Props) => {
         return <Tag value={label} severity={severity} icon={icon} />;
       }}
       onChange={(e: MultiSelectChangeEvent) => {
-        options.filterApplyCallback(e.value, options.index);
+        if (e.value === options.value) return;
+        options.filterCallback(e.value, options.index);
       }}
       dataKey="id"
       placeholder="Selecciona un estado"

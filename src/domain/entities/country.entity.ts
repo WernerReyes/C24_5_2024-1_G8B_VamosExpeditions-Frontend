@@ -1,15 +1,12 @@
-import { z } from "zod";
-import { cityEntitySchema } from "./city.entity";
+import type { CityEntity } from "./city.entity";
 
-export const countryEntitySchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  code: z.string(),
-  image: z.object({
-    png: z.string(),
-    svg: z.string(),
-  }).optional(),
-  cities: z.array(cityEntitySchema).optional(),
-});
-
-export type CountryEntity = z.infer<typeof countryEntitySchema>;
+export interface CountryEntity {
+  readonly id: number;
+  readonly name: string;
+  readonly code: string;
+  readonly image?: {
+    readonly png: string;
+    readonly svg: string;
+  };
+  readonly cities?: CityEntity[];
+}

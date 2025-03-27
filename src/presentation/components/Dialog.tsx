@@ -4,6 +4,7 @@ import {
 } from "primereact/dialog";
 import { useWindowSize } from "../hooks";
 import { constantResponsiveDesignArray } from "@/core/constants";
+import { cn } from "@/core/adapters";
 
 type Breakpoints = (typeof constantResponsiveDesignArray)[number];
 
@@ -33,6 +34,10 @@ export const Dialog = ({ ...props }: Props) => {
         ...props.style,
       }}
       {...props}
+      contentClassName={cn(
+        "thin-scrollbar flex flex-col justify-between",
+        props.contentClassName
+      )}
       maximized={width < TABLET ? true : props.maximized}
       maximizable={width < TABLET ? false : props.maximizable}
       maximizeIcon={width < TABLET && "unmaximize"}

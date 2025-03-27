@@ -10,7 +10,7 @@ import {
 } from "@/presentation/components";
 import { useEffect, useMemo, useState } from "react";
 import { HotelContent } from "./components";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 
 type Props = {
   visible: boolean;
@@ -150,7 +150,7 @@ export const HotelList = ({ visible, setVisible }: Props) => {
           value={hotelsFiltered}
           listTemplate={(hotels: HotelEntity[]) => (
             <div
-              className={classNamesAdapter(
+              className={cn(
                 "grid grid-cols-1 gap-6 items-start mt-3",
                 dialogMaximized ? "md:grid-cols-3" : "md:grid-cols-2"
               )}

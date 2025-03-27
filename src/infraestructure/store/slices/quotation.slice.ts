@@ -2,7 +2,11 @@ import { constantStorage } from "@/core/constants";
 import { LocalQuotationEntity } from "@/data";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const { CURRENT_ACTIVE_STEP, ITINERARY_CURRENT_SELECTED_DAY } = constantStorage;
+const {
+  CURRENT_ACTIVE_STEP,
+  ITINERARY_CURRENT_SELECTED_DAY,
+  ITIERARY_INDIRECT_COST_MARGIN,
+} = constantStorage;
 
 export interface Day {
   id: number;
@@ -18,7 +22,8 @@ type QuotationSliceState = {
   currentStep: number;
   days: Day[];
   selectedDay: Day | null;
-  operationType: "create" | "edit" | "replace" | null;
+  indirectCostMargin: number;
+  // operationType: "create" | "edit" | "replace" | null;
 };
 
 const initialState: QuotationSliceState = {
@@ -28,8 +33,11 @@ const initialState: QuotationSliceState = {
   selectedDay: JSON.parse(
     localStorage.getItem(ITINERARY_CURRENT_SELECTED_DAY) || "null"
   ),
+  indirectCostMargin: JSON.parse(
+    localStorage.getItem(ITIERARY_INDIRECT_COST_MARGIN) || "5"
+  ),
 
-  operationType: null,
+  // operationType: null,
 };
 
 export const quotationSlice = createSlice({
@@ -47,14 +55,13 @@ export const quotationSlice = createSlice({
     },
 
     onSetCurrentStep: (state, { payload }: PayloadAction<number>) => {
+      console.log("onSetCurrentStep", payload);
       localStorage.setItem(CURRENT_ACTIVE_STEP, JSON.stringify(payload));
       return {
         ...state,
         currentStep: payload,
       };
     },
-
-    
 
     onSetSelectedDay: (state, { payload }: PayloadAction<Day | null>) => {
       localStorage.setItem(
@@ -74,15 +81,26 @@ export const quotationSlice = createSlice({
       };
     },
 
-    onSetOperationType: (
-      state,
-      { payload }: PayloadAction<"create" | "edit" | "replace" | null>
-    ) => {
+    onSetIndirectCostMargin: (state, { payload }: PayloadAction<number>) => {
+      localStorage.setItem(
+        ITIERARY_INDIRECT_COST_MARGIN,
+        JSON.stringify(payload)
+      );
       return {
         ...state,
-        operationType: payload,
+        indirectCostMargin: payload,
       };
-    }
+    },
+
+    // onSetOperationType: (
+    //   state,
+    //   { payload }: PayloadAction<"create" | "edit" | "replace" | null>
+    // ) => {
+    //   return {
+    //     ...state,
+    //     operationType: payload,
+    //   };
+    // }
   },
 });
 
@@ -91,5 +109,6 @@ export const {
   onSetCurrentStep,
   onSetSelectedDay,
   onSetDays,
-  onSetOperationType,
+  onSetIndirectCostMargin,
+  // onSetOperationType,
 } = quotationSlice.actions;

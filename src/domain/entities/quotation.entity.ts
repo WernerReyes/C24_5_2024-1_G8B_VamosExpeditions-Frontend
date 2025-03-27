@@ -1,11 +1,14 @@
-import { z } from "zod";
-import { versionQuotationEntitySchema } from "./versionQuotation.entity";
+import type {
+  ReservationEntity
+} from "./reservation.entity";
+import type {
+  VersionQuotationEntity
+} from "./versionQuotation.entity";
 
-const quotationEntitySchema = z.object({
-  id: z.number(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  versions: z.array(versionQuotationEntitySchema).optional(),
-});
-
-export type QuotationEntity = z.infer<typeof quotationEntitySchema>;
+export interface QuotationEntity {
+  id: number;
+  createdAt: Date;
+  updatedAt: Date;
+  versions: VersionQuotationEntity[];
+  reservation?: ReservationEntity;
+}

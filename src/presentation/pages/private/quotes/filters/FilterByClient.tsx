@@ -5,7 +5,7 @@ import {
   MultiSelect,
   type MultiSelectChangeEvent,
 } from "@/presentation/components";
-import { ClientInfo } from "../components";
+import { ClientInfo } from "../../components";
 
 type Props = {
   options: ColumnFilterElementTemplateOptions;
@@ -23,7 +23,7 @@ export const FilterByClient = ({ options }: Props) => {
       }}
       dataKey="id"
       onChange={(e: MultiSelectChangeEvent) =>
-        options.filterApplyCallback(e.value, options.index)
+        options.filterCallback(e.value, options.index)
       }
       optionLabel="fullName"
       placeholder="Selecciona un cliente"

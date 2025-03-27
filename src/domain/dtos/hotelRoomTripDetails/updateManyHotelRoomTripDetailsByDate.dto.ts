@@ -1,21 +1,20 @@
 import { z } from "zod";
-import { requestValidator } from "@/core/utils";
-
-export type UpdateManyHotelRoomTripDetailsByDateDto = {
-  readonly tripDetailsId: number;
-  readonly startDate: Date;
-};
+import { dtoValidator } from "@/core/utils";
 
 const updateManyHotelRoomTripDetailsByDateDtoSchema = z.object({
   tripDetailsId: z.number(),
   startDate: z.date(),
 });
 
+export type UpdateManyHotelRoomTripDetailsByDateDto = z.infer<
+  typeof updateManyHotelRoomTripDetailsByDateDtoSchema
+>;
+
 export const updateManyHotelRoomTripDetailsByDateDto = {
   create: (
     dto: UpdateManyHotelRoomTripDetailsByDateDto
   ): [UpdateManyHotelRoomTripDetailsByDateDto?, string[]?] => {
-    const errors = requestValidator(
+    const errors = dtoValidator(
       dto,
       updateManyHotelRoomTripDetailsByDateDtoSchema
     );

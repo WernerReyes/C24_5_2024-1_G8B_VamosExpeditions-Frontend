@@ -1,4 +1,4 @@
-import { requestValidator } from "@/core/utils";
+import { dtoValidator } from "@/core/utils";
 import { z } from "zod";
 
 export type EmailDto = {
@@ -16,7 +16,7 @@ export const emailDto = (
 ) => {
   return {
     create: (): [EmailDto?, string[]?] => {
-      const errors = requestValidator(
+      const errors = dtoValidator(
         {
           subject,
           to,

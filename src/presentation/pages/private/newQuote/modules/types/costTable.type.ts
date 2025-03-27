@@ -1,4 +1,4 @@
-import type { CostTableEnum } from "../enums/costTable.enum";
+import type { CostTableEnum } from "../CostSummary/enums/costTable.enum";
 
 export type CostTableType = {
   name: CostTableEnum;

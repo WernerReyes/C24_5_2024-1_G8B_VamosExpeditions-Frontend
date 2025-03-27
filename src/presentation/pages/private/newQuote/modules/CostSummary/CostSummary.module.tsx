@@ -4,7 +4,7 @@ import { Accordion, TabView } from "@/presentation/components";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { DataTableCostSummary, HotelsDetailsSummary } from "./components";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 
 export const CostSummaryModule = () => {
   const { selectedDay: currentDay } = useSelector(
@@ -33,7 +33,7 @@ export const CostSummaryModule = () => {
     <>
       <TabView
         scrollable
-        className={classNamesAdapter(
+        className={cn(
           firstAccordion || secondAccordion ? "h-[34rem]" : ""
         )}
         onBeforeTabChange={(e) => {
@@ -88,7 +88,7 @@ export const CostSummaryModule = () => {
                   },
                   {
                     header: "Alojamientos",
-                    className: classNamesAdapter(
+                    className: cn(
                       "overflow-y-auto max-lg:mt-5 thin-scrollbar w-full",
                       firstAccordion ? "max-h-52" : "max-h-80"
                     ),

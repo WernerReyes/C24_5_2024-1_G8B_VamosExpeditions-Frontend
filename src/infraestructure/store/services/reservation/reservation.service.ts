@@ -1,19 +1,23 @@
-import { startShowSuccess } from "@/core/utils";
 import {
   getReservationsDto,
   GetReservationsDto,
+  getStadisticsDto,
+  GetStadisticsDto,
   reservationDto,
   ReservationDto,
 } from "@/domain/dtos/reservation";
 import { type ReservationEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
-import {
-  onSetCurrentReservation,
-  onSetReservations,
-} from "../../slices/reservation.slice";
 import { requestConfig } from "../config";
-import { ApiResponse } from "../response";
-import { dateFnsAdapter } from "@/core/adapters";
+import { ApiResponse, PaginatedResponse } from "../response";
+import { startShowApiError, startShowSuccess } from "@/core/utils";
+import type { AppState } from "@/app/store";
+import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
+import type {
+  GetReservationsStadistics,
+  GetReservationsStats,
+} from "./reservation.response";
+import { reservationCache } from "./reservation.cache";
 
 const PREFIX = "/reservation";
 
@@ -24,36 +28,44 @@ export const reservationServiceStore = createApi({
   endpoints: (builder) => ({
     upsertReservation: builder.mutation<
       ApiResponse<ReservationEntity>,
-      { reservationDto: ReservationDto; showMessage?: boolean, setCurrentReservation?: boolean }
+      ReservationDto
     >({
-      query: ({ reservationDto }) => {
-        if (reservationDto.id) {
+      query: ({ id, ...body }) => {
+        const [_, errors] = reservationDto.create({
+          ...body,
+          id,
+        });
+        if (errors) throw errors;
+        if (id !== 0) {
           return {
-            url: `/${reservationDto.id}`,
+            url: `/${id}`,
             method: "PUT",
-            body: reservationDto,
+            body,
           };
         }
         return {
           url: "/",
           method: "POST",
-          body: reservationDto,
+          body,
         };
       },
-      invalidatesTags: ["Reservations"],
-      async onQueryStarted(
-        { reservationDto: dto, showMessage = true, setCurrentReservation = true },
-        { dispatch, queryFulfilled }
-      ) {
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
         try {
-          //* Validate before sending
-          const [_, errors] = reservationDto.create(dto);
-          console.log(errors)
-          if (errors) throw errors;
           const { data } = await queryFulfilled;
-          if (setCurrentReservation) dispatch(onSetCurrentReservation(data.data));
-          if (showMessage) startShowSuccess(data.message);
-        } catch (error) {
+          startShowSuccess(data.message);
+
+          reservationCache.upsertReservation(data.data, dispatch, getState);
+
+          versionQuotationCache.updateVersionQuotationFromAnotherService(
+            {
+              ...data.data.versionQuotation,
+              reservation: data.data,
+            },
+            dispatch,
+            getState as () => AppState
+          );
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
           throw error;
         }
       },
@@ -62,65 +74,128 @@ export const reservationServiceStore = createApi({
     getReservationById: builder.query<ApiResponse<ReservationEntity>, number>({
       query: (id) => `/${id}`,
       providesTags: ["Reservation"],
-      // async onQueryStarted(args, { dispatch, queryFulfilled }) {
-      //   try {
-      //     console.log({ args });
-      //     //* Validate before sending
-      //     if (!args) return;
-
-      //     const { data } = await queryFulfilled;
-      //     console.log({ data });
-      //     dispatch(onSetCurrentReservation(data.data));
-      //     // startShowSuccess(data.message);
-      //   } catch (error) {
-      //     console.error(error);
-      //     throw error;
-      //   }
-      // },
     }),
 
     getAllReservations: builder.query<
-      ApiResponse<ReservationEntity[]>,
+      ApiResponse<PaginatedResponse<ReservationEntity>>,
       GetReservationsDto
     >({
       query: (params) => {
+        const [_, errors] = getReservationsDto.create(params);
+        if (errors) throw errors;
         return {
           url: "/",
           params,
         };
       },
       providesTags: ["Reservations"],
-      async onQueryStarted(args, { dispatch, queryFulfilled }) {
-        try {
-          //* Validate before sending
-          const [_, errors] = getReservationsDto.create(args);
-          if (errors) throw errors;
-
-          const { data } = await queryFulfilled;
-          dispatch(onSetReservations(data.data));
-          // startShowSuccess(data.message);
-        } catch (error) {
-          console.error(error);
-          throw error;
-        }
-      },
-      transformResponse: (response: ApiResponse<ReservationEntity[]>) => ({
+      transformResponse: (
+        response: ApiResponse<PaginatedResponse<ReservationEntity>>
+      ) => ({
         ...response,
-        data: response.data.map((reservation) => ({
-          ...reservation,
-          startDate: dateFnsAdapter.parseISO(reservation.startDate as any),
-          endDate: dateFnsAdapter.parseISO(reservation.endDate as any),
-        })),
+        data: {
+          ...response.data,
+          content: response.data.content.map((reservation) => ({
+            ...reservation,
+            createdAt: new Date(reservation.createdAt),
+            updatedAt: new Date(reservation.updatedAt),
+          })),
+        },
       }),
     }),
 
-    
+    cancelReservation: builder.mutation<
+      ApiResponse<ReservationEntity>,
+      ReservationEntity["id"]
+    >({
+      query: (id) => ({
+        url: `/${id}/cancel`,
+        method: "PUT",
+      }),
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+
+          versionQuotationCache.updateVersionQuotationFromAnotherService(
+            {
+              ...data.data.versionQuotation,
+              reservation: data.data,
+            },
+            dispatch,
+            getState as () => AppState
+          );
+
+          reservationCache.upsertReservation(data.data, dispatch, getState);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
+
+    getReservationStadistics: builder.query<
+      ApiResponse<GetReservationsStadistics[]>,
+      GetStadisticsDto
+    >({
+      query: (params) => {
+        const [_, errors] = getStadisticsDto.create(params);
+        if (errors) throw errors;
+        
+        return {
+          url: "/stadistics",
+          params,
+        };
+      },
+    }),
+
+    getReservationsStats: builder.query<
+      ApiResponse<GetReservationsStats>,
+      void
+    >({
+      query: () => `/stats`,
+    }),
+
+    deleteMultipleReservations: builder.mutation<
+      ApiResponse<ReservationEntity[]>,
+      ReservationEntity["id"][]
+    >({
+      query: (ids) => ({
+        url: "/multiple",
+        method: "DELETE",
+        body: ids,
+      }),
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+
+          reservationCache.deleteMultipleReservations(
+            data.data,
+            dispatch,
+            getState
+          );
+
+          versionQuotationCache.deleteMultipleVersionsFromAnotherService(
+            data.data.map((reservation) => reservation.versionQuotation),
+            dispatch,
+            getState as () => AppState
+          );
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
   }),
 });
 
 export const {
   useGetReservationByIdQuery,
   useGetAllReservationsQuery,
-  useLazyGetAllReservationsQuery,
   useUpsertReservationMutation,
+  useCancelReservationMutation,
+  useGetReservationStadisticsQuery,
+  useGetReservationsStatsQuery,
+  useDeleteMultipleReservationsMutation,
 } = reservationServiceStore;

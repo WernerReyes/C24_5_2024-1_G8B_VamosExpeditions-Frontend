@@ -1,15 +1,15 @@
 import { startShowSuccess } from "@/core/utils";
 import {
-  // getTripDetailsDto,
-  // GetTripDetailsDto,
   tripDetailsDto,
   TripDetailsDto,
 } from "@/domain/dtos/tripDetails";
-import { type TripDetailsEntity } from "@/domain/entities";
+import { VersionQuotationEntity, type TripDetailsEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { onSetCurrentTripDetails } from "../../slices/tripDetails.slice";
 import { requestConfig } from "../config";
-import { ApiResponse } from "../response";
+import type { ApiResponse } from "../response";
+import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
+import { AppState } from "@/app/store";
 
 const PREFIX = "/trip-details";
 
@@ -26,80 +26,65 @@ export const tripDetailsServiceStore = createApi({
         setCurrentTripDetails?: boolean;
       }
     >({
-      query: ({ tripDetailsDto }) => {
-        if (tripDetailsDto.id) {
+      query: ({ tripDetailsDto: body }) => {
+        //* Validate before sending
+        const [_, errors] = tripDetailsDto.create(body);
+        if (errors) throw errors;
+        if (body.id) {
           return {
-            url: `/${tripDetailsDto.id}`,
+            url: `/${body.id}`,
             method: "PUT",
-            body: tripDetailsDto,
+            body: body,
           };
         }
         return {
           url: "/",
           method: "POST",
-          body: tripDetailsDto,
+          body: body,
         };
       },
-      invalidatesTags: ["TripDetails"],
+      invalidatesTags: ["TripDetails", "TripDetail"],
       async onQueryStarted(
-        {
-          tripDetailsDto: dto,
-          showMessage = true,
-          setCurrentTripDetails = true,
-        },
-        { dispatch, queryFulfilled }
+        { showMessage = true, setCurrentTripDetails = true },
+        { dispatch, queryFulfilled, getState }
       ) {
         try {
-          //* Validate before sending
-          const [_, errors] = tripDetailsDto.create(dto);
-          if (errors) throw errors;
           const { data } = await queryFulfilled;
-          if (setCurrentTripDetails)
-            dispatch(onSetCurrentTripDetails(data.data));
+
+          versionQuotationCache.updateVersionQuotationByTripDetails(
+            data.data,
+            dispatch,
+            getState as () => AppState
+          );
+          
+
+          // if (setCurrentTripDetails)
+          //   dispatch(onSetCurrentTripDetails(data.data));
           if (showMessage) startShowSuccess(data.message);
         } catch (error) {
+          
           throw error;
         }
       },
     }),
 
-    // getTripDetailsById: builder.query<ApiResponse<TripDetailsEntity>, number>({
-    //   query: (id) => `/${id}`,
-    //   providesTags: ["TripDetail"],
-    //   // async onQueryStarted(args, { dispatch, queryFulfilled }) {
-    //   //   try {
-    //   //     console.log({ args });
-    //   //     //* Validate before sending
-    //   //     if (!args) return;
-
-    //   //     const { data } = await queryFulfilled;
-    //   //     console.log({ data });
-    //   //     dispatch(onSetCurrentTripDetails(data.data));
-    //   //     // startShowSuccess(data.message);
-    //   //   } catch (error) {
-    //   //     console.error(error);
-    //   //     throw error;
-    //   //   }
-    //   // },
-    // }),
-
     getTripDetailsByVersionQuotationId: builder.query<
       ApiResponse<TripDetailsEntity>,
-      { quotationId: number; versionNumber: number }
+      VersionQuotationEntity["id"]
     >({
-      query: ({ quotationId, versionNumber }) => ({
+      query: ({ quotationId, versionNumber }) => {
+        if (!quotationId || !versionNumber) {
+          throw "quotationId and versionNumber are required";
+        }
+        return {
         url: "/version-quotation",
         params: { quotationId, versionNumber },
-      }),
+      }},
       providesTags: ["TripDetail"],
-      async onQueryStarted(args, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
-          //* Validate before sending
-          if (!args) return;
-
           const { data } = await queryFulfilled;
           dispatch(onSetCurrentTripDetails(data.data));
-          // startShowSuccess(data.message);
         } catch (error: any) {
           if (error.error.status === 404) {
             dispatch(onSetCurrentTripDetails(null));
@@ -108,48 +93,10 @@ export const tripDetailsServiceStore = createApi({
         }
       },
     }),
-
-    // getAllTripDetails: builder.query<
-    //   ApiResponse<TripDetailsEntity[]>,
-    //   GetTripDetailsDto
-    // >({
-    //   query: (params) => {
-    //     return {
-    //       url: "/",
-    //       params,
-    //     };
-    //   },
-    //   providesTags: ["TripDetails"],
-    //   async onQueryStarted(args, { dispatch, queryFulfilled }) {
-    //     try {
-    //       //* Validate before sending
-    //       const [_, errors] = getTripDetailsDto.create(args);
-    //       if (errors) throw errors;
-
-    //       const { data } = await queryFulfilled;
-    //       dispatch(onSetTripDetails(data.data));
-    //       // startShowSuccess(data.message);
-    //     } catch (error) {
-    //       console.error(error);
-    //       throw error;
-    //     }
-    //   },
-    //   transformResponse: (response: ApiResponse<TripDetailsEntity[]>) => ({
-    //     ...response,
-    //     data: response.data.map((tripDetails) => ({
-    //       ...tripDetails,
-    //       startDate: dateFnsAdapter.parseISO(tripDetails.startDate as any),
-    //       endDate: dateFnsAdapter.parseISO(tripDetails.endDate as any),
-    //     })),
-    //   }),
-    // }),
   }),
 });
 
 export const {
-  // useGetTripDetailsByIdQuery,
-  // useGetAllTripDetailsQuery,
-  // useLazyGetAllTripDetailsQuery,
   useUpsertTripDetailsMutation,
   useGetTripDetailsByVersionQuotationIdQuery,
 } = tripDetailsServiceStore;

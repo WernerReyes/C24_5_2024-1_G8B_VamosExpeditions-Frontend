@@ -1,4 +1,12 @@
-import { parseISO, format, parse, isSameDay, isWithinInterval } from "date-fns";
+import {
+  parseISO,
+  format,
+  parse,
+  isSameDay,
+  isWithinInterval,
+  getHours,
+  eachDayOfInterval
+} from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale/es";
 
@@ -33,11 +41,22 @@ export const dateFnsAdapter = {
     return format(date, pattern);
   },
 
-  isSameDay(date1: Date, date2: Date): boolean {
-    return isSameDay(date1, date2);
+  isSameDay(date1: Date | string, date2: Date | string): boolean {
+    const dateFormat = typeof date1 === "string" ? dateFnsAdapter.parseISO(date1) : date1;
+    const dateFormat2 = typeof date2 === "string" ? dateFnsAdapter.parseISO(date2) : date2;
+    return isSameDay(dateFormat, dateFormat2);
+  },
+
+  getHours(date: Date = new Date()): number {
+    return getHours(date);
   },
 
   isWithinInterval(date: Date, startDate: Date, endDate: Date): boolean {
     return isWithinInterval(date, { start: startDate, end: endDate });
+  },
+
+
+  eachDayOfInterval(startDate: Date, endDate: Date): Date[] {
+    return eachDayOfInterval({ start: dateFnsAdapter.parseISO(startDate), end: dateFnsAdapter.parseISO(endDate) });
   },
 };

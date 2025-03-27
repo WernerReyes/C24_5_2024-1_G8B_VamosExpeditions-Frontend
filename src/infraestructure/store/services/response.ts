@@ -48,3 +48,12 @@ export type ApiError =
 //       data?: unknown;
 //       error: string;
 //     };
+
+
+export type PaginatedResponse<T> = {
+  content: T[];
+  readonly page: number,
+  readonly totalPages: number,
+  readonly total: number,
+  readonly limit: number
+};

@@ -1,1 +1,1 @@
-export * from './tableQuotation';
+export * from './quotesTableFilters';

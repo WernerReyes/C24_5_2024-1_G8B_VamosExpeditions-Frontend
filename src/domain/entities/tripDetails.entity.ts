@@ -1,9 +1,10 @@
-import { z } from "zod";
-import { clientEntitySchema } from "./client.entity";
-import { cityEntitySchema } from "./city.entity";
-import { generateEmptyObject } from "@/core/utils";
 import type { Severity } from "@/presentation/types";
-import { versionQuotationEntitySchema } from "./versionQuotation.entity";
+import type { CityEntity, } from "./city.entity";
+import type { ClientEntity, } from "./client.entity";
+import {
+  VersionQuotationEntity
+} from "./versionQuotation.entity";
+import { HotelRoomTripDetailsEntity } from "./hotelRoomTripDetails.entity";
 
 export enum TravelerStyle {
   STANDARD = "STANDARD",
@@ -48,27 +49,17 @@ export const orderTypeRender: Record<
   },
 };
 
-export const tripDetailsEntitySchema = z.object({
-  id: z.number().int().positive().min(1),
-  numberOfPeople: z.number(),
-  startDate: z.date(),
-  endDate: z.date(),
-  code: z.string(),
-  travelerStyle: z.nativeEnum(TravelerStyle),
-  orderType: z.nativeEnum(OrderType),
-  specialSpecifications: z.string().optional(),
-  versionQuotation: z.object(versionQuotationEntitySchema.shape).optional(),
-  client: z.object(clientEntitySchema.shape).optional(),
-  cities: z.array(cityEntitySchema).optional(),
-});
-
-export type TripDetailsEntity = z.infer<typeof tripDetailsEntitySchema>;
-
-const defaults = {
-  client: clientEntitySchema,
+export type TripDetailsEntity = {
+  id: number;
+  numberOfPeople: number;
+  startDate: Date;
+  endDate: Date;
+  code: string;
+  travelerStyle: TravelerStyle;
+  orderType: OrderType;
+  specialSpecifications?: string;
+  versionQuotation?: VersionQuotationEntity;
+  hotelRoomTripDetails?: HotelRoomTripDetailsEntity[];
+  client?: ClientEntity;
+  cities?: CityEntity[];
 };
-
-export const emptytripDetailsEntity = generateEmptyObject<TripDetailsEntity>(
-  tripDetailsEntitySchema,
-  defaults
-);

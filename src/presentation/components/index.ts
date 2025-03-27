@@ -52,3 +52,4 @@ export * from "./alerts/ExpiredSessionCountdown";
 //* Error
 export * from "./error/ErrorBoundary";
 export * from "./error/DefaultFallBackComponent";
+export * from "./error/NotFound";

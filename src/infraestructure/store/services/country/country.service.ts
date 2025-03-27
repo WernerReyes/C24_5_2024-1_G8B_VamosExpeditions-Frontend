@@ -11,8 +11,9 @@ export const countryService = createApi({
   endpoints: (builder) => ({
     getCountries: builder.query<ApiResponse<CountryEntity[]>, void>({
       query: () => "/",
+      keepUnusedDataFor: 1000 * 60 * 60, //* 1 hour
     }),
   }),
 });
 
-export const { useLazyGetCountriesQuery, useGetCountriesQuery } = countryService;
+export const { useGetCountriesQuery } = countryService;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
-  type VersionQuotationEntity
+  VersionQuotationStatus,
+  type VersionQuotationEntity,
 } from "@/domain/entities";
 import {
   Button,
@@ -17,8 +18,7 @@ import { useGetHotelPdfQuery } from "@/infraestructure/store/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { onSetOperationType } from "@/infraestructure/store";
+// import { onSetOperationType } from "@/infraestructure/store";
 
 const { EDIT_QUOTE } = constantRoutes.private;
 
@@ -37,7 +37,6 @@ type TyoeTableActions = {
 
 export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [createPdf, setCreatePdf] = useState(false);
 
   const { isLoading } = useGetHotelPdfQuery(
@@ -53,10 +52,7 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
 
   const [visible, setVisible] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-  } = useForm<EmailDto>({
+  const { control, handleSubmit } = useForm<EmailDto>({
     resolver: zodResolver(emailDtoSchema),
   });
 
@@ -72,11 +68,12 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         text
         icon="pi pi-pencil"
         onClick={() => {
-          navigate(
-            `${EDIT_QUOTE}/${rowData.id.quotationId}/${rowData.id.versionNumber}`
-          );
-          dispatch(onSetOperationType("edit"));
+          navigate(EDIT_QUOTE(rowData?.id));
+          // dispatch(onSetOperationType("edit"));
         }}
+        disabled={
+          rowData.status === VersionQuotationStatus.APPROVED && rowData.official
+        }
       />
 
       <Button
@@ -102,7 +99,6 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
           }}
         />
       )}
-      
 
       {/*  Dialog*/}
 
@@ -114,7 +110,10 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
           setVisible(false);
         }}
       >
-        <form className={"text-tertiary text-[20px] font-bold mb-4"} onSubmit={handleSubmit(handleLogin)}>
+        <form
+          className={"text-tertiary text-[20px] font-bold mb-4"}
+          onSubmit={handleSubmit(handleLogin)}
+        >
           <Controller
             name="subject"
             control={control}

@@ -1,273 +1,473 @@
-import { dateFnsAdapter } from "@/core/adapters";
+import { cn, dateFnsAdapter } from "@/core/adapters";
+import { formatCurrency } from "@/core/utils";
 import {
-  orderTypeRender,
   reservationStatusRender,
-  travelerStyleRender,
   type ReservationEntity,
 } from "@/domain/entities";
 
-import { useGetAllReservationsQuery } from "@/infraestructure/store/services";
 import {
   Button,
   Column,
   DataTable,
   DataTableRef,
+  DefaultFallBackComponent,
+  ErrorBoundary,
+  Skeleton,
   Tag,
   type DataTableSelectionMultipleChangeEvent,
 } from "@/presentation/components";
+import { ColumnGroup } from "primereact/columngroup";
+import { Row } from "primereact/row";
 import { Toolbar } from "primereact/toolbar";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { ClientInfo, UserInfo } from "../../components";
+import { usePaginator } from "@/presentation/hooks";
+import type { ReservationTableFilters } from "../types";
+import { filterByStatus, getTransformedFilters } from "../utils";
+import { FilterByStatus } from "../filters";
+import { useGetAllReservationsQuery } from "@/infraestructure/store/services";
+import {
+  FilterApplyButton,
+  FilterByDate,
+  FilterClearButton,
+} from "../../filters";
+import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
+import { constantStorage } from "@/core/constants";
+import { EditorReservationStatus } from "./EditorReservartionStatus";
+import { CancelConfirmReservationDialog } from "./CancelConfirmReservationDialog";
+import { DeleteConfirmReservationDialog } from "./DeleteConfirmReservationDialog";
+
+const { RESERVATION_PAGINATION } = constantStorage;
+
+const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const ReservationTable = () => {
   const dt = useRef<DataTableRef>(null);
-  const { data: reservations } = useGetAllReservationsQuery({});
-  
-  const [selectedreservations, setSelectedreservations] = useState<
+  const {
+    currentPage,
+    limit,
+    filters,
+    first,
+    handlePageChange,
+    handleSaveState,
+  } = usePaginator(ROW_PER_PAGE[0], RESERVATION_PAGINATION);
+  const [{ status, createdAt, updatedAt }, setFormatedFilters] =
+    useState<ReservationTableFilters>({});
+
+  const { currentData, isFetching, isLoading, refetch, isError } =
+    useGetAllReservationsQuery({
+      page: currentPage,
+      limit,
+      status,
+      createdAt,
+      updatedAt,
+    });
+
+  const reservations = currentData?.data;
+
+  const [selectedReservations, setSelectedReservations] = useState<
     ReservationEntity[]
   >([]);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  const [cancelReservation, setCancelReservation] =
+    useState<ReservationEntity | null>(null);
+
+  useEffect(() => {
+    if (!filters) return;
+    setFormatedFilters(getTransformedFilters(filters));
+  }, [filters]);
+
+  useEffect(() => {
+    if (!isError) return;
+    const tdEmpty = document.querySelector(".p-datatable-emptymessage td");
+    if (tdEmpty) {
+      tdEmpty.setAttribute("colspan", "12");
+    }
+  }, [isError]);
 
   return (
     <div>
+      <CancelConfirmReservationDialog
+        cancelReservation={cancelReservation}
+        setCancelReservation={setCancelReservation}
+      />
+      <DeleteConfirmReservationDialog
+        selectedReservations={selectedReservations}
+        visible={confirmVisible}
+        onHide={setConfirmVisible}
+        setSelectedReservations={setSelectedReservations}
+      />
       <div className="card">
-        {/* <Toolbar className="mb-4"></Toolbar> */}
         <Toolbar
           className="mb-4"
           start={
             <div className="flex gap-x-5">
               <Button
                 type="button"
-                label="Nuevo"
-                icon="pi pi-plus"
-                onClick={() => {
-                  console.log("Nuevo");
-                }}
-              />
-              <Button
-                type="button"
                 label="Eliminar"
                 icon="pi pi-trash"
-                outlined
-                severity="danger"
+                disabled={!selectedReservations.length}
                 onClick={() => {
-                  console.log("Eliminar");
+                  setConfirmVisible(true);
                 }}
               />
             </div>
           }
-          end={
-            <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
-              <Button
-                label="Exportar"
-                className="bg-transparent text-black border-[#D0D5DD]"
-                icon="pi pi-download"
-              />
-              <Button label="Importar" icon="pi pi-file-import" />
-            </div>
-          }
+          // end={
+          //   <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
+          //     <Button
+          //       label="Exportar"
+          //       className="bg-transparent text-black border-[#D0D5DD]"
+          //       icon="pi pi-download"
+          //     />
+          //     <Button label="Importar" icon="pi pi-file-import" />
+          //   </div>
+          // }
         />
 
-        
-
-        <DataTable
-          ref={dt}
-          value={reservations?.data ?? []}
-          selection={selectedreservations}
-          onSelectionChange={(
-            e: DataTableSelectionMultipleChangeEvent<ReservationEntity[]>
-          ) => {
-            if (Array.isArray(e.value)) {
-              setSelectedreservations(e.value);
-            }
-          }}
-          dataKey="id"
-          paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25]}
-          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} reservations"
-          //   globalFilter={globalFilter}
-          //   header={header}
-          selectionMode="multiple"
+        <ErrorBoundary
+          isLoader={isFetching || isLoading}
+          loadingComponent={
+            <DataTable
+              pt={{
+                header: {
+                  className: "!bg-secondary",
+                },
+              }}
+              showGridlines
+              headerColumnGroup={headerColumnGroup}
+              value={Array.from({
+                length: reservations?.content.length || 10,
+              })}
+              lazy
+              size="small"
+              emptyMessage={"No hay cotizaciones"}
+            >
+              {Array.from({ length: 12 }).map((_, i) => (
+                <Column
+                  key={i}
+                  field={`loading-${i}`}
+                  header="Cargando..."
+                  body={() => <Skeleton shape="rectangle" height="1.5rem" />}
+                />
+              ))}
+            </DataTable>
+          }
+          fallBackComponent={
+            <DataTable
+              pt={{
+                header: {
+                  className: "!bg-secondary",
+                },
+              }}
+              showGridlines
+              headerColumnGroup={headerColumnGroup}
+              value={[]}
+              lazy
+              size="small"
+              emptyMessage={
+                <DefaultFallBackComponent
+                  refetch={refetch}
+                  isFetching={isFetching}
+                  isLoading={isLoading}
+                  message="No se pudieron cargar las reservaciones"
+                />
+              }
+            />
+          }
+          error={isError}
         >
-          <Column selectionMode="multiple" exportable={false}></Column>
-          <Column
-            field="code"
-            header="Code"
-            sortable
-            align="center"
-            // style={{ minWidth: "12rem" }}
-          ></Column>
-          <Column
-            field="numberOfPeople"
-            header="Personas"
-            align="center"
-            sortable
-            // style={{ minWidth: "12rem" }}
-          ></Column>
-          <Column
-            field="client.fullName"
-            header="Client"
-            sortable
-            align="center"
-            style={{ minWidth: "10rem" }}
-          ></Column>
-          <Column
-            field="travelerStyle"
-            header="Estilo de Viajero"
-            sortable
-            style={{ minWidth: "8rem" }}
-            align="center"
-            body={(reservation: ReservationEntity) => {
-              const travelerStyle =
-                travelerStyleRender[reservation.travelerStyle];
-              return (
-                <Tag
-                  value={travelerStyle.label}
-                  severity={travelerStyle.severity}
-                ></Tag>
-              );
+          <DataTable
+            ref={dt}
+            scrollable
+            size="small"
+            stateStorage="custom"
+            stateKey={RESERVATION_PAGINATION}
+            customSaveState={(state: any) => {
+              handleSaveState({
+                first,
+                rows: limit,
+                filters: state.filters,
+              });
             }}
-          ></Column>
-          <Column
-            field="orderType"
-            header="Tipo de pedido"
-            sortable
-            style={{ minWidth: "8rem" }}
-            align="center"
-            body={(reservation: ReservationEntity) => {
-              const orderType = orderTypeRender[reservation.orderType];
-              return (
-                <Tag
-                  value={orderType.label}
-                  severity={orderType.severity}
-                ></Tag>
-              );
+            showGridlines
+            value={reservations?.content || []}
+            selection={selectedReservations}
+            onSelectionChange={(
+              e: DataTableSelectionMultipleChangeEvent<ReservationEntity[]>
+            ) => {
+              if (Array.isArray(e.value)) {
+                setSelectedReservations(e.value);
+              }
             }}
-          ></Column>
-          <Column
-            field="startDate"
-            header="Fecha de Inicio"
-            sortable
-            align="center"
-            body={(reservation: ReservationEntity) =>
-              dateFnsAdapter.format(reservation.startDate)
+            className="md:text-sm"
+            emptyMessage={"No hay reservaciones"}
+            filterDisplay="menu"
+            onFilter={handlePageChange}
+            filters={filters}
+            headerColumnGroup={headerColumnGroup}
+            rows={limit}
+            editMode="cell"
+            dataKey="id"
+            pt={{
+              footer: {
+                className: "bg-white",
+              },
+            }}
+            footer={
+              <Paginator
+                first={first}
+                rows={limit}
+                totalRecords={reservations?.total || 0}
+                rowsPerPageOptions={ROW_PER_PAGE}
+                onPageChange={(e: PaginatorPageChangeEvent) => {
+                  handlePageChange(e);
+                  handleSaveState({
+                    first: e.first,
+                    rows: e.rows,
+
+                    filters,
+                  });
+                }}
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} cotizaciones"
+              />
             }
-            style={{ minWidth: "8rem" }}
-          ></Column>
-          <Column
-            field="endDate"
-            header="Fecha de Fin"
-            sortable
-            align="center"
-            body={(reservation: ReservationEntity) =>
-              dateFnsAdapter.format(reservation.endDate)
-            }
-            style={{ minWidth: "8rem" }}
-          ></Column>
-          {/* <Column
-            field="cities"
-            header="Cities"
-            sortable
-            style={{ minWidth: "12rem" }}
-          ></Column> */}
-          <Column
-            field="specialSpecifications"
-            header="Special Specifications"
-            sortable
-            align="center"
-            style={{ minWidth: "12rem" }}
-          ></Column>
-          <Column
-            field="status"
-            header="Status"
-            sortable
-            align="center"
-            body={(reservation: ReservationEntity) => {
-              const status = reservationStatusRender[reservation.status];
-              return (
-                <Tag
-                  value={status.label}
-                  severity={status.severity}
-                  icon={status.icon}
-                ></Tag>
-              );
-            }}
-            style={{ minWidth: "12rem" }}
-          ></Column>
-        </DataTable>
+            selectionMode="multiple"
+          >
+            <Column selectionMode="multiple"></Column>
+            <Column field="id" align="center" />
+            <Column
+              align="center"
+              filterMatchMode="custom"
+              filterFunction={filterByStatus}
+              filterType="custom"
+              body={(reservation: ReservationEntity) => {
+                const { label, severity, icon } =
+                  reservationStatusRender[reservation.status];
+                return <Tag value={label} severity={severity} icon={icon} />;
+              }}
+              editor={(options) => {
+                return (
+                  <EditorReservationStatus
+                    options={options}
+                    setCancelReservation={setCancelReservation}
+                  />
+                );
+              }}
+              filterField="status"
+            />
+
+            <Column
+              align="center"
+              dataType="date"
+              filterMatchMode="gte"
+              filterType="dateIs"
+              filterField="createdAt"
+              body={(reservation: ReservationEntity) => {
+                return dateFnsAdapter.format(reservation.createdAt);
+              }}
+            />
+
+            <Column
+              align="center"
+              filterField="updatedAt"
+              body={(reservation: ReservationEntity) => {
+                return dateFnsAdapter.format(reservation.updatedAt);
+              }}
+            />
+
+            {/*  Version Quotation */}
+            <Column
+              headerClassName="min-w-24"
+              className="min-w-24"
+              header="Código"
+              body={({ versionQuotation }: ReservationEntity) => {
+                if (!versionQuotation) return "";
+                return (
+                  <label>
+                    Q{versionQuotation.id.quotationId}-V
+                    {versionQuotation.id.versionNumber}
+                  </label>
+                );
+              }}
+            />
+
+            <Column field="versionQuotation.name" align="center" />
+
+            <Column
+              body={(reservation: ReservationEntity) => {
+                const client =
+                  reservation.versionQuotation?.tripDetails?.client;
+                return client ? <ClientInfo client={client!} /> : "";
+              }}
+            />
+
+            <Column
+              align="center"
+              body={(reservation: ReservationEntity) => {
+                if (!reservation.versionQuotation?.tripDetails) {
+                  return "";
+                }
+                return dateFnsAdapter.format(
+                  reservation.versionQuotation.tripDetails.startDate
+                );
+              }}
+            />
+
+            <Column
+              align="center"
+              body={(reservation: ReservationEntity) => {
+                if (!reservation.versionQuotation?.tripDetails) {
+                  return "";
+                }
+                return dateFnsAdapter.format(
+                  reservation.versionQuotation.tripDetails.endDate
+                );
+              }}
+            />
+
+            <Column
+              align="center"
+              body={(reservation: ReservationEntity) => {
+                const finalPrice = reservation.versionQuotation?.finalPrice;
+                return formatCurrency(finalPrice ?? 0);
+              }}
+            />
+            <Column
+              header="Cotización"
+              align="center"
+              body={(reservation: ReservationEntity) => {
+                const representative = reservation.versionQuotation?.user;
+                if (!representative) return "";
+                return <UserInfo user={representative} />;
+              }}
+            />
+          </DataTable>
+        </ErrorBoundary>
       </div>
-
-      {/* <Dialog visible={reservationDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="reservation Details" modal className="p-fluid" footer={reservationDialogFooter} onHide={hideDialog}>
-                {reservation.image && <img src={`https://primefaces.org/cdn/primereact/images/reservation/${reservation.image}`} alt={reservation.image} className="reservation-image block m-auto pb-3" />}
-                <div className="field">
-                    <label htmlFor="name" className="font-bold">
-                        Name
-                    </label>
-                    <InputText id="name" value={reservation.name} onChange={(e) => onInputChange(e, 'name')} required autoFocus className={classNames({ 'p-invalid': submitted && !reservation.name })} />
-                    {submitted && !reservation.name && <small className="p-error">Name is required.</small>}
-                </div>
-                <div className="field">
-                    <label htmlFor="description" className="font-bold">
-                        Description
-                    </label>
-                    <InputTextarea id="description" value={reservation.description} onChange={(e:ChangeEvent<HTMLTextAreaElement>) => onInputTextAreaChange(e, 'description')} required rows={3} cols={20} />
-                </div>
-
-                <div className="field">
-                    <label className="mb-3 font-bold">Category</label>
-                    <div className="formgrid grid">
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category1" name="category" value="Accessories" onChange={onCategoryChange} checked={reservation.category === 'Accessories'} />
-                            <label htmlFor="category1">Accessories</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category2" name="category" value="Clothing" onChange={onCategoryChange} checked={reservation.category === 'Clothing'} />
-                            <label htmlFor="category2">Clothing</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category3" name="category" value="Electronics" onChange={onCategoryChange} checked={reservation.category === 'Electronics'} />
-                            <label htmlFor="category3">Electronics</label>
-                        </div>
-                        <div className="field-radiobutton col-6">
-                            <RadioButton inputId="category4" name="category" value="Fitness" onChange={onCategoryChange} checked={reservation.category === 'Fitness'} />
-                            <label htmlFor="category4">Fitness</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="formgrid grid">
-                    <div className="field col">
-                        <label htmlFor="price" className="font-bold">
-                            Price
-                        </label>
-                        <InputNumber id="price" value={reservation.price} onValueChange={(e) => onInputNumberChange(e, 'price')} mode="currency" currency="USD" locale="en-US" />
-                    </div>
-                    <div className="field col">
-                        <label htmlFor="quantity" className="font-bold">
-                            Quantity
-                        </label>
-                        <InputNumber id="quantity" value={reservation.quantity} onValueChange={(e) => onInputNumberChange(e, 'quantity')} />
-                    </div>
-                </div>
-            </Dialog>
-
-            <Dialog visible={deleteReservationDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteReservationDialogFooter} onHide={hideDeleteReservationDialog}>
-                <div className="confirmation-content">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {reservation && (
-                        <span>
-                            Are you sure you want to delete <b>{reservation.name}</b>?
-                        </span>
-                    )}
-                </div>
-            </Dialog>
-{/*  */}
-      {/* <Dialog visible={deleteReservationsDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Confirm" modal footer={deleteReservationsDialogFooter} onHide={hideDeleteReservationsDialog}>
-                <div className="confirmation-content">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {reservation && <span>Are you sure you want to delete the selected reservations?</span>}
-                </div>
-            </Dialog> */}
     </div>
   );
 };
+
+const headerColumnGroup = (
+  <ColumnGroup>
+    <Row>
+      <Column
+        headerClassName="bg-primary text-white"
+        selectionMode="multiple"
+      />
+      <Column
+        headerClassName="bg-primary text-white"
+        header="Código"
+        align="center"
+      />
+      <Column
+        headerClassName="bg-primary text-white"
+        header="Estado"
+        align="center"
+        filterHeaderClassName="bg-red-400"
+        filterField="status"
+        pt={{
+          filterMenuButton: ({ context }: { context: any }) => {
+            return {
+              className: cn(
+                "text-white hover:bg-tertiary bg-primary focus:bg-tertiary",
+                {
+                  "bg-tertiary text-white": context.active,
+                }
+              ),
+            };
+          },
+        }}
+        showFilterMatchModes={false}
+        showFilterOperator={false}
+        showAddButton={false}
+        filter
+        filterElement={(options) => <FilterByStatus options={options} />}
+        filterApply={(options) => <FilterApplyButton {...options} />}
+        filterClear={(options) => <FilterClearButton {...options} />}
+      />
+      <Column
+        showFilterMatchModes={false}
+        showFilterOperator={false}
+        showAddButton={false}
+        showApplyButton={false}
+        filterField="createdAt"
+        dataType="date"
+        filterMatchMode="gte"
+        filterType="dateIs"
+        pt={{
+          filterMenuButton: ({ context }: { context: any }) => {
+            return {
+              className: cn(
+                "text-white hover:bg-tertiary bg-primary focus:bg-tertiary",
+                {
+                  "bg-tertiary text-white": context.active,
+                }
+              ),
+            };
+          },
+        }}
+        filter
+        filterClear={(options) => <FilterClearButton {...options} />}
+        filterElement={(options) => (
+          <FilterByDate options={options} placeholder="Selecciona una fecha" />
+        )}
+        headerClassName="bg-primary text-white min-w-32"
+        header="Fecha de creación"
+        align="center"
+      />
+      <Column
+        showFilterMatchModes={false}
+        showFilterOperator={false}
+        showAddButton={false}
+        filterField="updatedAt"
+        pt={{
+          filterMenuButton: ({ context }: { context: any }) => {
+            return {
+              className: cn(
+                "text-white hover:bg-tertiary bg-primary focus:bg-tertiary",
+                {
+                  "bg-tertiary text-white": context.active,
+                }
+              ),
+            };
+          },
+        }}
+        filterApply={(options) => <FilterApplyButton {...options} />}
+        filterClear={(options) => <FilterClearButton {...options} />}
+        filter
+        filterElement={(options) => (
+          <FilterByDate options={options} placeholder="Selecciona una fecha" />
+        )}
+        headerClassName="bg-primary text-white min-w-32"
+        header="Última actualización"
+        align="center"
+      />
+
+      <Column
+        header={
+          <div className="text-sm  flex items-center gap-x-2">
+            <i className="text-sm pi pi-file" />
+            Detalles de cotización
+          </div>
+        }
+        align="center"
+        colSpan={10}
+      />
+    </Row>
+    <Row>
+      <Column colSpan={5} />
+
+      <Column header="Código" />
+      <Column header="Nombre" />
+      <Column header="Cliente" headerClassName="min-w-48" />
+      <Column header="Fecha de inicio" />
+      <Column header="Fecha de fin" />
+      <Column header="Precio" />
+      <Column header="Representante" />
+    </Row>
+  </ColumnGroup>
+);

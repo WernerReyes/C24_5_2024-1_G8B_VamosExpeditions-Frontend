@@ -8,6 +8,7 @@ interface Props {
   error?: boolean;
   isLoader?: boolean;
   loadingComponent?: React.ReactNode;
+  skeletonQuantity?: number;
   skeleton?: SkeletonProps;
 }
 
@@ -19,6 +20,7 @@ export const ErrorBoundary = ({
   isLoader,
   loadingComponent,
   skeleton,
+  skeletonQuantity,
 }: Props) => {
   const [hasError, setHasError] = useState(false);
   const [prevResetCondition, setPrevResetCondition] = useState(resetCondition);
@@ -48,7 +50,15 @@ export const ErrorBoundary = ({
         loadingComponent ? (
           loadingComponent
         ) : (
-          <Skeleton shape="rectangle" height="2rem" {...skeleton} />
+          <>
+            {skeletonQuantity ? (
+              Array.from({ length: skeletonQuantity }).map((_, index) => (
+                <Skeleton key={index} {...skeleton} />
+              ))
+            ) : (
+              <Skeleton {...skeleton} />
+            )}
+          </>
         )
       ) : (
         children

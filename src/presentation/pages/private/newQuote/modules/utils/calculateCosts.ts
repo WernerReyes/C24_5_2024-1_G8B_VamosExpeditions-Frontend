@@ -55,6 +55,7 @@ export const calculateCosts = (
           totalPricesByHotel[hotelKey];
         return {
           ...totals,
+          hotelName,
           [hotelName]: {
             total,
             number,

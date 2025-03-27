@@ -6,7 +6,7 @@ import {
 } from "primereact/tabview";
 import { classNames } from "primereact/utils";
 import { useWindowSize } from "../hooks";
-import { classNamesAdapter } from "@/core/adapters";
+import { cn } from "@/core/adapters";
 
 interface Props extends TabViewProps {
   tabPanelContent: TabPanelProps[];
@@ -29,7 +29,7 @@ export const TabView = ({
       pt={{
         ...Tailwind,
         panelContainer: {
-          className: classNamesAdapter("h-full", width < TABLET && "p-0"),
+          className: cn("h-full", width < TABLET && "p-0"),
         },
         nav: {
           className:

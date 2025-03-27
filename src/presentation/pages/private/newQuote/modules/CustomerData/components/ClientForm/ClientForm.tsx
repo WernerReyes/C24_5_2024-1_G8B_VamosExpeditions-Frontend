@@ -13,7 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
 import {
-  classNamesAdapter,
+  cn,
   type CountryCode,
   phoneNumberAdapter,
 } from "@/core/adapters";
@@ -29,7 +29,7 @@ import { getCountryPhoneMask } from "../../utils";
 import { SUBREGIONS } from "@/presentation/types";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
-import { onSetSincronizedCurrentTripDetailsByClient } from "@/infraestructure/store";
+import { onSetSelectedClient, onSetSincronizedCurrentTripDetailsByClient } from "@/infraestructure/store";
 
 const OPERATIONS = [
   {
@@ -67,6 +67,7 @@ export const ClientForm = () => {
   const {
     data: externalCountries,
     isLoading: isGettingAllExternalCountries,
+    isFetching: isFetchingAllExternalCountries,
     isError,
     error,
   } = useGetAllExternalCountriesQuery();
@@ -106,16 +107,17 @@ export const ClientForm = () => {
       .unwrap()
       .then(({ data }) => {
         if (currentOp === OPERATIONS[1]) {
-          dispatch(
-            onSetSincronizedCurrentTripDetailsByClient({
-              ...currentTripDetails!,
-              client: data,
-            })
-          );
+          dispatch(onSetSelectedClient(data));
+          if (currentTripDetails) {
+            
+            dispatch(
+              onSetSincronizedCurrentTripDetailsByClient({
+                ...currentTripDetails,
+                client: data,
+              })
+            );
+          }
         }
-      })
-      .catch((error) => {
-        console.error(error);
       });
   };
 
@@ -138,6 +140,7 @@ export const ClientForm = () => {
       setSelectedCountry(country);
       setSuggestPhone(true);
       setCurrentOp(OPERATIONS[1]);
+      setValue("id", selectedClient.id);
     } else {
       reset(clientDto.getEmpty);
       setSelectedCountry(undefined);
@@ -147,6 +150,8 @@ export const ClientForm = () => {
   }, [selectedClient, externalCountries]);
 
   const countryPhoneMask = getCountryPhoneMask(selectedCountry);
+
+  // console.log(errors, watch());
 
   return (
     <form
@@ -207,7 +212,7 @@ export const ClientForm = () => {
 
       <div className={Style.container}>
         <ErrorBoundary
-          isLoader={isGettingAllExternalCountries}
+          isLoader={isGettingAllExternalCountries || isFetchingAllExternalCountries}
           loadingComponent={
             <InputText
               label={{
@@ -273,6 +278,7 @@ export const ClientForm = () => {
                       id="country"
                       placeholder="Seleccione una subregión"
                       invalid={!!error}
+                      
                       options={SUBREGIONS}
                       virtualScrollerOptions={{ itemSize: 38 }}
                       {...field}
@@ -357,7 +363,7 @@ export const ClientForm = () => {
                     invalid={!!error}
                     small={{
                       text: error?.message,
-                      className: classNamesAdapter({
+                      className: cn({
                         "!text-black":
                           countryPhoneMask === null && suggestPhone,
                       }),
@@ -376,7 +382,7 @@ export const ClientForm = () => {
                         countryPhoneMask === null && suggestPhone
                           ? "Formato de telefono no encontrado"
                           : error?.message,
-                      className: classNamesAdapter({
+                      className: cn({
                         "!text-black":
                           countryPhoneMask === null && suggestPhone,
                       }),
@@ -411,11 +417,11 @@ export const ClientForm = () => {
         )}
       </div>
 
-      <Controller
+      {/* <Controller
         control={control}
         name="id"
         render={({ field }) => <input type="hidden" id="id" {...field} />}
-      />
+      /> */}
 
       <SplitButton
         label={isUpsertingClient ? currentOp.loading : currentOp.label}
@@ -424,10 +430,11 @@ export const ClientForm = () => {
           isContentLoading ||
           isUpsertingClient ||
           isGettingAllExternalCountries ||
-          Object.keys(errors).length > 0 || !isDirty
+          Object.keys(errors).length > 0 ||
+          !isDirty && currentOp === OPERATIONS[1]
         }
         icon={currentOp.icon}
-        menuClassName={classNamesAdapter({ hidden: !selectedClient })}
+        menuClassName={cn({ hidden: !selectedClient })}
         dropdownIcon={!selectedClient ? "pi pi-ban" : undefined}
         onClick={() => {
           handleSubmit(handleUpsertClient)();
@@ -438,7 +445,7 @@ export const ClientForm = () => {
           label: op.label,
           icon: op.icon,
           command: () => handleOperation(op),
-          className: classNamesAdapter(
+          className: cn(
             "border-[#D0D5DD]",
             currentOp === op ? "bg-secondary" : "text-black bg-transparent"
           ),

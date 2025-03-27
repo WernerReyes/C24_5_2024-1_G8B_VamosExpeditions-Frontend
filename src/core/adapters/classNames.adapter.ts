@@ -1,5 +1,5 @@
 import { classNames } from "primereact/utils";
 
-export const classNamesAdapter = (...args: any[]): string | undefined => {
+export const cn = (...args: any[]): string | undefined => {
   return classNames(...args);
 };

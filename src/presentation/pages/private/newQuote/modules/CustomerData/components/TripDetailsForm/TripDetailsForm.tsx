@@ -22,26 +22,23 @@ import { Controller, useForm } from "react-hook-form";
 import {
   type HotelRoomTripDetailsEntity,
   OrderType,
-  TravelerStyle,
-  VersionQuotationStatus,
+  TravelerStyle
 } from "@/domain/entities";
 import { generateCode } from "../../utils";
 
 import type { AppState } from "@/app/store";
+import { dateFnsAdapter } from "@/core/adapters";
 import { tripDetailsDto, type TripDetailsDto } from "@/domain/dtos/tripDetails";
 import { onSetSelectedClient } from "@/infraestructure/store";
 import {
   useDeleteManyHotelRoomTripDetailsMutation,
   useGetAllClientsQuery,
   useGetCountriesQuery,
-  useUpdateVersionQuotationMutation,
-  useUpsertTripDetailsMutation,
+  useUpsertTripDetailsMutation
 } from "@/infraestructure/store/services";
 import { useDispatch, useSelector } from "react-redux";
 import Style from "../Style.module.css";
 import TripDetailsFormStyle from "./TripDetailsForm.module.css";
-import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
-import { dateFnsAdapter } from "@/core/adapters";
 
 const TRAVELER_CLASES = [
   { key: TravelerStyle.COMFORT, label: "Confort" },
@@ -77,16 +74,14 @@ export const TripDetailsForm = () => {
 
   const { selectedClient } = useSelector((state: AppState) => state.client);
 
-  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
-
+ 
   const [upsertTripDetails, { isLoading: isUpsertingTripDetails }] =
     useUpsertTripDetailsMutation();
   const { data: clients, isLoading: isGettingAllClients } =
     useGetAllClientsQuery();
 
-  const [
-    deleteManyHotelRoomTripDetails,
-  ] = useDeleteManyHotelRoomTripDetailsMutation();
+  const [deleteManyHotelRoomTripDetails] =
+    useDeleteManyHotelRoomTripDetailsMutation();
 
   const {
     data: countries,
@@ -102,21 +97,27 @@ export const TripDetailsForm = () => {
   const [visible, setVisible] = useState(false);
   const [accept, setAccept] = useState(false);
   const [isContentLoading, setIsContentLoading] = useState(true);
+  const [deleteByDestination, setDeleteByDestination] = useState(false);
 
   const handleTripDetails = async (
     tripDetailsDto: TripDetailsDto,
     accept?: boolean
   ) => {
     const daysToDelete = !accept
-      ? hotelRoomTripDetails.filter(
-          (quote) =>
+      ? hotelRoomTripDetails.filter((quote) => {
+          const cityId = quote?.hotelRoom?.hotel?.distrit?.city?.id;
+          if (!tripDetailsDto.destination[cityId!])
+            setDeleteByDestination(true);
+          return (
             !dateFnsAdapter.isWithinInterval(
               quote.date,
               tripDetailsDto.travelDates[0],
               tripDetailsDto.travelDates[1]
-            )
-        )
+            ) || !tripDetailsDto.destination[cityId!]
+          );
+        })
       : [];
+
     if (daysToDelete.length > 0) {
       setVisible(true);
       setHotelsQuotationsOutSideDateRange(daysToDelete);
@@ -125,23 +126,9 @@ export const TripDetailsForm = () => {
     await upsertTripDetails({
       tripDetailsDto,
     })
-      .unwrap()
-      .then(() => {
-        // navigate(QUOTES);
-        if (currentTripDetails && !accept) return;
-        updateVersionQuotation(
-          versionQuotationDto.parse({
-            ...currentVersionQuotation!,
-            status: VersionQuotationStatus.DRAFT,
-            finalPrice: undefined,
-            profitMargin: undefined,
-            indirectCostMargin: undefined,
-            completionPercentage: 25,
-          })
-        );
-      });
+      
+      
   };
-
 
   useEffect(() => {
     if (accept && hotelsQuotationsOutSideDateRange.length > 0) {
@@ -153,17 +140,16 @@ export const TripDetailsForm = () => {
         })();
         setAccept(false);
         setVisible(false);
+        setDeleteByDestination(false);
       });
     }
   }, [accept]);
 
   useEffect(() => {
     if (currentTripDetails) {
-      reset(tripDetailsDto.parse(currentTripDetails));
-      if (currentTripDetails.client) {
-        dispatch(onSetSelectedClient(currentTripDetails.client));
-      }
+      reset(tripDetailsDto.parse(currentTripDetails));  
     }
+    dispatch(onSetSelectedClient(currentTripDetails?.client ?? null));
 
     setIsContentLoading(false);
   }, [currentTripDetails]);
@@ -184,6 +170,7 @@ export const TripDetailsForm = () => {
     });
     setValue("code", code);
   }, [
+    selectedClient,
     watch().clientId,
     watch().orderType,
     watch().travelDates,
@@ -200,7 +187,11 @@ export const TripDetailsForm = () => {
         acceptLabel="Sí"
         visible={visible}
         className="max-w-lg"
-        message="¿Estás seguro de cambiar la fecha de la reserva?, se eliminarán los días que no estén dentro del rango de fechas."
+        message={
+          deleteByDestination
+            ? "¿Estás seguro de cambiar el destino de la reserva?, se eliminarán los días que no pertenezcan a la ciudad seleccionada."
+            : "¿Estás seguro de cambiar la fecha de la reserva?, se eliminarán los días que no estén dentro del rango de fechas."
+        }
         onHide={() => setVisible(false)}
         accept={() => setAccept(true)}
         reject={() => setAccept(false)}
@@ -328,7 +319,8 @@ export const TripDetailsForm = () => {
           </div>
           <div className={Style.container}>
             <ErrorBoundary
-              isLoader={isGettingCountries}
+              isLoader={isGettingCountries || isFetchingCountries}
+              
               loadingComponent={
                 <div className="font-bold flex flex-col gap-2 mb-5">
                   <InputText
@@ -338,7 +330,7 @@ export const TripDetailsForm = () => {
                     }}
                     loading={isFetchingCountries}
                     skeleton={{
-                      height: "4rem",
+                      height: "3rem",
                     }}
                     disabled
                     id="destino"
@@ -371,13 +363,13 @@ export const TripDetailsForm = () => {
                         countries?.data.map((country) => ({
                           key: country.code,
                           label: country.name,
-                          icon: (
+                          icon: country.image ? (
                             <img
                               src={country.image?.svg}
                               className="w-5 me-2"
                               alt={country.name}
                             />
-                          ),
+                          ) : undefined,
                           selectable: false,
                           children: country.cities?.map((city) => ({
                             key: city.id.toString(),

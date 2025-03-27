@@ -1,23 +1,24 @@
 //import { useWindowSize } from '@/presentation/hooks';
-import { constantStorage } from "@/core/constants";
-import { useState, useEffect } from "react";
+import type { AppState } from "@/app/store";
 import { constantResponsiveDesign } from "@/core/constants";
+import { onSetSidebar, onToggleSidebar } from "@/infraestructure/store";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 export const useSidebar = () => {
-  const { SIDEBAR_VISIBLE } = constantStorage;
-
-  const [visible, setVisible] = useState(() => {
-    const savedVisible = localStorage.getItem(SIDEBAR_VISIBLE);
-    return savedVisible !== null ? JSON.parse(savedVisible) : true; // Cambiar a false si deseas que esté oculto por defecto
-  });
+  const dispatch = useDispatch();
+  const { isOpen } = useSelector((state: AppState) => state.sidebar);
 
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth < constantResponsiveDesign.MACBOOK;
 
-      if (isMobile && visible) {
-        setVisible(false); // Ocultar si estamos en móvil
-      } else if (!isMobile && !visible) {
-        setVisible(true); // Mostrar en pantallas grandes
+      if (isMobile && isOpen) {
+        // setVisible(false); // Ocultar si estamos en móvil
+       
+        dispatch(onSetSidebar(false));
+      } else if (!isMobile && !isOpen) {
+        // setVisible(true); // Mostrar en pantallas grandes
+        dispatch(onSetSidebar(true));
       }
     };
 
@@ -26,12 +27,14 @@ export const useSidebar = () => {
   }, []);
 
   // Guardar el estado de la visibilidad en localStorage cada vez que cambie
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_VISIBLE, JSON.stringify(visible));
-  }, [visible]);
+
+  const toggleSidebar = () => {
+    dispatch(onToggleSidebar());
+  };
 
   return {
-    visible,
-    setVisible,
+    visible: isOpen,
+
+    toggleSidebar,
   };
 };

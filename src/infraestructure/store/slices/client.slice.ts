@@ -22,15 +22,6 @@ export const clientSlice = createSlice({
       };
     },
 
-    onSetUpsertClient: (state, { payload }: PayloadAction<ClientEntity>) => {
-      return {
-        ...state,
-        clients: state.clients.map((client) =>
-          client.id === payload.id ? payload : client
-        ),
-      };
-    },
-
     onSetSelectedClient: (
       state,
       { payload }: PayloadAction<ClientEntity | null>
@@ -43,5 +34,5 @@ export const clientSlice = createSlice({
   },
 });
 
-export const { onSetClients, onSetUpsertClient, onSetSelectedClient } =
+export const { onSetClients, onSetSelectedClient } =
   clientSlice.actions;

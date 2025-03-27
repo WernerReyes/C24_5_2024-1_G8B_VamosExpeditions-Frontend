@@ -1,20 +1,19 @@
-import { z } from "zod";
 
-import { cityEntitySchema } from "./city.entity";
-import { clientEntitySchema } from "./client.entity";
-import { OrderType, TravelerStyle } from "./tripDetails.entity";
-import { userEntitySchema } from "./user.entity";
+import type { ReservationEntity } from "./reservation.entity";
+import type { TripDetailsEntity } from "./tripDetails.entity";
+import type { UserEntity } from "./user.entity";
 
 export enum VersionQuotationStatus {
   DRAFT = "DRAFT",
   COMPLETED = "COMPLETED",
   CANCELATED = "CANCELATED",
+  APPROVED = "APPROVED",
 }
 
 type VersionQuotationStatusRender = {
   label: string;
   icon: string;
-  severity: "info" | "warning" | "success";
+  severity: "info" | "warning" | "success" | "danger" | "secondary";
 };
 
 export const versionQuotationRender: Record<
@@ -23,51 +22,39 @@ export const versionQuotationRender: Record<
 > = {
   [VersionQuotationStatus.DRAFT]: {
     label: "Borrador",
-    severity: "info",
+    severity: "secondary",
     icon: "pi pi-pencil",
   },
   [VersionQuotationStatus.COMPLETED]: {
     label: "Completado",
-    severity: "success",
+    severity: "info",
     icon: "pi pi-check",
   },
   [VersionQuotationStatus.CANCELATED]: {
     label: "Cancelado",
-    severity: "warning",
+    severity: "danger",
     icon: "pi pi-times",
+  },
+  [VersionQuotationStatus.APPROVED]: {
+    label: "Aprobado",
+    severity: "success",
+    icon: "pi pi-check",
   },
 };
 
-export const versionQuotationEntitySchema = z.object({
-  id: z.object({ quotationId: z.number(), versionNumber: z.number() }),
-  name: z.string(),
-  status: z.nativeEnum(VersionQuotationStatus),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  official: z.boolean(),
-  completionPercentage: z.number(),
-  indirectCostMargin: z.number().optional(),
-  profitMargin: z.number().optional(),
-  finalPrice: z.number().optional(),
-  quotation: z.object({ id: z.number() }),
-  tripDetails: z
-    .object({
-      id: z.number().int().positive().min(1),
-      numberOfPeople: z.number(),
-      startDate: z.date(),
-      endDate: z.date(),
-      code: z.string(),
-      travelerStyle: z.nativeEnum(TravelerStyle),
-      orderType: z.nativeEnum(OrderType),
-      specialSpecifications: z.string().optional(),
+export interface VersionQuotationEntity  {
+  id: { quotationId: number; versionNumber: number };
+  name: string;
+  status: VersionQuotationStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  official: boolean;
+  completionPercentage: number;
+  indirectCostMargin?: number;
+  profitMargin?: number;
+  finalPrice?: number;
+  reservation?: ReservationEntity;
+  tripDetails?: TripDetailsEntity;
+  user?: UserEntity;
 
-      client: z.object(clientEntitySchema.shape).optional(),
-      cities: z.array(cityEntitySchema).optional(),
-    })
-    .optional(),
-  user: z.object(userEntitySchema.shape).optional(),
-});
-
-export type VersionQuotationEntity = z.infer<
-  typeof versionQuotationEntitySchema
->;
+}

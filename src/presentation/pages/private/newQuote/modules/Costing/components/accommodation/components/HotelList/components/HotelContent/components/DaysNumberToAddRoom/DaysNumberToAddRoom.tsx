@@ -14,7 +14,7 @@ type Props = {
 
 export const DaysNumberToAddRoom = ({ setRange }: Props) => {
   const { selectedDay } = useSelector((state: AppState) => state.quotation);
-  const [localValue, setLocalValue] = useState<[number, number]>([1, 1]);
+  const [localValue, setLocalValue] = useState<[number, number]>([selectedDay?.number ?? 1, selectedDay?.total ?? 1]);
 
   useEffect(() => {
     setRange(localValue);

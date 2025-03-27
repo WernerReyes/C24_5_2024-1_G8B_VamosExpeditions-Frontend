@@ -1,11 +1,12 @@
 import {
   Button,
   Divider,
+  NotFound,
   Stepper,
   type StepperChangeEvent,
 } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CostingModule,
   CostSummaryModule,
@@ -20,12 +21,29 @@ import {
   useGetAllHotelRoomTripDetailsQuery,
   useGetTripDetailsByVersionQuotationIdQuery,
   useGetVersionQuotationByIdQuery,
+  useUpdateVersionQuotationMutation,
 } from "@/infraestructure/store/services";
 import { useDispatch, useSelector } from "react-redux";
 import { EditableQuotationName, ProgressBarQuotation } from "./components";
 import { useParams } from "react-router-dom";
-import { useCleanStore } from "@/infraestructure/hooks";
-import { onSetCurrentStep, onSetOperationType } from "@/infraestructure/store";
+import {
+  onSetCurrentStep,
+  onSetCurrentTripDetails,
+  onSetCurrentVersionQuotation,
+  onSetHotelRoomTripDetails,
+} from "@/infraestructure/store";
+import { BlockUI } from "primereact/blockui";
+import { useLocation } from "react-use";
+import { constantRoutes } from "@/core/constants";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+
+import {
+  calculateCompletionPercentage,
+  getVersionDataAndCalculateCompletionPercentage,
+} from "./utils";
+import { startShowWarning } from "@/core/utils";
+import { VersionQuotationStatus } from "@/domain/entities";
+import { constantStorage } from '@/core/constants/storage.const';
 
 interface Title {
   header: string;
@@ -53,16 +71,18 @@ const renderStepContent = (step: number): React.ReactNode => {
   }
 };
 
-const NewQuotePage = memo(() => {
+const { VIEW_QUOTE } = constantRoutes.private;
+
+const NewQuotePage = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { quoteId, version } = useParams<{
     quoteId: string;
     version: string;
   }>();
-  const { cleanChangeEditQuotation, cleanChangeNewQuotation } = useCleanStore();
   const { width, DESKTOP, MOVILE } = useWindowSize();
 
-  const { currentQuotation, currentStep, days, operationType } = useSelector(
+  const { currentQuotation, currentStep, indirectCostMargin } = useSelector(
     (state: AppState) => state.quotation
   );
 
@@ -82,30 +102,36 @@ const NewQuotePage = memo(() => {
         }
       : currentQuotation?.currentVersion?.id;
 
-  const { refetch: refetchGetVersionQuotationById } =
-    useGetVersionQuotationByIdQuery(versionQuotationId!, {
-      skip: !versionQuotationId,
-    });
+  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
 
-  const { refetch: refetchGetTripDetailsByVersionQuotationId } =
-    useGetTripDetailsByVersionQuotationIdQuery(versionQuotationId!, {
-      skip: !versionQuotationId,
-    });
+  const {
+    error,
+    currentData: currentVersionQuotationData,
+    isError: isErrorGetVersionQuotationById,
+  } = useGetVersionQuotationByIdQuery(versionQuotationId!, {
+    skip: !versionQuotationId,
+  });
 
-    // console.log(currentTripDetails === null)
+  const currentTripDetailsData = currentVersionQuotationData?.data?.tripDetails;
 
-  const { refetch: refetchGetAllHotelRoomTripDetails } =
-    useGetAllHotelRoomTripDetailsQuery(
-      {
-        tripDetailsId: currentTripDetails?.id ?? 0,
-      },
-      {
-        skip: !currentTripDetails,
-      }
-    );
+  const currentHotelRoomTripDetailsData =
+    currentTripDetailsData?.hotelRoomTripDetails;
 
+  // const {
+  //   isUninitialized: isUninitializedGetHotelRoomTripDetails,
+  //   isSuccess: isSuccessGetHotelRoomTripDetails,
+  //   currentData: currentHotelRoomTripDetailsData,
+  // } = useGetAllHotelRoomTripDetailsQuery(
+  //   {
+  //     tripDetailsId: currentTripDetails?.id ?? 0,
+  //   },
+  //   {
+  //     skip: !currentTripDetails,
+  //   }
+  // );
+  const [errorVersionQuotation, setErrorVersionQuotation] = useState(false);
   const [isLoadingStep, setIsLoadingStep] = useState(true);
-  const [verifyStep, setVerifyStep] = useState(false)
+  const [isVerified, setIsVerified] = useState(false);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -123,158 +149,263 @@ const NewQuotePage = memo(() => {
     dispatch(onSetCurrentStep(event.index));
   };
 
-  const handleRefetch = useCallback(() => {
-    refetchGetVersionQuotationById()
-      .unwrap()
-      .then(() => {
-        refetchGetTripDetailsByVersionQuotationId()
-          .unwrap()
-          .then(() => {
-            refetchGetAllHotelRoomTripDetails();
-          })
-          .catch(() => {
-            dispatch(onSetCurrentStep(0));
-          });
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => {
-        dispatch(onSetOperationType(null));
-      });
-}, [
-  refetchGetVersionQuotationById, 
-  refetchGetTripDetailsByVersionQuotationId, 
-  refetchGetAllHotelRoomTripDetails, 
-  dispatch
-]);
+  
 
+  const existDaysWithQuotationsMemo = useMemo(() => {
+    if (!currentHotelRoomTripDetailsData || !currentTripDetailsData)
+      return false;
+    const { startDate, endDate } = currentTripDetailsData;
+    const dates: Date[] = dateFnsAdapter.eachDayOfInterval(startDate, endDate);
+    return dates.every((date) =>
+      currentHotelRoomTripDetailsData.some((hotelRoom) =>
+        dateFnsAdapter.isSameDay(date, hotelRoom.date)
+      )
+    );
+  }, [
+    currentTripDetailsData,
+    currentHotelRoomTripDetailsData,
+    quoteId,
+    version,
+  ]);
 
   useEffect(() => {
-    if (operationType === "edit" && quoteId && version) {
-      //* Clean state when change edit quotation
-      cleanChangeEditQuotation();
+    setIsLoadingStep(true);
 
-      setVerifyStep(false);
-      
-
-      handleRefetch();
-    }
-
-    if (operationType === "create" && !quoteId && !version) {
-      //* Clean state when change new quotation
-      cleanChangeNewQuotation();
-
-      setVerifyStep(false);
-    
-
-      handleRefetch();
-    }
-  }, [operationType, quoteId, version]);
-
-  useEffect(() => {
-    if (!isLoadingStep) return;
     const timeout = setTimeout(() => {
       setIsLoadingStep(false);
     }, 500);
-    
+
     return () => clearTimeout(timeout);
-}, [currentStep]);
+  }, [currentStep]);
 
-
-useEffect(() => {
-  if (isLoadingStep) return;
-  if (currentStep >= 0 && currentStep < STEPS.length) {
-    if (!currentTripDetails) {
-      dispatch(onSetCurrentStep(0));
-    } else if (currentStep > 1 && hotelRoomTripDetails.length === 0) {
-      dispatch(onSetCurrentStep(1));
+  useEffect(() => {
+    if (isErrorGetVersionQuotationById) {
+      dispatch(onSetCurrentVersionQuotation(null));
+      setErrorVersionQuotation(true);
     }
-  } else dispatch(onSetCurrentStep(0));
+    const timeout = setTimeout(() => {
+      setIsVerified(true);
+    }, 500);
 
- 
-    setVerifyStep(true);
- 
-}, [isLoadingStep, verifyStep, currentStep]);
+    return () => clearTimeout(timeout);
+  }, [isErrorGetVersionQuotationById]);
+
+  useEffect(() => {
+    const storedStep = Number(localStorage.getItem(constantStorage.CURRENT_ACTIVE_STEP));
+    console.log({
+      storedStep,
+      currentStep
+    });
+  
+    if (storedStep !== currentStep) {
+      dispatch(onSetCurrentStep(storedStep)); // Solo si hay diferencia
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!currentVersionQuotationData) return;
+    const version = currentVersionQuotationData?.data;
+    if (version) {
+      dispatch(onSetCurrentVersionQuotation(version));
+      if (version.tripDetails) {
+        dispatch(onSetCurrentTripDetails(version.tripDetails));
+        if (version.tripDetails?.hotelRoomTripDetails) {
+          dispatch(
+            onSetHotelRoomTripDetails(version.tripDetails?.hotelRoomTripDetails)
+          );
+        } else {
+          console.log("No hotel room trip details");
+          dispatch(onSetHotelRoomTripDetails([]));
+        }
+      } else {
+        console.log("No trip details");
+        dispatch(onSetCurrentTripDetails(null));
+      }
+    } else {
+      console.log("No version");
+      dispatch(onSetCurrentVersionQuotation(null));
+    }
+  }, [currentVersionQuotationData]);
 
 
+  useEffect(() => {
+    if (isLoadingStep) return;
 
-  const existDaysWithQuotations = useMemo(() => {
-    if (!days || !hotelRoomTripDetails) return false;
-    return days.every((day) =>
-      hotelRoomTripDetails.some((hotelRoom) =>
-        dateFnsAdapter.isSameDay(day.date, hotelRoom.date)
-      )
-    );
-  }, [days, hotelRoomTripDetails]);
+   
+   if (!currentTripDetailsData) {
+    setTimeout(() => {
+      dispatch(onSetCurrentStep(0));
+    }, 0);
+   }
+}, [currentTripDetailsData, isLoadingStep ]);
+
+  useEffect(() => {
+    if (isLoadingStep) return;
+
+    if (currentStep < 2 || existDaysWithQuotationsMemo) return;
+
+    if (currentStep === 2) {
+      startShowWarning(
+        "No puede continuar sin agregar habitaciones a todos los días del itinerario"
+      );
+    }
 
   
+    setTimeout(() => {
+      dispatch(onSetCurrentStep(1));
+    }, 0);
+   
+  }, [currentStep, existDaysWithQuotationsMemo, isLoadingStep]);
+
+  useEffect(() => {
+    if (!currentVersionQuotationData || !isVerified || isLoadingStep) return;
+
+    const storedCompletionPercentage =
+      currentVersionQuotationData.data.completionPercentage;
+
+    const newCompletionPercentage = calculateCompletionPercentage(
+      currentStep,
+      !!currentTripDetails,
+      existDaysWithQuotationsMemo,
+      {
+        ...currentVersionQuotationData.data,
+        indirectCostMargin:
+          currentVersionQuotationData.data.indirectCostMargin ||
+          indirectCostMargin,
+      },
+      storedCompletionPercentage
+    );
+
+    //* Prevent unnecessary updates when reloading
+    if (storedCompletionPercentage === newCompletionPercentage) return;
+
+    updateVersionQuotation(
+      versionQuotationDto.parse(
+        getVersionDataAndCalculateCompletionPercentage(
+          {
+            ...currentVersionQuotationData.data,
+            indirectCostMargin:
+              currentVersionQuotationData.data.indirectCostMargin ||
+              indirectCostMargin,
+          },
+          newCompletionPercentage
+        )
+      )
+    );
+  }, [
+    currentStep,
+    currentTripDetails,
+    existDaysWithQuotationsMemo,
+    currentVersionQuotationData,
+    indirectCostMargin,
+  ]);
+
+  if (!isVerified) {
+    return (
+      <div className="flex justify-center items-center h-96 lg:h-[30rem]">
+        <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
+      </div>
+    );
+  }
+
+  if (errorVersionQuotation) {
+    return <NotFound screenSize="partial" />;
+  }
+
+  // if (
+  //   currentVersionQuotationData?.data.status ===
+  //     VersionQuotationStatus.APPROVED &&
+  //   currentVersionQuotationData?.data.official &&
+  //   currentVersionQuotationData?.data.reservation
+  // ) {
+  //   return (
+  //     <NotFound
+  //       screenSize="partial"
+  //       title="Cotización Aprobada"
+  //       message="Esta cotización ya ha sido aprobada y no puede ser modificada."
+  //     />
+  //   );
+  // }
+
+  // if (
+  //   currentVersionQuotationData?.data.status ===
+  //     VersionQuotationStatus.CANCELATED &&
+  //   currentVersionQuotationData?.data.official &&
+  //   currentVersionQuotationData?.data.reservation
+  // ) {
+  //   return (
+  //     <NotFound
+  //       screenSize="partial"
+  //       title="Cotización Cancelada"
+  //       message="Esta cotización ha sido cancelada y no puede ser modificada."
+  //     />
+  //   );
+  // }
 
   return (
-    <section className="bg-white py-5 md:p-10 rounded-lg my-auto shadow-md min-h-screen">
+    <section className="bg-white py-5 md:p-10 rounded-lg shadow-md">
       <EditableQuotationName />
       <ProgressBarQuotation />
       <Divider />
-  
-      {/* Only render Stepper when verifyStep is true */}
-      {verifyStep ? (
-        <Stepper
-          linear
-          orientation={width > DESKTOP ? "horizontal" : "vertical"}
-          activeStep={currentStep}
-          onChangeStep={handleChangeStep}
-          panelContent={STEPS.map((step, index) => ({
-            header: step.header,
-            children: !isLoadingStep ? (
-              <div className={"pe-4 sm:pe-0"}>
+
+      <Stepper
+        linear
+        orientation={width > DESKTOP ? "horizontal" : "vertical"}
+        activeStep={currentStep}
+        onChangeStep={handleChangeStep}
+        panelContent={STEPS.map((step, index) => ({
+          header: step.header,
+          children: !isLoadingStep ? (
+            <div className={"pe-4 h-full sm:pe-0"}>
+              <BlockUI
+                blocked={location.pathname === VIEW_QUOTE(versionQuotationId)}
+                className="!z-10"
+                template={
+                  <i className="pi pi-lock" style={{ fontSize: "3rem" }}></i>
+                }
+              >
                 {renderStepContent(index)}
-                <div className="flex pt-4 justify-between">
-                  {index > 0 && (
-                    <Button
-                      label={width > MOVILE ? "Atrás" : undefined}
-                      severity="secondary"
-                      icon="pi pi-arrow-left"
-                      iconPos="left"
-                      tooltip={width <= MOVILE ? "Atrás" : undefined}
-                      tooltipOptions={{ position: "top" }}
-                      onClick={handleBack}
-                    />
-                  )}
-  
-                  {index < STEPS.length - 1 && (
-                    <Button
-                      label={width > MOVILE ? "Continuar" : undefined}
-                      icon="pi pi-arrow-right"
-                      iconPos="right"
-                      tooltip={width <= MOVILE ? "Continuar" : undefined}
-                      tooltipOptions={{ position: "top" }}
-                      onClick={handleNext}
-                      disabled={
-                        (index === 0 && !currentTripDetails) ||
-                        (index === 1 &&
-                          (hotelRoomTripDetails.length === 0 ||
-                            !existDaysWithQuotations))
-                      }
-                    />
-                  )}
-                </div>
+              </BlockUI>
+              <div className="flex pt-4  justify-between">
+                {index > 0 && (
+                  <Button
+                    label={width > MOVILE ? "Atrás" : undefined}
+                    severity="secondary"
+                    icon="pi pi-arrow-left"
+                    iconPos="left"
+                    tooltip={width <= MOVILE ? "Atrás" : undefined}
+                    tooltipOptions={{ position: "top" }}
+                    onClick={handleBack}
+                  />
+                )}
+
+                {index < STEPS.length - 1 && (
+                  <Button
+                    label={width > MOVILE ? "Continuar" : undefined}
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    tooltip={width <= MOVILE ? "Continuar" : undefined}
+                    tooltipOptions={{ position: "top" }}
+                    onClick={handleNext}
+                    disabled={
+                      (index === 0 && !currentTripDetailsData) ||
+                      (index === 1 &&
+                        (hotelRoomTripDetails.length === 0 ||
+                          !existDaysWithQuotationsMemo))
+                    }
+                  />
+                )}
               </div>
-            ) : (
-              <div className="flex justify-center items-center h-96 lg:h-[30rem]">
-                <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
-              </div>
-            ),
-          }))}
-        />
-      ) : (
-        // Show a loading state while verifyStep is false
-        <div className="flex justify-center items-center h-96 lg:h-[30rem]">
-          <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
-        </div>
-      )}
+            </div>
+          ) : (
+            <div className="flex justify-center items-center h-96 lg:h-[30rem]">
+              <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
+            </div>
+          ),
+        }))}
+      />
     </section>
   );
-  
-});
+};
 
 export default NewQuotePage;

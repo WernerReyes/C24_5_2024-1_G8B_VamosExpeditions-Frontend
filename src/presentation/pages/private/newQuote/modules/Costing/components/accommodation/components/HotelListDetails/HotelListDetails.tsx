@@ -15,26 +15,30 @@ export const HotelListDetails = () => {
 
   const [contentLoading, setContentLoading] = useState(true);
 
-  const hotelRoomTripDetailsPerDay: HotelRoomTripDetailsEntity[] = useMemo(() => {
-    if (selectedDay && hotelRoomTripDetails.length > 0) {
-      const { result, executionTime } = measureExecutionTime(function () {
-        return hotelRoomTripDetails.filter((quote) =>
-          dateFnsAdapter.isSameDay(quote.date, selectedDay.date)
-        );
-      });
+  const hotelRoomTripDetailsPerDay: HotelRoomTripDetailsEntity[] =
+    useMemo(() => {
+      if (selectedDay && hotelRoomTripDetails.length > 0) {
+        const { result, executionTime } = measureExecutionTime(function () {
+          return hotelRoomTripDetails.filter((quote) => {
+            return dateFnsAdapter.isSameDay(quote.date, selectedDay.date);
+          });
+        });
 
-      setTimeout(() => {
-        setContentLoading(false);
-      }, executionTime);
+        setTimeout(() => {
+          setContentLoading(false);
+        }, executionTime);
 
-      return result;
-    }
-    return [];
-  }, [selectedDay, hotelRoomTripDetails]);
+        return result;
+      }
+      return [];
+    }, [selectedDay, hotelRoomTripDetails]);
 
   const length =
-    hotelRoomTripDetailsPerDay.length > 0 ? hotelRoomTripDetailsPerDay.length : 4;
+    hotelRoomTripDetailsPerDay.length > 0
+      ? hotelRoomTripDetailsPerDay.length
+      : 4;
 
+    
   return (
     <>
       {hotelRoomTripDetailsPerDay.length === 0 ? (

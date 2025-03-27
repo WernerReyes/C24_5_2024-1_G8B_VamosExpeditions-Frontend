@@ -4,8 +4,11 @@ import { constantRoutes } from "@/core/constants";
 import { ProgressBar } from "../ProgressBar";
 import { Button } from "../Button";
 import { Card } from "../Card";
+import { useReLoginMutation } from "@/infraestructure/store/services";
 
 const { LOGIN } = constantRoutes.public;
+
+const sessionChannel = new BroadcastChannel("session"); // Shared channel
 
 interface ExpiredSessionCountdownProps {
   countdownDuration?: number;
@@ -16,6 +19,7 @@ export function ExpiredSessionCountdown({
   countdownDuration = 60,
   isExpired,
 }: ExpiredSessionCountdownProps) {
+  const [reLogin] = useReLoginMutation();
   const [timeLeft, setTimeLeft] = useState(countdownDuration);
 
   const handleRedirect = () => (window.location.href = LOGIN);
@@ -40,6 +44,7 @@ export function ExpiredSessionCountdown({
       closable={false}
       visible={isExpired}
       className="w-fit"
+      style={{ width: "50vw" }}
       onHide={() => {}}
     >
       <Card
@@ -57,7 +62,11 @@ export function ExpiredSessionCountdown({
             label="Iniciar sesión"
             icon="pi pi-sign-in"
             className="w-full mt-3"
-            onClick={() => handleRedirect()}
+            onClick={() =>
+              reLogin()
+                .unwrap()
+                .then(() => sessionChannel.postMessage("relogged"))
+            }
           />
         }
       >

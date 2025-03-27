@@ -22,18 +22,19 @@ export const HotelListDetailsHeader = ({ quote }: Props) => {
   ] = useUpdateVersionQuotationMutation();
 
   const handleDelete = () => {
+    console.log("quote.id", quote.id);
     deleteHotelRoomTripDetails(quote.id).then(({ data }) => {
        const restHotelRooms = hotelRoomTripDetails.filter((hotel) => hotel.id !== data!.data.id)
-       if (restHotelRooms.length === 0) {
-          updateVersionQuotation(versionQuotationDto.parse({
-            ...currentVersionQuotation!,
-            status: VersionQuotationStatus.DRAFT,
-            finalPrice: undefined,
-            profitMargin: undefined,
-            indirectCostMargin: undefined,
-            completionPercentage: 25,
-          }));
-        }     
+      //  if (restHotelRooms.length === 0) {
+      //     updateVersionQuotation(versionQuotationDto.parse({
+      //       ...currentVersionQuotation!,
+      //       status: VersionQuotationStatus.DRAFT,
+      //       finalPrice: undefined,
+      //       profitMargin: undefined,
+      //       indirectCostMargin: undefined,
+      //       completionPercentage: 25,
+      //     }));
+      //   }     
     });
   };
 

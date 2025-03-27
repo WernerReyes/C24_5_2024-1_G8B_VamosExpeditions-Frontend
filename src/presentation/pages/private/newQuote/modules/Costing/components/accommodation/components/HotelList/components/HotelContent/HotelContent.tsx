@@ -1,23 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
-import { VersionQuotationStatus, type HotelEntity, type HotelRoomEntity } from "@/domain/entities";
 import type { AppState } from "@/app/store";
+import { cn } from "@/core/adapters";
+import { type HotelEntity, type HotelRoomEntity } from "@/domain/entities";
 import {
-  useCreateManyHotelRoomTripDetailsMutation,
-  useUpdateVersionQuotationMutation,
+  useCreateManyHotelRoomTripDetailsMutation
 } from "@/infraestructure/store/services";
 import {
   Accordion,
-  type AccordionTabChangeEvent,
   Button,
   confirmPopup,
   Divider,
   InputNumber,
+  type AccordionTabChangeEvent,
 } from "@/presentation/components";
-import { classNamesAdapter } from "@/core/adapters";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { DaysNumberToAddRoom } from "./components";
 import { getHotelRoomRenderProperties } from "./utils";
-import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 
 type Props = {
   hotel: HotelEntity;
@@ -27,19 +25,9 @@ type Props = {
 export const HotelContent = ({ hotel, setVisible }: Props) => {
   const { days } = useSelector((state: AppState) => state.quotation);
 
-  const { currentVersionQuotation } = useSelector(
-    (state: AppState) => state.versionQuotation
-  );
-
   const { currentTripDetails } = useSelector(
     (state: AppState) => state.tripDetails
   );
-
-  const { hotelRoomTripDetails } = useSelector(
-    (state: AppState) => state.hotelRoomTripDetails
-  );
-
-  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
 
   const [createManyHotelRoomTripDetails] =
     useCreateManyHotelRoomTripDetailsMutation();
@@ -73,19 +61,6 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
       .then(() => {
         setVisible(false);
         setConfirm(false);
-        if (hotelRoomTripDetails.length === 0 && currentVersionQuotation) {
-          console.log("updateVersionQuotation");
-          updateVersionQuotation(
-            versionQuotationDto.parse({
-              ...currentVersionQuotation,
-              status: VersionQuotationStatus.DRAFT,
-              finalPrice: undefined,
-            profitMargin: undefined,
-            indirectCostMargin: undefined,
-              completionPercentage: 50,
-            })
-          );
-        }
       })
       .catch(() => {
         setConfirm(false);
@@ -97,6 +72,8 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
       target: event.currentTarget,
       message: <DaysNumberToAddRoom setRange={setRangeState} />,
       defaultFocus: "accept",
+      acceptLabel: "Aceptar",
+      rejectLabel: "Cancelar",
       accept: () => {
         setConfirm(true);
       },
@@ -186,7 +163,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
               >
                 <div className="flex items-center gap-2">
                   <i
-                    className={classNamesAdapter(
+                    className={cn(
                       getHotelRoomRenderProperties(room, "icon"),
                       "font-bold text-gray-500"
                     )}

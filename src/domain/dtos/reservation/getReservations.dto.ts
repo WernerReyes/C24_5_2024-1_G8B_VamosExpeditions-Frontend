@@ -1,24 +1,37 @@
-import { requestValidator } from "@/core/utils";
-import { ReservationStatus } from "@/domain/entities";
+import { dtoValidator } from "@/core/utils";
 import { z } from "zod";
+import { paginationDtoSchema } from "../common";
+import { ReservationStatus } from "@/domain/entities";
 
-export type GetReservationsDto = {
-  readonly status?: ReservationStatus;
-  readonly quotationId?: number;
-  readonly versionNumber?: number;
-};
+const getReservationsDtoSchema = z
+  .object({
+    // status: z.optional(z.nativeEnum(ReservationStatus)),
+    quotationId: z.number().min(1).optional(),
+    versionNumber: z.number().min(1).optional(),
+    status: z.nativeEnum(ReservationStatus).array().optional(),
+    createdAt: z.date().optional(),
+    updatedAt: z.date().optional(),
 
-const getReservationsDtoSchema = z.object({
-  status: z.optional(z.nativeEnum(ReservationStatus)),
-  quotationId: z.number().min(1).optional(),
-  versionNumber: z.number().min(1).optional(),
-});
+  })
+  .merge(paginationDtoSchema);
+
+export type GetReservationsDto = z.infer<typeof getReservationsDtoSchema>;
 
 export const getReservationsDto = {
   create: (dto: GetReservationsDto): [GetReservationsDto?, string[]?] => {
-    const errors = requestValidator(dto, getReservationsDtoSchema);
+    const errors = dtoValidator(dto, getReservationsDtoSchema);
     if (errors) return [undefined, errors];
     return [dto, undefined];
   },
-  getSchema: getReservationsDtoSchema,
+  getQueryParams: (dto: GetReservationsDto) =>
+    new URLSearchParams(
+      Object.entries({
+        ...dto,
+        quotationId: dto.quotationId?.toString(),
+        versionNumber: dto.versionNumber?.toString(),
+      }).reduce((acc, [key, value]) => {
+        if (value !== undefined) acc[key] = value.toString();
+        return acc;
+      }, {} as Record<string, string>)
+    ).toString(),
 };
