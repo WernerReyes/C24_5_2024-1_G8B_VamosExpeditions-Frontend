@@ -10,3 +10,6 @@ export * from './slices/tripDetails.slice';
 export * from './slices/versionQuotation.slice';
 export * from './slices/hotelRoomTripDetails.slice';
 
+
+export * from "./slices/users.slice";
+export * from "./slices/notificatioMessage.slice";

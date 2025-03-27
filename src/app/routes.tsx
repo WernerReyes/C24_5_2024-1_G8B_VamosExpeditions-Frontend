@@ -37,7 +37,7 @@ export const AppRouter = () => {
       init(userAuthenticatedData.data.expiresAt);
     }
   }, [userAuthenticatedData]);
-
+  
   if (isUserAuthenticatedLoading || isUserAuthenticatedFetching) return null;
 
   return (

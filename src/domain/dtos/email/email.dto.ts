@@ -3,34 +3,13 @@ import { z } from "zod";
 
 export type EmailDto = {
   readonly subject: string;
-  readonly to: string[];
+  readonly to: Array<{
+  readonly id?: number;
+  readonly email: string;
+  }>;
   readonly resources: string;
   readonly description?: string;
-};
-
-export const emailDto = (
-  subject: string,
-  to: string[],
-  resources: string,
-  description?: string
-) => {
-  return {
-    create: (): [EmailDto?, string[]?] => {
-      const errors = requestValidator(
-        {
-          subject,
-          to,
-          resources,
-          description,
-        },
-        emailDtoSchema
-      );
-      if (errors) {
-        return [undefined, errors];
-      }
-      return [{ subject, to, resources, description }, undefined];
-    },
-  };
+  readonly reservationId?: number;
 };
 
 export const emailDtoSchema = z.object({
@@ -38,9 +17,17 @@ export const emailDtoSchema = z.object({
     message: "El campo asunto es requerido",
   }),
   to: z
-    .array(z.string(), {
-      required_error: "El campo para es requerido",
-    })
+    .array(
+      z.object({
+        email: z.string().email({
+          message: "El campo email debe ser un correo válido",
+        }),
+        id: z.number().optional(),
+      }),
+      {
+        required_error: "El campo para es requerido",
+      }
+    )
     .min(1, {
       message: "El campo para es requerido",
     }),
@@ -51,5 +38,16 @@ export const emailDtoSchema = z.object({
     .min(1, {
       message: "El campo recursos es requerido",
     }),
+  resourcesId: z.number().optional(),
   description: z.string().optional(),
 });
+
+export const emailDto = {
+  create: (dto: EmailDto): [EmailDto?, string[]?] => {
+    const errors = requestValidator(dto, emailDtoSchema);
+    if (errors) {
+      return [undefined, errors];
+    }
+    return [dto, undefined];
+  },
+};

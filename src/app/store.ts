@@ -12,6 +12,8 @@ import {
   reportService,
   tripDetailsServiceStore,
   userService,
+  SocketService,
+  EmailService,
 } from "@/infraestructure/store/services";
 
 import {
@@ -25,6 +27,9 @@ import {
   versionquotationSlice,
   hotelRoomTripDetailsSlice,
   tripDetailsSlice,
+  usersSlice,
+  userNotificationSlice,
+  
 } from "@/infraestructure/store";
 
 export const store = configureStore({
@@ -39,6 +44,9 @@ export const store = configureStore({
     reservation: reservationSlice.reducer,
     tripDetails: tripDetailsSlice.reducer,
     cookieExpiration: cookieExpirationSlice.reducer,
+    
+    chatNotifications: userNotificationSlice.reducer,
+    users: usersSlice.reducer,
     [tripDetailsServiceStore.reducerPath]: tripDetailsServiceStore.reducer,
     [authService.reducerPath]: authService.reducer,
     [userService.reducerPath]: userService.reducer,
@@ -51,6 +59,8 @@ export const store = configureStore({
     [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
     [reportService.reducerPath]: reportService.reducer,
+    [SocketService.reducerPath]: SocketService.reducer,
+    [EmailService.reducerPath]: EmailService.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -67,7 +77,11 @@ export const store = configureStore({
       .concat(versionQuotationService.middleware)
       .concat(hotelRoomTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
-      .concat(reportService.middleware),
+      .concat(reportService.middleware)
+      .concat(SocketService.middleware)
+      .concat(EmailService.middleware),
+
+
 });
 
 export type AppState = ReturnType<typeof store.getState>;

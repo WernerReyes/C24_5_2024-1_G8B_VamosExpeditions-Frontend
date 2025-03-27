@@ -6,6 +6,7 @@ export const userEntitySchema = z.object({
   id: z.number(),
   fullname: z.string(),
   email: z.string(),
+  online: z.boolean().optional(),
   role: z.object(roleEntitySchema.shape).optional(),
 });
 

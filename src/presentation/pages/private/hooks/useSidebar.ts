@@ -7,7 +7,7 @@ export const useSidebar = () => {
 
   const [visible, setVisible] = useState(() => {
     const savedVisible = localStorage.getItem(SIDEBAR_VISIBLE);
-    return savedVisible !== null ? JSON.parse(savedVisible) : true; // Cambiar a false si deseas que esté oculto por defecto
+    return savedVisible !== null ? JSON.parse(savedVisible) : true;
   });
 
   useEffect(() => {

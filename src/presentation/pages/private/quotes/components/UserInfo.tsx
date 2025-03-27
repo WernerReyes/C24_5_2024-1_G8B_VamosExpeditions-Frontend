@@ -11,7 +11,7 @@ export const UserInfo = ({ user }: Props) => {
   return (
     <div className="flex items-center gap-2">
       <Avatar
-        label={firstName[0] + lastName[0]}
+        /* label={firstName[0]  + lastName[0]} */
         shape="circle"
         className="bg-primary text-white"
       />

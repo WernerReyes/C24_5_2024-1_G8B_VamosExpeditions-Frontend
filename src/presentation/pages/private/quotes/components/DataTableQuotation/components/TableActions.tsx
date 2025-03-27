@@ -1,24 +1,32 @@
 import { useState } from "react";
+import { UserEntity, type VersionQuotationEntity } from "@/domain/entities";
 import {
-  type VersionQuotationEntity
-} from "@/domain/entities";
-import {
+  Avatar,
+  Badge,
   Button,
   Dialog,
   InputText,
   InputTextarea,
   MultiSelect,
+  MultiSelectChangeEvent,
+  ProgressSpinner,
   SelectButton,
   SelectButtonChangeEvent,
 } from "@/presentation/components";
 import { constantRoutes } from "@/core/constants";
 import { EmailDto, emailDtoSchema } from "@/domain/dtos/email";
-import { useGetHotelPdfQuery } from "@/infraestructure/store/services";
+import {
+  useGetHotelPdfQuery,
+  useSendMessageEmailMutation,
+  useSendMessageMutation,
+} from "@/infraestructure/store/services";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { onSetOperationType } from "@/infraestructure/store";
+import { AppState } from "@/app/store";
+
 
 const { EDIT_QUOTE } = constantRoutes.private;
 
@@ -39,30 +47,80 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [createPdf, setCreatePdf] = useState(false);
+  const [visible, setVisible] = useState(false);
 
-  const { isLoading } = useGetHotelPdfQuery(
+ 
+
+
+  const { authUser } = useSelector((state: AppState) => state.auth);
+  const {users}  = useSelector((state: AppState) => state.users);
+  
+
+
+  const { isLoading: isLoadingPdf } = useGetHotelPdfQuery(
     {
-      id: rowData!.tripDetails?.id || 0,
+      id: rowData?.tripDetails?.id || 0,
+      name: rowData?.tripDetails?.client?.fullName || "",
     },
     {
       skip: !rowData?.tripDetails || !createPdf,
     }
   );
 
-  // const { downloadPdf, isLoading } = useReportStore();
+  
+   
 
-  const [visible, setVisible] = useState(false);
+  const [sendMessage] = useSendMessageMutation();
+  const [sendMessageEmail, { isLoading: isLoadingEmail }] =
+    useSendMessageEmailMutation();
 
-  const {
-    control,
-    handleSubmit,
-  } = useForm<EmailDto>({
+  const { control, handleSubmit } = useForm<EmailDto>({
     resolver: zodResolver(emailDtoSchema),
   });
 
-  const handleLogin = (data: EmailDto) => {
-    console.log(data);
-    // Add your login handling logic here
+  const handleLogin = async (data: EmailDto) => {
+    /* await sendMessageEmail({
+      subject: data.subject,
+      to: data.to.map((user) => ({ email: user.email })),
+      resources: data.resources,
+      description: data.description,
+      reservationId: rowData!.tripDetails?.id || 0,
+    })
+      .unwrap()
+      .catch((error: any) => {
+        console.log(error);
+      }); */
+
+    await sendMessage({
+      from_user: authUser?.id as number,
+      to_user: data.to.map((user) => user.id!),
+      message: data.description as string,
+    })
+      .unwrap()
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const userTemplate = (option: UserEntity) => {
+    return (
+      <div
+        className="
+        flex
+        items-center
+      "
+      >
+        <Avatar icon="pi pi-user" shape="circle" />
+        {
+          <Badge
+            severity={option.online ? "success" : "danger"}
+            className="mx-2"
+          />
+        }
+
+        <p className="font-bold ">{option.fullname}</p>
+      </div>
+    );
   };
 
   return (
@@ -84,37 +142,38 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         className=""
         rounded
         text
-        disabled={isLoading || !rowData.tripDetails}
+        disabled={isLoadingPdf || !rowData.tripDetails}
         onClick={() => {
           if (!rowData.tripDetails) return;
-          // downloadPdf(rowData?.reservation?.id, "rolando");
           setCreatePdf(true);
         }}
-        // disabled={isLoading}
       />
       {type === "principal" && (
         <Button
           icon="pi pi-envelope"
           rounded
+          disabled={!rowData.tripDetails}
           text
           onClick={() => {
             setVisible(true);
           }}
         />
       )}
-      
 
       {/*  Dialog*/}
 
       <Dialog
         header="Enviar correo"
         visible={visible}
-        style={{ width: "auto" /* border: "4px solid #01A3BB" */ }}
+        style={{ width: "auto" }}
         onHide={() => {
           setVisible(false);
         }}
       >
-        <form className={"text-tertiary text-[20px] font-bold mb-4"} onSubmit={handleSubmit(handleLogin)}>
+        <form
+          className={"text-tertiary text-[20px] font-bold mb-4"}
+          onSubmit={handleSubmit(handleLogin)}
+        >
           <Controller
             name="subject"
             control={control}
@@ -122,7 +181,10 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
             render={({ field, fieldState: { error } }) => (
               <InputText
                 type="text"
-                label={{ text: "Asunto" }}
+                label={{
+                  text: "Asunto",
+                  className: "text-tertiary text-[20px] font-bold ",
+                }}
                 placeholder="Asunto"
                 className="w-full mb-4"
                 invalid={!!error}
@@ -150,23 +212,32 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
               control={control}
               render={({ field, fieldState: { error } }) => (
                 <MultiSelect
-                  {...field}
-                  options={[
-                    { label: "Annelies", value: "Annelies" },
-                    { label: "Pablo", value: "Pablo" },
-                    { label: "Carmen", value: "Carmen" },
-                  ]}
+                  options={
+                    Array.isArray(users)
+                      ? users?.map((user) => {
+                          return {
+                            ...user,
+                          };
+                        })
+                      : []
+                  }
                   multiple
                   filter
                   className="w-full"
                   placeholder="Para"
                   invalid={!!error}
-                  onChange={(e) => field.onChange(e.value)}
+                  {...field}
+                  onChange={(e: MultiSelectChangeEvent) => {
+                    
+                    field.onChange(e.value);
+                  }}
                   small={{
                     text: error?.message,
                     className: "text-red-500",
                   }}
                   display="chip"
+                  optionLabel="fullname"
+                  itemTemplate={userTemplate}
                 />
               )}
             />
@@ -212,17 +283,31 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
             )}
           />
           <div className="flex justify-end mt-4">
-            <Button
-              label="Cancelar"
-              onClick={() => {
-                setVisible(false);
-              }}
-              icon="pi pi-envelope"
-              type="submit"
-              className="mr-4 bg-white text-gray-500"
-            />
-
-            <Button label="Enviar" icon="pi pi-envelope" type="submit" />
+            {isLoadingEmail ? (
+              <ProgressSpinner
+                style={{ width: "40px", height: "40px" }}
+                strokeWidth="8"
+              />
+            ) : (
+              <>
+                <Button
+                  label="Cancelar"
+                  
+                  onClick={() => {
+                    setVisible(false);
+                  }}
+                  icon="pi pi-envelope"
+                  type="submit"
+                  className="mr-4 bg-white text-gray-500"
+                />
+                <Button
+                  label="Enviar"
+                  icon="pi pi-envelope"
+                  type="submit"
+                  disabled={isLoadingEmail}
+                />
+              </>
+            )}
           </div>
         </form>
       </Dialog>

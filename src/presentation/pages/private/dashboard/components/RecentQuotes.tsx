@@ -55,7 +55,8 @@ export const RecentQuotes = () => {
         {RECENT_QUOTES.map((quote) => (
           <li
             key={quote.id}
-            className="relative flex items-center justify-between p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition duration-200 group"
+            className="relative flex items-center justify-between 
+            p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition duration-200 group"
           >
             <div className="flex items-center">
               <Avatar
@@ -87,7 +88,12 @@ export const RecentQuotes = () => {
               </span>
             </div>
             <Button
-              className="absolute right-4 bottom-4 px-3 py-1 text-sm font-medium text-primary bg-transparent border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors duration-200 opacity-0 group-hover:opacity-100"
+              className="
+              absolute right-4 bottom-4 px-3 py-1 text-sm font-medium 
+              text-primary bg-transparent 
+              border border-primary rounded-lg 
+              
+              hover:bg-primary hover:text-white transition-colors duration-200 opacity-0 group-hover:opacity-100"
               onClick={() => handleViewDetails(quote.id)}
             >
               View Details

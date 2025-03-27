@@ -7,3 +7,4 @@ export * from "./showAlert"
 export * from "./measureExecutionTime";
 export * from "./removeBaseRoute";
 export * from "./deepEqual";
+export * from "./timeElapsed";

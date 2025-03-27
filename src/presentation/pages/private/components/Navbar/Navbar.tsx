@@ -1,24 +1,56 @@
 import {
   Avatar,
   Badge,
-  Dialog,
+  /* Dialog, */
   Menubar,
   Menu,
   type MenuItem,
+  DataTable,
+  Column,
+  Button,
+  TabView,
+  InputTextarea,
+  MultiSelect,
 } from "@/presentation/components";
 import { useState } from "react";
 
 import { classNamesAdapter } from "@/core/adapters";
 
 import "./Navbar.css";
+/* import { Toolbar } from "primereact/toolbar"; */
+import { DataTableSelectionMultipleChangeEvent } from "primereact/datatable";
+import { useSelector } from "react-redux";
+import { AppState } from "@/app/store";
 
+import { messageTimestamp } from "@/core/utils";
+import { NotificationMessageEntity } from "@/domain/entities";
+import {
+  useDeleteNotificationsMutation,
+  useMarkNotificationsAsReadMutation,
+} from "@/infraestructure/store/services";
+/* import { useWindowSize } from "@/presentation/hooks";
+ */
 interface NavbarProps {
   setVisible: (value: boolean) => void;
 }
 
 export const Navbar = ({ setVisible }: NavbarProps) => {
-  const [show, setShow] = useState(false);
+  const [deleteNotifications, {}] = useDeleteNotificationsMutation();
+  const [markNotificationsAsRead] = useMarkNotificationsAsReadMutation();
+
+  /* const { width, TABLET } = useWindowSize(); */
+
+  const { messages } = useSelector(
+    (state: AppState) => state.chatNotifications
+  );
+
+  /* const [show, setShow] = useState(false); */
   const [showMenu, setShowMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const [selectedNotifications, setSelectedNotifications] = useState<number[]>(
+    []
+  );
 
   const items: MenuItem[] = [
     {
@@ -38,31 +70,266 @@ export const Navbar = ({ setVisible }: NavbarProps) => {
     },
   ];
 
+  const itemsMessage: MenuItem[] = [
+    {
+      template: () => {
+        return (
+          <>
+            <TabView
+              className="my-0 mx-0"
+              tabPanelContent={[
+                {
+                  header: `Notificaciones  ${messages?.length} 🔔`,
+                  className: "w-full h-full",
+                  children: (
+                    <>
+                      <div className="flex gap-2 mb-4 ">
+                        <Button
+                          icon="pi pi-trash"
+                          label="Eliminar"
+                          size="small"
+                          severity="danger"
+                          disabled={selectedNotifications?.length === 0}
+                          onClick={() => {
+                            deleteNotifications({
+                              id: selectedNotifications,
+                            }).unwrap();
+                            setSelectedNotifications([]);
+                          }}
+                        />
+                        <Button
+                          icon="pi pi-eye"
+                          label="Marcar como leídas"
+                          size="small"
+                          disabled={
+                            selectedNotifications?.length === 0 ||
+                            messages
+                              ?.filter((p) =>
+                                selectedNotifications.includes(p.id)
+                              )
+                              .every((p) => p.is_read)
+                          }
+                          onClick={() => {
+                            markNotificationsAsRead({
+                              id: selectedNotifications,
+                            }).unwrap();
+                            setSelectedNotifications([]);
+                          }}
+                        />
+                      </div>
+
+                      <DataTable
+                        dataKey="id"
+                        value={messages || []}
+                        paginator
+                        rows={10}
+                        scrollable
+                        scrollHeight="600px"
+                        selection={
+                          selectedNotifications.length > 0
+                            ? messages?.filter((p) =>
+                                selectedNotifications.includes(p.id)
+                              ) ?? []
+                            : []
+                        }
+                        selectionMode="multiple"
+                        onSelectionChange={(
+                          e: DataTableSelectionMultipleChangeEvent<
+                            NotificationMessageEntity[]
+                          >
+                        ) =>
+                          setSelectedNotifications(
+                            e.value.map((item) => item.id)
+                          )
+                        }
+                      >
+                        <Column
+                          selectionMode="multiple"
+                          style={{ width: "5%" }}
+                        ></Column>
+
+                        <Column
+                          field="message"
+                          style={{ width: "auto", height: "auto" }}
+                          header={
+                            <span className="text-lg font-semibold text-gray-800">
+                              🔔 Notificaciones
+                            </span>
+                          }
+                          /* body */
+                          body={(rowData: NotificationMessageEntity) => (
+                            <>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-3">
+                                  <Avatar
+                                    image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
+                                    size="large"
+                                    shape="circle"
+                                  />
+
+                                  <div>
+                                    <p className="text-md font-semibold text-gray-900">
+                                      {rowData.user?.fullname}
+                                    </p>
+                                    <span className="text-xs text-gray-500">
+                                      {messageTimestamp(
+                                        new Date(rowData.created_at)
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex gap-2">
+                                  <Button
+                                    icon={
+                                      rowData.is_read
+                                        ? "pi pi-eye"
+                                        : "pi pi-eye-slash"
+                                    }
+                                    rounded
+                                    text
+                                    disabled={rowData.is_read}
+                                    pt={{
+                                      icon: {
+                                        style: {
+                                          fontSize: "1.5rem",
+                                        },
+                                      },
+                                    }}
+                                    onClick={() => {
+                                      markNotificationsAsRead({
+                                        id: [rowData.id],
+                                      }).unwrap();
+                                      setSelectedNotifications([]);
+                                    }}
+                                  />
+
+                                  <Button
+                                    icon="pi pi-trash"
+                                    rounded
+                                    text
+                                    severity="danger"
+                                    pt={{
+                                      icon: {
+                                        style: {
+                                          fontSize: "1.5rem",
+                                        },
+                                      },
+                                    }}
+                                    disabled={
+                                      (selectedNotifications?.length ?? 0) > 0
+                                    }
+                                    onClick={() => {
+                                      deleteNotifications({
+                                        id: [rowData.id],
+                                      }).unwrap();
+                                      setSelectedNotifications([]);
+                                    }}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="mt-2">
+                                <p
+                                  className={`text-gray-700 text-sm text-justify   font-semibold`}
+                                >
+                                  {rowData.message}
+                                </p>
+                              </div>
+                            </>
+                          )}
+                          /* body */
+                        />
+                      </DataTable>
+                    </>
+                  ),
+                },
+                {
+                  header: "Enviar Notificaciones 🔔",
+                  className: "w-full h-full",
+                  children: (
+                    <>
+                      <form className="text-tertiary text-[16px] font-bold mb-4">
+                        
+                          <MultiSelect
+                            className="w-full"
+                            label={{ text: "Usuarios" }}
+                            options={[
+                              { label: "Usuario 1", value: "1" },
+                              { label: "Usuario 2", value: "2" },
+                              { label: "Usuario 3", value: "3" },
+                            ]}
+                            filter
+                            placeholder="Seleccione los usuarios"
+                          
+                          />
+
+                          
+                          <InputTextarea
+                            className="w-full"
+                            label={{ text: "Descripción" }}
+                            rows={5}
+                            placeholder="Descripción de la notificación"
+                          />
+                        
+                        <div className="flex justify-end mt-2">
+                          <Button
+                            label="Enviar"
+                            type="submit"
+                            size="large"
+                            icon="pi pi-send"
+                          />
+                        </div>
+                      </form>
+                    </>
+                  ),
+                },
+              ]}
+            />
+          </>
+        );
+      },
+    },
+  ];
+
   return (
     <>
       <Menubar
         menuIcon={null}
         start={() => (
           <i
-            className="text-2xl pi pi-bars  cursor-pointer hover:text-primary"
+            className="text-2xl pi pi-bars  cursor-pointer hover:text-primary "
             onClick={() => setVisible(true)}
           />
         )}
         end={() => (
           <div className="flex items-center gap-7  mr-8 ">
             <i
-              className="pi pi-bell text-2xl cursor-pointer hover:text-slate-200 p-overlay-badge"
+              className="pi pi-bell text-2xl cursor-pointer hover:text-slate-200   p-overlay-badge"
               style={{ fontSize: "2rem" }}
-              onClick={() => setShow(true)}
+              onClick={() => {
+                /* setShow(!show); */
+                setShowNotifications(!showNotifications);
+              }}
             >
-              <Badge value="2" className="bg-red-500"></Badge>
+              <Badge
+                value={
+                  Array.isArray(messages)
+                    ? messages.filter((item) => !item.is_read).length
+                    : 0
+                }
+                className="bg-red-600"
+                onClick={() => {}}
+              />
             </i>
             <div className="relative">
               <Avatar
                 image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
                 size="large"
                 shape="circle"
-                className="cursor-pointer"
+                className="
+                cursor-pointer
+                "
                 onClick={() => setShowMenu(!showMenu)}
                 itemRef="popup_menu_left"
               />
@@ -83,26 +350,250 @@ export const Navbar = ({ setVisible }: NavbarProps) => {
         popupAlignment="left"
       />
 
-      <Dialog
+      <Menu
+        model={itemsMessage}
+        className={classNamesAdapter(
+          !showNotifications ? "hidden" : "fixed z-[1000]",
+          "sm:right-32 top-[70px] right-auto sm:w-[500px] w-auto"
+        )}
+      />
+    </>
+  );
+};
+
+/* onst TemplateNotificaciones = (
+  rowData: NotificationMessageEntity,
+  setSelectedNotifications: React.Dispatch<React.SetStateAction<number[]>>
+) => {
+  const dispatch = useDispatch();
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <Avatar
+            image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
+            size="large"
+            shape="circle"
+          />
+
+          <div>
+            <p className="text-md font-semibold text-gray-900">
+              {rowData.user?.fullname}
+            </p>
+            <span className="text-xs text-gray-500">
+              {messageTimestamp(new Date(rowData.created_at))}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            icon={rowData.is_read ? "pi pi-eye" : "pi pi-eye-slash"}
+            rounded
+            text
+            disabled={rowData.is_read}
+            pt={{
+              icon: {
+                style: {
+                  fontSize: "1.5rem",
+                },
+              },
+            }}
+          />
+
+          <Button
+            icon="pi pi-trash"
+            rounded
+            text
+            severity="danger"
+            pt={{
+              icon: {
+                style: {
+                  fontSize: "1.5rem",
+                },
+              },
+            }}
+            disabled={(selectMessage?.length ?? 0) > 0}
+            onClick={() => {
+              dispatch(onDeleteIdMessage(rowData.id));
+              setSelectedNotifications([]);
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="mt-2">
+        <p className={`text-gray-700 text-sm text-justify   font-semibold`}>
+          {rowData.message}
+        </p>
+      </div>
+    </>
+  );
+};
+ */
+/* --------------------------- */
+{
+  /* <Dialog
         visible={show}
-        header="Notificaciones"
+        header="🔔 Notificaciones"
         onHide={() => {
           if (!show) return;
           setShow(false);
         }}
         position="top-right"
+        className="sm:w-[30%] w-auto"
+        style={{
+          height: "auto",
+        }}
         modal={false}
-        className="w-96 "
+        pt={{
+          closeButton: {
+            style: {
+              background: "#01A3BB",
+              color: "white",
+            },
+          },
+        }}
       >
-        <hr />
-        <p className="mb-5">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat...
-        </p>
-        <hr />
-      </Dialog>
-    </>
-  );
-};
+        <Toolbar
+          className=" mb-4"
+          start={
+            <div className="flex gap-2">
+              <Button
+                icon="pi pi-trash"
+                label="Eliminar"
+                size="small"
+                severity="danger"
+                disabled={selectedNotifications?.length === 0}
+                onClick={() => {
+                  deleteNotifications({ id: selectedNotifications }).unwrap();
+                  setSelectedNotifications([]);
+                }}
+              />
+              <Button
+                icon="pi pi-eye"
+                label="Marcar como leídas"
+                size="small"
+                disabled={
+                  selectedNotifications?.length === 0 ||
+                  messages
+                    ?.filter((p) => selectedNotifications.includes(p.id))
+                    .every((p) => p.is_read)
+                }
+                onClick={() => {
+                  markNotificationsAsRead({
+                    id: selectedNotifications,
+                  }).unwrap();
+                  setSelectedNotifications([]);
+                }}
+              />
+            </div>
+          }
+        />
+        <DataTable
+          dataKey="id"
+          value={Array.isArray(messages) ? messages : []}
+          paginator
+          rows={10}
+          scrollable
+          scrollHeight="600px"
+          selection={
+            selectedNotifications.length > 0
+              ? messages?.filter((p) => selectedNotifications.includes(p.id)) ??
+                []
+              : []
+          }
+          selectionMode="multiple"
+          onSelectionChange={(
+            e: DataTableSelectionMultipleChangeEvent<
+              NotificationMessageEntity[]
+            >
+          ) => setSelectedNotifications(e.value.map((item) => item.id))}
+        >
+          <Column selectionMode="multiple" style={{ width: "5%" }}></Column>
+
+          <Column
+            field="message"
+            style={{ width: "auto", height: "auto" }}
+            header={
+              <span className="text-lg font-semibold text-gray-800">
+                🔔 Notificaciones
+              </span>
+            }
+           
+            body={(rowData: NotificationMessageEntity) => (
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
+                      size="large"
+                      shape="circle"
+                    />
+
+                    <div>
+                      <p className="text-md font-semibold text-gray-900">
+                        {rowData.user?.fullname}
+                      </p>
+                      <span className="text-xs text-gray-500">
+                        {messageTimestamp(new Date(rowData.created_at))}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      icon={rowData.is_read ? "pi pi-eye" : "pi pi-eye-slash"}
+                      rounded
+                      text
+                      disabled={rowData.is_read}
+                      pt={{
+                        icon: {
+                          style: {
+                            fontSize: "1.5rem",
+                          },
+                        },
+                      }}
+                      onClick={() => {
+                        markNotificationsAsRead({ id: [rowData.id] }).unwrap();
+                        setSelectedNotifications([]);
+                      }}
+                    />
+
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      severity="danger"
+                      pt={{
+                        icon: {
+                          style: {
+                            fontSize: "1.5rem",
+                          },
+                        },
+                      }}
+                      disabled={(selectedNotifications?.length ?? 0) > 0}
+                      onClick={() => {
+                        deleteNotifications({ id: [rowData.id] }).unwrap();
+                        setSelectedNotifications([]);
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-2">
+                  <p
+                    className={`text-gray-700 text-sm text-justify   font-semibold`}
+                  >
+                    {rowData.message}
+                  </p>
+                </div>
+              </>
+            )}
+            
+          />
+        </DataTable>
+      </Dialog> */
+}
+/* ------------------------- */
