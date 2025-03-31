@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Skeleton, type SkeletonProps } from "../Skeleton";
+import { Skeleton, type SkeletonProps } from "../";
 
 interface Props {
   children: React.ReactNode;

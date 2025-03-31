@@ -12,7 +12,7 @@ const PREFIX = "/client";
 
 export const clientService = createApi({
   reducerPath: "clientService",
-  tagTypes: ["Client", "Clients"],
+  tagTypes: ["Clients"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
     upsertClient: builder.mutation<ApiResponse<ClientEntity>, ClientDto>({
@@ -35,8 +35,6 @@ export const clientService = createApi({
 
           //* Update cache
           clientCache.upsertClient(data, dispatch, getState);
-
-          console.log(data.data);
            
           versionQuotationCache.updateVersionQuotationByClient(
             data.data,

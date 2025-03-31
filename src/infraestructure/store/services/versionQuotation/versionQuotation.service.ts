@@ -11,7 +11,11 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { requestConfig } from "../config";
 import type { ApiResponse } from "../response";
 
-import { startShowApiError, startShowSuccess } from "@/core/utils";
+import {
+  startShowApiError,
+  startShowError,
+  startShowSuccess,
+} from "@/core/utils";
 import { PaginatedResponse } from "../response";
 import { versionQuotationCache } from "./versionQuotation.cache";
 import type {
@@ -270,48 +274,78 @@ export const versionQuotationService = createApi({
         }
         return `/${id.quotationId}/${id.versionNumber}`;
       },
-      providesTags: (result, _, id) => {
-        return result
-          ? [
-              {
-                type: "VersionQuotation",
-                id: `${id.quotationId}-${id.versionNumber}`,
-              },
-            ]
-          : ["VersionQuotation"];
-      },
-      async onQueryStarted(_, { dispatch, queryFulfilled, getState }) {
-        try {
-          const { data } = await queryFulfilled;
+      // providesTags: (result, _, id) => {
+      //   return result
+      //     ? [
+      //         {
+      //           type: "VersionQuotation",
+      //           id: `${id.quotationId}-${id.versionNumber}`,
+      //         },
+      //       ]
+      //     : ["VersionQuotation"];
+      // },
+      providesTags: ["VersionQuotation"],
 
-          // //* Update the cache
-          // versionQuotationCache.updateVersionQuotation(
-          //   data.data,
-          //   dispatch,
-          //   getState
-          // );
-        } catch (error: any) {
-          console.log(error);
-        }
-      },
-      transformResponse: (response: ApiResponse<VersionQuotationEntity>): ApiResponse<VersionQuotationEntity> => {
+      transformResponse: (
+        response: ApiResponse<VersionQuotationEntity>
+      ): ApiResponse<VersionQuotationEntity> => {
         return {
           ...response,
           data: {
             ...response.data,
-            tripDetails: response.data?.tripDetails ? {
-              ...response.data?.tripDetails,
-              hotelRoomTripDetails:
-                response.data?.tripDetails?.hotelRoomTripDetails?.map(
-                  (hotelRoomTripDetails) => ({
-                    ...hotelRoomTripDetails,
-                    date: dateFnsAdapter.parseISO(hotelRoomTripDetails.date),
-                  })
-                ),
-            } : undefined,
-           
+            tripDetails: response.data?.tripDetails
+              ? {
+                  ...response.data?.tripDetails,
+                  hotelRoomTripDetails:
+                    response.data?.tripDetails?.hotelRoomTripDetails?.map(
+                      (hotelRoomTripDetails) => ({
+                        ...hotelRoomTripDetails,
+                        date: dateFnsAdapter.parseISO(
+                          hotelRoomTripDetails.date
+                        ),
+                      })
+                    ),
+                }
+              : undefined,
           },
         };
+      },
+    }),
+
+    generateVersionQuotationPdf: builder.query<
+      Blob,
+      { id: VersionQuotationEntity["id"]; name: string }
+    >({
+      query: ({ id }) => {
+        if (!id.quotationId || !id.versionNumber) {
+          throw "QuotationId and VersionNumber are required";
+        }
+        return {
+          url: `/pdf/${id.quotationId}/${id.versionNumber}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      async onQueryStarted({ name }, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          const blobURL = URL.createObjectURL(data);
+          const hiddenElement = document.createElement("a");
+          hiddenElement.href = blobURL;
+          hiddenElement.download = `${name}.pdf`;
+          document.body.appendChild(hiddenElement);
+          hiddenElement.click();
+          document.body.removeChild(hiddenElement);
+          setTimeout(() => {
+            window.URL.revokeObjectURL(blobURL);
+          }, 1000);
+        } catch (error: any) {
+          if (error.error)
+            startShowError(
+              "Versión de cotización no encontrada o no completado"
+            );
+        }
       },
     }),
 
@@ -357,5 +391,6 @@ export const {
   useCancelAndReplaceApprovedOfficialVersionQuotationMutation,
   useDuplicateMultipleVersionQuotationsMutation,
   useGetVersionQuotationByIdQuery,
+  useLazyGenerateVersionQuotationPdfQuery,
   useDeleteMultipleVersionQuotationsMutation,
 } = versionQuotationService;

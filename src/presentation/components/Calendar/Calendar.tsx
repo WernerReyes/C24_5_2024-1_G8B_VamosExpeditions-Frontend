@@ -6,7 +6,7 @@ import { addLocale, type LocaleOptions } from "primereact/api";
 import { HTMLAttributes, LabelHTMLAttributes } from "react";
 
 import "./Calendar.css";
-import { Skeleton, type SkeletonProps } from "../Skeleton";
+import { Skeleton, type SkeletonProps } from "..";
 import { useWindowSize } from "@/presentation/hooks";
 
 type Props = CalendarProps & {

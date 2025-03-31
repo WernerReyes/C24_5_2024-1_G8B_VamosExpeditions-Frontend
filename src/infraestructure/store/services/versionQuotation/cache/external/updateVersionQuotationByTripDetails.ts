@@ -13,7 +13,7 @@ export const updateVersionQuotationByTripDetails = function (
 
   //* Update the data in the cache for the query "getVersionQuotationById"
   for (const param of params) {
-    const { getVersionQuotationById, getAllOfficialVersionQuotations } = param;
+    const { getVersionQuotationById, getAllOfficialVersionQuotations, getAllUnofficialVersionQuotations } = param;
 
     if (getVersionQuotationById) {
       dispatch(
@@ -46,6 +46,31 @@ export const updateVersionQuotationByTripDetails = function (
         versionQuotationService.util.updateQueryData(
           "getAllOfficialVersionQuotations",
           getAllOfficialVersionQuotations,
+          (draft) => {
+            Object.assign(draft, {
+              data: {
+                ...draft.data,
+                content: draft.data.content.map((item) => {
+                  if (item?.tripDetails?.id === data.id) {
+                    return {
+                      ...item,
+                      tripDetails: data,
+                    };
+                  }
+                  return item;
+                }),
+              },
+            });
+          }
+        )
+      );
+    }
+
+    if (getAllUnofficialVersionQuotations) {
+      dispatch(
+        versionQuotationService.util.updateQueryData(
+          "getAllUnofficialVersionQuotations",
+          getAllUnofficialVersionQuotations,
           (draft) => {
             Object.assign(draft, {
               data: {

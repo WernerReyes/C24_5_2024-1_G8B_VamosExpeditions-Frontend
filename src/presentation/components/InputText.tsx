@@ -7,7 +7,7 @@ import {
 } from "primereact/inputtext";
 import { classNames } from "primereact/utils";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
-import { Skeleton, type SkeletonProps } from "./Skeleton";
+import { Skeleton, type SkeletonProps } from ".";
 import { useWindowSize } from "../hooks";
 
 type DesingType = "label" | "floatLabel";

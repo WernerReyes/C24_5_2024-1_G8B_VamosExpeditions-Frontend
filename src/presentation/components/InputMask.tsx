@@ -4,7 +4,7 @@ import {
 } from "primereact/inputmask";
 import { classNames } from "primereact/utils";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
-import { Skeleton, type SkeletonProps } from "./Skeleton";
+import { Skeleton, type SkeletonProps } from ".";
 
 interface Props extends InputMaskProps {
   label: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };

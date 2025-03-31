@@ -1,2 +1,3 @@
-export * from './QuotationSuccessDialog'
-export * from './GenerateTable'
+export * from './GenerateTable';
+export * from './ParnerTable';
+export * from './QuotationSuccessDialog';

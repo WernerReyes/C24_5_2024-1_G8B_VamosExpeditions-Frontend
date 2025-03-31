@@ -13,7 +13,7 @@ export const reportService = createApi({
         responseHandler: (response) => response.blob(),
         
       }),
-      async onQueryStarted({ id, name  }, { queryFulfilled }) {
+      async onQueryStarted({  name  }, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
 
@@ -29,10 +29,8 @@ export const reportService = createApi({
             window.URL.revokeObjectURL(blobURL);
           }, 1000); 
           
-
-          console.log("Descarga iniciada para ID:", id);
         } catch (error) {
-          console.error("Error al descargar el PDF:", error);
+        
         }
       },
     }),

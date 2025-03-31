@@ -106,14 +106,13 @@ export const TripDetailsForm = () => {
     const daysToDelete = !accept
       ? hotelRoomTripDetails.filter((quote) => {
           const cityId = quote?.hotelRoom?.hotel?.distrit?.city?.id;
-          if (!tripDetailsDto.destination[cityId!])
-            setDeleteByDestination(true);
+          if (!tripDetailsDto.destination[cityId!]) setDeleteByDestination(true);
           return (
             !dateFnsAdapter.isWithinInterval(
               quote.date,
               tripDetailsDto.travelDates[0],
               tripDetailsDto.travelDates[1]
-            ) || !tripDetailsDto.destination[cityId!]
+            )
           );
         })
       : [];

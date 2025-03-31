@@ -7,6 +7,7 @@ const insertManyHotelRoomTripDetailsDtoSchema = z.object({
   tripDetailsId: z.number(),
   hotelRoomId: z.number(),
   dateRange: z.array(z.date()).min(2).max(2),
+  countPerDay: z.number().default(1),
   numberOfPeople: z.number(),
 });
 

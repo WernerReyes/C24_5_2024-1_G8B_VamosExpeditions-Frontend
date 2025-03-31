@@ -1,7 +1,6 @@
 import {
   Avatar,
   Badge,
-  /* Dialog, */
   Menubar,
   Menu,
   type MenuItem,
@@ -48,11 +47,8 @@ const ITEMS: MenuItem[] = [
   },
 ];
 
-interface NavbarProps {
-  setVisible: (value: boolean) => void;
-}
 
-export const Navbar = ({ setVisible }: NavbarProps) => {
+export const Navbar = () => {
   const [deleteNotifications, {}] = useDeleteNotificationsMutation();
   const [markNotificationsAsRead] = useMarkNotificationsAsReadMutation();
 
@@ -60,15 +56,12 @@ export const Navbar = ({ setVisible }: NavbarProps) => {
   const { authUser } = useSelector((state: AppState) => state.auth);
   const [logout] = useLogoutMutation();
   const { toggleSidebar } = useSidebar();
-  const [show, setShow] = useState(false);
-  /* const { width, TABLET } = useWindowSize(); */
-
+  
   const { messages } = useSelector(
     (state: AppState) => state.chatNotifications
   );
 
-  /* const [show, setShow] = useState(false); */
-
+ 
   const [showMenu, setShowMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -305,20 +298,17 @@ export const Navbar = ({ setVisible }: NavbarProps) => {
             onClick={() => {
               toggleSidebar();
             }}
-            // className="text-2xl pi pi-bars  cursor-pointer hover:text-primary "
-            // onClick={() => setVisible(true)}
+           
           />
         )}
         end={() => (
           <div className="flex items-center gap-7  mr-8 ">
             <i
               className="pi pi-bell text-2xl cursor-pointer hover:text-slate-200 p-overlay-badge"
-              // onClick={() => setShow(true)}
-              // className="pi pi-bell text-2xl cursor-pointer hover:text-slate-200   p-overlay-badge"
+             
               style={{ fontSize: "2rem" }}
               onClick={() => {
-                /* setShow(!show); */
-                setShow(true)
+               
                 setShowNotifications(!showNotifications);
               }}
             >

@@ -237,7 +237,6 @@ export const versionQuotationCache = {
             "getAllUnofficialVersionQuotations",
             arg,
             (draft) => {
-              console.log(draft.data.content, data);
               Object.assign(draft, {
                 data: {
                   ...draft.data,
@@ -368,7 +367,6 @@ export const versionQuotationCache = {
           "getAllOfficialVersionQuotations",
           arg,
           (draft) => {
-            console.log(draft.data.content);
             Object.assign(draft, {
               data: {
                 ...draft.data,

@@ -29,6 +29,7 @@ export const emailDtoSchema = z.object({
     }),
   resourcesId: z.number().optional(),
   description: z.string().optional(),
+  reservationId: z.number().optional(),
 });
 
 export type EmailDto = z.infer<typeof emailDtoSchema>;

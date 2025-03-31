@@ -1,4 +1,5 @@
 
+import type { PartnerEntity } from "./partner.entity";
 import type { ReservationEntity } from "./reservation.entity";
 import type { TripDetailsEntity } from "./tripDetails.entity";
 import type { UserEntity } from "./user.entity";
@@ -53,6 +54,8 @@ export interface VersionQuotationEntity  {
   indirectCostMargin?: number;
   profitMargin?: number;
   finalPrice?: number;
+  commission?: number;
+  partner?: PartnerEntity;
   reservation?: ReservationEntity;
   tripDetails?: TripDetailsEntity;
   user?: UserEntity;

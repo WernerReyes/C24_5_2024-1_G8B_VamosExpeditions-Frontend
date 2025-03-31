@@ -67,9 +67,9 @@ export const HotelListDetails = () => {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <i className="pi pi-user text-primary me-1"></i>
-                          Personas
+                          Capacidad
                         </div>
-                        <p className="font-semibold">{quote.numberOfPeople}</p>
+                        <p className="font-semibold">{quote.hotelRoom?.capacity}</p>
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 text-sm text-gray-600">

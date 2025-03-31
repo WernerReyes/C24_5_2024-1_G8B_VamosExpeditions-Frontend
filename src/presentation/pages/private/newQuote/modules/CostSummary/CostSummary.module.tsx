@@ -20,7 +20,7 @@ export const CostSummaryModule = () => {
 
   useEffect(() => {
     setSelectedDay(currentTripDetails?.startDate);
-  }, [currentTripDetails]);
+  }, []);
 
   useEffect(() => {
     setLoading(true);

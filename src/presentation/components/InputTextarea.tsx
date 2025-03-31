@@ -4,7 +4,7 @@ import {
   type InputTextareaProps,
 } from "primereact/inputtextarea";
 import { HTMLAttributes, LabelHTMLAttributes } from "react";
-import { Skeleton, type SkeletonProps } from "./Skeleton";
+import { Skeleton, type SkeletonProps } from ".";
 
 interface Props extends InputTextareaProps {
   label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };

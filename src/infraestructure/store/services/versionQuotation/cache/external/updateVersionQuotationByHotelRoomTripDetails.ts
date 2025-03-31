@@ -133,29 +133,6 @@ export const deleteHotelRoomTripDetails = function (
         );
       }
     }
-   
-  
-    // args.forEach((arg) => {
-    //   dispatch(
-    //     hotelRoomTripDetailsService.util.updateQueryData(
-    //       "getAllHotelRoomTripDetails",
-    //       arg,
-    //       (draft) => {
-    //         console.log(draft.data.filter(
-    //             (hotelRoomTripDetails) =>
-    //               hotelRoomTripDetails.id !== data.data.id
-    //           ),
-    //         );
-    //         Object.assign(draft, {
-    //           data: draft.data.filter(
-    //             (hotelRoomTripDetails) =>
-    //               hotelRoomTripDetails.id !== data.data.id
-    //           ),
-    //         });
-    //       }
-    //     )
-    //   );
-    // });
   };
 
 

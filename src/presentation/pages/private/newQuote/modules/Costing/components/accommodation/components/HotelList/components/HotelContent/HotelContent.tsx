@@ -1,12 +1,11 @@
 import type { AppState } from "@/app/store";
 import { cn } from "@/core/adapters";
 import { type HotelEntity, type HotelRoomEntity } from "@/domain/entities";
-import {
-  useCreateManyHotelRoomTripDetailsMutation
-} from "@/infraestructure/store/services";
+import { useCreateManyHotelRoomTripDetailsMutation } from "@/infraestructure/store/services";
 import {
   Accordion,
   Button,
+  Checkbox,
   confirmPopup,
   Divider,
   InputNumber,
@@ -36,17 +35,25 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   const [selectedRoom, setSelectedRoom] = useState<HotelRoomEntity | null>();
   const [peopleAmount, setPeopleAmount] = useState<number>(0);
   const [rangeState, setRangeState] = useState<[number, number]>([1, 1]);
+  const [autoCompleteDay, setAutoCompleteDay] = useState(true);
   const [confirm, setConfirm] = useState(false);
+  const [{ rooms, recommended }, setRecommendedHotels] = useState({
+    rooms: hotel.hotelRooms,
+    recommended: true,
+  });
 
   const handleTabChange = (e: AccordionTabChangeEvent) => {
     const index = Array.isArray(e.index) ? e.index[0] : e.index; // Capturamos el índice activo
     setActiveRoom(index);
 
-    const selectedRoom = hotel.hotelRooms![index];
+    const selectedRoom = rooms?.[index];
 
     if (index !== null) {
       setSelectedRoom(selectedRoom);
-      setPeopleAmount(selectedRoom.capacity);
+
+      if (selectedRoom) {
+        setPeopleAmount(selectedRoom.capacity);
+      }
     }
   };
 
@@ -54,6 +61,9 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
     await createManyHotelRoomTripDetails({
       tripDetailsId: currentTripDetails!.id,
       dateRange: dateRange,
+      countPerDay: autoCompleteDay
+        ? Math.floor(currentTripDetails!.numberOfPeople / peopleAmount)
+        : 1,
       hotelRoomId: selectedRoom!.id,
       numberOfPeople: peopleAmount,
     })
@@ -70,7 +80,12 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   const handleConfirmAddDays = (event: React.MouseEvent<HTMLButtonElement>) => {
     confirmPopup({
       target: event.currentTarget,
-      message: <DaysNumberToAddRoom setRange={setRangeState} />,
+      message: (
+        <DaysNumberToAddRoom
+          setRange={setRangeState}
+          setAutoCompleteDay={setAutoCompleteDay}
+        />
+      ),
       defaultFocus: "accept",
       acceptLabel: "Aceptar",
       rejectLabel: "Cancelar",
@@ -83,7 +98,6 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   const dateRange: [Date, Date] = useMemo(() => {
     const startDate = days[rangeState[0] - 1];
     const endDate = days[rangeState[1] - 1] ?? days[rangeState[0] - 1];
-    // console.log(startDate, endDate);
     return [startDate.date, endDate.date];
   }, [days, rangeState]);
 
@@ -91,6 +105,25 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
     if (!confirm) return;
     handleAddHotelRoomQuotation();
   }, [rangeState, confirm]);
+
+  useEffect(() => {
+    if (!recommended) {
+      setRecommendedHotels({
+        recommended: false,
+        rooms: hotel.hotelRooms,
+      });
+    } else {
+      const filteredRooms = hotel.hotelRooms?.filter(
+        (room) => room.capacity <= currentTripDetails!.numberOfPeople
+      );
+      setRecommendedHotels({
+        recommended: true,
+        rooms: filteredRooms,
+      });
+    }
+
+    setPeopleAmount(0);
+  }, [recommended]);
 
   return (
     <div className="p-6 border border-gray-300 bg-white rounded-lg shadow-md">
@@ -139,9 +172,24 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
 
       {/* Room Section */}
       <section>
-        <span className="block text-lg font-semibold text-gray-800">
-          Habitaciones:
-        </span>
+        <div className="inline-flex items-center gap-x-2">
+          <Checkbox
+            tooltip="Recomendado"
+            checked={recommended}
+            onChange={(e) =>
+              setRecommendedHotels({
+                recommended: e?.checked ?? false,
+                rooms,
+              })
+            }
+            tooltipOptions={{
+              position: "top",
+            }}
+          />
+          <span className="text-lg font-semibold text-gray-800">
+            Habitaciones:
+          </span>
+        </div>
 
         {hotel.hotelRooms?.length === 0 && (
           <p className="text-gray-500 mt-2 text-center bg-secondary p-2 rounded-md">
@@ -154,7 +202,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
           activeIndex={activeRoom}
           onTabClose={handleTabChange}
           onTabChange={handleTabChange}
-          tabContent={hotel.hotelRooms?.map((room, idx) => ({
+          tabContent={rooms?.map((room, idx) => ({
             header: (
               <div
                 className="flex justify-between items-center gap-3"

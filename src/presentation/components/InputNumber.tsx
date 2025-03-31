@@ -5,7 +5,7 @@ import {
 } from "primereact/inputnumber";
 import { classNames } from "primereact/utils";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
-import { Skeleton, type SkeletonProps } from "./Skeleton";
+import { Skeleton, type SkeletonProps } from ".";
 
 interface Props extends InputNumberProps {
   label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };

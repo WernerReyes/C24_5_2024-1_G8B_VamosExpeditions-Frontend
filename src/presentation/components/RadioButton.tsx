@@ -4,7 +4,7 @@ import {
   type RadioButtonProps,
   type RadioButtonChangeEvent,
 } from "primereact/radiobutton";
-import { Skeleton, type SkeletonProps } from "./Skeleton";
+import { Skeleton, type SkeletonProps } from ".";
 
 interface Props extends RadioButtonProps {
   label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };

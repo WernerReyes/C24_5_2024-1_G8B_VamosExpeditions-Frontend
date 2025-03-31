@@ -1,12 +1,16 @@
-import { AppState } from "@/app/store";
+import type { AppState } from "@/app/store";
 import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
-import { VersionQuotationStatus } from "@/domain/entities";
+import { type PartnerEntity, VersionQuotationStatus } from "@/domain/entities";
 import { useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
 import { Button, Confetti, InputText, Slider } from "@/presentation/components";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { GenerateTable, QuotationSuccessDialog } from "./components";
+import {
+  GenerateTable,
+  ParnerTable,
+  QuotationSuccessDialog,
+} from "./components";
 import { deepEqual } from "@/core/utils";
 
 export const GenerateModule = () => {
@@ -14,34 +18,43 @@ export const GenerateModule = () => {
     quoteId: string;
     version: string;
   }>();
-  
+
   const { currentVersionQuotation } = useSelector(
     (state: AppState) => state.versionQuotation
   );
-  const { hotelRoomTripDetailsWithTotalCost } = useSelector(
-    (state: AppState) => state.hotelRoomTripDetails
-  );
-  
 
   const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
-  const [profitMargin, setProfitMargin] = useState<number>(currentVersionQuotation?.profitMargin ?? 80);
-  const [finalPrice, setFinalPrice] = useState<number>(0);
+  const [profitMargin, setProfitMargin] = useState<number>(
+    currentVersionQuotation?.profitMargin ?? 80
+  );
   const [isExploding, setIsExploding] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
+  const [finalPrice, setFinalPrice] = useState<number>(0);
+  const [parner, setParner] = useState<PartnerEntity | undefined>();
+
+  const [comission, setComission] = useState<number>(0);
+
+  const objectToCompare = {
+    ...currentVersionQuotation!,
+    finalPrice,
+    profitMargin,
+    completionPercentage: 100,
+    commission: comission,
+    partner: parner,
+    status: VersionQuotationStatus.COMPLETED,
+  };
 
   const handleSaveQuotation = () => {
     if (
-      deepEqual(currentVersionQuotation, {
-        ...currentVersionQuotation!,
-        finalPrice,
-        profitMargin,
-        completionPercentage: 100,
-        status: VersionQuotationStatus.COMPLETED,
-      })
-    ) {
-      setIsExploding(true);
+      deepEqual(
+        {
+          ...currentVersionQuotation,
+          commission: currentVersionQuotation?.commission || 0,
+        },
+        objectToCompare
+      )
+    )
       return;
-    }
 
     updateVersionQuotation(
       versionQuotationDto.parse({
@@ -49,12 +62,16 @@ export const GenerateModule = () => {
         finalPrice,
         profitMargin,
         completionPercentage: 100,
+        commission: comission,
+        partner: parner,
         status: VersionQuotationStatus.COMPLETED,
       })
-    ).then(() => {
-      setIsExploding(true);
-      setDisableButton(true);
-    });
+    )
+      .unwrap()
+      .then(() => {
+        setIsExploding(true);
+        setDisableButton(true);
+      });
   };
 
   useEffect(() => {
@@ -64,34 +81,27 @@ export const GenerateModule = () => {
   }, [currentVersionQuotation]);
 
   useEffect(() => {
-    if (!hotelRoomTripDetailsWithTotalCost.length) return;
-    setFinalPrice(
-      hotelRoomTripDetailsWithTotalCost.reduce((acc, quote) => {
-        return (
-          acc +
-          parseFloat((quote.totalCost / (profitMargin / 100)).toFixed(2)) *
-            quote.numberOfPeople
-        );
-      }, 0)
-    );
-  }, [finalPrice, currentVersionQuotation, profitMargin, hotelRoomTripDetailsWithTotalCost]);
-
-  useEffect(() => {
     if (
-      deepEqual(currentVersionQuotation, {
-        ...currentVersionQuotation!,
-        finalPrice: +finalPrice.toFixed(2),
-        profitMargin,
-        completionPercentage: 100,
-        status: VersionQuotationStatus.COMPLETED,
-      }) &&
+      deepEqual(
+        {
+          ...currentVersionQuotation,
+          commission: currentVersionQuotation?.commission || 0,
+        },
+        objectToCompare
+      ) &&
       !isExploding
     ) {
       setDisableButton(true);
       return;
     } else setDisableButton(false);
-  }, [currentVersionQuotation, finalPrice, profitMargin, isExploding]);
-
+  }, [
+    currentVersionQuotation,
+    finalPrice,
+    profitMargin,
+    comission,
+    parner,
+    isExploding,
+  ]);
 
   return (
     <>
@@ -114,7 +124,6 @@ export const GenerateModule = () => {
           className="w-full"
         />
         <Slider
-         
           value={profitMargin}
           min={0}
           onChange={(e) => setProfitMargin(e.value as number)}
@@ -122,8 +131,15 @@ export const GenerateModule = () => {
         />
       </div>
 
+      <ParnerTable setParner={setParner} setComission={setComission} />
+
       {/* Tabla de costos */}
-      <GenerateTable finalPrice={finalPrice} profitMargin={profitMargin} />
+      <GenerateTable
+        setFinalPrice={setFinalPrice}
+        profitMargin={profitMargin}
+        parnerName={parner?.name || ""}
+        comission={comission}
+      />
 
       <div className="flex justify-end">
         <Button

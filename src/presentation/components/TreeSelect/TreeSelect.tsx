@@ -8,7 +8,7 @@ import {
 import type { HTMLAttributes, LabelHTMLAttributes } from "react";
 
 import "./TreeSelect.css";
-import { Skeleton, type SkeletonProps } from "../Skeleton";
+import { Skeleton, type SkeletonProps } from "..";
 
 interface Props extends TreeSelectProps {
   label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };

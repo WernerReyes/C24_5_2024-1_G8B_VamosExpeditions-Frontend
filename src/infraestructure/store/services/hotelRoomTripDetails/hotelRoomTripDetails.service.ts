@@ -1,57 +1,23 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { requestConfig } from "../config";
-import type { HotelRoomTripDetailsEntity } from "@/domain/entities";
-import type { ApiResponse } from "../response";
+import type { AppState } from "@/app/store";
+import { startShowApiError, startShowSuccess } from "@/core/utils";
 import {
-  getHotelRoomTripDetailsDto,
-  type GetHotelRoomTripDetailsDto,
   type InsertManyHotelRoomTripDetailsDto,
   insertManyHotelRoomTripDetailsDto,
   updateManyHotelRoomTripDetailsByDateDto,
   UpdateManyHotelRoomTripDetailsByDateDto,
 } from "@/domain/dtos/hotelRoomTripDetails";
-import { startShowApiError, startShowSuccess } from "@/core/utils";
-import { dateFnsAdapter } from "@/core/adapters";
-import { hotelRoomTripDetailsCache } from "./hotelRoomTripDetails.cache";
+import type { HotelRoomTripDetailsEntity } from "@/domain/entities";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { requestConfig } from "../config";
+import type { ApiResponse } from "../response";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
-import type { AppState } from "@/app/store";
 
 const PREFIX = "/hotel-room-trip-details";
 
 export const hotelRoomTripDetailsService = createApi({
   reducerPath: "hotelRoomTripDetailsService",
-  tagTypes: ["HotelRoomTripDetails", "HotelRoomTripDetail"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    getAllHotelRoomTripDetails: builder.query<
-      ApiResponse<HotelRoomTripDetailsEntity[]>,
-      GetHotelRoomTripDetailsDto
-    >({
-      query: (params) => {
-        const [_, errors] = getHotelRoomTripDetailsDto.create(params);
-        if (errors) throw errors;
-        return {
-          url: "/",
-          params,
-        };
-      },
-      providesTags: ["HotelRoomTripDetails"],
-
-      transformResponse: (
-        response: ApiResponse<HotelRoomTripDetailsEntity[]>
-      ) => {
-        return {
-          ...response,
-          data: response.data.map((hotelRoomTripDetails) => {
-            return {
-              ...hotelRoomTripDetails,
-              date: dateFnsAdapter.parseISO(hotelRoomTripDetails.date),
-            };
-          }),
-        };
-      },
-    }),
-
     createManyHotelRoomTripDetails: builder.mutation<
       ApiResponse<HotelRoomTripDetailsEntity[]>,
       InsertManyHotelRoomTripDetailsDto
@@ -62,17 +28,15 @@ export const hotelRoomTripDetailsService = createApi({
         return {
           url: "/many",
           method: "POST",
-          body,
+          body: {
+            ...body,
+            countPerDay: body.countPerDay < 1 ? 1 : body.countPerDay,
+          },
         };
       },
       async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
         try {
           const { data } = await queryFulfilled;
-          hotelRoomTripDetailsCache.createManyHotelRoomTripDetails(
-            data,
-            dispatch,
-            getState
-          );
 
           versionQuotationCache.addMultipleHotelRoomTripDetails(
             data.data,
@@ -177,7 +141,6 @@ export const hotelRoomTripDetailsService = createApi({
 });
 
 export const {
-  useGetAllHotelRoomTripDetailsQuery,
   useCreateManyHotelRoomTripDetailsMutation,
   useUpdateManyHotelRoomTripDetailsByDateMutation,
   useDeleteHotelRoomTripDetailsMutation,

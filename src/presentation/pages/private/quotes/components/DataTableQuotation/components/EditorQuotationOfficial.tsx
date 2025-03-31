@@ -39,19 +39,12 @@ export const EditorQuotationOfficial = ({ options }: Props) => {
           .unwrap()
           .then(({ data }) => {
             options.editorCallback?.(e.value);
-            console.log(data)
             if (data.newOfficial.status === VersionQuotationStatus.APPROVED) {
               upsertReservation({
                 id: 0,
                 quotationId: options.rowData.id.quotationId,
-                status: ReservationStatus.PENDING
-              })
-              .then(() => {
-                console.log("Reservation updated");
-              })
-              .catch((error) => {
-                console.error(error);
-              })
+                status: ReservationStatus.PENDING,
+              });
             }
           });
       }}

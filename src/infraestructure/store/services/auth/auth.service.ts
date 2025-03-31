@@ -45,7 +45,6 @@ export const authService = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(onLogin(data.data.user));
-          console.log(data.data.expiresAt);
           dispatch(onSetCookieExpiration(data.data.expiresAt));
           dispatch(onSetExpired(false));
           startShowSuccess(data.message);

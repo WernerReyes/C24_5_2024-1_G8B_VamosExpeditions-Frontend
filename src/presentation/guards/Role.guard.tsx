@@ -12,7 +12,7 @@ type Props = {
 
 export const RoleGuard = ({ roles }: Props) => {
   const { authUser } = useSelector((state: AppState) => state.auth);
-  return authUser?.id && roles.includes(authUser.role.name) ? (
+  return authUser && authUser.role && roles.includes(authUser.role.name) ? (
     <Outlet />
   ) : (
     <Navigate to={LOGIN} />

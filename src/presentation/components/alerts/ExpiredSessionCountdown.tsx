@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog } from "../Dialog";
 import { constantRoutes } from "@/core/constants";
-import { ProgressBar } from "../ProgressBar";
+import { ProgressBar } from "..";
 import { Button } from "../Button";
 import { Card } from "../Card";
 import { useReLoginMutation } from "@/infraestructure/store/services";

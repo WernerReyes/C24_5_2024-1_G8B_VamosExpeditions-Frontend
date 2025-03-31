@@ -9,7 +9,6 @@ export const filterByStatus = (
     id: ReservationStatus;
   }[]
 ) => {
-  console.log(filter);
   if (Array.isArray(filter) && filter.length === 0) return true;
   
   return Array.isArray(filter)
@@ -30,10 +29,6 @@ export const filterByRepresentative = (id: number, filter: UserEntity[]) => {
 export const getTransformedFilters = (
   filters: any
 ): ReservationTableFilters => {
-  console.log(filters["status"]);
-  console.log(filters["status"]?.constraints[0].value?.map(
-    (item: { label: string; id: ReservationStatus }) => item.id
-  ) ?? undefined);
   return {
     createdAt: filters["createdAt"].constraints[0].value ?? undefined,
     updatedAt: filters["updatedAt"].constraints[0].value ?? undefined,

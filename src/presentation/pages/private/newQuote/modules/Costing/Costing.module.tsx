@@ -8,7 +8,6 @@ import {
   SelectButton,
   Skeleton,
   SplitButton,
-  type MenuRef,
 } from "@/presentation/components";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Accommodiations, SidebarDays } from "./components";
@@ -133,7 +132,7 @@ export const CostingModule = () => {
   ] = useState<HotelRoomTripDetailsEntity[]>([]);
 
   const [isDayDeleted, setIsDayDeleted] = useState<boolean>(false);
-  const menuLeft = useRef<MenuRef>(null);
+  const menuLeft = useRef<Menu>(null);
 
   const [{ visible, message, type }, setConfirmDialog] = useState<{
     visible: boolean;
@@ -186,7 +185,6 @@ export const CostingModule = () => {
 
   const handleDeleteManyDays = () => {
     if (hotelsQuotationsOutSideDateRange.length > 0 && startDate && endDate) {
-      console.log({ startDate, endDate });
       handleUpsertTripDetails([startDate, endDate]).then(() => {
         deleteManyHotelRoomTripDetails(
           hotelsQuotationsOutSideDateRange.map((quote) => quote.id)
@@ -250,17 +248,6 @@ export const CostingModule = () => {
         className="max-w-lg"
         acceptLabel="Sí"
         accept={type === "delete" ? handleDelete : handleDeleteManyDays}
-        // reject={
-        //   type === "delete"
-        //     ? undefined
-        //     : () => {
-        //         setDateRange(
-        //           currentTripDetails
-        //             ? [currentTripDetails.startDate, currentTripDetails.endDate]
-        //             : [null, null]
-        //         );
-        //       }
-        // }
         rejectLabel="No"
       />
       <div className="max-w-screen-2xl mx-auto">
@@ -314,7 +301,6 @@ export const CostingModule = () => {
                   });
                   setHotelsQuotationsOutSideDateRange(daysToDelete);
                 } else {
-                  console.log("e.value", e.value);
                   handleUpsertTripDetails(e.value as [Date, Date]);
                 }
               }
@@ -347,9 +333,10 @@ export const CostingModule = () => {
               ) : (
                 <>
                   <div className="p-0 mt-auto">
-                    <h2 className="text-2xl sm:text-4xl font-bold text-tertiary">
+                    <h2 className="text-2xl sm:text-4xl font-bold text-tertiary inline me-3">
                       {selectedDay?.name} - {selectedCity?.name}
                     </h2>
+
                     <p className="max-sm:text-sm text-primary">
                       {selectedDay?.formattedDate}
                     </p>

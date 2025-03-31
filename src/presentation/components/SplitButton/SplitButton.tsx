@@ -5,7 +5,7 @@ import {
 } from "primereact/splitbutton";
 
 import "./SplitButton.css";
-import { type SkeletonProps, Skeleton } from "../Skeleton";
+import { type SkeletonProps, Skeleton } from "..";
 
 interface Props extends SplitButtonProps {
   skeleton?: SkeletonProps;

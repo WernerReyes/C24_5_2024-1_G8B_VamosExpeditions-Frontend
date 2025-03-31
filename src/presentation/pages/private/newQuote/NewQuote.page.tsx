@@ -6,7 +6,7 @@ import {
   type StepperChangeEvent,
 } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CostingModule,
   CostSummaryModule,
@@ -15,35 +15,30 @@ import {
 } from "./modules";
 
 import type { AppState } from "@/app/store";
-import { dateFnsAdapter } from "@/core/adapters";
 
-import {
-  useGetAllHotelRoomTripDetailsQuery,
-  useGetTripDetailsByVersionQuotationIdQuery,
-  useGetVersionQuotationByIdQuery,
-  useUpdateVersionQuotationMutation,
-} from "@/infraestructure/store/services";
-import { useDispatch, useSelector } from "react-redux";
-import { EditableQuotationName, ProgressBarQuotation } from "./components";
-import { useParams } from "react-router-dom";
+import { constantRoutes } from "@/core/constants";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 import {
   onSetCurrentStep,
   onSetCurrentTripDetails,
   onSetCurrentVersionQuotation,
   onSetHotelRoomTripDetails,
 } from "@/infraestructure/store";
+import {
+  useGetVersionQuotationByIdQuery,
+  useUpdateVersionQuotationMutation,
+} from "@/infraestructure/store/services";
 import { BlockUI } from "primereact/blockui";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import { useLocation } from "react-use";
-import { constantRoutes } from "@/core/constants";
-import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
+import { EditableQuotationName, ProgressBarQuotation } from "./components";
 
+import { constantStorage } from "@/core/constants/storage.const";
 import {
   calculateCompletionPercentage,
   getVersionDataAndCalculateCompletionPercentage,
 } from "./utils";
-import { startShowWarning } from "@/core/utils";
-import { VersionQuotationStatus } from "@/domain/entities";
-import { constantStorage } from '@/core/constants/storage.const';
 
 interface Title {
   header: string;
@@ -105,7 +100,6 @@ const NewQuotePage = () => {
   const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
 
   const {
-    error,
     currentData: currentVersionQuotationData,
     isError: isErrorGetVersionQuotationById,
   } = useGetVersionQuotationByIdQuery(versionQuotationId!, {
@@ -115,20 +109,8 @@ const NewQuotePage = () => {
   const currentTripDetailsData = currentVersionQuotationData?.data?.tripDetails;
 
   const currentHotelRoomTripDetailsData =
-    currentTripDetailsData?.hotelRoomTripDetails;
+    currentTripDetailsData?.hotelRoomTripDetails ?? [];
 
-  // const {
-  //   isUninitialized: isUninitializedGetHotelRoomTripDetails,
-  //   isSuccess: isSuccessGetHotelRoomTripDetails,
-  //   currentData: currentHotelRoomTripDetailsData,
-  // } = useGetAllHotelRoomTripDetailsQuery(
-  //   {
-  //     tripDetailsId: currentTripDetails?.id ?? 0,
-  //   },
-  //   {
-  //     skip: !currentTripDetails,
-  //   }
-  // );
   const [errorVersionQuotation, setErrorVersionQuotation] = useState(false);
   const [isLoadingStep, setIsLoadingStep] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
@@ -148,25 +130,6 @@ const NewQuotePage = () => {
   const handleChangeStep = (event: StepperChangeEvent) => {
     dispatch(onSetCurrentStep(event.index));
   };
-
-  
-
-  const existDaysWithQuotationsMemo = useMemo(() => {
-    if (!currentHotelRoomTripDetailsData || !currentTripDetailsData)
-      return false;
-    const { startDate, endDate } = currentTripDetailsData;
-    const dates: Date[] = dateFnsAdapter.eachDayOfInterval(startDate, endDate);
-    return dates.every((date) =>
-      currentHotelRoomTripDetailsData.some((hotelRoom) =>
-        dateFnsAdapter.isSameDay(date, hotelRoom.date)
-      )
-    );
-  }, [
-    currentTripDetailsData,
-    currentHotelRoomTripDetailsData,
-    quoteId,
-    version,
-  ]);
 
   useEffect(() => {
     setIsLoadingStep(true);
@@ -191,8 +154,10 @@ const NewQuotePage = () => {
   }, [isErrorGetVersionQuotationById]);
 
   useEffect(() => {
-    const storedStep = Number(localStorage.getItem(constantStorage.CURRENT_ACTIVE_STEP));
-    
+    const storedStep = Number(
+      localStorage.getItem(constantStorage.CURRENT_ACTIVE_STEP)
+    );
+
     if (storedStep !== currentStep) {
       dispatch(onSetCurrentStep(storedStep)); // Solo si hay diferencia
     }
@@ -210,48 +175,41 @@ const NewQuotePage = () => {
             onSetHotelRoomTripDetails(version.tripDetails?.hotelRoomTripDetails)
           );
         } else {
-          console.log("No hotel room trip details");
           dispatch(onSetHotelRoomTripDetails([]));
         }
       } else {
-        console.log("No trip details");
         dispatch(onSetCurrentTripDetails(null));
       }
     } else {
-      console.log("No version");
       dispatch(onSetCurrentVersionQuotation(null));
     }
   }, [currentVersionQuotationData]);
 
-
   useEffect(() => {
     if (isLoadingStep) return;
 
-   
-   if (!currentTripDetailsData) {
-    setTimeout(() => {
-      dispatch(onSetCurrentStep(0));
-    }, 0);
-   }
-}, [currentTripDetailsData, isLoadingStep ]);
-
-  useEffect(() => {
-    if (isLoadingStep) return;
-
-    if (currentStep < 2 || existDaysWithQuotationsMemo) return;
-
-    if (currentStep === 2) {
-      startShowWarning(
-        "No puede continuar sin agregar habitaciones a todos los días del itinerario"
-      );
+    if (
+      !currentTripDetailsData &&
+      currentHotelRoomTripDetailsData.length === 0 &&
+      currentStep > 0
+    ) {
+      setTimeout(() => {
+        dispatch(onSetCurrentStep(0));
+      }, 0);
+    } else if (
+      currentHotelRoomTripDetailsData.length === 0 &&
+      currentStep > 1
+    ) {
+      setTimeout(() => {
+        dispatch(onSetCurrentStep(1));
+      }, 0);
     }
-
-  
-    setTimeout(() => {
-      dispatch(onSetCurrentStep(1));
-    }, 0);
-   
-  }, [currentStep, existDaysWithQuotationsMemo, isLoadingStep]);
+  }, [
+    currentTripDetailsData,
+    currentHotelRoomTripDetailsData,
+    isLoadingStep,
+    currentStep,
+  ]);
 
   useEffect(() => {
     if (!currentVersionQuotationData || !isVerified || isLoadingStep) return;
@@ -262,7 +220,7 @@ const NewQuotePage = () => {
     const newCompletionPercentage = calculateCompletionPercentage(
       currentStep,
       !!currentTripDetails,
-      existDaysWithQuotationsMemo,
+      hotelRoomTripDetails.length > 0,
       {
         ...currentVersionQuotationData.data,
         indirectCostMargin:
@@ -291,7 +249,7 @@ const NewQuotePage = () => {
   }, [
     currentStep,
     currentTripDetails,
-    existDaysWithQuotationsMemo,
+    hotelRoomTripDetails,
     currentVersionQuotationData,
     indirectCostMargin,
   ]);
@@ -307,36 +265,6 @@ const NewQuotePage = () => {
   if (errorVersionQuotation) {
     return <NotFound screenSize="partial" />;
   }
-
-  // if (
-  //   currentVersionQuotationData?.data.status ===
-  //     VersionQuotationStatus.APPROVED &&
-  //   currentVersionQuotationData?.data.official &&
-  //   currentVersionQuotationData?.data.reservation
-  // ) {
-  //   return (
-  //     <NotFound
-  //       screenSize="partial"
-  //       title="Cotización Aprobada"
-  //       message="Esta cotización ya ha sido aprobada y no puede ser modificada."
-  //     />
-  //   );
-  // }
-
-  // if (
-  //   currentVersionQuotationData?.data.status ===
-  //     VersionQuotationStatus.CANCELATED &&
-  //   currentVersionQuotationData?.data.official &&
-  //   currentVersionQuotationData?.data.reservation
-  // ) {
-  //   return (
-  //     <NotFound
-  //       screenSize="partial"
-  //       title="Cotización Cancelada"
-  //       message="Esta cotización ha sido cancelada y no puede ser modificada."
-  //     />
-  //   );
-  // }
 
   return (
     <section className="bg-white py-5 md:p-10 rounded-lg shadow-md">
@@ -385,9 +313,7 @@ const NewQuotePage = () => {
                     onClick={handleNext}
                     disabled={
                       (index === 0 && !currentTripDetailsData) ||
-                      (index === 1 &&
-                        (hotelRoomTripDetails.length === 0 ||
-                          !existDaysWithQuotationsMemo))
+                      (index === 1 && hotelRoomTripDetails.length === 0)
                     }
                   />
                 )}

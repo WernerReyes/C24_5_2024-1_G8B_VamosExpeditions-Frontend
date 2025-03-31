@@ -1,11 +1,12 @@
 import { constantRoutes } from "@/core/constants";
 import { EmailDto, emailDtoSchema } from "@/domain/dtos/email";
 import {
-  UserEntity, VersionQuotationStatus,
+  UserEntity,
+  VersionQuotationStatus,
   type VersionQuotationEntity,
 } from "@/domain/entities";
 import {
-  useGetHotelPdfQuery,
+  useLazyGenerateVersionQuotationPdfQuery,
   useSendMessageEmailMutation,
   useSendMessageMutation,
 } from "@/infraestructure/store/services";
@@ -30,8 +31,6 @@ import { useNavigate } from "react-router-dom";
 import { AppState } from "@/app/store";
 import { useSelector } from "react-redux";
 
-
-
 const { EDIT_QUOTE } = constantRoutes.private;
 
 const resources = [
@@ -49,29 +48,13 @@ type TyoeTableActions = {
 
 export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   const navigate = useNavigate();
-  const [createPdf, setCreatePdf] = useState(false);
   const [visible, setVisible] = useState(false);
 
- 
-
-
   const { authUser } = useSelector((state: AppState) => state.auth);
-  const {users}  = useSelector((state: AppState) => state.users);
-  
+  const { users } = useSelector((state: AppState) => state.users);
 
-
-  const { isLoading: isLoadingPdf } = useGetHotelPdfQuery(
-    {
-      id: rowData?.tripDetails?.id || 0,
-      name: rowData?.tripDetails?.client?.fullName || "",
-    },
-    {
-      skip: !rowData?.tripDetails || !createPdf,
-    }
-  );
-
-  
-   
+  const [handleGeneratePdf, { isLoading: isLoadingGeneratePdf }] =
+    useLazyGenerateVersionQuotationPdfQuery();
 
   const [sendMessage] = useSendMessageMutation();
   const [sendMessageEmail, { isLoading: isLoadingEmail }] =
@@ -81,18 +64,17 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
     resolver: zodResolver(emailDtoSchema),
   });
 
+  
   const handleLogin = async (data: EmailDto) => {
-    /* await sendMessageEmail({
+    await sendMessageEmail({
       subject: data.subject,
       to: data.to.map((user) => ({ email: user.email })),
       resources: data.resources,
       description: data.description,
-      reservationId: rowData!.tripDetails?.id || 0,
+      reservationId: rowData.tripDetails?.id,
     })
       .unwrap()
-      .catch((error: any) => {
-        console.log(error);
-      }); */
+      
 
     await sendMessage({
       from_user: authUser?.id as number,
@@ -100,9 +82,7 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       message: data.description as string,
     })
       .unwrap()
-      .catch((error) => {
-        console.log(error);
-      });
+      
   };
 
   const userTemplate = (option: UserEntity) => {
@@ -134,7 +114,6 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         icon="pi pi-pencil"
         onClick={() => {
           navigate(EDIT_QUOTE(rowData?.id));
-          // dispatch(onSetOperationType("edit"));
         }}
         disabled={
           rowData.status === VersionQuotationStatus.APPROVED && rowData.official
@@ -146,10 +125,16 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         className=""
         rounded
         text
-        disabled={isLoadingPdf || !rowData.tripDetails}
+        disabled={
+          isLoadingGeneratePdf ||
+          rowData.status === VersionQuotationStatus.DRAFT
+        }
         onClick={() => {
           if (!rowData.tripDetails) return;
-          setCreatePdf(true);
+          handleGeneratePdf({
+            id: rowData.id,
+            name: rowData?.tripDetails?.client?.fullName || "",
+          });
         }}
       />
       {type === "principal" && (
@@ -232,7 +217,6 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
                   invalid={!!error}
                   {...field}
                   onChange={(e: MultiSelectChangeEvent) => {
-                    
                     field.onChange(e.value);
                   }}
                   small={{
@@ -296,7 +280,6 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
               <>
                 <Button
                   label="Cancelar"
-                  
                   onClick={() => {
                     setVisible(false);
                   }}

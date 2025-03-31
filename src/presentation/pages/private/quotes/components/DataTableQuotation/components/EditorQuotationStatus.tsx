@@ -32,8 +32,7 @@ export const EditorQuotationStatus = ({
   ) => {
     if (e.value === options.value) return;
 
-    if (options.rowData.official && e.value  === VersionQuotationStatus.CANCELATED) {
-         console.log(options.rowData);
+    if (options.rowData.official && options.rowData.reservation &&  e.value  === VersionQuotationStatus.CANCELATED) {
         setSelectedQuotation(options.rowData);
       
       return options.editorCallback?.(e.value);

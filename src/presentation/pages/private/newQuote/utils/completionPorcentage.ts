@@ -30,7 +30,6 @@ export const calculateCompletionPercentage = (
     newPercentage = 75; // Drop back if no final price
   }
   if (!versionQuotation.indirectCostMargin && newPercentage > 50) {
-    console.log(versionQuotation);
     newPercentage = 50; // Drop back if no indirect cost margin
   }
 

@@ -4,7 +4,7 @@ import {
   type DropdownChangeEvent,
 } from "primereact/dropdown";
 import { forwardRef, HTMLAttributes, LabelHTMLAttributes } from "react";
-import { Skeleton, type SkeletonProps } from "./Skeleton";
+import { Skeleton, type SkeletonProps } from ".";
 
 interface Props extends DropdownProps {
   label?: LabelHTMLAttributes<HTMLLabelElement> & { text?: string };

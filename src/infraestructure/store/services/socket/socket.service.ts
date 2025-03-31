@@ -1,8 +1,7 @@
+import { constantEnvs } from "@/core/constants/env.const";
+import { SocketDto } from "@/domain/dtos/socket/socket.dto";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { io, Socket } from "socket.io-client";
-import { constantEnvs } from "@/core/constants/env.const";
-import { startShowError, startShowSuccess } from "@/core/utils";
-import { SocketDto } from "@/domain/dtos/socket/socket.dto";
 
 import { NotificationMessageEntity, UserEntity } from "@/domain/entities";
 import { requestConfig } from "../config";
@@ -50,18 +49,18 @@ export const SocketService = createApi({
 
       async onCacheEntryAdded(
         _,
-        { cacheDataLoaded, cacheEntryRemoved, updateCachedData, dispatch }
+        { cacheDataLoaded, cacheEntryRemoved }
       ) {
         await cacheDataLoaded;
 
         const socket = SocketManager.connect();
 
         socket?.on("connect", () => {
-          startShowSuccess("conectado al servidor de sockets");
+          // startShowSuccess("conectado al servidor de sockets");
         });
 
         socket?.on("disconnect", () => {
-          startShowError("desconectado del servidor de sockets");
+          // startShowError("desconectado del servidor de sockets");
         });
 
         await cacheEntryRemoved;
@@ -114,7 +113,7 @@ export const SocketService = createApi({
             if (existingUser) {
               existingUser.online = data.online;
             } else {
-              draft.push(data);
+              // draft.push(data);
             }
             draft.sort((a, b) => Number(b.online) - Number(a.online));
           });
@@ -139,9 +138,9 @@ export const SocketService = createApi({
 
     listUserNotifications: builder.query<
       NotificationMessageEntity[],
-      { id: number }
+      undefined
     >({
-      query: ({ id }) => `/messages/${id}`,
+      query: () => `/messages`,
       providesTags: (result) =>
         result
           ? [
@@ -158,7 +157,6 @@ export const SocketService = createApi({
         const socket = SocketManager.connect();
 
         socket.on("personal-message", (data) => {
-          /* console.log("📩", data); */
           updateCachedData((draft) => {
             draft.unshift(data);
           });

@@ -55,7 +55,6 @@ export const quotationSlice = createSlice({
     },
 
     onSetCurrentStep: (state, { payload }: PayloadAction<number>) => {
-      console.log("onSetCurrentStep", payload);
       localStorage.setItem(CURRENT_ACTIVE_STEP, JSON.stringify(payload));
       return {
         ...state,

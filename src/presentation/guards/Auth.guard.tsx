@@ -29,17 +29,17 @@ export const AuthGuard = ({ privateValidation }: Props) => {
   });
 
   useEffect(() => {
-    if (userAll) {
+    if (userAll && userAll?.length > 0) {
       dispatch(setUsers(userAll));
     }
   }, [userAll, dispatch]);
 
-  const { data: messageData } = authUser?.id
-    ? useListUserNotificationsQuery({ id: authUser.id }, { skip: false })
-    : { data: undefined };
+ 
+  const { data: messageData } = useListUserNotificationsQuery(undefined, { skip: !authUser?.id })
+  
 
   useEffect(() => {
-    if (messageData) {
+    if (messageData  && messageData?.length > 0) {
       dispatch(setMessages(messageData));
     }
   }, [messageData, dispatch]);

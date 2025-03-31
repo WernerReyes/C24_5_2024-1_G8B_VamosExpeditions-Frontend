@@ -1,7 +1,7 @@
 import type { AppState } from "@/app/store";
 import { constantRoutes } from "@/core/constants";
 import { quotationService } from "@/data";
-import { onSetCurrentQuotation, onSetDays } from "@/infraestructure/store";
+import { onSetCurrentQuotation } from "@/infraestructure/store";
 import { Button, Dialog } from "@/presentation/components";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -30,19 +30,18 @@ export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
       setVisible(false);
       if (!quoteId && !version) {
         navigate(EDIT_QUOTE(currentVersionQuotation?.id));
-        
+
         await new Promise((resolve) => setTimeout(resolve, 100));
-        
+
         await quotationService.deleteCurrentQuotation().then(() => {
           dispatch(onSetCurrentQuotation(null));
-          // dispatch(onSetDays([]));
-        })
+        });
         return;
       }
     }
   };
 
-  const handleWatchQuotes = async() => {
+  const handleWatchQuotes = async () => {
     if (visible) {
       navigate(QUOTES);
       setVisible(false);
@@ -51,8 +50,7 @@ export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
 
       await quotationService.deleteCurrentQuotation().then(() => {
         dispatch(onSetCurrentQuotation(null));
-        // dispatch(onSetDays([]));
-      })
+      });
     }
   };
 
@@ -80,8 +78,8 @@ export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
           </h3>
           <p className="text-[#00A7B5] font-medium"></p>
           <p className="text-gray-500 text-sm">
-            La cotización ha sido creada exitosamente y está lista para ser
-            enviada al cliente.
+            La cotización ha sido {quoteId ? "actualizada" : "creada"}{" "}
+            exitosamente y está lista para ser enviada al cliente.
           </p>
         </div>
         <div className="flex gap-3 mt-6">

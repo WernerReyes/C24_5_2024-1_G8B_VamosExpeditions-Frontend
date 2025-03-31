@@ -21,8 +21,9 @@ export const HotelsDetailsSummary = ({ selectedDay }: Props) => {
     );
   }, [selectedDay, hotelRoomTripDetails]);
 
+
   return (
-    <div>
+    <>
       {hotelRoomTripDetailsPerDay.length === 0 ? (
         <p className="text-center bg-secondary p-2 md:w-3/4 mx-auto rounded-md text-gray-500">
           Ningún alojamiento por ahora
@@ -54,6 +55,6 @@ export const HotelsDetailsSummary = ({ selectedDay }: Props) => {
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 };
