@@ -7,4 +7,6 @@ export type QuotesTableFilters = {
   endDate?: Date;
   representativesIds?: number[];
   status?: VersionQuotationStatus[];
+  createdAt?: Date;
+  updatedAt?: Date;
 };

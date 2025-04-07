@@ -1,12 +1,13 @@
 import { cn } from "@/core/adapters";
 import { useGetReservationStadisticsQuery } from "@/infraestructure/store/services";
 import {
+  Chart,
   DefaultFallBackComponent,
   ErrorBoundary,
+  OverlayPanel,
   Skeleton,
 } from "@/presentation/components";
-import { Chart } from "primereact/chart";
-import { OverlayPanel } from "primereact/overlaypanel";
+import { useWindowSize } from "@/presentation/hooks";
 import { useEffect, useRef, useState } from "react";
 
 export const StatisticsSummaryGraph = () => {
@@ -158,7 +159,8 @@ const generateYearsOptions = () => {
   return Array.from({ length: 5 }, (_, i) => currentYear - i);
 };
 
-export default function GradientSkeleton() {
+function GradientSkeleton() {
+  const { width, DESKTOP } = useWindowSize();
   return (
     <div className="w-full max-w-6xl  mx-auto p-6 shadow-sm">
       <div className="space-y-6">
@@ -202,7 +204,7 @@ export default function GradientSkeleton() {
                   className="flex flex-col items-center justify-end h-full"
                 >
                   <Skeleton
-                    width="2rem"
+                    width={width > DESKTOP ? "2rem" : "1.5rem"}
                     height={`${randomPercentage()}%`}
                     className="rounded-t"
                   />

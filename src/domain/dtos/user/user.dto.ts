@@ -3,7 +3,7 @@ import { generateEmptyObject, dtoValidator } from "@/core/utils";
 import { regex } from "@/core/constants";
 import { UserEntity } from "@/domain/entities";
 
-const { EMAIL } = regex;
+const { EMAIL, PHONE } = regex;
 
 const userDtoSchema = z.object({
   fullname: z.string().min(1, {
@@ -17,6 +17,13 @@ const userDtoSchema = z.object({
     .regex(EMAIL, {
       message: "El campo email es inválido",
     }),
+  phoneNumber: z
+    .string()
+    .regex(PHONE, {
+      message: "El campo teléfono es inválido",
+    })
+    .optional(),
+  description: z.string().optional(),
 
   id: z.number().optional().default(0),
 });
@@ -32,12 +39,14 @@ export const userDto = {
     return [dto, undefined];
   },
 
-  getDefault: (entity: UserEntity  | null) => {
+  getDefault: (entity: UserEntity | null) => {
     if (entity) {
       return {
         id: entity.id,
         fullname: entity.fullname,
         email: entity.email,
+        phoneNumber: entity.phoneNumber,
+        description: entity.description,
       };
     }
 

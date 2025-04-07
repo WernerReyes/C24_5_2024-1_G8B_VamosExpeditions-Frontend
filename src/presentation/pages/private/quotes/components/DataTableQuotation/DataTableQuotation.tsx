@@ -323,6 +323,50 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           ))}
 
         <Column
+          header="Fecha de creación"
+          className="min-w-32"
+          headerClassName="min-w-32"
+          filterMenuStyle={{ width: "16rem" }}
+          dataType="date"
+          filter
+          showFilterOperator={false}
+          showAddButton={false}
+          showFilterMatchModes={false}
+          showApplyButton={false}
+          filterField="createdAt"
+          field="createdAt"
+          filterClear={(options) => <FilterClearButton {...options} />}
+          body={(e: VersionQuotationEntity) =>
+            dateFnsAdapter.format(e.createdAt, "dd/MM/yyyy")
+          }
+          filterElement={(options) => (
+            <FilterByDate options={options} placeholder="Fecha de creación" />
+          )}
+        />
+
+        <Column
+          header="Última modificación"
+          className="min-w-32"
+          headerClassName="min-w-32"
+          filterMenuStyle={{ width: "16rem" }}
+          dataType="date"
+          filter
+          showFilterOperator={false}
+          showAddButton={false}
+          showFilterMatchModes={false}
+          showApplyButton={false}
+          filterField="updatedAt"
+          field="updatedAt"
+          filterClear={(options) => <FilterClearButton {...options} />}
+          body={(e: VersionQuotationEntity) =>
+            dateFnsAdapter.format(e.updatedAt, "dd/MM/yyyy")
+          }
+          filterElement={(options) => (
+            <FilterByDate options={options} placeholder="Fecha de ultima modificación" />
+          )}
+        />
+
+        <Column
           header="Acciones"
           body={(quote: VersionQuotationEntity) => (
             <TableActions rowData={quote} type="principal" />

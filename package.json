@@ -7,12 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "start": "pnpm build && vite --host",
     "preview": "vite preview --port 8080"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
     "@reduxjs/toolkit": "^2.3.0",
-    "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",

@@ -99,7 +99,8 @@ const LoginPage = () => {
                     className: "text-red-500",
                   }}
                   feedback={false}
-                  inputClassName="mt-2 block w-full sm:w-[21rem]"
+                  className="w-full"
+                  inputClassName="mt-2 block w-64 sm:w-[21rem]"
                   placeholder="Contraseña"
                   toggleMask
                   invalid={!!error}
@@ -113,7 +114,6 @@ const LoginPage = () => {
             type="submit"
             label={isLoggingIn ? "Validando..." : "Iniciar Sesión"}
             disabled={Object.keys(errors).length > 0 || isLoggingIn}
-            // onClick={handleSubmit}
             className="w-full mt-8"
           />
         </form>

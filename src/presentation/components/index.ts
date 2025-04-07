@@ -48,6 +48,8 @@ export * from "primereact/slider";
 export * from "primereact/tag";
 export * from "primereact/togglebutton";
 export * from "primereact/tooltip";
+export { Chart } from "primereact/chart";
+export { OverlayPanel } from "primereact/overlaypanel";
 
 //* Router Dom
 export { Link } from "react-router-dom";

@@ -85,6 +85,7 @@ export const GenerateModule = () => {
       deepEqual(
         {
           ...currentVersionQuotation,
+          partner: parner,
           commission: currentVersionQuotation?.commission || 0,
         },
         objectToCompare
@@ -102,6 +103,10 @@ export const GenerateModule = () => {
     parner,
     isExploding,
   ]);
+
+  console.log({ 
+    comission
+  })
 
   return (
     <>
@@ -137,7 +142,7 @@ export const GenerateModule = () => {
       <GenerateTable
         setFinalPrice={setFinalPrice}
         profitMargin={profitMargin}
-        parnerName={parner?.name || ""}
+        parnerName={parner?.name}
         comission={comission}
       />
 

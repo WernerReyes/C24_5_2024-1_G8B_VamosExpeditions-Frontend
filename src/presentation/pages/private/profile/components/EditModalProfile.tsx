@@ -93,6 +93,54 @@ export const EditModalProfile = ({ setShowModal, showModal }: Props) => {
           />
         </div>
 
+        <div>
+          <Controller
+            control={control}
+            name="phoneNumber"
+            defaultValue=""
+            render={({ field, fieldState: { error } }) => (
+              <InputText
+                label={{
+                  htmlFor: "Número de teléfono",
+                  text: "Telefono ( +51999999999 )",
+                }}
+                type="text"
+                small={{
+                  text: error?.message,
+                }}
+                placeholder="Número de teléfono"
+                className="w-full"
+                invalid={!!error}
+                {...field}
+              />
+            )}
+          />
+        </div>
+
+        <div>
+          <Controller
+            control={control}
+            name="description"
+            defaultValue=""
+            render={({ field, fieldState: { error } }) => (
+              <InputText
+                label={{
+                  htmlFor: "Descripción",
+                  text: "Descripción",
+                }}
+                type="text"
+                small={{
+                  text: error?.message,
+                }}
+                placeholder="Descripción"
+                className="w-full"
+                invalid={!!error}
+                {...field}
+              />
+            )}
+          />
+        </div>
+
         <div className="flex justify-end gap-4">
           <Button
             label="Cancelar"

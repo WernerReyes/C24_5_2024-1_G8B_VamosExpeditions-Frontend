@@ -3,7 +3,7 @@ import {
   type CalendarProps,
 } from "primereact/calendar";
 import { addLocale, type LocaleOptions } from "primereact/api";
-import { HTMLAttributes, LabelHTMLAttributes } from "react";
+import type { HTMLAttributes, LabelHTMLAttributes } from "react";
 
 import "./Calendar.css";
 import { Skeleton, type SkeletonProps } from "..";
@@ -38,7 +38,11 @@ export const Calendar = ({
           width={width < TABLET ? "100%" : skeleton?.width}
         />
       ) : (
-        <CalendarPrimeReact locale={locale} {...props} />
+        <CalendarPrimeReact
+          locale={locale}
+          {...props}
+          numberOfMonths={props.numberOfMonths ? width < TABLET ? 1 : props.numberOfMonths : 1}
+        />
       )}
       {small ? <small {...small}>{small.text}</small> : null}
     </>
@@ -60,18 +64,18 @@ const spanishLocaleOptions: LocaleOptions & { showMonthAfterYear: boolean } = {
   dayNamesShort: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
   dayNamesMin: ["D", "L", "M", "X", "J", "V", "S"],
   monthNames: [
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ],
   monthNamesShort: [
     "ene",

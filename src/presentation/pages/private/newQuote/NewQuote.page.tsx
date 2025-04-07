@@ -254,6 +254,7 @@ const NewQuotePage = () => {
     indirectCostMargin,
   ]);
 
+
   if (!isVerified) {
     return (
       <div className="flex justify-center items-center h-96 lg:h-[30rem]">

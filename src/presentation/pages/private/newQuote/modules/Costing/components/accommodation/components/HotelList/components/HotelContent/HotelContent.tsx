@@ -58,23 +58,24 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
   };
 
   const handleAddHotelRoomQuotation = async () => {
+    if (!selectedRoom) return;
     await createManyHotelRoomTripDetails({
       tripDetailsId: currentTripDetails!.id,
       dateRange: dateRange,
       countPerDay: autoCompleteDay
         ? Math.floor(currentTripDetails!.numberOfPeople / peopleAmount)
         : 1,
-      hotelRoomId: selectedRoom!.id,
-      numberOfPeople: peopleAmount,
+      hotelRoomId: selectedRoom.id,
+      costPerson: ((selectedRoom.priceUsd ?? 0) / currentTripDetails!.numberOfPeople)
     })
       .unwrap()
       .then(() => {
         setVisible(false);
+       
+      })
+      .finally(() => {
         setConfirm(false);
       })
-      .catch(() => {
-        setConfirm(false);
-      });
   };
 
   const handleConfirmAddDays = (event: React.MouseEvent<HTMLButtonElement>) => {

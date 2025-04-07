@@ -14,10 +14,7 @@ type Props = {
   setComission: (salesPrice: number) => void;
 };
 
-const PARNERS: PartnerEntity[] = [
-  { name: "Vamos Expeditions", id: 1 },
-  { name: "Travel Local", id: 2 },
-];
+const PARNERS: PartnerEntity[] = [{ name: "Travel Local", id: 1 }];
 
 export const ParnerTable = ({
   setParner,
@@ -31,11 +28,14 @@ export const ParnerTable = ({
   const { hotelRoomTripDetailsWithTotalCost } = useSelector(
     (state: AppState) => state.hotelRoomTripDetails
   );
-  const [selectedPartner, setSelectedPartner] = useState<PartnerEntity>(
-    currentVersionQuotation?.partner || PARNERS[0]
-  );
+  const [selectedPartner, setSelectedPartner] = useState<
+    PartnerEntity | undefined
+  >(currentVersionQuotation?.partner);
   const [commission, setCommission] = useState<number>(
-    currentVersionQuotation?.commission ?? 3
+    currentVersionQuotation?.commission === 0 ||
+      currentVersionQuotation?.commission === undefined
+      ? 3
+      : currentVersionQuotation.commission
   );
 
   useEffect(() => {
@@ -43,10 +43,14 @@ export const ParnerTable = ({
   }, [selectedPartner]);
 
   useEffect(() => {
-    setComission(selectedPartner.id === 1 ? 0 : commission);
+    if (!selectedPartner) {
+      setComission(0);
+      return;
+    }
+
+    setComission(commission);
   }, [commission, selectedPartner]);
-  
-  
+
   return (
     <DataTable
       value={hotelRoomTripDetailsWithTotalCost.slice(0, 1)}
@@ -58,19 +62,17 @@ export const ParnerTable = ({
         header="Parners"
         className="max-sm:text-xs max-md:text-sm text-center min-w-48"
         body={() => (
-          <>
-            <Dropdown
-              options={PARNERS}
-              value={selectedPartner}
-              useOptionAsValue
-              onChange={(e) => setSelectedPartner(e.value)}
-              placeholder="Seleccione"
-              className="w-full"
-              optionLabel="name"
-              optionValue="id"
-              checkmark
-            />
-          </>
+          <Dropdown
+            options={PARNERS}
+            value={selectedPartner}
+            useOptionAsValue
+            onChange={(e) => setSelectedPartner(e.value)}
+            placeholder="Seleccione"
+            className="w-full"
+            optionLabel="name"
+            showClear
+            checkmark
+          />
         )}
       />
       <Column
@@ -80,7 +82,7 @@ export const ParnerTable = ({
         header="Porcentaje de comisión (3% - 20%)"
         body={() => (
           <InputNumber
-            disabled={selectedPartner.id === 1}
+            disabled={!selectedPartner}
             prefix="%"
             inputClassName="w-full"
             className="w-full"

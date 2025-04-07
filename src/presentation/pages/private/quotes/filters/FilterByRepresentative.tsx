@@ -1,23 +1,24 @@
 import { UserEntity } from "@/domain/entities";
-import { useGetUsersQuery } from "@/infraestructure/store/services";
 import {
   type ColumnFilterElementTemplateOptions,
   MultiSelect,
   type MultiSelectChangeEvent,
 } from "@/presentation/components";
 import { UserInfo } from "../../components";
+import { useSelector } from "react-redux";
+import type { AppState } from "@/app/store";
 
 type Props = {
   options: ColumnFilterElementTemplateOptions;
 };
 
 export const FilterByRepresentative = ({ options }: Props) => {
-  const { data: usersData } = useGetUsersQuery();
-
+  const { users } = useSelector((state: AppState) => state.users);
+  
   return (
     <MultiSelect
       value={options.value || []}
-      options={usersData?.data || []}
+      options={users}
       display="chip"
       itemTemplate={(user: UserEntity) => <UserInfo user={user} />}
       onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value, options.index)}

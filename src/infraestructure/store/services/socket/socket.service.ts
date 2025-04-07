@@ -3,8 +3,12 @@ import { SocketDto } from "@/domain/dtos/socket/socket.dto";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { io, Socket } from "socket.io-client";
 
-import { NotificationMessageEntity, UserEntity } from "@/domain/entities";
+import { AppState } from "@/app/store";
+import { startShowError, startShowSuccess } from "@/core/utils";
+import { NotificationMessageEntity } from "@/domain/entities";
 import { requestConfig } from "../config";
+import { userCache } from "../user/user.cache";
+import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
 
 const { VITE_API_URL } = constantEnvs;
 
@@ -49,18 +53,51 @@ export const SocketService = createApi({
 
       async onCacheEntryAdded(
         _,
-        { cacheDataLoaded, cacheEntryRemoved }
+        { cacheDataLoaded, cacheEntryRemoved, dispatch, getState }
       ) {
         await cacheDataLoaded;
 
         const socket = SocketManager.connect();
 
         socket?.on("connect", () => {
-          // startShowSuccess("conectado al servidor de sockets");
+          startShowSuccess("conectado al servidor de sockets");
+          socket?.on("userConnected", (data) => {
+            //* Update user to online
+            versionQuotationCache.updateVersionQuotationByUserId(
+              +data,
+              true,
+              dispatch,
+              getState as () => AppState
+            );
+
+            userCache.updateById(
+              +data,
+              true,
+              dispatch,
+              getState as () => AppState
+            );
+          });
+
+          socket?.on("userDisconnected", (data) => {
+            //* Update user to online
+            versionQuotationCache.updateVersionQuotationByUserId(
+              +data,
+              false,
+              dispatch,
+              getState as () => AppState
+            );
+
+            userCache.updateById(
+              +data,
+              false,
+              dispatch,
+              getState as () => AppState
+            );
+          });
         });
 
         socket?.on("disconnect", () => {
-          // startShowError("desconectado del servidor de sockets");
+          startShowError("desconectado del servidor de sockets");
         });
 
         await cacheEntryRemoved;
@@ -86,53 +123,6 @@ export const SocketService = createApi({
             },
           };
         }
-      },
-    }),
-
-    getAllUsers: builder.query<UserEntity[], void>({
-      query: () => "/user",
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({ type: "User" as const, id })),
-              { type: "User", id: "LIST" },
-            ]
-          : [{ type: "User", id: "LIST" }],
-
-      async onCacheEntryAdded(
-        _,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
-      ) {
-        await cacheDataLoaded;
-        const socket = SocketManager.connect();
-
-        socket.on("userConnected", (data) => {
-          updateCachedData((draft) => {
-            const existingUser = draft.find((user) => user.id === data.id);
-
-            if (existingUser) {
-              existingUser.online = data.online;
-            } else {
-              // draft.push(data);
-            }
-            draft.sort((a, b) => Number(b.online) - Number(a.online));
-          });
-
-          /* dispatch(SocketService.util.invalidateTags(["User"])); */
-        });
-        socket.on("userDisconnected", (data) => {
-          updateCachedData((draft) => {
-            const existingUser = draft.find((user) => user.id === data.id);
-
-            if (existingUser) {
-              existingUser.online = data.online;
-            }
-            draft.sort((a, b) => Number(b.online) - Number(a.online));
-          });
-        });
-
-        await cacheEntryRemoved;
-        SocketManager.disconnect();
       },
     }),
 
@@ -190,7 +180,7 @@ export const SocketService = createApi({
 export const {
   useConnectSocketQuery,
   useSendMessageMutation,
-  useGetAllUsersQuery,
+
   useListUserNotificationsQuery,
   useDeleteNotificationsMutation,
   useMarkNotificationsAsReadMutation,

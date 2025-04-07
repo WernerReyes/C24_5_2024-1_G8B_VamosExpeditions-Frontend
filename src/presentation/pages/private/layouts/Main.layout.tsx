@@ -30,10 +30,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <section className="w-screen min-h-screen flex max-w-full">
       <div
-        className={cn(
-          "bg-red-400 transition-all",
-          visible ? "sidebar-fixed bg-red-500" : "hidden"
-        )}
+        className={cn("transition-all", visible ? "sidebar-fixed" : "hidden")}
       >
         <Sidebar />
       </div>
@@ -47,7 +44,9 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       >
         <Navbar />
 
-        <main className="px-5 pt-28 pb-10 md:px-10 h-full xl:px-20">{children}</main>
+        <main className="px-5 pt-28 pb-10 md:px-10 h-full xl:px-20">
+          {children}
+        </main>
       </div>
     </section>
   );

@@ -56,7 +56,7 @@ export const QuotesTable = () => {
     handleSaveState,
   } = usePaginator(ROW_PER_PAGE[0], QUOTATION_PAGINATION);
   const [
-    { name, clientsIds, startDate, endDate, representativesIds, status },
+    { name, clientsIds, startDate, endDate, representativesIds, status, createdAt, updatedAt },
     setFilters,
   ] = useState<QuotesTableFilters>({});
 
@@ -76,7 +76,8 @@ export const QuotesTable = () => {
       endDate,
       representativesIds,
       status,
-      official: true,
+      createdAt,
+      updatedAt,
     },
     {
       skip: !currentPage,
@@ -114,9 +115,8 @@ export const QuotesTable = () => {
   const handleDeleteMultiple = async () => {
     if (!selectedQuotes.length) return;
     const quotesWithReservations = selectedQuotes.filter((q) => !q.reservation);
-    if (!quotesWithReservations.length) {
-      return;
-    }
+    if (!quotesWithReservations.length) return;
+    
     await deleteMultipleVersionQuotations({
       ids: quotesWithReservations.map((q) => q.id),
     })

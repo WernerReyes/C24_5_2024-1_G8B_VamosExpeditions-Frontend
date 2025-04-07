@@ -1,6 +1,6 @@
-import { ClientEntity, UserEntity } from "@/domain/entities";
-import { VersionQuotationStatus } from "@/domain/entities/versionQuotation.entity";
-import { QuotesTableFilters } from "../types";
+import type { ClientEntity, UserEntity } from "@/domain/entities";
+import type { VersionQuotationStatus } from "@/domain/entities/versionQuotation.entity";
+import type { QuotesTableFilters } from "../types";
 
 export const filterByStatus = (
   value: VersionQuotationStatus,
@@ -38,5 +38,7 @@ export const getTransformedFilters = (filters: any): QuotesTableFilters => {
       label: string;
       id: VersionQuotationStatus;
     }) => item.id) ?? undefined,
+    createdAt: filters["createdAt"].constraints[0].value ?? undefined,
+    updatedAt: filters["updatedAt"].constraints[0].value ?? undefined,
   };
 };

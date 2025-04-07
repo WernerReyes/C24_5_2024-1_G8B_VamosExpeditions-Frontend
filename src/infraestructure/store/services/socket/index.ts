@@ -25,27 +25,27 @@ const PREFIX = "/socket";
 
 const getSocket = createSocketFactory();
 
-export const SocketService = createApi({
-  reducerPath: "socketApi",
-  baseQuery: requestConfig(PREFIX),
-  endpoints: (builder) => ({
-    connectSocket: builder.query<any, { userId?: number }>({
-      query: (userId) => `/user/connect/${userId}`,
-      async onCacheEntryAdded(
-        { userId },
-        { cacheDataLoaded, cacheEntryRemoved }
-      ) {
-        const socket = await getSocket();
+// export const SocketService = createApi({
+//   reducerPath: "socketApi",
+//   baseQuery: requestConfig(PREFIX),
+//   endpoints: (builder) => ({
+//     connectSocket: builder.query<any, { userId?: number }>({
+//       query: (userId) => `/user/connect/${userId}`,
+//       async onCacheEntryAdded(
+//         { userId },
+//         { cacheDataLoaded, cacheEntryRemoved }
+//       ) {
+//         const socket = await getSocket();
 
-        try {
-          if (!userId) return;
+//         try {
+//           if (!userId) return;
 
-          await cacheDataLoaded;
-        } catch (error) {
-          await cacheEntryRemoved;
-          socket.disconnect();
-        }
-      },
-    }),
-  }),
-});
+//           await cacheDataLoaded;
+//         } catch (error) {
+//           await cacheEntryRemoved;
+//           socket.disconnect();
+//         }
+//       },
+//     }),
+//   }),
+// });

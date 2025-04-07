@@ -33,9 +33,10 @@ export const UnofficialDataTable = ({
   const { handlePageChange, currentPage, first, limit, filters } =
     usePaginator(5);
   const [
-    { name, clientsIds, startDate, endDate, representativesIds, status },
+    { name, clientsIds, startDate, endDate, representativesIds, status, createdAt, updatedAt },
     setFilters,
   ] = useState<QuotesTableFilters>({});
+
 
   const { currentData, isLoading, isFetching, isError, refetch } =
   useGetAllUnofficialVersionQuotationsQuery(
@@ -49,6 +50,9 @@ export const UnofficialDataTable = ({
         representativesIds,
         status,
         quotationId: currentRowExpanded?.id.quotationId,
+        createdAt,
+        updatedAt,
+      
       },
       {
         skip: !currentPage || !currentRowExpanded,

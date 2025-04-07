@@ -23,7 +23,8 @@ import {
   updateVersionQuotationByUser,
   updateVersionQuotationFromAnotherService,
   updateManyHotelRoomTripDetailsByDate,
-  deleteManyHotelRoomTripDetails
+  deleteManyHotelRoomTripDetails,
+  updateVersionQuotationByUserId,
 } from "./cache/external";
 
 export const versionQuotationCache = {
@@ -38,6 +39,13 @@ export const versionQuotationCache = {
     dispatch: ThunkDispatch<any, any, UnknownAction>,
     getState: () => AppState
   ) => updateVersionQuotationByUser(data, dispatch, getState),
+
+  updateVersionQuotationByUserId: (
+    id: UserEntity["id"],
+    online: boolean,
+    dispatch: ThunkDispatch<any, any, UnknownAction>,
+    getState: () => AppState
+  ) => updateVersionQuotationByUserId(id, online, dispatch, getState),
 
   updateVersionQuotationByTripDetails: (
     data: TripDetailsEntity,
@@ -55,8 +63,7 @@ export const versionQuotationCache = {
     data: HotelRoomTripDetailsEntity[],
     dispatch: ThunkDispatch<any, any, UnknownAction>,
     getState: () => AppState
-  ) =>
-    addMultipleHotelRoomTripDetails(data, dispatch, getState),
+  ) => addMultipleHotelRoomTripDetails(data, dispatch, getState),
 
   updateManyHotelRoomTripDetailsByDate: (
     data: HotelRoomTripDetailsEntity[],
@@ -467,36 +474,41 @@ export const versionQuotationCache = {
           )
         );
       });
-      if (!item.official) {
-        //* Update the data in the cache for the query "getAllUnofficialVersionQuotations"
-        const args = versionQuotationService.util.selectCachedArgsForQuery(
-          getState(),
-          "getAllUnofficialVersionQuotations"
-        );
-        args.forEach((arg) => {
-          dispatch(
-            versionQuotationService.util.updateQueryData(
-              "getAllUnofficialVersionQuotations",
-              arg,
-              (draft) => {
-                Object.assign(draft, {
-                  data: {
-                    ...draft.data,
-                    content: [
-                      ...draft.data.content,
+      // if (!item.official) {
+      //* Update the data in the cache for the query "getAllUnofficialVersionQuotations"
+      const args2 = versionQuotationService.util.selectCachedArgsForQuery(
+        getState(),
+        "getAllUnofficialVersionQuotations"
+      );
+      args2.forEach((arg) => {
+        dispatch(
+          versionQuotationService.util.updateQueryData(
+            "getAllUnofficialVersionQuotations",
+            arg,
+            (draft) => {
+              const duplicated = draft.data.content.find(
+                (i) => i.id.quotationId === item.id.quotationId
+              );
 
-                      ...(draft.data.content.length < draft.data.limit
-                        ? [{ ...item, hasUnofficialVersions: false }]
-                        : []),
-                    ],
-                    total: draft.data.total + 1,
-                  },
-                });
-              }
-            )
-          );
-        });
-      }
+              Object.assign(draft, {
+                data: {
+                  ...draft.data,
+                  content: [
+                    ...draft.data.content,
+
+                    ...(draft.data.content.length < draft.data.limit &&
+                    duplicated
+                      ? [{ ...item, hasUnofficialVersions: false }]
+                      : []),
+                  ],
+                  total: draft.data.total + 1,
+                },
+              });
+            }
+          )
+        );
+      });
+      // }
     }
   },
 

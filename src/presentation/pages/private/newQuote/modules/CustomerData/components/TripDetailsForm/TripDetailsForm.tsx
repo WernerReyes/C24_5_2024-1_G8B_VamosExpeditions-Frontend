@@ -206,7 +206,7 @@ export const TripDetailsForm = () => {
             <Controller
               control={control}
               name="clientId"
-              defaultValue={selectedClient?.id || 0}
+              defaultValue={selectedClient?.id}
               render={({ field, fieldState: { error } }) => {
                 return (
                   <Dropdown
@@ -371,7 +371,7 @@ export const TripDetailsForm = () => {
                           ) : undefined,
                           selectable: false,
                           children: country.cities?.map((city) => ({
-                            key: city.id.toString(),
+                            key: city?.id.toString(),
                             label: city.name,
                             selectable: true,
                           })),

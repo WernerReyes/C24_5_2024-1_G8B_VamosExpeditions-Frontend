@@ -12,7 +12,6 @@ import {
 } from "@/infraestructure/store/services";
 import {
   Avatar,
-  Badge,
   Button,
   Dialog,
   InputText,
@@ -21,7 +20,7 @@ import {
   MultiSelectChangeEvent,
   ProgressSpinner,
   SelectButton,
-  SelectButtonChangeEvent,
+  SelectButtonChangeEvent
 } from "@/presentation/components";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -85,21 +84,22 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       
   };
 
+ 
   const userTemplate = (option: UserEntity) => {
     return (
       <div
         className="
         flex
-        items-center
+        items-center gap-x-3
       "
       >
-        <Avatar icon="pi pi-user" shape="circle" />
-        {
-          <Badge
-            severity={option.online ? "success" : "danger"}
-            className="mx-2"
-          />
-        }
+        <Avatar 
+         badge={{
+          
+          severity: option.online ? "success" : "danger",
+         }}
+        icon="pi pi-user" shape="circle" />
+        
 
         <p className="font-bold ">{option.fullname}</p>
       </div>

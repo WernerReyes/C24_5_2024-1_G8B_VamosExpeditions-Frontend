@@ -87,3 +87,74 @@ export const updateVersionQuotationByUser = function (
     }
   }
 };
+
+export const updateVersionQuotationByUserId = function (
+  id: UserEntity["id"],
+  online: boolean,
+  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  getState: () => AppState
+) {
+  const params = extractedParams(getState);
+  for (const param of params) {
+    const {
+      getAllOfficialVersionQuotations,
+      getAllUnofficialVersionQuotations,
+    } = param;
+
+    if (getAllOfficialVersionQuotations) {
+      dispatch(
+        versionQuotationService.util.updateQueryData(
+          "getAllOfficialVersionQuotations",
+          getAllOfficialVersionQuotations,
+          (draft) => {
+            Object.assign(draft, {
+              data: {
+                ...draft.data,
+                content: draft.data.content.map((item) => {
+                  if (item?.user?.id === id) {
+                    return {
+                      ...item,
+                      user: {
+                        ...item.user,
+                        online,
+                      },
+                    };
+                  }
+                  return item;
+                }),
+              },
+            });
+          }
+        )
+      );
+    }
+
+    if (getAllUnofficialVersionQuotations) {
+      dispatch(
+        versionQuotationService.util.updateQueryData(
+          "getAllUnofficialVersionQuotations",
+          getAllUnofficialVersionQuotations,
+          (draft) => {
+            Object.assign(draft, {
+              data: {
+                ...draft.data,
+                content: draft.data.content.map((item) => {
+                  if (item?.user?.id === id) {
+                    return {
+                      ...item,
+                      user: {
+                        ...item.user,
+                        online,
+                      },
+                    };
+                  }
+                  return item;
+                }),
+              },
+            });
+          }
+        )
+      );
+    }
+  }
+};

@@ -8,6 +8,10 @@ import { removeBaseRoute } from "@/core/utils";
 import { ExpiredSessionCountdown } from "../components";
 import { useCookieExpirationStore } from "../../infraestructure/hooks/useCookieExpirationStore";
 import { useLocation } from "react-use";
+import {
+  useConnectSocketQuery,
+  useGetUsersQuery,
+} from "@/infraestructure/store/services";
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
 
@@ -35,6 +39,13 @@ const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, PROFILE } = removeBaseRoute(
 const PrivateRoutes = () => {
   const { isExpired } = useCookieExpirationStore();
   const { pathname } = useLocation();
+
+  //* Connect to socket
+  useConnectSocketQuery();
+
+  //* Get Users
+  useGetUsersQuery();
+  
 
   useEffect(() => {
     if (!pathname) return;
