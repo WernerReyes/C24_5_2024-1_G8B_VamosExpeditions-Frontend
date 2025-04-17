@@ -117,6 +117,8 @@ export const TripDetailsForm = () => {
         })
       : [];
 
+      console.log(hotelRoomTripDetails)
+
     if (daysToDelete.length > 0) {
       setVisible(true);
       setHotelsQuotationsOutSideDateRange(daysToDelete);

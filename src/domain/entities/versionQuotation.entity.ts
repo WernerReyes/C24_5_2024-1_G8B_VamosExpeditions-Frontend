@@ -1,4 +1,3 @@
-
 import type { PartnerEntity } from "./partner.entity";
 import type { ReservationEntity } from "./reservation.entity";
 import type { TripDetailsEntity } from "./tripDetails.entity";
@@ -11,7 +10,7 @@ export enum VersionQuotationStatus {
   APPROVED = "APPROVED",
 }
 
-type VersionQuotationStatusRender = {
+type VersionQuotationRender = {
   label: string;
   icon: string;
   severity: "info" | "warning" | "success" | "danger" | "secondary";
@@ -19,7 +18,7 @@ type VersionQuotationStatusRender = {
 
 export const versionQuotationRender: Record<
   VersionQuotationStatus,
-  VersionQuotationStatusRender
+  VersionQuotationRender
 > = {
   [VersionQuotationStatus.DRAFT]: {
     label: "Borrador",
@@ -43,7 +42,52 @@ export const versionQuotationRender: Record<
   },
 };
 
-export interface VersionQuotationEntity  {
+export enum AllowVersionQuotationType {
+  TRANSPORTATION = "TRANSPORTATION",
+  ACTIVITY = "ACTIVITY",
+  ACCOMMODATION = "ACCOMMODATION",
+  FOOD = "FOOD",
+  GUIDE = "GUIDE",
+}
+
+export const allowVersionQuotationTypesRender: Record<
+  AllowVersionQuotationType,
+  VersionQuotationRender & {
+    value: AllowVersionQuotationType;
+  }
+> = {
+  [AllowVersionQuotationType.TRANSPORTATION]: {
+    label: "Transporte",
+    severity: "info",
+    icon: "pi pi-car",
+    value: AllowVersionQuotationType.TRANSPORTATION,
+  },
+  [AllowVersionQuotationType.ACTIVITY]: {
+    label: "Actividad",
+    severity: "info",
+    icon: "pi pi-calendar",
+    value: AllowVersionQuotationType.ACTIVITY,
+  },
+  [AllowVersionQuotationType.ACCOMMODATION]: {
+    label: "Alojamiento",
+    severity: "info",
+    icon: "pi pi-home",
+    value: AllowVersionQuotationType.ACCOMMODATION,
+  },
+  [AllowVersionQuotationType.FOOD]: {
+    label: "Comida",
+    severity: "info",
+    icon: "pi pi-apple",
+    value: AllowVersionQuotationType.FOOD,
+  },
+  [AllowVersionQuotationType.GUIDE]: {
+    label: "Guía",
+    severity: "info",
+    icon: "pi pi-user",
+    value: AllowVersionQuotationType.GUIDE,
+  },
+};
+export interface VersionQuotationEntity {
   id: { quotationId: number; versionNumber: number };
   name: string;
   status: VersionQuotationStatus;
@@ -59,5 +103,4 @@ export interface VersionQuotationEntity  {
   reservation?: ReservationEntity;
   tripDetails?: TripDetailsEntity;
   user?: UserEntity;
-
 }

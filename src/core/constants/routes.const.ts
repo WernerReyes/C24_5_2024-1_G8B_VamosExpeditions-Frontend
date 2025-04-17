@@ -2,6 +2,8 @@ import type { VersionQuotationEntity } from "@/domain/entities";
 
 type PublicRoutes = {
   LOGIN: string;
+  FORGET_PASSWORD: string;
+  RESET_PASSWORD: (token?: string) => string;
 };
 
 type PrivateRoutes = {
@@ -25,6 +27,9 @@ const PRIVATE_BASE = "/app";
 export const constantRoutes: Routes = {
   public: {
     LOGIN: "/login",
+    FORGET_PASSWORD: "/forget-password",
+    RESET_PASSWORD: (token?: string) =>
+      token ? `/reset-password/${token}` : "/reset-password/:token",
   },
 
   private: {

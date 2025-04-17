@@ -1,15 +1,20 @@
+import { AppState } from "@/app/store";
+import { startShowApiError, startShowSuccess } from "@/core/utils";
+import {
+  ChangePasswordDto,
+  changePasswordDto,
+  userDto,
+  type UserDto,
+} from "@/domain/dtos/user";
 import type { UserEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { requestConfig } from "../config";
-import type { ApiResponse } from "../response";
-import { userDto, type UserDto } from "@/domain/dtos/user";
 import { onLogin } from "../../slices/auth.slice";
-import { startShowSuccess } from "@/core/utils";
-import { userCache } from "./user.cache";
-import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
-import { AppState } from "@/app/store";
-import { reservationCache } from "../reservation/reservation.cache";
 import { setUsers } from "../../slices/users.slice";
+import { requestConfig } from "../config";
+import { reservationCache } from "../reservation/reservation.cache";
+import type { ApiResponse } from "../response";
+import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
+import { userCache } from "./user.cache";
 
 const PREFIX = "/user";
 
@@ -77,7 +82,32 @@ export const userService = createApi({
         }
       },
     }),
+
+    changePassword: builder.mutation<ApiResponse<void>, ChangePasswordDto>({
+      query: (body) => {
+        const [_, errors] = changePasswordDto.create(body);
+        if (errors) throw errors;
+
+        return {
+          url: `/${body.id}/change-password`,
+          method: "PUT",
+          body,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useUpsertUserMutation } = userService;
+export const {
+  useGetUsersQuery,
+  useUpsertUserMutation,
+  useChangePasswordMutation,
+} = userService;

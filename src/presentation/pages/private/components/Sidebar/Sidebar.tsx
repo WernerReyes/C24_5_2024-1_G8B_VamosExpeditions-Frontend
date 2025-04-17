@@ -1,7 +1,7 @@
 import { cn } from "@/core/adapters";
 import { constantRoutes } from "@/core/constants";
 import {
-  Image,
+  Button,
   Link,
   type MenuItem,
   PanelMenu,
@@ -13,7 +13,6 @@ import { NewQuotationDialog } from "../NewQuotationDialog";
 
 import "./Sidebar.css";
 import { useSidebar } from "../../hooks";
-
 
 const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
 
@@ -33,7 +32,6 @@ const ITEMS: MenuItem[] = [
   {
     id: "quotations",
     label: "Cotizaciones",
-    // style: {  },
     className: "text-xs",
     icon: "pi  pi-book",
     expanded: true,
@@ -61,12 +59,8 @@ export const Sidebar = () => {
 
   return (
     <SidebarComponent
-      header={
-        <Image src="/images/logo.png" alt="Logo" width="200" height="200" />
-      }
       onHide={() => {
         toggleSidebar();
-        
       }}
       visible={visible}
       className="w-72"
@@ -74,10 +68,26 @@ export const Sidebar = () => {
       blockScroll={false}
       modal={width < TABLET}
       dismissable={width < DESKTOP}
-    >
-      <hr className="mt-3 mb-2 border-2 border-gray-300 " />
-      <PanelMenu model={ITEMS} className="w-full" />
-    </SidebarComponent>
+      content={({ closeIconRef, hide }) => (
+        <>
+          <div className="flex items-center justify-between p-3">
+            <img src="/images/logo.webp" alt="Logo" width="200" height="200" />
+            <Button
+              ref={closeIconRef as any}
+              onClick={hide}
+              text
+              aria-label="Close"
+              rounded
+              className="ml-auto text-slate-500"
+              icon="pi pi-times"
+            />
+          </div>
+
+          <hr className="mt-3 mb-2 border-2 border-gray-300 " />
+          <PanelMenu model={ITEMS} className="mx-6" />
+        </>
+      )}
+    />
   );
 };
 

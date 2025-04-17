@@ -31,7 +31,7 @@ export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
       if (!quoteId && !version) {
         navigate(EDIT_QUOTE(currentVersionQuotation?.id));
 
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         await quotationService.deleteCurrentQuotation().then(() => {
           dispatch(onSetCurrentQuotation(null));
@@ -46,7 +46,7 @@ export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
       navigate(QUOTES);
       setVisible(false);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       await quotationService.deleteCurrentQuotation().then(() => {
         dispatch(onSetCurrentQuotation(null));

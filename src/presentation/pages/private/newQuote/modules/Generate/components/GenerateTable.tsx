@@ -1,12 +1,5 @@
 import type { AppState } from "@/app/store";
-import {
-  Badge,
-  Column,
-  DataTable
-} from "@/presentation/components";
-import { useWindowSize } from "@/presentation/hooks";
-import { ColumnGroup } from "primereact/columngroup";
-import { Row } from "primereact/row";
+import { Badge, Column, DataTable, ColumnGroup, Row } from "@/presentation/components";
 import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useCalculateCostsPerService } from "../../../hooks/useCalculateCostsPerService";
@@ -24,8 +17,6 @@ export const GenerateTable = ({
   setFinalPrice,
   parnerName,
 }: Props) => {
-  const { width, TABLET } = useWindowSize();
-
   const { hotelRoomTripDetailsWithTotalCost } = useSelector(
     (state: AppState) => state.hotelRoomTripDetails
   );
@@ -81,14 +72,12 @@ export const GenerateTable = ({
         <ColumnGroup>
           <Row>
             <Column colSpan={4} className="bg-primary text-white" />
-            {width > TABLET && (
-              <Column
-                align={"center"}
-                className="bg-primary  text-white text-lg"
-                footer={<span>$ {finalPrice.VE.toFixed(2)}</span>}
-              />
-            )}
-            {width > TABLET && parnerName && (
+            <Column
+              align={"center"}
+              className="bg-primary  text-white text-lg"
+              footer={<span>$ {finalPrice.VE.toFixed(2)}</span>}
+            />
+            {parnerName && (
               <Column
                 align={"center"}
                 className="bg-primary  text-white text-lg"
@@ -131,27 +120,6 @@ export const GenerateTable = ({
         body={<span>{profitMargin}%</span>}
       />
 
-      {/* <Column
-        alignHeader={"center"}
-        align={"center"}
-        headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
-        className="max-sm:text-xs max-md:text-sm w-20"
-        field="numberOfPeople"
-        header="Nro. personas"
-        editor={(options) => {
-          return (
-            <InputNumber
-              inputClassName="w-20"
-              value={options.value}
-              onValueChange={(e) => {
-                options.editorCallback?.(e.value ?? 0);
-              }}
-              min={1}
-              max={options.rowData.hotelRoom?.capacity}
-            />
-          );
-        }}
-      /> */}
       <Column
         alignHeader={"center"}
         align={"center"}
@@ -201,4 +169,4 @@ export const GenerateTable = ({
   );
 };
 
-// const calculatePinal
+

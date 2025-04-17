@@ -486,20 +486,26 @@ export const versionQuotationCache = {
             "getAllUnofficialVersionQuotations",
             arg,
             (draft) => {
-              const duplicated = draft.data.content.find(
-                (i) => i.id.quotationId === item.id.quotationId
-              );
-
+              
               Object.assign(draft, {
                 data: {
                   ...draft.data,
                   content: [
-                    ...draft.data.content,
-
-                    ...(draft.data.content.length < draft.data.limit &&
-                    duplicated
-                      ? [{ ...item, hasUnofficialVersions: false }]
-                      : []),
+                    { ...item, hasUnofficialVersions: false },
+                    ...(draft.data.content.length + 1 > draft.data.limit
+                      ? 
+                        draft.data.content.filter(
+                          (content) => {
+                          
+                            return content.id.versionNumber !==
+                            Math.min(
+                              ...draft.data.content.map(
+                                (c) => c.id.versionNumber
+                              )
+                            )
+                          }
+                        )
+                      : draft.data.content),
                   ],
                   total: draft.data.total + 1,
                 },

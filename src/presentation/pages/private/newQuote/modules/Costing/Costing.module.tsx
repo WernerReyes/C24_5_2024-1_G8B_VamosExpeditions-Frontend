@@ -4,7 +4,7 @@ import {
   Calendar,
   ConfirmDialog,
   Menu,
-  MenuItem,
+  type MenuItem,
   SelectButton,
   Skeleton,
   SplitButton,

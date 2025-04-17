@@ -4,7 +4,7 @@ import { type PartnerEntity, VersionQuotationStatus } from "@/domain/entities";
 import { useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
 import { Button, Confetti, InputText, Slider } from "@/presentation/components";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
   GenerateTable,
@@ -12,12 +12,19 @@ import {
   QuotationSuccessDialog,
 } from "./components";
 import { deepEqual } from "@/core/utils";
+import { quotationService } from "@/data";
+import { onSetCurrentQuotation } from "@/infraestructure/store";
 
 export const GenerateModule = () => {
+  const dispatch = useDispatch();
   const { quoteId, version } = useParams<{
     quoteId: string;
     version: string;
   }>();
+
+  const { currentQuotation } = useSelector(
+    (state: AppState) => state.quotation
+  );
 
   const { currentVersionQuotation } = useSelector(
     (state: AppState) => state.versionQuotation
@@ -71,6 +78,19 @@ export const GenerateModule = () => {
       .then(() => {
         setIsExploding(true);
         setDisableButton(true);
+
+        if (quoteId && version) {
+          const currentVersionId = currentQuotation?.currentVersion.id;
+          if (!currentVersionId) return;
+
+          if (
+            currentVersionId.versionNumber === Number(version) &&
+            currentVersionId.quotationId === Number(quoteId)
+          ) {
+            quotationService.deleteCurrentQuotation();
+            dispatch(onSetCurrentQuotation(null));
+          }
+        }
       });
   };
 
@@ -103,10 +123,6 @@ export const GenerateModule = () => {
     parner,
     isExploding,
   ]);
-
-  console.log({ 
-    comission
-  })
 
   return (
     <>

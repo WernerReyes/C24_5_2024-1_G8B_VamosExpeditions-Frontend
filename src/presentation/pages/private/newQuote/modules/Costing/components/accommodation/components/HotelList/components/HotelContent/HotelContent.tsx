@@ -192,7 +192,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
           </span>
         </div>
 
-        {hotel.hotelRooms?.length === 0 && (
+        {rooms?.length === 0 && (
           <p className="text-gray-500 mt-2 text-center bg-secondary p-2 rounded-md">
             No hay habitaciones disponibles
           </p>

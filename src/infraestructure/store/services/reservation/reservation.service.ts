@@ -135,7 +135,7 @@ export const reservationServiceStore = createApi({
     }),
 
     getReservationStadistics: builder.query<
-      ApiResponse<GetReservationsStadistics[]>,
+      ApiResponse<GetReservationsStadistics>,
       GetStadisticsDto
     >({
       query: (params) => {

@@ -29,7 +29,7 @@ export const FilterByClient = ({ options }: Props) => {
       placeholder="Selecciona un cliente"
       selectAllLabel="Todos"
       maxSelectedLabels={2}
-      className="p-column-filter"
+      className="p-column-filter max-w-56"
     />
   );
 };

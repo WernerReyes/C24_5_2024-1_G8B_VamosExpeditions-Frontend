@@ -22,7 +22,10 @@ import { useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
 import { useNavigate } from "react-router-dom";
 import { constantRoutes } from "@/core/constants";
-import { useLogoutMutation } from "@/infraestructure/store/services";
+import {
+  useGetAllNotificationsQuery,
+  useLogoutMutation,
+} from "@/infraestructure/store/services";
 import { DataTableSelectionMultipleChangeEvent } from "primereact/datatable";
 
 import { messageTimestamp } from "@/core/utils";
@@ -50,15 +53,12 @@ const ITEMS: MenuItem[] = [
 export const Navbar = () => {
   const [deleteNotifications, {}] = useDeleteNotificationsMutation();
   const [markNotificationsAsRead] = useMarkNotificationsAsReadMutation();
+  const { currentData: notifications } = useGetAllNotificationsQuery();
 
   const navigate = useNavigate();
   const { authUser } = useSelector((state: AppState) => state.auth);
   const [logout] = useLogoutMutation();
   const { toggleSidebar } = useSidebar();
-
-  const { messages } = useSelector(
-    (state: AppState) => state.chatNotifications
-  );
 
   const [showMenu, setShowMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -76,7 +76,7 @@ export const Navbar = () => {
               className="my-0 mx-0"
               tabPanelContent={[
                 {
-                  header: `Notificaciones  ${messages?.length} 🔔`,
+                  header: `Notificaciones  ${notifications?.length} 🔔`,
                   className: "w-full h-full",
                   children: (
                     <>
@@ -100,7 +100,7 @@ export const Navbar = () => {
                           size="small"
                           disabled={
                             selectedNotifications?.length === 0 ||
-                            messages
+                            notifications
                               ?.filter((p) =>
                                 selectedNotifications.includes(p.id)
                               )
@@ -117,14 +117,14 @@ export const Navbar = () => {
 
                       <DataTable
                         dataKey="id"
-                        value={messages || []}
+                        value={notifications|| []}
                         paginator
                         rows={10}
                         scrollable
                         scrollHeight="600px"
                         selection={
                           selectedNotifications.length > 0
-                            ? messages?.filter((p) =>
+                            ? notifications?.filter((p) =>
                                 selectedNotifications.includes(p.id)
                               ) ?? []
                             : []
@@ -309,8 +309,8 @@ export const Navbar = () => {
             >
               <Badge
                 value={
-                  Array.isArray(messages)
-                    ? messages.filter((item) => !item.is_read).length
+                  Array.isArray(notifications)
+                    ? notifications.filter((item) => !item.is_read).length
                     : 0
                 }
                 className="bg-red-600"

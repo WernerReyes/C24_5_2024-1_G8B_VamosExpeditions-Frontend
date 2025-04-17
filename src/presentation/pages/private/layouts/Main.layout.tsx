@@ -30,7 +30,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <section className="w-screen min-h-screen flex max-w-full">
       <div
-        className={cn("transition-all", visible ? "sidebar-fixed" : "hidden")}
+        className={cn(visible ? "sidebar-fixed" : "hidden")}
       >
         <Sidebar />
       </div>
@@ -40,7 +40,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           width: visible && width > TABLET ? "calc(100% - 18rem)" : "100%",
           transition: "width 0.5s",
         }}
-        className="ml-auto bg-secondary transition-all"
+        className="ml-auto bg-secondary"
       >
         <Navbar />
 

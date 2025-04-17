@@ -18,6 +18,8 @@ export const StatisticsSummaryGraph = () => {
       year: currentYear,
     });
 
+  const pricesPerMonth = currentData?.data?.pricesPerMonth;
+  const years = currentData?.data?.years;
 
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
@@ -29,14 +31,16 @@ export const StatisticsSummaryGraph = () => {
     const textColorSecondary = documentStyle.getPropertyValue("--text-color");
     const surfaceBorder = documentStyle.getPropertyValue("--surface-border");
 
+    console.log(pricesPerMonth);
+
     const data = {
-      labels: currentData?.data.map((item) => item.month),
+      labels: pricesPerMonth?.map((item) => item.month),
       datasets: [
         {
           type: "bar",
           label: "Ingresos",
           backgroundColor: documentStyle.getPropertyValue("--tertiary-color"),
-          data: currentData?.data.map((item) => item.income),
+          data: pricesPerMonth?.map((item) => item.income),
           borderColor: "white",
           borderWidth: 2,
         },
@@ -44,7 +48,7 @@ export const StatisticsSummaryGraph = () => {
           type: "bar",
           label: "Margen",
           backgroundColor: documentStyle.getPropertyValue("--primary-color"),
-          data: currentData?.data.map((item) => item.margin),
+          data: pricesPerMonth?.map((item) => item.margin),
           options: {
             indexAxis: "y",
           },
@@ -53,7 +57,7 @@ export const StatisticsSummaryGraph = () => {
           type: "bar",
           label: "Viajes",
           backgroundColor: documentStyle.getPropertyValue("black"),
-          data: currentData?.data.map((item) => item.trips),
+          data: pricesPerMonth?.map((item) => item.trips),
           options: {
             indexAxis: "y",
           },
@@ -120,43 +124,34 @@ export const StatisticsSummaryGraph = () => {
           className="flex items-center gap-x-1 cursor-pointer"
           onClick={(e) => op?.current?.toggle(e)}
         >
-          <span className="text-slate-500">
-            {currentYear}
-          </span>
+          <span className="text-slate-500">{currentYear}</span>
           <i className="pi pi-chevron-down text-slate-500"></i>
         </div>
         <OverlayPanel className="!z-10" ref={op}>
-          <>
-            {generateYearsOptions().map((year) => (
-              <div
-                key={year}
-                onClick={() => setCurrentYear(year)}
-                className={cn(
-                  "cursor-pointer p-2 hover:bg-gray-100 rounded-sm",
-                  year === currentYear && "bg-gray-100"
-                )}
-              >
-                {year}
-              </div>
-            ))}
-          </>
+          {years?.map((year) => (
+            <div
+              key={year}
+              onClick={() => setCurrentYear(year)}
+              className={cn(
+                "cursor-pointer p-2 hover:bg-gray-100 rounded-sm",
+                year === currentYear && "bg-gray-100"
+              )}
+            >
+              {year}
+            </div>
+          ))}
         </OverlayPanel>
       </div>
       <div className="flex items-center mt-4 w-full">
         <Chart
           className="w-full max-w-screen-lg mx-auto h-48 md:h-72 lg:h-96 max-h-96"
-          type="line"
+          // type="line"
           data={chartData}
           options={chartOptions}
         />
       </div>
     </ErrorBoundary>
   );
-};
-
-const generateYearsOptions = () => {
-  const currentYear = new Date().getFullYear();
-  return Array.from({ length: 5 }, (_, i) => currentYear - i);
 };
 
 function GradientSkeleton() {

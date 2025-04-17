@@ -31,13 +31,6 @@ export const hotelService = createApi({
       },
       keepUnusedDataFor: 1000 * 60 * 60, //* 1 hour
     }),
-    getHotelPdf: builder.query<Blob, { id: number }>({
-      query: ({ id }) => ({
-        url: `/pdf/${id}`,  // Aquí pasamos el ID como parte de la URL
-        method: "GET",      // Usamos el método GET
-        responseHandler: (response) => response.blob(),  // Transformamos la respuesta en un Blob (archivo)
-      }),
-    }),
   }),
 });
 

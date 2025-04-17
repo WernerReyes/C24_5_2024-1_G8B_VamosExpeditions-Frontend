@@ -9,12 +9,11 @@ import {
   versionQuotationService,
   hotelRoomTripDetailsService,
   reservationServiceStore,
-  reportService,
   tripDetailsServiceStore,
   userService,
   rtkQueryErrorLogger,
   SocketService,
-  EmailService,
+  notificationService,
 } from "@/infraestructure/store/services";
 
 import {
@@ -59,9 +58,8 @@ export const store = configureStore({
       hotelRoomTripDetailsService.reducer,
     [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
-    [reportService.reducerPath]: reportService.reducer,
     [SocketService.reducerPath]: SocketService.reducer,
-    [EmailService.reducerPath]: EmailService.reducer,
+    [notificationService.reducerPath]: notificationService.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -78,9 +76,8 @@ export const store = configureStore({
       .concat(versionQuotationService.middleware)
       .concat(hotelRoomTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
-      .concat(reportService.middleware)
       .concat(SocketService.middleware)
-      .concat(EmailService.middleware)
+      .concat(notificationService.middleware)
       .concat(rtkQueryErrorLogger),
 });
 

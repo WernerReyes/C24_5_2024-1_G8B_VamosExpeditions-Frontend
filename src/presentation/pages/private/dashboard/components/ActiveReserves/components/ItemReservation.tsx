@@ -14,7 +14,7 @@ export const ItemReservation = ({ reservation }: Props) => {
   const clientFullname =
     reservation.versionQuotation?.tripDetails?.client?.fullName || "";
   const tripDetails = reservation.versionQuotation?.tripDetails;
-
+  
   const handleViewDetails = (id: number) => {
     alert(`Viewing details for quote ID: ${id}`);
   };

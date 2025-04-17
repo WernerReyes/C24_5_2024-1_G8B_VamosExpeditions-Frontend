@@ -1,5 +1,5 @@
 import { startShowApiError, startShowSuccess } from "@/core/utils";
-import { loginDto, type LoginDto } from "@/domain/dtos/auth";
+import { loginDto, ResetPasswordDto, type LoginDto } from "@/domain/dtos/auth";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { onLogin, onLogout } from "../../slices/auth.slice";
 import {
@@ -31,16 +31,63 @@ export const authService = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(onLogin({
-            ...data.data.user,
-            online: true,
-          }));
+          dispatch(
+            onLogin({
+              ...data.data.user,
+              online: true,
+            })
+          );
           startShowSuccess(data.message);
-           
+
           //* Connect to socket
           authSocket.userConnected();
         } catch (error: any) {
           startShowApiError(error.error);
+        }
+      },
+    }),
+
+    sendResetPasswordEmail: builder.mutation<ApiResponse<void>, string>({
+      query: (email) => {
+        return {
+          url: "/send-reset-password-email",
+          method: "POST",
+          body: { email },
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      },
+    }),
+
+    verifyResetPasswordToken: builder.query<ApiResponse<void>, string>({
+      query: (token) => {
+        return {
+          url: `/verify-reset-password-token/${token}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    resetPassword: builder.mutation<ApiResponse<void>, ResetPasswordDto>({
+      query: (dto) => {
+        return {
+          url: "/reset-password",
+          method: "POST",
+          body: dto,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
         }
       },
     }),
@@ -60,7 +107,7 @@ export const authService = createApi({
           dispatch(onSetExpired(false));
           startShowSuccess(data.message);
 
-           //* Connect to socket
+          //* Connect to socket
           authSocket.userConnected();
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
@@ -90,7 +137,7 @@ export const authService = createApi({
         try {
           await queryFulfilled;
           dispatch(onLogout());
-          
+
           //* Disconnect from socket
           authSocket.userDisconnected();
         } catch (error: any) {
@@ -103,6 +150,9 @@ export const authService = createApi({
 
 export const {
   useLoginMutation,
+  useSendResetPasswordEmailMutation,
+  useVerifyResetPasswordTokenQuery,
+  useResetPasswordMutation,
   useReLoginMutation,
   useLazyUserAuthenticatedQuery,
   useUserAuthenticatedQuery,

@@ -5,15 +5,13 @@ import { roleRender } from "@/domain/entities";
 import { Avatar, Button, Card, Divider, Tag } from "@/presentation/components";
 import { EditModalProfile } from "./components";
 import { phoneNumberAdapter } from "@/core/adapters";
+import { EditModalPassword } from "./components/EditModalPassword";
 
 export const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
   const { authUser } = useSelector((state: AppState) => state.auth);
-
-  console.log(
-    phoneNumberAdapter.parse("+51923456789")?.formatInternational(),
-    authUser?.phoneNumber
-  );
 
   const { label, severity } = roleRender[authUser!.role!.name];
 
@@ -22,6 +20,10 @@ export const ProfilePage = () => {
       <EditModalProfile
         showModal={isEditModalOpen}
         setShowModal={setIsEditModalOpen}
+      />
+      <EditModalPassword
+        showModal={isChangePasswordModalOpen}
+        setShowModal={setIsChangePasswordModalOpen}
       />
       <div className="flex justify-center h-full items-center">
         <Card className="w-full shadow-lg p-4">
@@ -50,7 +52,11 @@ export const ProfilePage = () => {
                   outlined
                   onClick={() => setIsEditModalOpen(true)}
                 />
-                <Button label="Cambiar Contraseña" icon="pi pi-lock" />
+                <Button
+                  label="Cambiar Contraseña"
+                  icon="pi pi-lock"
+                  onClick={() => setIsChangePasswordModalOpen(true)}
+                />
               </div>
             </div>
 
@@ -61,7 +67,7 @@ export const ProfilePage = () => {
               <h3 className="text-lg font-semibold border-b pb-2">
                 Información personal
               </h3>
-              <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="grid sm:grid-cols-2 gap-4 mt-4">
                 <p>
                   <label className="block text-slate-400">
                     Nombres completos:

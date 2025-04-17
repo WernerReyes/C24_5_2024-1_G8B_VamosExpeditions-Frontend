@@ -29,7 +29,17 @@ export const emailDtoSchema = z.object({
     }),
   resourcesId: z.number().optional(),
   description: z.string().optional(),
-  reservationId: z.number().optional(),
+  versionQuotationId: z.object({
+    quotationId: z.number().min(1, {
+      message: "El campo cotización es requerido",
+    }),
+    versionNumber: z.number().min(1, {
+      message: "El campo versión es requerido",
+    }),
+  }),
+  from: z.string().email({
+    message: "El campo email debe ser un correo válido",
+  }),
 });
 
 export type EmailDto = z.infer<typeof emailDtoSchema>;

@@ -3,6 +3,8 @@ import {
   DuplicateMultipleVersionQuotationDto,
   getVersionQuotationsDto,
   GetVersionQuotationsDto,
+  sendEmailAndGenerateReportDto,
+  SendEmailAndGenerateReportDto,
   versionQuotationDto,
   type VersionQuotationDto,
 } from "@/domain/dtos/versionQuotation";
@@ -379,6 +381,31 @@ export const versionQuotationService = createApi({
         }
       },
     }),
+
+    sendEmailAndGenerateReport: builder.mutation<
+      ApiResponse<void>,
+      SendEmailAndGenerateReportDto
+    >({
+      query: (body) => {
+        const [_, errors] = sendEmailAndGenerateReportDto.create(body);
+        console.log(errors);
+        if (errors) throw new Error(errors[0]);
+        return {
+          url: `/send-email-pdf`,
+          method: "POST",
+          body: { ...body, to: body.to.map((item) => item.email) },
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
   }),
 });
 
@@ -393,4 +420,5 @@ export const {
   useGetVersionQuotationByIdQuery,
   useLazyGenerateVersionQuotationPdfQuery,
   useDeleteMultipleVersionQuotationsMutation,
+  useSendEmailAndGenerateReportMutation,
 } = versionQuotationService;
