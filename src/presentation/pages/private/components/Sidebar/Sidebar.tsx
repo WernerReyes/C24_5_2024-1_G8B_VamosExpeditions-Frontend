@@ -1,7 +1,6 @@
 import { cn } from "@/core/adapters";
 import { constantRoutes } from "@/core/constants";
 import {
-  Button,
   Link,
   type MenuItem,
   PanelMenu,
@@ -62,32 +61,20 @@ export const Sidebar = () => {
       onHide={() => {
         toggleSidebar();
       }}
+      header={
+        <img src="/images/logo.webp" alt="Logo" width="200" />
+      }
       visible={visible}
       className="w-72"
       baseZIndex={width < MACBOOK ? 1000 : 0}
       blockScroll={false}
       modal={width < TABLET}
       dismissable={width < DESKTOP}
-      content={({ closeIconRef, hide }) => (
-        <>
-          <div className="flex items-center justify-between p-3">
-            <img src="/images/logo.webp" alt="Logo" width="200" height="200" />
-            <Button
-              ref={closeIconRef as any}
-              onClick={hide}
-              text
-              aria-label="Close"
-              rounded
-              className="ml-auto text-slate-500"
-              icon="pi pi-times"
-            />
-          </div>
-
-          <hr className="mt-3 mb-2 border-2 border-gray-300 " />
-          <PanelMenu model={ITEMS} className="mx-6" />
-        </>
-      )}
-    />
+     
+    >
+      <hr className="mt-3 mb-2 border-2 border-gray-300 " />
+      <PanelMenu model={ITEMS}  />
+    </SidebarComponent>
   );
 };
 
