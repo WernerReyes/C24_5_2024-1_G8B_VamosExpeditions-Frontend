@@ -123,7 +123,7 @@ export const authService = createApi({
         dispatch(
           onLogin({
             ...data.data.user,
-            online: true,
+            // online: true,
           })
         );
       },

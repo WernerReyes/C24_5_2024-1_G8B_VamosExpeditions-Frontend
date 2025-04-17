@@ -67,7 +67,9 @@ export const SocketService = createApi({
         const notificationSocket = notificationSocketListeners(dispatch);
         notificationSocket.getPersonalMessages(socket);
 
-        socket?.on("disconnect", () => {});
+        socket?.on("disconnect", () => {
+          console.log("Disconnected from socket server");
+        });
 
         await cacheEntryRemoved;
         SocketManager?.disconnect();

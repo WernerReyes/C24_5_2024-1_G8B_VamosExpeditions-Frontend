@@ -11,7 +11,7 @@ import {
   InputTextarea,
   MultiSelect,
 } from "@/presentation/components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/core/adapters";
 
@@ -66,6 +66,24 @@ export const Navbar = () => {
   const [selectedNotifications, setSelectedNotifications] = useState<number[]>(
     []
   );
+
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Clean up the event listeners when the component unmounts
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  console.log("isOnline", isOnline);
 
   const itemsMessage: MenuItem[] = [
     {
