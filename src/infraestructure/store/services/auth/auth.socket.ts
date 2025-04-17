@@ -6,7 +6,7 @@ import { reservationCache } from "../reservation/reservation.cache";
 import { SocketManager } from "../socket/socket.service";
 import { userCache } from "../user/user.cache";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
-import { onOffline, onOnline } from "../../slices/auth.slice";
+import { onOnline } from "../../slices/auth.slice";
 
 export const authSocket = {
   userConnected: () => {
@@ -29,7 +29,7 @@ export const authSocketListeners = (
 ) => ({
   userConnected: (socket: Socket) => {
     socket?.on("userConnected", (data: UserEntity["id"]) => {
-      dispatch(onOnline(+data));
+      dispatch(onOnline(true));
 
       //* Update user to online
       versionQuotationCache.updateVersionQuotationByUserId(
@@ -54,7 +54,7 @@ export const authSocketListeners = (
 
   userDisconnected: (socket: Socket) => {
     socket?.on("userDisconnected", (data: UserEntity["id"]) => {
-      dispatch(onOffline(+data));
+      dispatch(onOnline(false));
 
       //* Update user to online
       versionQuotationCache.updateVersionQuotationByUserId(

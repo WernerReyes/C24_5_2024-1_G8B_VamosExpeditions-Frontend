@@ -1,4 +1,11 @@
 import type { AppState } from "@/app/store";
+import { dateFnsAdapter } from "@/core/adapters";
+import { useGetReservationsStatsQuery } from "@/infraestructure/store/services";
+import {
+  Card,
+  DefaultFallBackComponent,
+  ErrorBoundary,
+} from "@/presentation/components";
 import { useSelector } from "react-redux";
 import { NewQuotationDialog } from "../components";
 import {
@@ -7,15 +14,7 @@ import {
   StatisticsSummaryGraph,
   StatsOverviewCard,
 } from "./components";
-import { dateFnsAdapter } from "@/core/adapters";
-import {
-  useGetReservationsStatsQuery,
-} from "@/infraestructure/store/services";
-import {
-  Card,
-  DefaultFallBackComponent,
-  ErrorBoundary,
-} from "@/presentation/components";
+
 
 
 const FALLBACK_MESSAGES = [
@@ -27,8 +26,7 @@ const FALLBACK_MESSAGES = [
 
 const DashboardPage = () => {
   const { authUser } = useSelector((state: AppState) => state.auth);
- 
-  
+
   const {
     currentData: reservationsStatsData,
     isLoading: isLoadingReservationsStats,
@@ -47,6 +45,8 @@ const DashboardPage = () => {
         </h1>
         <NewQuotationDialog />
       </div>
+
+      
 
       <div className="grid grid-cols-4 grid-flow-row gap-x-4 gap-y-6 mt-4">
         <div className="w-full bg-white border col-span-4 h-full shadow-md rounded-md p-3">

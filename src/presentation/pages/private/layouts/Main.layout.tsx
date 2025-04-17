@@ -1,12 +1,12 @@
-import { useEffect } from "react";
-import { cn } from "@/core/adapters";
-import { useWindowSize } from "@/presentation/hooks";
-import { Navbar, Sidebar } from "../components";
-import { useSidebar } from "../hooks";
-import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
+import { cn } from "@/core/adapters";
 import { quotationService } from "@/data";
 import { onSetCurrentQuotation } from "@/infraestructure/store";
+import { useWindowSize } from "@/presentation/hooks";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Navbar, OfflineDialog, Sidebar } from "../components";
+import { useSidebar } from "../hooks";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -29,9 +29,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
 
   return (
     <section className="w-screen min-h-screen flex max-w-full">
-      <div
-        className={cn(visible ? "sidebar-fixed" : "hidden")}
-      >
+      <div className={cn(visible ? "sidebar-fixed" : "hidden")}>
         <Sidebar />
       </div>
 
@@ -43,6 +41,9 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         className="ml-auto bg-secondary"
       >
         <Navbar />
+        
+        //* Show dialog when the connection is off
+        <OfflineDialog />
 
         <main className="px-5 pt-28 pb-10 md:px-10 h-full xl:px-20">
           {children}

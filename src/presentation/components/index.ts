@@ -55,6 +55,8 @@ export { Row } from "primereact/row";
 
 export { CountdownCircleTimer } from "react-countdown-circle-timer";
 
+export { Offline } from "react-detect-offline";
+
 //* Router Dom
 export { Link } from "react-router-dom";
 

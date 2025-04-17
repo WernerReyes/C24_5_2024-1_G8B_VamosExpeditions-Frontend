@@ -50,6 +50,9 @@ importers:
       react-countdown-circle-timer:
         specifier: ^3.2.1
         version: 3.2.1(react@18.3.1)
+      react-detect-offline:
+        specifier: ^2.4.5
+        version: 2.4.5
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
@@ -84,6 +87,9 @@ importers:
       '@types/react':
         specifier: ^18.3.12
         version: 18.3.12
+      '@types/react-detect-offline':
+        specifier: ^2.4.5
+        version: 2.4.5
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.1
@@ -569,6 +575,9 @@ packages:
 
   '@types/prop-types@15.7.13':
     resolution: {integrity: sha512-hCZTSvwbzWGvhqxp/RqVqwU999pBf2vp7hzIjiYOsl8wqOmUxkQ6ddw1cV3l8811+kdUFus/q4d1Y3E3SyEifA==}
+
+  '@types/react-detect-offline@2.4.5':
+    resolution: {integrity: sha512-fx8h8ShYZWGaku3RkpCMveuST9H25/twXddauBR0kWBrB0QTRTkhvLc92ihe1Xa8Yk6pKAXtccqqEtQr2e55Dg==}
 
   '@types/react-dom@18.3.1':
     resolution: {integrity: sha512-qW1Mfv8taImTthu4KoXgDfLuk4bydU6Q/TkADnDWWHwi4NX4BR+LWfTp2sVmTqRrsHvyDDTelgelxJ+SsejKKQ==}
@@ -1307,6 +1316,9 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
+  react-detect-offline@2.4.5:
+    resolution: {integrity: sha512-sI13NPEKl3uQp95FT5CwrYzH3DnXCwNP6TnY6NRF5gFDM4NU9KDlbtA6HG2dwhDVS0RYQGXwZW/mHbdf8fCnaw==}
+
   react-dom@18.3.1:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
     peerDependencies:
@@ -1997,6 +2009,10 @@ snapshots:
   '@types/luxon@3.4.2': {}
 
   '@types/prop-types@15.7.13': {}
+
+  '@types/react-detect-offline@2.4.5':
+    dependencies:
+      '@types/react': 18.3.12
 
   '@types/react-dom@18.3.1':
     dependencies:
@@ -2739,6 +2755,8 @@ snapshots:
   react-countdown-circle-timer@3.2.1(react@18.3.1):
     dependencies:
       react: 18.3.1
+
+  react-detect-offline@2.4.5: {}
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:

@@ -28,26 +28,14 @@ export const authSlice = createSlice({
       };
     },
 
-    onOnline: (state, { payload }: PayloadAction<UserEntity["id"]>) => {
-      if (state.authUser?.id === payload) {
+    
+    onOnline: (state, { payload }: PayloadAction<UserEntity["online"]>) => {
+      if (state.authUser?.id) {
         return {
           ...state,
           authUser: {
             ...state.authUser,
-            online: true,
-          },
-        };
-      }
-      return state;
-    },
-
-    onOffline: (state, { payload }: PayloadAction<UserEntity["id"]>) => {
-      if (state.authUser?.id === payload) {
-        return {
-          ...state,
-          authUser: {
-            ...state.authUser,
-            online: false,
+            online: payload
           },
         };
       }
@@ -63,4 +51,4 @@ export const authSlice = createSlice({
   },
 });
 
-export const { onLogin, onLogout, onOnline, onOffline } = authSlice.actions;
+export const { onLogin, onLogout, onOnline } = authSlice.actions;
