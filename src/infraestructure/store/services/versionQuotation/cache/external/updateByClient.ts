@@ -1,12 +1,11 @@
-import type { AppState } from "@/app/store";
+import type { AppDispatch, AppState } from "@/app/store";
 import type { ClientEntity } from "@/domain/entities";
-import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
-import { extractedParams } from "./extractedParams";
 import { versionQuotationService } from "../../versionQuotation.service";
+import { extractedParams } from "../extractedParams";
 
-export const updateVersionQuotationByClient = function (
+export const updateByClient = function (
   data: ClientEntity,
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
     const params = extractedParams(getState);

@@ -38,7 +38,7 @@ export const CancelQuotationDialog = ({
       skip: !selectedQuotation,
     }
   );
-  //   const {} =
+
   const [cancelAndReplaceApprovedOfficialVersionQuotation] =
     useCancelAndReplaceApprovedOfficialVersionQuotationMutation();
 

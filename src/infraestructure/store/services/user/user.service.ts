@@ -64,7 +64,7 @@ export const userService = createApi({
 
           userCache.upsertUser(data.data, dispatch, getState);
 
-          versionQuotationCache.updateVersionQuotationByUser(
+          versionQuotationCache.updateByUser(
             data.data,
             dispatch,
             getState as () => AppState

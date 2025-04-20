@@ -1,12 +1,11 @@
-import type { AppState } from "@/app/store";
+import type { AppDispatch, AppState } from "@/app/store";
 import type { VersionQuotationEntity } from "@/domain/entities";
-import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
-import { extractedParams } from "./extractedParams";
 import { versionQuotationService } from "../../versionQuotation.service";
+import { extractedParams } from "../extractedParams";
 
-export const updateVersionQuotationFromAnotherService = function (
+export const updateFromAnotherService = function (
   { reservation, ...versionQuotation }: VersionQuotationEntity,
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
   const params = extractedParams(getState);
@@ -54,7 +53,7 @@ export const updateVersionQuotationFromAnotherService = function (
                         return {
                           ...versionQuotation,
                           reservation,
-                          hasUnofficialVersions: item.hasUnofficialVersions,
+                          hasVersions: item.hasVersions,
                         };
                       }
                       return item;
@@ -73,4 +72,4 @@ export const updateVersionQuotationFromAnotherService = function (
       );
     }
   }
-}
+};

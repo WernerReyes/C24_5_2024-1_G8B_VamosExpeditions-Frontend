@@ -28,7 +28,7 @@ import {
 } from "../../utils";
 
 import { formatCurrency } from "@/core/utils";
-import { ClientInfo, UserInfo } from "../../../components";
+import { ClientInfo, FieldNotAssigned, UserInfo } from "../../../components";
 import {
   FilterApplyButton,
   FilterByDate,
@@ -39,7 +39,6 @@ import {
   EditorQuotationOfficial,
   EditorQuotationStatus,
   EditQuotationName,
-  FieldNotAssigned,
   TableActions,
 } from "./components";
 
@@ -372,7 +371,7 @@ export const DataTableQuotation = forwardRef(function DataTable2<
             <TableActions rowData={quote} type="principal" />
           )}
           exportable={false}
-          className="min-w-44"
+          className="min-w-56"
         />
       </DataTable>
     </>

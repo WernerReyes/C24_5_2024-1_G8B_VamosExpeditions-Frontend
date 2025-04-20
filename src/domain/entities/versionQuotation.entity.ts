@@ -10,35 +10,40 @@ export enum VersionQuotationStatus {
   APPROVED = "APPROVED",
 }
 
-type VersionQuotationRender = {
+type VersionQuotationRender<T> = {
   label: string;
   icon: string;
   severity: "info" | "warning" | "success" | "danger" | "secondary";
+  value: T;
 };
 
 export const versionQuotationRender: Record<
   VersionQuotationStatus,
-  VersionQuotationRender
+  VersionQuotationRender<VersionQuotationStatus>
 > = {
   [VersionQuotationStatus.DRAFT]: {
     label: "Borrador",
     severity: "secondary",
     icon: "pi pi-pencil",
+    value: VersionQuotationStatus.DRAFT,
   },
   [VersionQuotationStatus.COMPLETED]: {
     label: "Completado",
     severity: "info",
     icon: "pi pi-check",
+    value: VersionQuotationStatus.COMPLETED,
   },
   [VersionQuotationStatus.CANCELATED]: {
     label: "Cancelado",
     severity: "danger",
     icon: "pi pi-times",
+    value: VersionQuotationStatus.CANCELATED,
   },
   [VersionQuotationStatus.APPROVED]: {
     label: "Aprobado",
     severity: "success",
     icon: "pi pi-check",
+    value: VersionQuotationStatus.APPROVED,
   },
 };
 
@@ -52,9 +57,7 @@ export enum AllowVersionQuotationType {
 
 export const allowVersionQuotationTypesRender: Record<
   AllowVersionQuotationType,
-  VersionQuotationRender & {
-    value: AllowVersionQuotationType;
-  }
+  VersionQuotationRender<AllowVersionQuotationType>
 > = {
   [AllowVersionQuotationType.TRANSPORTATION]: {
     label: "Transporte",
@@ -103,4 +106,10 @@ export interface VersionQuotationEntity {
   reservation?: ReservationEntity;
   tripDetails?: TripDetailsEntity;
   user?: UserEntity;
+
+  hasVersions: boolean;
+
+  isArchived: boolean;
+  archivedAt?: Date;
+  archivedReason?: string;
 }

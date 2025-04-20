@@ -1,13 +1,12 @@
+import type { AppDispatch, AppState } from "@/app/store";
+import { dateFnsAdapter } from "@/core/adapters";
 import type { HotelRoomTripDetailsEntity } from "@/domain/entities";
 import { versionQuotationService } from "../../versionQuotation.service";
-import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
-import type { AppState } from "@/app/store";
-import { extractedParams } from "./extractedParams";
-import { dateFnsAdapter } from "@/core/adapters";
+import { extractedParams } from "../extractedParams";
 
 export const addMultipleHotelRoomTripDetails = function (
   data: HotelRoomTripDetailsEntity[],
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
   const params = extractedParams(getState);
@@ -52,7 +51,7 @@ export const addMultipleHotelRoomTripDetails = function (
 
 export const updateManyHotelRoomTripDetailsByDate = function (
   data: HotelRoomTripDetailsEntity[],
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
   const params = extractedParams(getState);
@@ -100,7 +99,7 @@ export const updateManyHotelRoomTripDetailsByDate = function (
 
 export const deleteHotelRoomTripDetails = function (
     data: HotelRoomTripDetailsEntity,
-    dispatch: ThunkDispatch<any, any, UnknownAction>,
+    dispatch: AppDispatch,
     getState: () => AppState
   ) {
 
@@ -138,7 +137,7 @@ export const deleteHotelRoomTripDetails = function (
 
 export const deleteManyHotelRoomTripDetails = function (
   data: HotelRoomTripDetailsEntity[],
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
   const params = extractedParams(getState);

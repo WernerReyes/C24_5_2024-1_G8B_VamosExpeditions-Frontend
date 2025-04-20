@@ -32,7 +32,7 @@ export const authSocketListeners = (
       dispatch(onOnline(true));
 
       //* Update user to online
-      versionQuotationCache.updateVersionQuotationByUserId(
+      versionQuotationCache.updateByUserId(
         +data,
         true,
         dispatch,
@@ -57,7 +57,7 @@ export const authSocketListeners = (
       dispatch(onOnline(false));
 
       //* Update user to online
-      versionQuotationCache.updateVersionQuotationByUserId(
+      versionQuotationCache.updateByUserId(
         +data,
         false,
         dispatch,

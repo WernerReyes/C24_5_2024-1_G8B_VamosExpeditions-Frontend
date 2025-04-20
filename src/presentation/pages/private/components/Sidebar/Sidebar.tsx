@@ -62,7 +62,7 @@ export const Sidebar = () => {
         toggleSidebar();
       }}
       header={
-        <img src="/images/logo.webp" alt="Logo" width="200" />
+        <img src="/images/logo.webp" alt="Logo" width="200"  />
       }
       visible={visible}
       className="w-72"

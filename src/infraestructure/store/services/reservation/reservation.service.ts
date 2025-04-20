@@ -56,7 +56,7 @@ export const reservationServiceStore = createApi({
 
           reservationCache.upsertReservation(data.data, dispatch, getState);
 
-          versionQuotationCache.updateVersionQuotationFromAnotherService(
+          versionQuotationCache.updateFromAnotherService(
             {
               ...data.data.versionQuotation,
               reservation: data.data,
@@ -117,7 +117,7 @@ export const reservationServiceStore = createApi({
           const { data } = await queryFulfilled;
           startShowSuccess(data.message);
 
-          versionQuotationCache.updateVersionQuotationFromAnotherService(
+          versionQuotationCache.updateFromAnotherService(
             {
               ...data.data.versionQuotation,
               reservation: data.data,

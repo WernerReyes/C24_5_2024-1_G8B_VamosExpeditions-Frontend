@@ -1,12 +1,11 @@
-import type { AppState } from "@/app/store";
+import type { AppDispatch, AppState } from "@/app/store";
 import type { UserEntity } from "@/domain/entities";
-import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 import { versionQuotationService } from "../../versionQuotation.service";
-import { extractedParams } from "./extractedParams";
+import { extractedParams } from "../extractedParams";
 
-export const updateVersionQuotationByUser = function (
+export const updateByUser = function (
   data: UserEntity,
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
   //* Update the data in the cache for the query "getVersionQuotationById"
@@ -85,13 +84,14 @@ export const updateVersionQuotationByUser = function (
         )
       );
     }
+
   }
 };
 
-export const updateVersionQuotationByUserId = function (
+export const updateByUserId = function (
   id: UserEntity["id"],
   online: boolean,
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
   const params = extractedParams(getState);
@@ -99,7 +99,10 @@ export const updateVersionQuotationByUserId = function (
     const {
       getAllOfficialVersionQuotations,
       getAllUnofficialVersionQuotations,
+      getAllArchivedVersionQuotations,
     } = param;
+
+    console.log(getAllArchivedVersionQuotations);
 
     if (getAllOfficialVersionQuotations) {
       dispatch(
@@ -139,6 +142,36 @@ export const updateVersionQuotationByUserId = function (
               data: {
                 ...draft.data,
                 content: draft.data.content.map((item) => {
+                  if (item?.user?.id === id) {
+                    return {
+                      ...item,
+                      user: {
+                        ...item.user,
+                        online,
+                      },
+                    };
+                  }
+                  return item;
+                }),
+              },
+            });
+          }
+        )
+      );
+    }
+
+    if (getAllArchivedVersionQuotations) {
+      console.log(getAllArchivedVersionQuotations);
+      dispatch(
+        versionQuotationService.util.updateQueryData(
+          "getAllArchivedVersionQuotations",
+          getAllArchivedVersionQuotations,
+          (draft) => {
+            Object.assign(draft, {
+              data: {
+                ...draft.data,
+                content: draft.data.content.map((item) => {
+                  console.log(item?.user?.id, id);
                   if (item?.user?.id === id) {
                     return {
                       ...item,

@@ -1,3 +1,4 @@
+export * from './archiveVersionQuotation.dto';
 export * from './duplicateMultipleVersionQuotation.dto';
 export * from './getVersionQuotations.dto';
 export * from './sendEmailAndGenerateReport.dto';

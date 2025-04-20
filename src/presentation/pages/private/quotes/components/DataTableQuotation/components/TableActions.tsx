@@ -19,7 +19,7 @@ import {
   MultiSelectChangeEvent,
   ProgressSpinner,
   SelectButton,
-  type SelectButtonChangeEvent,
+  type SelectButtonChangeEvent
 } from "@/presentation/components";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
@@ -27,12 +27,13 @@ import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
 import type { AppState } from "@/app/store";
-import { useSelector } from "react-redux";
-import { allowVersionQuotationTypesRender } from "@/domain/entities";
 import {
   sendEmailAndGenerateReportDto,
   type SendEmailAndGenerateReportDto,
 } from "@/domain/dtos/versionQuotation";
+import { allowVersionQuotationTypesRender } from "@/domain/entities";
+import { useSelector } from "react-redux";
+import { ArchiveVersionQuotation } from "./ArchiveVersionQuotation";
 
 const { EDIT_QUOTE } = constantRoutes.private;
 
@@ -109,6 +110,8 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       <Button
         rounded
         text
+        tooltip="Editar"
+        tooltipOptions={{ position: "top" }}
         icon="pi pi-pencil"
         onClick={() => {
           navigate(EDIT_QUOTE(rowData?.id));
@@ -120,7 +123,8 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
 
       <Button
         icon="pi pi-file-pdf"
-        className=""
+        tooltip="Generar PDF"
+        tooltipOptions={{ position: "top" }}
         rounded
         text
         disabled={
@@ -138,6 +142,8 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       {type === "principal" && (
         <Button
           icon="pi pi-envelope"
+          tooltip="Enviar correo"
+          tooltipOptions={{ position: "top" }}
           rounded
           disabled={!rowData.tripDetails}
           text
@@ -146,6 +152,8 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
           }}
         />
       )}
+
+      <ArchiveVersionQuotation versionQuotation={rowData} />
 
       {/*  Dialog*/}
 
