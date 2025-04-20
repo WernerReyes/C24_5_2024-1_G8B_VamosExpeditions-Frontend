@@ -1,6 +1,5 @@
 import type { VersionQuotationEntity } from "@/domain/entities";
 
-export interface QuotationWithVersions extends VersionQuotationEntity {}
 
 
 export interface TotalDraftsVersionQuotation {

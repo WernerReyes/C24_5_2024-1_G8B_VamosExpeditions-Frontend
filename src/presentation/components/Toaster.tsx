@@ -1,5 +1,5 @@
 import { classNames } from "primereact/utils";
-import toast, { ToastBar, Toaster as ToasterHot, ToastOptions } from "react-hot-toast";
+import toast, { ToastBar, Toaster as ToasterHot } from "react-hot-toast";
 
 export const Toaster = () => {
   const iconType = (icon: any) => {

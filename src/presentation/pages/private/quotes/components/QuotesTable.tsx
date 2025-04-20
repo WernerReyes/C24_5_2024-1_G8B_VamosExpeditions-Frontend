@@ -4,10 +4,8 @@ import {
   type VersionQuotationEntity,
 } from "@/domain/entities";
 import {
-  QuotationhasVersions,
   useDuplicateMultipleVersionQuotationsMutation,
   useGetAllOfficialVersionQuotationsQuery,
-  type QuotationWithVersions,
 } from "@/infraestructure/store/services";
 import {
   Badge,
@@ -203,7 +201,7 @@ export const QuotesTable = () => {
             header={header}
             extraColumns={[
               {
-                expander: (data: QuotationhasVersions) => {
+                expander: (data: VersionQuotationEntity) => {
                   return data.hasVersions;
                 },
                 position: "start",
@@ -232,7 +230,7 @@ export const QuotesTable = () => {
           expandedRows={expandedRows}
           extraColumns={[
             {
-              expander: (data: QuotationhasVersions) => {
+              expander: (data: VersionQuotationEntity) => {
                 return data.hasVersions;
               },
 
@@ -271,7 +269,7 @@ export const QuotesTable = () => {
           editMode="cell"
           className="text-sm lg:text-[15px] mt-5"
           sortMode="single"
-          dataKey={(data: QuotationWithVersions) =>
+          dataKey={(data: VersionQuotationEntity) =>
             `${data.id.quotationId}${data.id.versionNumber}`
           }
           sortField={sortField?.sortField}

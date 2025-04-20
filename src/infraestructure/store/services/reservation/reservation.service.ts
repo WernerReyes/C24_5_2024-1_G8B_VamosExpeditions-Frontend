@@ -176,11 +176,11 @@ export const reservationServiceStore = createApi({
             getState
           );
 
-          versionQuotationCache.deleteMultipleVersionsFromAnotherService(
-            data.data.map((reservation) => reservation.versionQuotation),
-            dispatch,
-            getState as () => AppState
-          );
+          // versionQuotationCache.deleteMultipleVersionsFromAnotherService(
+          //   data.data.map((reservation) => reservation.versionQuotation),
+          //   dispatch,
+          //   getState as () => AppState
+          // );
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
           throw error;
