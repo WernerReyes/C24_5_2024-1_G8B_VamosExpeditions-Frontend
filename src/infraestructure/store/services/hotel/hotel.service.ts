@@ -39,6 +39,7 @@ export const hotelService = createApi({
       },
       keepUnusedDataFor: 1000 * 60 * 60, //* 1 hour
     }),
+<<<<<<< HEAD
     getHotelPdf: builder.query<Blob, { id: number }>({
       query: ({ id }) => ({
         url: `/pdf/${id}`,
@@ -203,6 +204,8 @@ export const hotelService = createApi({
 
       keepUnusedDataFor: 1000 * 60 * 60, //* 1 hour
     }),
+=======
+>>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
   }),
 });
 

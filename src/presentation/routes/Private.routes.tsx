@@ -8,10 +8,19 @@ import { removeBaseRoute } from "@/core/utils";
 import { ExpiredSessionCountdown } from "../components";
 import { useCookieExpirationStore } from "../../infraestructure/hooks/useCookieExpirationStore";
 import { useLocation } from "react-use";
+import {
+  useConnectSocketQuery,
+  useGetUsersQuery,
+} from "@/infraestructure/store/services";
+import { MainLayout } from "../pages/private/layouts";
 
+<<<<<<< HEAD
 
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
+=======
+// const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
+>>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
 
 const DashboardPage = lazy(
   () => import("../pages/private/dashboard/Dashboard.page")
@@ -39,6 +48,13 @@ const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, PROFILE ,HOTEL,COUNTRY} = re
 const PrivateRoutes = () => {
   const { isExpired } = useCookieExpirationStore();
   const { pathname } = useLocation();
+
+  //* Connect to socket
+  useConnectSocketQuery();
+
+  //* Get Users
+  useGetUsersQuery();
+  
 
   useEffect(() => {
     if (!pathname) return;

@@ -1,23 +1,18 @@
-import type { AppState } from "@/app/store";
-import type { UserEntity } from "@/domain/entities";
-import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
+import type { AppDispatch, AppState } from "@/app/store";
+import type { TripDetailsEntity } from "@/domain/entities";
 import { versionQuotationService } from "../../versionQuotation.service";
-import { extractedParams } from "./extractedParams";
+import { extractedParams } from "../extractedParams";
 
-export const updateVersionQuotationByUser = function (
-  data: UserEntity,
-  dispatch: ThunkDispatch<any, any, UnknownAction>,
+export const updateByTripDetails = function (
+  data: TripDetailsEntity,
+  dispatch: AppDispatch,
   getState: () => AppState
 ) {
-  //* Update the data in the cache for the query "getVersionQuotationById"
   const params = extractedParams(getState);
 
+  //* Update the data in the cache for the query "getVersionQuotationById"
   for (const param of params) {
-    const {
-      getVersionQuotationById,
-      getAllOfficialVersionQuotations,
-      getAllUnofficialVersionQuotations,
-    } = param;
+    const { getVersionQuotationById, getAllOfficialVersionQuotations, getAllUnofficialVersionQuotations } = param;
 
     if (getVersionQuotationById) {
       dispatch(
@@ -28,7 +23,16 @@ export const updateVersionQuotationByUser = function (
             Object.assign(draft, {
               data: {
                 ...draft.data,
-                ...(draft.data.user?.id === data.id ? { user: data } : {}),
+                ...(draft.data.tripDetails?.id === data.id
+                  ? {
+                      tripDetails: {
+                        ...draft.data.tripDetails,
+                        ...data,
+                      },
+                    }
+                  : {
+                      tripDetails: data,
+                    }),
               },
             });
           }
@@ -46,10 +50,10 @@ export const updateVersionQuotationByUser = function (
               data: {
                 ...draft.data,
                 content: draft.data.content.map((item) => {
-                  if (item?.user?.id === data.id) {
+                  if (item?.tripDetails?.id === data.id) {
                     return {
                       ...item,
-                      user: data,
+                      tripDetails: data,
                     };
                   }
                   return item;
@@ -71,10 +75,10 @@ export const updateVersionQuotationByUser = function (
               data: {
                 ...draft.data,
                 content: draft.data.content.map((item) => {
-                  if (item?.user?.id === data.id) {
+                  if (item?.tripDetails?.id === data.id) {
                     return {
                       ...item,
-                      user: data,
+                      tripDetails: data,
                     };
                   }
                   return item;

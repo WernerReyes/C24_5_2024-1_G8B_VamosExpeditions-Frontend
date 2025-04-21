@@ -93,7 +93,7 @@ export const HotelListDetails = () => {
                           </span>
                         </div>
                         <span className="text-xl lg:text-2xl font-bold text-primary">
-                          ${quote.hotelRoom?.rateUsd}
+                          ${quote.costPerson}
                         </span>
                       </div>
                     </div>

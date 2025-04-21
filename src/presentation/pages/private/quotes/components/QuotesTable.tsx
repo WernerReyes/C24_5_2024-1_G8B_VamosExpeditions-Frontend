@@ -1,11 +1,9 @@
+import { constantStorage } from "@/core/constants";
 import {
   reservationStatusRender,
   type VersionQuotationEntity,
 } from "@/domain/entities";
 import {
-  QuotationHasUnofficialVersions,
-  type QuotationWithVersions,
-  useDeleteMultipleVersionQuotationsMutation,
   useDuplicateMultipleVersionQuotationsMutation,
   useGetAllOfficialVersionQuotationsQuery,
 } from "@/infraestructure/store/services";
@@ -23,29 +21,32 @@ import {
   type DataTableValueArray,
 } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
-import { Toolbar } from "primereact/toolbar";
-import { useEffect, useState } from "react";
-import { DataTableQuotation } from "./DataTableQuotation/DataTableQuotation";
-import { getTransformedFilters } from "../utils";
-import { QuotesTableFilters } from "../types";
-import { UnofficialDataTable } from "./UnofficialDataTable";
-import type { AppState } from "@/app/store";
-import { useDispatch, useSelector } from "react-redux";
-import { onSetCurrentQuotation } from "@/infraestructure/store";
-import { quotationService } from "@/data";
-import { constantStorage } from "@/core/constants";
 import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "primereact/row";
+import { Toolbar } from "primereact/toolbar";
+import { useEffect, useState } from "react";
+import { QuotesTableFilters } from "../types";
+import { getTransformedFilters } from "../utils";
+import { ArchivatedQuotesDialog } from "./ArchivatedQuotesDialog";
+import { DataTableQuotation } from "./DataTableQuotation/DataTableQuotation";
+import { UnofficialDataTable } from "./UnofficialDataTable";
+import { useSelector } from "react-redux";
+import { AppState } from "@/app/store";
 
 const { QUOTATION_PAGINATION } = constantStorage;
 
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
+<<<<<<< HEAD
 
   const dispatch = useDispatch();
   const { currentQuotation } = useSelector(
     (state: AppState) => state.quotation
+=======
+  const { archivedVersions } = useSelector(
+    (state: AppState) => state.versionQuotation
+>>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
   );
 
   const {
@@ -60,7 +61,16 @@ export const QuotesTable = () => {
 
 
   const [
-    { name, clientsIds, startDate, endDate, representativesIds, status },
+    {
+      name,
+      clientsIds,
+      startDate,
+      endDate,
+      representativesIds,
+      status,
+      createdAt,
+      updatedAt,
+    },
     setFilters,
   ] = useState<QuotesTableFilters>({});
 
@@ -81,7 +91,8 @@ export const QuotesTable = () => {
       endDate,
       representativesIds,
       status,
-      official: true,
+      createdAt,
+      updatedAt,
     },
     {
       skip: !currentPage,
@@ -91,8 +102,6 @@ export const QuotesTable = () => {
 
   const [duplicateMultipleVersionQuotations, { isLoading: isDuplicating }] =
     useDuplicateMultipleVersionQuotationsMutation();
-  const [deleteMultipleVersionQuotations, { isLoading: isDeleting }] =
-    useDeleteMultipleVersionQuotationsMutation();
 
   const [expandedRows, setExpandedRows] = useState<
     DataTableExpandedRows | DataTableValueArray | undefined
@@ -110,6 +119,9 @@ export const QuotesTable = () => {
     VersionQuotationEntity | undefined
   >();
 
+  const [visibleArchivatedQuotes, setVisibleArchivatedQuotes] =
+    useState<boolean>(false);
+
   const handleDuplicateMultiple = async () => {
     if (!selectedQuotes.length) return;
     await duplicateMultipleVersionQuotations({
@@ -120,85 +132,63 @@ export const QuotesTable = () => {
     setSelectedQuotes([]);
   };
 
-  const handleDeleteMultiple = async () => {
-    if (!selectedQuotes.length) return;
-    const quotesWithReservations = selectedQuotes.filter((q) => !q.reservation);
-    if (!quotesWithReservations.length) {
-      return;
-    }
-    await deleteMultipleVersionQuotations({
-      ids: quotesWithReservations.map((q) => q.id),
-    })
-      .unwrap()
-      .then(({ data }) => {
-        if (!currentQuotation) return;
-        const versionId = currentQuotation.currentVersion.id;
-        data.versionQuotationsDeleted.forEach((deleted) => {
-          if (
-            versionId.quotationId === deleted.id.quotationId &&
-            versionId.versionNumber === deleted.id.versionNumber
-          ) {
-            quotationService.deleteCurrentQuotation().then(() => {
-              dispatch(onSetCurrentQuotation(null));
-            });
-          }
-        });
-      });
-
-    setSelectedQuotes([]);
-  };
-
   useEffect(() => {
     if (!filters) return;
     setFilters(getTransformedFilters(filters));
   }, [filters]);
 
   const header = (
-    <div className="flex flex-wrap gap-2 p-2 items-center">
-      <h4 className="m-0 text-sm md:text-lg">Cotizaciones</h4>
-      <Badge
-        value={
-          officialCurrentData?.data.total
-            ? `Total: ${officialCurrentData?.data.total}`
-            : "Total: 0"
-        }
-      />
-      {recentDuplicatedQuotes.length > 0 && (
+    <div className="flex sm:justify-between gap-y-3 flex-wrap justify-center items-center">
+      <div className="flex flex-wrap gap-2 p-2 items-center">
+        <h4 className="m-0 text-sm md:text-lg">Cotizaciones</h4>
         <Badge
-          value={`${recentDuplicatedQuotes.length} ${
-            recentDuplicatedQuotes.length === 1
-              ? "cotización duplicada"
-              : "cotizaciones duplicadas"
-          }`}
-          severity="success"
-          className="text-white"
+          value={
+            officialCurrentData?.data.total
+              ? `Total: ${officialCurrentData?.data.total}`
+              : "Total: 0"
+          }
         />
-      )}
+        {recentDuplicatedQuotes.length > 0 && (
+          <Badge
+            value={`${recentDuplicatedQuotes.length} ${
+              recentDuplicatedQuotes.length === 1
+                ? "cotización duplicada"
+                : "cotizaciones duplicadas"
+            }`}
+            severity="success"
+            className="text-white"
+          />
+        )}
+      </div>
+
+      <Button
+        icon="pi pi-bookmark"
+        label="Archivadas"
+        outlined
+        size="small"
+        onClick={() => setVisibleArchivatedQuotes(true)}
+        disabled={isFetchingOfficial}
+      />
     </div>
   );
 
   return (
     <>
+      <ArchivatedQuotesDialog
+        visible={visibleArchivatedQuotes}
+        onHide={() => setVisibleArchivatedQuotes(false)}
+      />
       <Toolbar
         className="mt-10 mb-4"
         start={
-          <div className="flex gap-2">
-            <Button
-              icon="pi pi-trash"
-              label="Eliminar"
-              loading={isDeleting}
-              onClick={handleDeleteMultiple}
-              disabled={!selectedQuotes.length || isDuplicating || isDeleting}
-            />
-            <Button
-              icon="pi pi-clone"
-              label="Duplicar"
-              onClick={handleDuplicateMultiple}
-              loading={isDuplicating}
-              severity="secondary"
-              disabled={!selectedQuotes.length || isDuplicating || isDeleting}
-            />
-          </div>
+          <Button
+            icon="pi pi-clone"
+            label="Duplicar"
+            onClick={handleDuplicateMultiple}
+            loading={isDuplicating}
+            severity="secondary"
+            disabled={!selectedQuotes.length || isDuplicating}
+          />
         }
       />
       <ErrorBoundary
@@ -231,8 +221,8 @@ export const QuotesTable = () => {
             header={header}
             extraColumns={[
               {
-                expander: (data: QuotationHasUnofficialVersions) => {
-                  return data.hasUnofficialVersions;
+                expander: (data: VersionQuotationEntity) => {
+                  return data.hasVersions;
                 },
                 position: "start",
               },
@@ -260,8 +250,18 @@ export const QuotesTable = () => {
           expandedRows={expandedRows}
           extraColumns={[
             {
-              expander: (data: QuotationHasUnofficialVersions) => {
-                return data.hasUnofficialVersions;
+              expander: (data: VersionQuotationEntity) => {
+                const quotationId = data.id.quotationId;
+                const hasArchived = archivedVersions?.[quotationId] ?? null;
+
+                // console.log(hasArchived)
+
+                if (hasArchived !== null) {
+                  console.log(hasArchived);
+                  return hasArchived > 0;
+                }
+
+                return data.hasVersions;
               },
 
               position: "start",
@@ -299,7 +299,7 @@ export const QuotesTable = () => {
           editMode="cell"
           className="text-sm lg:text-[15px] mt-5"
           sortMode="single"
-          dataKey={(data: QuotationWithVersions) =>
+          dataKey={(data: VersionQuotationEntity) =>
             `${data.id.quotationId}${data.id.versionNumber}`
           }
           sortField={sortField?.sortField}
@@ -332,7 +332,6 @@ export const QuotesTable = () => {
                     q.id.quotationId === quotation.id.quotationId &&
                     q.id.versionNumber === quotation.id.versionNumber
                 ),
-              // "p-disabled": quotation?.reservation
             };
           }}
           rowExpansionTemplate={() => {

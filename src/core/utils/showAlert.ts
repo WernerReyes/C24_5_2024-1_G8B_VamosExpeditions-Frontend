@@ -15,7 +15,7 @@ const activeToasts: string[] = [];
 const startShowAlert = (
   message: string,
   type: AlertType,
-  maxToasts: number = MAX_TOASTS
+  maxToasts: number = MAX_TOASTS,
 ) => {
   if (activeToasts.length >= maxToasts) {
     const firstToastId = activeToasts.shift();
@@ -32,6 +32,9 @@ const startShowAlert = (
       break;
     case AlertType.WARNING:
       toastId = toasterAdapter.warning(message);
+      break;
+    case AlertType.INFO:
+      toastId = toasterAdapter.info(message);
       break;
     default:
       break;
@@ -50,6 +53,10 @@ export const startShowError = (message: string, maxToasts?: number) => {
 
 export const startShowWarning = (message: string, maxToasts?: number) => {
   startShowAlert(message, AlertType.WARNING, maxToasts);
+};
+
+export const startShowInfo = (message: string, maxToasts?: number) => {
+  startShowAlert(message, AlertType.INFO, maxToasts);
 };
 
 export const startShowApiError = (error: ApiError, maxToasts?: number) => {

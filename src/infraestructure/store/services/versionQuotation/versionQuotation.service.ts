@@ -1,8 +1,12 @@
 import {
+  archiveVersionQuotationDto,
+  type ArchiveVersionQuotationDto,
   duplicateMultipleVersionQuotationDto,
-  DuplicateMultipleVersionQuotationDto,
+  type DuplicateMultipleVersionQuotationDto,
   getVersionQuotationsDto,
-  GetVersionQuotationsDto,
+  type GetVersionQuotationsDto,
+  sendEmailAndGenerateReportDto,
+  type SendEmailAndGenerateReportDto,
   versionQuotationDto,
   type VersionQuotationDto,
 } from "@/domain/dtos/versionQuotation";
@@ -20,9 +24,6 @@ import { PaginatedResponse } from "../response";
 import { versionQuotationCache } from "./versionQuotation.cache";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
-  DeleteMultipleVersionQuotations,
-  QuotationHasUnofficialVersions,
-  TotalDraftsVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
 import { reservationCache } from "../reservation/reservation.cache";
@@ -34,15 +35,16 @@ const PREFIX = "/version-quotation";
 export const versionQuotationService = createApi({
   reducerPath: "versionQuotationService",
   tagTypes: [
-    "VersionQuotations",
-    "VersionQuotation",
+    "ArchivedQuotations",
     "OfficialQuotations",
     "UnofficialQuotations",
+    "Drafts",
   ],
+
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
     getAllOfficialVersionQuotations: builder.query<
-      ApiResponse<PaginatedResponse<QuotationHasUnofficialVersions>>,
+      ApiResponse<PaginatedResponse<VersionQuotationEntity>>,
       GetVersionQuotationsDto
     >({
       query: (params) => {
@@ -55,6 +57,7 @@ export const versionQuotationService = createApi({
           params: {
             ...params,
             official: true,
+            isArchived: false,
           },
         };
       },
@@ -83,7 +86,7 @@ export const versionQuotationService = createApi({
     }),
 
     getAllUnofficialVersionQuotations: builder.query<
-      ApiResponse<PaginatedResponse<QuotationHasUnofficialVersions>>,
+      ApiResponse<PaginatedResponse<VersionQuotationEntity>>,
       GetVersionQuotationsDto
     >({
       query: (params) => {
@@ -96,6 +99,7 @@ export const versionQuotationService = createApi({
           params: {
             ...params,
             official: false,
+            isArchived: false,
           },
         };
       },
@@ -112,11 +116,36 @@ export const versionQuotationService = createApi({
       },
     }),
 
-    getTotalDraftsVersionQuotations: builder.query<
-      ApiResponse<TotalDraftsVersionQuotation>,
-      void
+    getAllArchivedVersionQuotations: builder.query<
+      ApiResponse<PaginatedResponse<VersionQuotationEntity>>,
+      GetVersionQuotationsDto
     >({
-      query: () => "/drafts",
+      query: (params) => {
+        //* Validate before sending
+        const [_, errors] = getVersionQuotationsDto.create(params);
+        if (errors) throw errors;
+        return {
+          url: "/",
+          method: "GET",
+          params: {
+            ...params,
+            official: false,
+            isArchived: true,
+          },
+        };
+      },
+
+      providesTags: (result, _, __) => {
+        return result
+          ? [
+              ...result.data.content.map((versionQuotation) => ({
+                type: "ArchivedQuotations" as const,
+                id: `${versionQuotation.id.quotationId}-${versionQuotation.id.versionNumber}`,
+              })),
+              { type: "ArchivedQuotations" as const, id: "PARTIAL-LIST" },
+            ]
+          : [{ type: "ArchivedQuotations" as const, id: "PARTIAL-LIST" }];
+      },
     }),
 
     updateVersionQuotation: builder.mutation<
@@ -139,10 +168,10 @@ export const versionQuotationService = createApi({
           const { data } = await queryFulfilled;
 
           //* Update the cache
-          versionQuotationCache.updateVersionQuotation(
+          versionQuotationCache.update(
             data.data,
             dispatch,
-            getState
+            getState as () => AppState
           );
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
@@ -171,17 +200,15 @@ export const versionQuotationService = createApi({
           const { data } = await queryFulfilled;
 
           //* Update the cache
-          versionQuotationCache.updateOfficialVersionQuotation(
-            data.data.newOfficial.official,
+          versionQuotationCache.updateOfficial(
             data.data,
             dispatch,
-            getState
+            getState as () => AppState
           );
-          versionQuotationCache.updateOfficialVersionQuotation(
-            data.data.unOfficial.official,
+          versionQuotationCache.updateOfficial(
             data.data,
             dispatch,
-            getState
+            getState as () => AppState
           );
         } catch (error: any) {
           startShowApiError(error.error);
@@ -211,10 +238,10 @@ export const versionQuotationService = createApi({
           const { data } = await queryFulfilled;
 
           //* Update the cache
-          versionQuotationCache.cancelAndReplaceApprovedOfficialVersionQuotation(
+          versionQuotationCache.cancelAndReplaceApprovedOfficial(
             data.data,
             dispatch,
-            getState
+            getState as () => AppState
           );
 
           reservationCache.updateReservationFromAnotherService(
@@ -252,10 +279,75 @@ export const versionQuotationService = createApi({
           const { data } = await queryFulfilled;
 
           //* Update the cache
-          versionQuotationCache.duplicateMultipleVersions(
+          versionQuotationCache.duplicateMultiple(
             data.data,
             dispatch,
-            getState
+            getState as () => AppState
+          );
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
+
+    archiveVersionQuotation: builder.mutation<
+      ApiResponse<VersionQuotationEntity>,
+      ArchiveVersionQuotationDto
+    >({
+      query: (body) => {
+        //* Validate before sending
+        const [_, errors] = archiveVersionQuotationDto.create(body);
+        if (errors) throw errors;
+        return {
+          url: "/archive",
+          method: "PUT",
+          body,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          //* Update the cache
+          versionQuotationCache.archive(
+            data.data,
+            dispatch,
+            getState as () => AppState
+          );
+
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
+
+    unArchiveVersionQuotation: builder.mutation<
+      ApiResponse<VersionQuotationEntity>,
+      VersionQuotationEntity["id"]
+    >({
+      query: (body) => {
+        if (!body.quotationId || !body.versionNumber) {
+          throw "QuotationId and VersionNumber are required";
+        }
+        return {
+          url: "/unarchive",
+          method: "PUT",
+          body,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+
+          //* Update the cache
+          versionQuotationCache.unArchive(
+            data.data,
+            dispatch,
+            getState as () => AppState
           );
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
@@ -284,7 +376,7 @@ export const versionQuotationService = createApi({
       //       ]
       //     : ["VersionQuotation"];
       // },
-      providesTags: ["VersionQuotation"],
+      // providesTags: ["VersionQuotation"],
 
       transformResponse: (
         response: ApiResponse<VersionQuotationEntity>
@@ -349,32 +441,26 @@ export const versionQuotationService = createApi({
       },
     }),
 
-    deleteMultipleVersionQuotations: builder.mutation<
-      ApiResponse<DeleteMultipleVersionQuotations>,
-      { ids: VersionQuotationEntity["id"][] }
+    sendEmailAndGenerateReport: builder.mutation<
+      ApiResponse<void>,
+      SendEmailAndGenerateReportDto
     >({
       query: (body) => {
-        if (!body.ids.length) {
-          throw "Ids are required";
-        }
+        const [_, errors] = sendEmailAndGenerateReportDto.create(body);
+        console.log(errors);
+        if (errors) throw new Error(errors[0]);
         return {
-          url: "/multiple",
-          method: "DELETE",
-          body,
+          url: `/send-email-pdf`,
+          method: "POST",
+          body: { ...body, to: body.to.map((item) => item.email) },
         };
       },
-
-      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+      async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          //* Update the cache
-          versionQuotationCache.deleteMultipleVersions(
-            data.data,
-            dispatch,
-            getState
-          );
+          startShowSuccess(data.message);
         } catch (error: any) {
-          if (error.error) startShowApiError(error.error);
+          startShowApiError(error.error);
           throw error;
         }
       },
@@ -383,14 +469,17 @@ export const versionQuotationService = createApi({
 });
 
 export const {
-  useGetTotalDraftsVersionQuotationsQuery,
   useGetAllOfficialVersionQuotationsQuery,
   useGetAllUnofficialVersionQuotationsQuery,
+  useGetAllArchivedVersionQuotationsQuery,
   useUpdateVersionQuotationMutation,
   useUpdateOfficialVersionQuotationMutation,
   useCancelAndReplaceApprovedOfficialVersionQuotationMutation,
   useDuplicateMultipleVersionQuotationsMutation,
+  useArchiveVersionQuotationMutation,
+  useUnArchiveVersionQuotationMutation,
   useGetVersionQuotationByIdQuery,
   useLazyGenerateVersionQuotationPdfQuery,
-  useDeleteMultipleVersionQuotationsMutation,
+
+  useSendEmailAndGenerateReportMutation,
 } = versionQuotationService;

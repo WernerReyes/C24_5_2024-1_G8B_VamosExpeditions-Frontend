@@ -5,7 +5,6 @@ import { VersionQuotationStatus } from "@/domain/entities";
 
 const getVersionQuotationsDtoSchema = z
   .object({
-    official: z.boolean().optional(),
     name: z.string().nullable().optional(),
     clientsIds: z.array(z.number()).nullable().optional(),
     startDate: z.date().nullable().optional(),
@@ -13,6 +12,8 @@ const getVersionQuotationsDtoSchema = z
     representativesIds: z.array(z.number()).nullable().optional(),
     status: z.array(z.nativeEnum(VersionQuotationStatus)).nullable().optional(),
     quotationId: z.number().nullable().optional(),
+    createdAt: z.date().nullable().optional(),
+    updatedAt: z.date().nullable().optional(),
   })
   .merge(paginationDtoSchema);
 

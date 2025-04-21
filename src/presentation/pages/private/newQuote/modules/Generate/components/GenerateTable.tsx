@@ -1,14 +1,5 @@
 import type { AppState } from "@/app/store";
-import { cn } from "@/core/adapters";
-import {
-  Badge,
-  Column,
-  DataTable,
-  InputNumber
-} from "@/presentation/components";
-import { useWindowSize } from "@/presentation/hooks";
-import { ColumnGroup } from "primereact/columngroup";
-import { Row } from "primereact/row";
+import { Badge, Column, DataTable, ColumnGroup, Row } from "@/presentation/components";
 import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useCalculateCostsPerService } from "../../../hooks/useCalculateCostsPerService";
@@ -17,54 +8,59 @@ type Props = {
   setFinalPrice: (finalPrice: number) => void;
   profitMargin: number;
   comission: number;
-  parnerName : string;
+  parnerName?: string;
 };
 
-
-
-export const GenerateTable = ({ profitMargin,comission, setFinalPrice, parnerName }: Props) => {
-  const { width, TABLET } = useWindowSize();
-
+export const GenerateTable = ({
+  profitMargin,
+  comission,
+  setFinalPrice,
+  parnerName,
+}: Props) => {
   const { hotelRoomTripDetailsWithTotalCost } = useSelector(
     (state: AppState) => state.hotelRoomTripDetails
   );
 
   const {} = useCalculateCostsPerService();
 
-
   const calculateSalesPrice = useMemo(() => {
     return hotelRoomTripDetailsWithTotalCost.map((quote) => {
       const salesPrice = parseFloat(
         (quote.totalCost / (profitMargin / 100)).toFixed(2)
       );
-      
+
       const salesPriceWithCommission = parseFloat(
         ((salesPrice * 100) / (100 - comission)).toFixed(2)
       );
       return {
-        utility: parseFloat(
-          (salesPrice - quote.totalCost).toFixed(2)
-        ),
+        utility: parseFloat((salesPrice - quote.totalCost).toFixed(2)),
         hotelName: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
         margin: profitMargin,
-        numberOfPeople: quote.numberOfPeople,
+        costPerson: quote.costPerson,
         totalCost: +quote.totalCost.toFixed(2),
-        salesPrice: comission > 0 ? salesPriceWithCommission : salesPrice,
+        salesPriceVE: salesPrice,
+        salesPriceParner: salesPriceWithCommission,
         number: quote.number,
       };
     });
   }, [hotelRoomTripDetailsWithTotalCost, profitMargin, comission]);
 
   const finalPrice = useMemo(() => {
-    return calculateSalesPrice.reduce((acc, quote) => {
-      return acc + parseFloat(quote.salesPrice.toFixed(2));
-    }, 0);
-  } , [calculateSalesPrice]);
+    return {
+      VE: calculateSalesPrice.reduce(
+        (acc, quote) => acc + quote.salesPriceVE,
+        0
+      ),
+      parner: calculateSalesPrice.reduce(
+        (acc, quote) => acc + quote.salesPriceParner,
+        0
+      ),
+    };
+  }, [calculateSalesPrice]);
 
   useEffect(() => {
-    setFinalPrice(finalPrice);
-  }
-  , [finalPrice]);
+    setFinalPrice(parnerName ? finalPrice.parner : finalPrice.VE);
+  }, [finalPrice]);
 
   return (
     <DataTable
@@ -75,34 +71,17 @@ export const GenerateTable = ({ profitMargin,comission, setFinalPrice, parnerNam
       footerColumnGroup={
         <ColumnGroup>
           <Row>
+            <Column colSpan={4} className="bg-primary text-white" />
             <Column
-              footer={
-                <div
-                  className={cn(
-                    "text-white md:text-lg",
-                    width < TABLET && "flex items-center"
-                  )}
-                >
-                  <i className="pi pi-money-bill me-3"></i>
-                  <span>
-                    Total:
-                    {width < TABLET && (
-                      <strong className="ms-2">${finalPrice.toFixed(2)}</strong>
-                    )}
-                  </span>
-                </div>
-              }
-              colSpan={width > TABLET ? 5 : 6}
-              className={cn(
-                "bg-primary text-white",
-                width > TABLET && "text-right"
-              )}
+              align={"center"}
+              className="bg-primary  text-white text-lg"
+              footer={<span>$ {finalPrice.VE.toFixed(2)}</span>}
             />
-            {width > TABLET && (
+            {parnerName && (
               <Column
                 align={"center"}
-                className="bg-primary p-0 text-white text-lg"
-                footer={<span>$ {finalPrice.toFixed(2)}</span>}
+                className="bg-primary  text-white text-lg"
+                footer={<span>$ {finalPrice.parner.toFixed(2)}</span>}
               />
             )}
           </Row>
@@ -145,27 +124,6 @@ export const GenerateTable = ({ profitMargin,comission, setFinalPrice, parnerNam
         alignHeader={"center"}
         align={"center"}
         headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
-        className="max-sm:text-xs max-md:text-sm w-20"
-        field="numberOfPeople"
-        header="Nro. personas"
-        editor={(options) => {
-          return (
-            <InputNumber
-              inputClassName="w-20"
-              value={options.value}
-              onValueChange={(e) => {
-                options.editorCallback?.(e.value ?? 0);
-              }}
-              min={1}
-              max={options.rowData.hotelRoom?.capacity}
-            />
-          );
-        }}
-      />
-      <Column
-        alignHeader={"center"}
-        align={"center"}
-        headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
         className="max-sm:text-xs max-md:text-sm"
         header="Utilidad"
         body={(rowData) => {
@@ -175,20 +133,40 @@ export const GenerateTable = ({ profitMargin,comission, setFinalPrice, parnerNam
       <Column
         alignHeader={"center"}
         align={"center"}
-        headerClassName="bg-primary text-white max-sm:text-xs max-md:text-sm"
+        headerClassName="min-w-48 bg-primary text-white max-sm:text-xs max-md:text-sm"
         className="max-sm:text-xs max-md:text-sm"
         header={
           <>
             Precio de venta
-            <Badge className="ms-2 bg-tertiary" value={parnerName} />
+            <Badge
+              className="ms-2 bg-tertiary block"
+              value="Vamos expeditions"
+            />
           </>
         }
         body={(rowData) => {
-          return <span>${rowData.salesPrice}</span>;
+          return <span>${rowData.salesPriceVE}</span>;
         }}
       />
+      {parnerName && (
+        <Column
+          alignHeader={"center"}
+          align={"center"}
+          headerClassName="min-w-48 bg-primary text-white max-sm:text-xs max-md:text-sm"
+          className="max-sm:text-xs max-md:text-sm"
+          header={
+            <>
+              Precio de venta
+              <Badge className="ms-2 bg-tertiary block" value={parnerName} />
+            </>
+          }
+          body={(rowData) => {
+            return <span>${rowData.salesPriceParner}</span>;
+          }}
+        />
+      )}
     </DataTable>
   );
 };
 
-// const calculatePinal
+

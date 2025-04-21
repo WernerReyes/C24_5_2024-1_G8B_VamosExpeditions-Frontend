@@ -27,6 +27,20 @@ export const authSlice = createSlice({
         authUser: payload,
       };
     },
+
+    
+    onOnline: (state, { payload }: PayloadAction<UserEntity["online"]>) => {
+      if (state.authUser?.id) {
+        return {
+          ...state,
+          authUser: {
+            ...state.authUser,
+            online: payload
+          },
+        };
+      }
+      return state;
+    },
     onLogout: (state) => {
       return {
         ...state,
@@ -37,4 +51,4 @@ export const authSlice = createSlice({
   },
 });
 
-export const { onLogin, onLogout } = authSlice.actions;
+export const { onLogin, onLogout, onOnline } = authSlice.actions;

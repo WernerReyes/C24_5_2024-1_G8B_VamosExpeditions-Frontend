@@ -14,7 +14,7 @@ export * from "./InputNumber";
 export * from "./InputText";
 export * from "./InputTextarea";
 export * from "./MultiSelect";
-export * from "./Password";
+export * from "./Password/Password";
 export * from "./RadioButton";
 export * from "./SelectButton";
 export * from "./SpeedDial/SpeedDial";
@@ -26,6 +26,7 @@ export * from "./TreeSelect/TreeSelect";
 export * from "./FileUpload";
 //* PrimeReact Components
 export * from "primereact/badge";
+export { Chart } from "primereact/chart";
 export * from "primereact/chip";
 export * from "primereact/column";
 export * from "primereact/confirmpopup";
@@ -35,9 +36,10 @@ export * from "primereact/divider";
 export * from "primereact/image";
 export * from "primereact/menu";
 export * from "primereact/menubar";
-export{ type MenuItem } from "primereact/menuitem";
+export { type MenuItem } from "primereact/menuitem";
 export * from "primereact/orderlist";
 export * from "primereact/overlaypanel";
+export { OverlayPanel } from "primereact/overlaypanel";
 export * from "primereact/panelmenu";
 export * from "primereact/progressbar";
 export * from "primereact/progressspinner";
@@ -48,6 +50,12 @@ export * from "primereact/slider";
 export * from "primereact/tag";
 export * from "primereact/togglebutton";
 export * from "primereact/tooltip";
+export { ColumnGroup } from "primereact/columngroup";
+export { Row } from "primereact/row";
+
+export { CountdownCircleTimer } from "react-countdown-circle-timer";
+
+export { Offline } from "react-detect-offline";
 
 
 //* Router Dom

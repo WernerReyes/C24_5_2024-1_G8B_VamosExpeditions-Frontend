@@ -2,6 +2,7 @@ import parsePhoneNumber, {
   AsYouType,
   type CountryCode as CountryCodeLib,
   getExampleNumber,
+  
 
 } from "libphonenumber-js";
 import examples from "libphonenumber-js/examples.mobile.json";
@@ -13,7 +14,9 @@ export const phoneNumberAdapter = {
     return new AsYouType(code).input(phoneNumber);
   },
 
-  parse(phoneNumber: string, code: CountryCode) {
+  
+
+  parse(phoneNumber: string, code?: CountryCode) {
     return parsePhoneNumber(phoneNumber, code);
   },
   getExampleNumber(code: CountryCode) {

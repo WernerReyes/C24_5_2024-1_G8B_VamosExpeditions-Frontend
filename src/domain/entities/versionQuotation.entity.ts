@@ -1,4 +1,3 @@
-
 import type { PartnerEntity } from "./partner.entity";
 import type { ReservationEntity } from "./reservation.entity";
 import type { TripDetailsEntity } from "./tripDetails.entity";
@@ -11,39 +10,87 @@ export enum VersionQuotationStatus {
   APPROVED = "APPROVED",
 }
 
-type VersionQuotationStatusRender = {
+type VersionQuotationRender<T> = {
   label: string;
   icon: string;
   severity: "info" | "warning" | "success" | "danger" | "secondary";
+  value: T;
 };
 
 export const versionQuotationRender: Record<
   VersionQuotationStatus,
-  VersionQuotationStatusRender
+  VersionQuotationRender<VersionQuotationStatus>
 > = {
   [VersionQuotationStatus.DRAFT]: {
     label: "Borrador",
     severity: "secondary",
     icon: "pi pi-pencil",
+    value: VersionQuotationStatus.DRAFT,
   },
   [VersionQuotationStatus.COMPLETED]: {
     label: "Completado",
     severity: "info",
     icon: "pi pi-check",
+    value: VersionQuotationStatus.COMPLETED,
   },
   [VersionQuotationStatus.CANCELATED]: {
     label: "Cancelado",
     severity: "danger",
     icon: "pi pi-times",
+    value: VersionQuotationStatus.CANCELATED,
   },
   [VersionQuotationStatus.APPROVED]: {
     label: "Aprobado",
     severity: "success",
     icon: "pi pi-check",
+    value: VersionQuotationStatus.APPROVED,
   },
 };
 
-export interface VersionQuotationEntity  {
+export enum AllowVersionQuotationType {
+  TRANSPORTATION = "TRANSPORTATION",
+  ACTIVITY = "ACTIVITY",
+  ACCOMMODATION = "ACCOMMODATION",
+  FOOD = "FOOD",
+  GUIDE = "GUIDE",
+}
+
+export const allowVersionQuotationTypesRender: Record<
+  AllowVersionQuotationType,
+  VersionQuotationRender<AllowVersionQuotationType>
+> = {
+  [AllowVersionQuotationType.TRANSPORTATION]: {
+    label: "Transporte",
+    severity: "info",
+    icon: "pi pi-car",
+    value: AllowVersionQuotationType.TRANSPORTATION,
+  },
+  [AllowVersionQuotationType.ACTIVITY]: {
+    label: "Actividad",
+    severity: "info",
+    icon: "pi pi-calendar",
+    value: AllowVersionQuotationType.ACTIVITY,
+  },
+  [AllowVersionQuotationType.ACCOMMODATION]: {
+    label: "Alojamiento",
+    severity: "info",
+    icon: "pi pi-home",
+    value: AllowVersionQuotationType.ACCOMMODATION,
+  },
+  [AllowVersionQuotationType.FOOD]: {
+    label: "Comida",
+    severity: "info",
+    icon: "pi pi-apple",
+    value: AllowVersionQuotationType.FOOD,
+  },
+  [AllowVersionQuotationType.GUIDE]: {
+    label: "Guía",
+    severity: "info",
+    icon: "pi pi-user",
+    value: AllowVersionQuotationType.GUIDE,
+  },
+};
+export interface VersionQuotationEntity {
   id: { quotationId: number; versionNumber: number };
   name: string;
   status: VersionQuotationStatus;
@@ -60,4 +107,9 @@ export interface VersionQuotationEntity  {
   tripDetails?: TripDetailsEntity;
   user?: UserEntity;
 
+  hasVersions: boolean;
+
+  isArchived: boolean;
+  archivedAt?: Date;
+  archivedReason?: string;
 }

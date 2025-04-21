@@ -11,7 +11,11 @@ const tripDetailsDtoSchema = z.object({
     quotationId: z.number(),
     versionNumber: z.number(),
   }),
-  clientId: z.number(),
+  clientId: z.number({
+    message: "El campo cliente es requerido",
+  }).min(1, {
+    message: "El campo cliente es requerido",
+  }),
   numberOfPeople: z
     .number({
       message: "El campo número de personas es requerido",
@@ -74,7 +78,7 @@ export const tripDetailsDto = {
   parse: (tripDetailsEntity: TripDetailsEntity): TripDetailsDto => {
     return {
       versionQuotationId: tripDetailsEntity.versionQuotation?.id!,
-      clientId: tripDetailsEntity.client!.id,
+      clientId: tripDetailsEntity.client?.id ?? 0,
       numberOfPeople: tripDetailsEntity.numberOfPeople,
       travelDates: [
        tripDetailsEntity.startDate,

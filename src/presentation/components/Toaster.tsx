@@ -81,6 +81,23 @@ export const toasterAdapter = {
       </div>
     );
   }),
+  info: (message: string) => toast.custom((t) => {
+    return (
+      <div className="text-white p-4 rounded-lg w-[22rem] shadow-md flex items-start bg-blue-500">
+        <div className="mr-4">
+          <i className="pi pi-info-circle"></i>
+        </div>
+        <div className="flex-grow text-xs sm:text-sm">
+          <h3 className="font-semibold mb-1 text-md">Info</h3>
+          {message}
+        </div>
+        <i
+          className="pi pi-times cursor-pointer hover:bg-transparent/10 p-2 rounded-full hover:text-white"
+          onClick={() => toast.dismiss(t.id)}
+        ></i>
+      </div>
+    );
+  }),
   dismiss: (id?: string) => toast.dismiss(id),
   remove: (message: string) => toast.remove(message),
 };

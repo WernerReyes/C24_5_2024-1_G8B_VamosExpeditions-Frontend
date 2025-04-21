@@ -19,6 +19,7 @@ import type { AppState } from "@/app/store";
 import { constantRoutes } from "@/core/constants";
 import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 import {
+  onSetCurrentQuotation,
   onSetCurrentStep,
   onSetCurrentTripDetails,
   onSetCurrentVersionQuotation,
@@ -39,6 +40,7 @@ import {
   calculateCompletionPercentage,
   getVersionDataAndCalculateCompletionPercentage,
 } from "./utils";
+import { quotationService } from "@/data";
 
 interface Title {
   header: string;
@@ -62,7 +64,7 @@ const renderStepContent = (step: number): React.ReactNode => {
     case 3:
       return <GenerateModule />;
     default:
-      return <h1>Finalizar</h1>;
+      return <h2>Finalizar</h2>;
   }
 };
 
@@ -79,14 +81,6 @@ const NewQuotePage = () => {
 
   const { currentQuotation, currentStep, indirectCostMargin } = useSelector(
     (state: AppState) => state.quotation
-  );
-
-  const { currentTripDetails } = useSelector(
-    (state: AppState) => state.tripDetails
-  );
-
-  const { hotelRoomTripDetails } = useSelector(
-    (state: AppState) => state.hotelRoomTripDetails
   );
 
   const versionQuotationId =
@@ -145,6 +139,11 @@ const NewQuotePage = () => {
     if (isErrorGetVersionQuotationById) {
       dispatch(onSetCurrentVersionQuotation(null));
       setErrorVersionQuotation(true);
+
+      if (currentQuotation) {
+        quotationService.deleteCurrentQuotation();
+        dispatch(onSetCurrentQuotation(null));
+      }
     }
     const timeout = setTimeout(() => {
       setIsVerified(true);
@@ -164,24 +163,23 @@ const NewQuotePage = () => {
   }, []);
 
   useEffect(() => {
-    if (!currentVersionQuotationData) return;
-    const version = currentVersionQuotationData?.data;
-    if (version) {
-      dispatch(onSetCurrentVersionQuotation(version));
-      if (version.tripDetails) {
-        dispatch(onSetCurrentTripDetails(version.tripDetails));
-        if (version.tripDetails?.hotelRoomTripDetails) {
-          dispatch(
-            onSetHotelRoomTripDetails(version.tripDetails?.hotelRoomTripDetails)
-          );
+    if (currentVersionQuotationData) {
+      dispatch(onSetCurrentVersionQuotation(currentVersionQuotationData!.data));
+      if (currentTripDetailsData) {
+        dispatch(onSetCurrentTripDetails(currentTripDetailsData));
+        if (currentHotelRoomTripDetailsData.length > 0) {
+          dispatch(onSetHotelRoomTripDetails(currentHotelRoomTripDetailsData));
         } else {
           dispatch(onSetHotelRoomTripDetails([]));
         }
       } else {
         dispatch(onSetCurrentTripDetails(null));
+        dispatch(onSetHotelRoomTripDetails([]));
       }
     } else {
       dispatch(onSetCurrentVersionQuotation(null));
+      dispatch(onSetCurrentTripDetails(null));
+      dispatch(onSetHotelRoomTripDetails([]));
     }
   }, [currentVersionQuotationData]);
 
@@ -204,12 +202,7 @@ const NewQuotePage = () => {
         dispatch(onSetCurrentStep(1));
       }, 0);
     }
-  }, [
-    currentTripDetailsData,
-    currentHotelRoomTripDetailsData,
-    isLoadingStep,
-    currentStep,
-  ]);
+  }, [currentHotelRoomTripDetailsData, isLoadingStep, currentStep]);
 
   useEffect(() => {
     if (!currentVersionQuotationData || !isVerified || isLoadingStep) return;
@@ -219,8 +212,8 @@ const NewQuotePage = () => {
 
     const newCompletionPercentage = calculateCompletionPercentage(
       currentStep,
-      !!currentTripDetails,
-      hotelRoomTripDetails.length > 0,
+      !!currentTripDetailsData,
+      currentHotelRoomTripDetailsData.length > 0,
       {
         ...currentVersionQuotationData.data,
         indirectCostMargin:
@@ -246,13 +239,7 @@ const NewQuotePage = () => {
         )
       )
     );
-  }, [
-    currentStep,
-    currentTripDetails,
-    hotelRoomTripDetails,
-    currentVersionQuotationData,
-    indirectCostMargin,
-  ]);
+  }, [currentStep, currentVersionQuotationData, indirectCostMargin]);
 
   if (!isVerified) {
     return (
@@ -313,7 +300,8 @@ const NewQuotePage = () => {
                     onClick={handleNext}
                     disabled={
                       (index === 0 && !currentTripDetailsData) ||
-                      (index === 1 && hotelRoomTripDetails.length === 0)
+                      (index === 1 &&
+                        currentHotelRoomTripDetailsData.length === 0)
                     }
                   />
                 )}

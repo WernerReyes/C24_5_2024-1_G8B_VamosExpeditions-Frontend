@@ -1,18 +1,16 @@
 import { constantRoutes } from "@/core/constants";
-import { EmailDto, emailDtoSchema } from "@/domain/dtos/email";
 import {
   UserEntity,
   VersionQuotationStatus,
   type VersionQuotationEntity,
 } from "@/domain/entities";
 import {
+  notificationSocket,
   useLazyGenerateVersionQuotationPdfQuery,
-  useSendMessageEmailMutation,
-  useSendMessageMutation,
+  useSendEmailAndGenerateReportMutation,
 } from "@/infraestructure/store/services";
 import {
   Avatar,
-  Badge,
   Button,
   Dialog,
   InputText,
@@ -21,25 +19,23 @@ import {
   MultiSelectChangeEvent,
   ProgressSpinner,
   SelectButton,
-  SelectButtonChangeEvent,
+  type SelectButtonChangeEvent
 } from "@/presentation/components";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 
-import { AppState } from "@/app/store";
+import type { AppState } from "@/app/store";
+import {
+  sendEmailAndGenerateReportDto,
+  type SendEmailAndGenerateReportDto,
+} from "@/domain/dtos/versionQuotation";
+import { allowVersionQuotationTypesRender } from "@/domain/entities";
 import { useSelector } from "react-redux";
+import { ArchiveVersionQuotation } from "./ArchiveVersionQuotation";
 
 const { EDIT_QUOTE } = constantRoutes.private;
-
-const resources = [
-  "Transporte",
-  "Actividades",
-  "Alimenatación",
-  "Guías",
-  "Alojamiento",
-];
 
 type TyoeTableActions = {
   rowData: VersionQuotationEntity;
@@ -56,33 +52,31 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   const [handleGeneratePdf, { isLoading: isLoadingGeneratePdf }] =
     useLazyGenerateVersionQuotationPdfQuery();
 
-  const [sendMessage] = useSendMessageMutation();
-  const [sendMessageEmail, { isLoading: isLoadingEmail }] =
-    useSendMessageEmailMutation();
+  const [
+    sendEmailAndGenerateReport,
+    { isLoading: isLoadingSendEmailAndGenerateReport },
+  ] = useSendEmailAndGenerateReportMutation();
 
-  const { control, handleSubmit } = useForm<EmailDto>({
-    resolver: zodResolver(emailDtoSchema),
-  });
+  const { control, handleSubmit, setValue } =
+    useForm<SendEmailAndGenerateReportDto>({
+      resolver: zodResolver(sendEmailAndGenerateReportDto.schema),
+    });
 
-  
-  const handleLogin = async (data: EmailDto) => {
-    await sendMessageEmail({
+  const handleLogin = async (data: SendEmailAndGenerateReportDto) => {
+    await sendEmailAndGenerateReport({
       subject: data.subject,
       to: data.to.map((user) => ({ email: user.email })),
       resources: data.resources,
       description: data.description,
-      reservationId: rowData.tripDetails?.id,
-    })
-      .unwrap()
-      
+      versionQuotationId: data.versionQuotationId,
+      from: data.from,
+    }).unwrap();
 
-    await sendMessage({
+    notificationSocket.sendNotification({
       from_user: authUser?.id as number,
       to_user: data.to.map((user) => user.id!),
       message: data.description as string,
-    })
-      .unwrap()
-      
+    });
   };
 
   const userTemplate = (option: UserEntity) => {
@@ -90,27 +84,34 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       <div
         className="
         flex
-        items-center
+        items-center gap-x-3
       "
       >
-        <Avatar icon="pi pi-user" shape="circle" />
-        {
-          <Badge
-            severity={option.online ? "success" : "danger"}
-            className="mx-2"
-          />
-        }
+        <Avatar
+          badge={{
+            severity: option.online ? "success" : "danger",
+          }}
+          icon="pi pi-user"
+          shape="circle"
+        />
 
         <p className="font-bold ">{option.fullname}</p>
       </div>
     );
   };
 
+  useEffect(() => {
+    setValue("from", authUser?.email || "");
+    setValue("versionQuotationId", rowData.id);
+  }, [authUser, rowData]);
+
   return (
     <div className="space-x-1">
       <Button
         rounded
         text
+        tooltip="Editar"
+        tooltipOptions={{ position: "top" }}
         icon="pi pi-pencil"
         onClick={() => {
           navigate(EDIT_QUOTE(rowData?.id));
@@ -122,7 +123,8 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
 
       <Button
         icon="pi pi-file-pdf"
-        className=""
+        tooltip="Generar PDF"
+        tooltipOptions={{ position: "top" }}
         rounded
         text
         disabled={
@@ -140,6 +142,8 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       {type === "principal" && (
         <Button
           icon="pi pi-envelope"
+          tooltip="Enviar correo"
+          tooltipOptions={{ position: "top" }}
           rounded
           disabled={!rowData.tripDetails}
           text
@@ -148,6 +152,8 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
           }}
         />
       )}
+
+      <ArchiveVersionQuotation versionQuotation={rowData} />
 
       {/*  Dialog*/}
 
@@ -202,13 +208,7 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
               render={({ field, fieldState: { error } }) => (
                 <MultiSelect
                   options={
-                    Array.isArray(users)
-                      ? users?.map((user) => {
-                          return {
-                            ...user,
-                          };
-                        })
-                      : []
+                    users.filter((user) => user.id !== authUser?.id) || []
                   }
                   multiple
                   filter
@@ -236,21 +236,33 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
               <Controller
                 name="resources"
                 control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <SelectButton
-                    label={{ text: "Recursos" }}
-                    options={resources}
-                    invalid={!!error}
-                    {...field}
-                    onChange={(e: SelectButtonChangeEvent) =>
-                      field.onChange(e.value)
-                    }
-                    small={{
-                      text: error?.message,
-                      className: "text-red-500",
-                    }}
-                  />
-                )}
+                render={({ field, fieldState: { error } }) => {
+                  return (
+                    <SelectButton
+                      label={{ text: "Recursos" }}
+                      options={Object.values(allowVersionQuotationTypesRender)}
+                      optionLabel="label"
+                      optionValue="value"
+                      invalid={!!error}
+                      {...field}
+                      onChange={(e: SelectButtonChangeEvent) =>
+                        field.onChange(e.value)
+                      }
+                      itemTemplate={(option) => {
+                        return (
+                          <div className="flex items-center gap-x-2">
+                            <i className={option.icon} />
+                            <span>{option.label}</span>
+                          </div>
+                        );
+                      }}
+                      small={{
+                        text: error?.message,
+                        className: "text-red-500",
+                      }}
+                    />
+                  );
+                }}
               />
             </div>
           </div>
@@ -271,7 +283,7 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
             )}
           />
           <div className="flex justify-end mt-4">
-            {isLoadingEmail ? (
+            {isLoadingSendEmailAndGenerateReport ? (
               <ProgressSpinner
                 style={{ width: "40px", height: "40px" }}
                 strokeWidth="8"
@@ -291,7 +303,7 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
                   label="Enviar"
                   icon="pi pi-envelope"
                   type="submit"
-                  disabled={isLoadingEmail}
+                  disabled={isLoadingSendEmailAndGenerateReport}
                 />
               </>
             )}

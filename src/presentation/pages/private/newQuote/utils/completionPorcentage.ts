@@ -1,4 +1,7 @@
-import { type VersionQuotationEntity, VersionQuotationStatus } from "@/domain/entities";
+import {
+  type VersionQuotationEntity,
+  VersionQuotationStatus,
+} from "@/domain/entities";
 
 export const calculateCompletionPercentage = (
   currentStep: number,
@@ -13,11 +16,16 @@ export const calculateCompletionPercentage = (
   if (currentStep >= 1 && currentTripDetails) {
     newPercentage = Math.max(newPercentage, 25);
   }
-  if (currentStep >= 2 && hotelRoomTripDetails) {
+  if (currentStep >= 2 && currentTripDetails && hotelRoomTripDetails) {
     newPercentage = Math.max(newPercentage, 50);
   }
 
-  if (currentStep >= 3 && versionQuotation.indirectCostMargin) {
+  if (
+    currentStep >= 3 &&
+    currentTripDetails &&
+    hotelRoomTripDetails &&
+    versionQuotation.indirectCostMargin
+  ) {
     newPercentage = Math.max(newPercentage, 75);
   }
 

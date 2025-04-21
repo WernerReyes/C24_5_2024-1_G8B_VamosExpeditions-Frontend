@@ -24,6 +24,8 @@ export const reservationCache = {
       {
         getAllReservations: GetReservationsDto;
       }[]
+
+      
     >(cachedQueries);
     for (const query of extractedParams) {
       if (query.getAllReservations) {
@@ -55,7 +57,7 @@ export const reservationCache = {
   },
 
   updateReservationByUser: (
-    data: UserEntity,
+    data: Partial<UserEntity>,
     dispatch: ThunkDispatch<any, any, UnknownAction>,
     getState: () => AppState
   ) => {
@@ -83,7 +85,10 @@ export const reservationCache = {
                         ...reservation,
                         versionQuotation: {
                           ...reservation.versionQuotation,
-                          user: data,
+                          user: {
+                            ...reservation.versionQuotation.user,
+                            ...data,
+                          },
                         },
                       };
                     }

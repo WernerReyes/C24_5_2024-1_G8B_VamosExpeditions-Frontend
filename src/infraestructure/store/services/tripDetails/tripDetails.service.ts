@@ -49,7 +49,7 @@ export const tripDetailsServiceStore = createApi({
         try {
           const { data } = await queryFulfilled;
 
-          versionQuotationCache.updateVersionQuotationByTripDetails(
+          versionQuotationCache.updateByTripDetails(
             data.data,
             dispatch,
             getState as () => AppState

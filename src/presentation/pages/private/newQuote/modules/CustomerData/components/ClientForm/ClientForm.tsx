@@ -12,11 +12,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
-import {
-  cn,
-  type CountryCode,
-  phoneNumberAdapter,
-} from "@/core/adapters";
+import { cn, type CountryCode, phoneNumberAdapter } from "@/core/adapters";
 
 import Style from "../Style.module.css";
 
@@ -29,7 +25,10 @@ import { getCountryPhoneMask } from "../../utils";
 import { SUBREGIONS } from "@/presentation/types";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
-import { onSetSelectedClient, onSetSincronizedCurrentTripDetailsByClient } from "@/infraestructure/store";
+import {
+  onSetSelectedClient,
+  onSetSincronizedCurrentTripDetailsByClient,
+} from "@/infraestructure/store";
 
 const OPERATIONS = [
   {
@@ -81,6 +80,9 @@ export const ClientForm = () => {
   const [currentOp, setCurrentOp] = useState(OPERATIONS[0]);
   const [suggestPhone, setSuggestPhone] = useState(true);
   const [isContentLoading, setIsContentLoading] = useState(true);
+  const [numberPhone, setNumberPhone] = useState<string>(
+    currentTripDetails?.client?.phone ?? ""
+  );
 
   const handleOperation = (op: (typeof OPERATIONS)[number]) => {
     setCurrentOp(op);
@@ -108,7 +110,6 @@ export const ClientForm = () => {
         if (currentOp === OPERATIONS[1]) {
           dispatch(onSetSelectedClient(data));
           if (currentTripDetails) {
-            
             dispatch(
               onSetSincronizedCurrentTripDetailsByClient({
                 ...currentTripDetails,
@@ -140,6 +141,7 @@ export const ClientForm = () => {
       setSuggestPhone(true);
       setCurrentOp(OPERATIONS[1]);
       setValue("id", selectedClient.id);
+      setNumberPhone(selectedClient.phone);
     } else {
       reset(clientDto.getEmpty);
       setSelectedCountry(undefined);
@@ -209,7 +211,9 @@ export const ClientForm = () => {
 
       <div className={Style.container}>
         <ErrorBoundary
-          isLoader={isGettingAllExternalCountries || isFetchingAllExternalCountries}
+          isLoader={
+            isGettingAllExternalCountries || isFetchingAllExternalCountries
+          }
           loadingComponent={
             <InputText
               label={{
@@ -275,7 +279,6 @@ export const ClientForm = () => {
                       id="country"
                       placeholder="Seleccione una subregión"
                       invalid={!!error}
-                      
                       options={SUBREGIONS}
                       virtualScrollerOptions={{ itemSize: 38 }}
                       {...field}
@@ -347,14 +350,15 @@ export const ClientForm = () => {
                       htmlFor: "phone",
                       text: "Telefono ( +51999999999 )",
                     }}
-                    {...field}
+                    value={numberPhone}
                     onChange={(e) => {
                       if (!e.value) return field.onChange(e.value);
                       const parsedValue = phoneNumberAdapter.parse(
                         e.value,
                         selectedCountry?.code as CountryCode
                       )?.number;
-                      return field.onChange(parsedValue ?? e.value);
+
+                      field.onChange(parsedValue ?? e.value);
                     }}
                     loading={isContentLoading}
                     invalid={!!error}
@@ -365,7 +369,6 @@ export const ClientForm = () => {
                           countryPhoneMask === null && suggestPhone,
                       }),
                     }}
-                    autoClear={false}
                   ></InputMask>
                 ) : (
                   <InputText
@@ -428,7 +431,7 @@ export const ClientForm = () => {
           isUpsertingClient ||
           isGettingAllExternalCountries ||
           Object.keys(errors).length > 0 ||
-          !isDirty && currentOp === OPERATIONS[1]
+          (!isDirty && currentOp === OPERATIONS[1])
         }
         icon={currentOp.icon}
         menuClassName={cn({ hidden: !selectedClient })}

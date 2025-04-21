@@ -43,9 +43,10 @@ export function ExpiredSessionCountdown({
     <Dialog
       closable={false}
       visible={isExpired}
-      className="w-fit"
-      style={{ width: "50vw" }}
+      breakpoints={{ "1024vw": "25vw", '768px': '50vw', '641px': '100vw' }}
+      style={{ width: "50vw"  }}
       onHide={() => {}}
+      baseZIndex={999999}
     >
       <Card
         className="border-none shadow-none"

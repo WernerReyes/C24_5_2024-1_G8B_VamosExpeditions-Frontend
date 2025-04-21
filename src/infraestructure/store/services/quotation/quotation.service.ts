@@ -29,7 +29,7 @@ export const quotationServiceStore = createApi({
           await quotationService.upsertQuotation(transformedData);
           dispatch(onSetCurrentQuotation(transformedData));
 
-          versionQuotationCache.updateVersionQuotationFromAnotherService(
+          versionQuotationCache.updateFromAnotherService(
             data.data!.versions![0],
             dispatch,
             getState as () => AppState

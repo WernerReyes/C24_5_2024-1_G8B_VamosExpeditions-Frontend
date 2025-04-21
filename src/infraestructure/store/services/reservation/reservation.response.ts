@@ -13,8 +13,11 @@ export interface GetReservationsStats {
 }
 
 export interface GetReservationsStadistics {
-  month: string;
-  income: number;
-  margin: number;
-  trips: number;
+  pricesPerMonth: {
+    month: string;
+    income: number;
+    margin: number;
+    trips: number;
+  }[];
+  years: number[];
 }

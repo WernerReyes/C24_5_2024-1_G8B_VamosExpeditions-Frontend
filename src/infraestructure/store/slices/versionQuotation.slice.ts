@@ -3,10 +3,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type VersionQuotationSliceState = {
   currentVersionQuotation: VersionQuotationEntity | null;
+  archivedVersions?: Record<number, number>;
 };
 
 const initialState: VersionQuotationSliceState = {
   currentVersionQuotation: null,
+  archivedVersions: undefined,
 };
 
 export const versionquotationSlice = createSlice({
@@ -22,7 +24,38 @@ export const versionquotationSlice = createSlice({
         currentVersionQuotation: payload,
       };
     },
+
+    onSetNumberOfVersions: (
+      state,
+      { payload }: PayloadAction<Record<number, number>>
+    ) => {
+      return {
+        ...state,
+        archivedVersions: {
+          ...state.archivedVersions,
+          ...payload,
+        },
+      };
+    },
+
+    onDiscountNumberOfVersions: (
+      state,
+      { payload }: PayloadAction<{ quotationId: number }>
+    ) => {
+      if (state.archivedVersions) {
+        const { [payload.quotationId]: _, ...rest } = state.archivedVersions;
+        return {
+          ...state,
+          archivedVersions: {
+            ...rest,
+            [payload.quotationId]: state.archivedVersions[payload.quotationId] - 1,
+          }
+        };
+      }
+      return state;
+    },
   },
 });
 
-export const { onSetCurrentVersionQuotation } = versionquotationSlice.actions;
+export const { onSetCurrentVersionQuotation, onSetNumberOfVersions, onDiscountNumberOfVersions } =
+  versionquotationSlice.actions;

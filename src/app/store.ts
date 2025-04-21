@@ -9,13 +9,16 @@ import {
   versionQuotationService,
   hotelRoomTripDetailsService,
   reservationServiceStore,
-  reportService,
   tripDetailsServiceStore,
   userService,
   rtkQueryErrorLogger,
   SocketService,
+<<<<<<< HEAD
   EmailService,
   distritService,
+=======
+  notificationService,
+>>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
 } from "@/infraestructure/store/services";
 
 import {
@@ -60,10 +63,13 @@ export const store = configureStore({
       hotelRoomTripDetailsService.reducer,
     [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
-    [reportService.reducerPath]: reportService.reducer,
     [SocketService.reducerPath]: SocketService.reducer,
+<<<<<<< HEAD
     [EmailService.reducerPath]: EmailService.reducer,
     [distritService.reducerPath]: distritService.reducer,
+=======
+    [notificationService.reducerPath]: notificationService.reducer,
+>>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -80,10 +86,13 @@ export const store = configureStore({
       .concat(versionQuotationService.middleware)
       .concat(hotelRoomTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
-      .concat(reportService.middleware)
       .concat(SocketService.middleware)
+<<<<<<< HEAD
       .concat(EmailService.middleware)
       .concat(distritService.middleware)
+=======
+      .concat(notificationService.middleware)
+>>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
       .concat(rtkQueryErrorLogger),
 });
 

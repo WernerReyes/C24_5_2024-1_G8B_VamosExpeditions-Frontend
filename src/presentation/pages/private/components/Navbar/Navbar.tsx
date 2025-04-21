@@ -22,7 +22,10 @@ import { useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
 import { useNavigate } from "react-router-dom";
 import { constantRoutes } from "@/core/constants";
-import { useLogoutMutation } from "@/infraestructure/store/services";
+import {
+  useGetAllNotificationsQuery,
+  useLogoutMutation,
+} from "@/infraestructure/store/services";
 import { DataTableSelectionMultipleChangeEvent } from "primereact/datatable";
 
 import { messageTimestamp } from "@/core/utils";
@@ -47,21 +50,16 @@ const ITEMS: MenuItem[] = [
   },
 ];
 
-
 export const Navbar = () => {
   const [deleteNotifications, {}] = useDeleteNotificationsMutation();
   const [markNotificationsAsRead] = useMarkNotificationsAsReadMutation();
+  const { currentData: notifications } = useGetAllNotificationsQuery();
 
   const navigate = useNavigate();
   const { authUser } = useSelector((state: AppState) => state.auth);
   const [logout] = useLogoutMutation();
   const { toggleSidebar } = useSidebar();
-  
-  const { messages } = useSelector(
-    (state: AppState) => state.chatNotifications
-  );
 
- 
   const [showMenu, setShowMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -80,7 +78,7 @@ export const Navbar = () => {
               className="my-0 mx-0"
               tabPanelContent={[
                 {
-                  header: `Notificaciones  ${messages?.length} 🔔`,
+                  header: `Notificaciones  ${notifications?.length} 🔔`,
                   className: "w-full h-full",
                   children: (
                     <>
@@ -104,7 +102,7 @@ export const Navbar = () => {
                           size="small"
                           disabled={
                             selectedNotifications?.length === 0 ||
-                            messages
+                            notifications
                               ?.filter((p) =>
                                 selectedNotifications.includes(p.id)
                               )
@@ -121,14 +119,14 @@ export const Navbar = () => {
 
                       <DataTable
                         dataKey="id"
-                        value={messages || []}
+                        value={notifications|| []}
                         paginator
                         rows={10}
                         scrollable
                         scrollHeight="600px"
                         selection={
                           selectedNotifications.length > 0
-                            ? messages?.filter((p) =>
+                            ? notifications?.filter((p) =>
                                 selectedNotifications.includes(p.id)
                               ) ?? []
                             : []
@@ -300,24 +298,21 @@ export const Navbar = () => {
             onClick={() => {
               toggleSidebar();
             }}
-           
           />
         )}
         end={() => (
-          <div className="flex items-center gap-7  mr-8 ">
+          <div className="flex items-center gap-7">
             <i
               className="pi pi-bell text-2xl cursor-pointer hover:text-slate-200 p-overlay-badge"
-             
               style={{ fontSize: "2rem" }}
               onClick={() => {
-               
                 setShowNotifications(!showNotifications);
               }}
             >
               <Badge
                 value={
-                  Array.isArray(messages)
-                    ? messages.filter((item) => !item.is_read).length
+                  Array.isArray(notifications)
+                    ? notifications.filter((item) => !item.is_read).length
                     : 0
                 }
                 className="bg-red-600"
@@ -328,6 +323,9 @@ export const Navbar = () => {
             <div className="flex gap-x-2 items-center">
               <Avatar
                 shape="circle"
+                badge={{
+                  severity: authUser?.online ? "success" : "danger",
+                }}
                 label={authUser?.fullname}
                 className=" bg-tertiary"
                 onClick={() => setShowMenu(!showMenu)}
@@ -335,7 +333,6 @@ export const Navbar = () => {
               <span className="text-white">{authUser?.fullname}</span>
               <i
                 className="pi pi-angle-down text-white cursor-pointer hover:text-slate-200"
-               
                 onClick={() => setShowMenu(!showMenu)}
               />
             </div>
@@ -361,7 +358,7 @@ export const Navbar = () => {
         aria-controls="popup_menu_left"
         className={cn(
           !showMenu ? "hidden" : "fixed z-[1000]",
-          "right-12 top-[60px]"
+          "right-1 top-[60px]"
         )}
         popupAlignment="left"
       />
@@ -376,240 +373,3 @@ export const Navbar = () => {
     </>
   );
 };
-
-/* onst TemplateNotificaciones = (
-  rowData: NotificationMessageEntity,
-  setSelectedNotifications: React.Dispatch<React.SetStateAction<number[]>>
-) => {
-  const dispatch = useDispatch();
-
-  return (
-    <>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <Avatar
-            image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
-            size="large"
-            shape="circle"
-          />
-
-          <div>
-            <p className="text-md font-semibold text-gray-900">
-              {rowData.user?.fullname}
-            </p>
-            <span className="text-xs text-gray-500">
-              {messageTimestamp(new Date(rowData.created_at))}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <Button
-            icon={rowData.is_read ? "pi pi-eye" : "pi pi-eye-slash"}
-            rounded
-            text
-            disabled={rowData.is_read}
-            pt={{
-              icon: {
-                style: {
-                  fontSize: "1.5rem",
-                },
-              },
-            }}
-          />
-
-          <Button
-            icon="pi pi-trash"
-            rounded
-            text
-            severity="danger"
-            pt={{
-              icon: {
-                style: {
-                  fontSize: "1.5rem",
-                },
-              },
-            }}
-            disabled={(selectMessage?.length ?? 0) > 0}
-            onClick={() => {
-              dispatch(onDeleteIdMessage(rowData.id));
-              setSelectedNotifications([]);
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="mt-2">
-        <p className={`text-gray-700 text-sm text-justify   font-semibold`}>
-          {rowData.message}
-        </p>
-      </div>
-    </>
-  );
-};
- */
-/* --------------------------- */
-{
-  /* <Dialog
-        visible={show}
-        header="🔔 Notificaciones"
-        onHide={() => {
-          if (!show) return;
-          setShow(false);
-        }}
-        position="top-right"
-        className="sm:w-[30%] w-auto"
-        style={{
-          height: "auto",
-        }}
-        modal={false}
-        pt={{
-          closeButton: {
-            style: {
-              background: "#01A3BB",
-              color: "white",
-            },
-          },
-        }}
-      >
-        <Toolbar
-          className=" mb-4"
-          start={
-            <div className="flex gap-2">
-              <Button
-                icon="pi pi-trash"
-                label="Eliminar"
-                size="small"
-                severity="danger"
-                disabled={selectedNotifications?.length === 0}
-                onClick={() => {
-                  deleteNotifications({ id: selectedNotifications }).unwrap();
-                  setSelectedNotifications([]);
-                }}
-              />
-              <Button
-                icon="pi pi-eye"
-                label="Marcar como leídas"
-                size="small"
-                disabled={
-                  selectedNotifications?.length === 0 ||
-                  messages
-                    ?.filter((p) => selectedNotifications.includes(p.id))
-                    .every((p) => p.is_read)
-                }
-                onClick={() => {
-                  markNotificationsAsRead({
-                    id: selectedNotifications,
-                  }).unwrap();
-                  setSelectedNotifications([]);
-                }}
-              />
-            </div>
-          }
-        />
-        <DataTable
-          dataKey="id"
-          value={Array.isArray(messages) ? messages : []}
-          paginator
-          rows={10}
-          scrollable
-          scrollHeight="600px"
-          selection={
-            selectedNotifications.length > 0
-              ? messages?.filter((p) => selectedNotifications.includes(p.id)) ??
-                []
-              : []
-          }
-          selectionMode="multiple"
-          onSelectionChange={(
-            e: DataTableSelectionMultipleChangeEvent<
-              NotificationMessageEntity[]
-            >
-          ) => setSelectedNotifications(e.value.map((item) => item.id))}
-        >
-          <Column selectionMode="multiple" style={{ width: "5%" }}></Column>
-
-          <Column
-            field="message"
-            style={{ width: "auto", height: "auto" }}
-            header={
-              <span className="text-lg font-semibold text-gray-800">
-                🔔 Notificaciones
-              </span>
-            }
-           
-            body={(rowData: NotificationMessageEntity) => (
-              <>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar
-                      image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
-                      size="large"
-                      shape="circle"
-                    />
-
-                    <div>
-                      <p className="text-md font-semibold text-gray-900">
-                        {rowData.user?.fullname}
-                      </p>
-                      <span className="text-xs text-gray-500">
-                        {messageTimestamp(new Date(rowData.created_at))}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      icon={rowData.is_read ? "pi pi-eye" : "pi pi-eye-slash"}
-                      rounded
-                      text
-                      disabled={rowData.is_read}
-                      pt={{
-                        icon: {
-                          style: {
-                            fontSize: "1.5rem",
-                          },
-                        },
-                      }}
-                      onClick={() => {
-                        markNotificationsAsRead({ id: [rowData.id] }).unwrap();
-                        setSelectedNotifications([]);
-                      }}
-                    />
-
-                    <Button
-                      icon="pi pi-trash"
-                      rounded
-                      text
-                      severity="danger"
-                      pt={{
-                        icon: {
-                          style: {
-                            fontSize: "1.5rem",
-                          },
-                        },
-                      }}
-                      disabled={(selectedNotifications?.length ?? 0) > 0}
-                      onClick={() => {
-                        deleteNotifications({ id: [rowData.id] }).unwrap();
-                        setSelectedNotifications([]);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-2">
-                  <p
-                    className={`text-gray-700 text-sm text-justify   font-semibold`}
-                  >
-                    {rowData.message}
-                  </p>
-                </div>
-              </>
-            )}
-            
-          />
-        </DataTable>
-      </Dialog> */
-}
-/* ------------------------- */

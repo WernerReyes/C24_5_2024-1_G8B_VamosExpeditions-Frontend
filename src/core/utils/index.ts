@@ -1,6 +1,5 @@
 export * from "./dtoValidator";
 export * from "./format";
-export * from "./getValidationError";
 export * from "./generateEmptyObject";
 export * from "./showAlert"
 export * from "./measureExecutionTime";

@@ -1,11 +1,15 @@
-import { loginDto, type LoginDto } from "@/domain/dtos/auth";
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { requestConfig } from "../config";
-import type { LoginResponse } from "./auth.response";
-import type { ApiResponse } from "../response";
-import { onLogin, onLogout } from "../../slices/auth.slice";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
-import { onSetCookieExpiration, onSetExpired } from "../../slices/cookieExpiration.slice";
+import { loginDto, ResetPasswordDto, type LoginDto } from "@/domain/dtos/auth";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { onLogin, onLogout } from "../../slices/auth.slice";
+import {
+  onSetCookieExpiration,
+  onSetExpired,
+} from "../../slices/cookieExpiration.slice";
+import { requestConfig } from "../config";
+import type { ApiResponse } from "../response";
+import type { LoginResponse } from "./auth.response";
+import { authSocket } from "./auth.socket";
 
 const PREFIX = "/auth";
 
@@ -19,17 +23,71 @@ export const authService = createApi({
         const [dto, errors] = loginDto.create(body);
         if (errors) throw errors;
         return {
-        url: "/login",
-        method: "POST",
-        body: dto,
-      }},
+          url: "/login",
+          method: "POST",
+          body: dto,
+        };
+      },
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(onLogin(data.data.user));
+          dispatch(
+            onLogin({
+              ...data.data.user,
+              online: true,
+            })
+          );
           startShowSuccess(data.message);
+
+          //* Connect to socket
+          authSocket.userConnected();
         } catch (error: any) {
           startShowApiError(error.error);
+        }
+      },
+    }),
+
+    sendResetPasswordEmail: builder.mutation<ApiResponse<void>, string>({
+      query: (email) => {
+        return {
+          url: "/send-reset-password-email",
+          method: "POST",
+          body: { email },
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      },
+    }),
+
+    verifyResetPasswordToken: builder.query<ApiResponse<void>, string>({
+      query: (token) => {
+        return {
+          url: `/verify-reset-password-token/${token}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    resetPassword: builder.mutation<ApiResponse<void>, ResetPasswordDto>({
+      query: (dto) => {
+        return {
+          url: "/reset-password",
+          method: "POST",
+          body: dto,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
         }
       },
     }),
@@ -48,6 +106,9 @@ export const authService = createApi({
           dispatch(onSetCookieExpiration(data.data.expiresAt));
           dispatch(onSetExpired(false));
           startShowSuccess(data.message);
+
+          //* Connect to socket
+          authSocket.userConnected();
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
         }
@@ -57,10 +118,14 @@ export const authService = createApi({
     userAuthenticated: builder.query<ApiResponse<LoginResponse>, void>({
       query: () => "/user-authenticated",
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(onLogin(data.data.user));
-        } catch (error: any) {}
+        const { data } = await queryFulfilled;
+
+        dispatch(
+          onLogin({
+            ...data.data.user,
+            online: true,
+          })
+        );
       },
     }),
     logout: builder.mutation<void, void>({
@@ -72,6 +137,9 @@ export const authService = createApi({
         try {
           await queryFulfilled;
           dispatch(onLogout());
+
+          //* Disconnect from socket
+          authSocket.userDisconnected();
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
         }
@@ -82,6 +150,9 @@ export const authService = createApi({
 
 export const {
   useLoginMutation,
+  useSendResetPasswordEmailMutation,
+  useVerifyResetPasswordTokenQuery,
+  useResetPasswordMutation,
   useReLoginMutation,
   useLazyUserAuthenticatedQuery,
   useUserAuthenticatedQuery,

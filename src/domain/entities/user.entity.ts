@@ -6,4 +6,7 @@ export interface UserEntity {
   email: string;
   online?: boolean;
   role?: RoleEntity;
+  phoneNumber?: string;
+  description?: string;
 }
+

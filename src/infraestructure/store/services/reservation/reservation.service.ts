@@ -56,7 +56,7 @@ export const reservationServiceStore = createApi({
 
           reservationCache.upsertReservation(data.data, dispatch, getState);
 
-          versionQuotationCache.updateVersionQuotationFromAnotherService(
+          versionQuotationCache.updateFromAnotherService(
             {
               ...data.data.versionQuotation,
               reservation: data.data,
@@ -117,7 +117,7 @@ export const reservationServiceStore = createApi({
           const { data } = await queryFulfilled;
           startShowSuccess(data.message);
 
-          versionQuotationCache.updateVersionQuotationFromAnotherService(
+          versionQuotationCache.updateFromAnotherService(
             {
               ...data.data.versionQuotation,
               reservation: data.data,
@@ -135,7 +135,7 @@ export const reservationServiceStore = createApi({
     }),
 
     getReservationStadistics: builder.query<
-      ApiResponse<GetReservationsStadistics[]>,
+      ApiResponse<GetReservationsStadistics>,
       GetStadisticsDto
     >({
       query: (params) => {
@@ -176,11 +176,11 @@ export const reservationServiceStore = createApi({
             getState
           );
 
-          versionQuotationCache.deleteMultipleVersionsFromAnotherService(
-            data.data.map((reservation) => reservation.versionQuotation),
-            dispatch,
-            getState as () => AppState
-          );
+          // versionQuotationCache.deleteMultipleVersionsFromAnotherService(
+          //   data.data.map((reservation) => reservation.versionQuotation),
+          //   dispatch,
+          //   getState as () => AppState
+          // );
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
           throw error;

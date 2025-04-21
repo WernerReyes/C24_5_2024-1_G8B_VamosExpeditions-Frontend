@@ -7,6 +7,8 @@ import {
 import { classNames } from "primereact/utils";
 import { forwardRef, type HTMLAttributes, type LabelHTMLAttributes } from "react";
 
+import "./Password.css";
+
 type DesingType = "label" | "floatLabel";
 
 interface Props extends PasswordProps {

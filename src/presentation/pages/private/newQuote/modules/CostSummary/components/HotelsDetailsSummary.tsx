@@ -47,7 +47,7 @@ export const HotelsDetailsSummary = ({ selectedDay }: Props) => {
                     <span className="font-medium hidden min-[350px]:block">Costo</span>
                   </div>
                   <span className="text-lg md:text-2xl font-bold text-primary">
-                    ${quote.hotelRoom?.rateUsd}
+                    ${quote.costPerson}
                   </span>
                 </div>
               </div>

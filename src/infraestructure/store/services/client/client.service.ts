@@ -36,7 +36,7 @@ export const clientService = createApi({
           //* Update cache
           clientCache.upsertClient(data, dispatch, getState);
            
-          versionQuotationCache.updateVersionQuotationByClient(
+          versionQuotationCache.updateByClient(
             data.data,
             dispatch,
             getState as () => AppState
