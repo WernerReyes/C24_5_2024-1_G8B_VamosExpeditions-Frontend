@@ -15,6 +15,7 @@ import {
   rtkQueryErrorLogger,
   SocketService,
   EmailService,
+  distritService,
 } from "@/infraestructure/store/services";
 
 import {
@@ -62,6 +63,7 @@ export const store = configureStore({
     [reportService.reducerPath]: reportService.reducer,
     [SocketService.reducerPath]: SocketService.reducer,
     [EmailService.reducerPath]: EmailService.reducer,
+    [distritService.reducerPath]: distritService.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -81,6 +83,7 @@ export const store = configureStore({
       .concat(reportService.middleware)
       .concat(SocketService.middleware)
       .concat(EmailService.middleware)
+      .concat(distritService.middleware)
       .concat(rtkQueryErrorLogger),
 });
 

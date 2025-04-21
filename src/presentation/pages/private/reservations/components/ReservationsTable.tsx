@@ -51,6 +51,7 @@ export const ReservationTable = () => {
     handlePageChange,
     handleSaveState,
   } = usePaginator(ROW_PER_PAGE[0], RESERVATION_PAGINATION);
+
   const [{ status, createdAt, updatedAt }, setFormatedFilters] =
     useState<ReservationTableFilters>({});
 
@@ -195,6 +196,7 @@ export const ReservationTable = () => {
                 filters: state.filters,
               });
             }}
+            
             showGridlines
             value={reservations?.content || []}
             selection={selectedReservations}

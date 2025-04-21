@@ -9,6 +9,8 @@ import { ExpiredSessionCountdown } from "../components";
 import { useCookieExpirationStore } from "../../infraestructure/hooks/useCookieExpirationStore";
 import { useLocation } from "react-use";
 
+
+
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
 
 const DashboardPage = lazy(
@@ -24,10 +26,12 @@ const ReservationsPage = lazy(
 );
 
 const ProfilePage = lazy(() => import("../pages/private/profile/Profile.page"));
+const Hotelpage  = lazy(() => import("../pages/private/Hotels/hotel.page"));
+const CountryPage = lazy(() => import("../pages/private/country/country.page"));
 
 const { BASE, VIEW_QUOTE, EDIT_QUOTE, ...rest } = constantRoutes.private;
 
-const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, PROFILE } = removeBaseRoute(
+const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, PROFILE ,HOTEL,COUNTRY} = removeBaseRoute(
   rest,
   BASE
 );
@@ -63,6 +67,11 @@ const PrivateRoutes = () => {
           <Route path={RESERVATIONS} element={<ReservationsPage />} />
 
           <Route path={PROFILE} element={<ProfilePage />} />
+          <Route path={HOTEL} element={<Hotelpage />} />
+          <Route path={COUNTRY} element={<CountryPage />} />
+          
+
+          
 
           {/* <Route path="*" element={<Navigate to="/" />} /> */}
         </Route>

@@ -42,10 +42,12 @@ const { QUOTATION_PAGINATION } = constantStorage;
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
+
   const dispatch = useDispatch();
   const { currentQuotation } = useSelector(
     (state: AppState) => state.quotation
   );
+
   const {
     handlePageChange,
     currentPage,
@@ -55,10 +57,13 @@ export const QuotesTable = () => {
     filters,
     handleSaveState,
   } = usePaginator(ROW_PER_PAGE[0], QUOTATION_PAGINATION);
+
+
   const [
     { name, clientsIds, startDate, endDate, representativesIds, status },
     setFilters,
   ] = useState<QuotesTableFilters>({});
+
 
   const {
     currentData: officialCurrentData,
@@ -83,6 +88,7 @@ export const QuotesTable = () => {
     }
   );
 
+
   const [duplicateMultipleVersionQuotations, { isLoading: isDuplicating }] =
     useDuplicateMultipleVersionQuotationsMutation();
   const [deleteMultipleVersionQuotations, { isLoading: isDeleting }] =
@@ -91,6 +97,9 @@ export const QuotesTable = () => {
   const [expandedRows, setExpandedRows] = useState<
     DataTableExpandedRows | DataTableValueArray | undefined
   >(undefined);
+
+  /* expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data) */
+  
   const [selectedQuotes, setSelectedQuotes] = useState<
     VersionQuotationEntity[]
   >([]);

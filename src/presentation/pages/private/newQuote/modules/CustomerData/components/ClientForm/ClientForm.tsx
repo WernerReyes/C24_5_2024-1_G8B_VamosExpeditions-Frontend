@@ -71,8 +71,13 @@ export const ClientForm = () => {
     isError,
     error,
   } = useGetAllExternalCountriesQuery();
+
   const [selectedCountry, setSelectedCountry] =
     useState<ExternalCountryEntity>();
+
+
+
+    
   const [currentOp, setCurrentOp] = useState(OPERATIONS[0]);
   const [suggestPhone, setSuggestPhone] = useState(true);
   const [isContentLoading, setIsContentLoading] = useState(true);
@@ -96,13 +101,7 @@ export const ClientForm = () => {
   };
 
   const handleUpsertClient = (clientDto: ClientDto) => {
-    let client =
-      currentOp === OPERATIONS[1]
-        ? clientDto
-        : {
-            ...clientDto,
-            id: 0,
-          };
+    let client =currentOp === OPERATIONS[1]? clientDto: {...clientDto,id: 0,};
     upsertClient(client)
       .unwrap()
       .then(({ data }) => {

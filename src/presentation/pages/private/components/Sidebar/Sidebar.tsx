@@ -14,8 +14,8 @@ import { NewQuotationDialog } from "../NewQuotationDialog";
 import "./Sidebar.css";
 import { useSidebar } from "../../hooks";
 
-
-const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
+const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, HOTEL, COUNTRY } =
+  constantRoutes.private;
 
 const ITEMS: MenuItem[] = [
   {
@@ -53,6 +53,18 @@ const ITEMS: MenuItem[] = [
       },
     ],
   },
+  {
+    label: "Hoteles",
+    icon: "pi pi-building",
+    url: HOTEL,
+    template: (e) => <Template menuItem={e} />,
+  },
+  {
+    label: "Países",
+    icon: "pi pi-globe",
+    url: COUNTRY,
+    template: (e) => <Template menuItem={e} />,
+  },
 ];
 
 export const Sidebar = () => {
@@ -66,7 +78,6 @@ export const Sidebar = () => {
       }
       onHide={() => {
         toggleSidebar();
-        
       }}
       visible={visible}
       className="w-72"

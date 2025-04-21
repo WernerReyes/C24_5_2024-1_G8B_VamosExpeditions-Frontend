@@ -7,6 +7,7 @@ import { EditModalProfile } from "./components";
 
 export const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
   const { authUser } = useSelector((state: AppState) => state.auth);
 
   const { label, severity } = roleRender[authUser!.role!.name];

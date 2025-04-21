@@ -23,7 +23,7 @@ export * from "./Stepper/Stepper";
 export * from "./TabView";
 export * from "./Toaster";
 export * from "./TreeSelect/TreeSelect";
-
+export * from "./FileUpload";
 //* PrimeReact Components
 export * from "primereact/badge";
 export * from "primereact/chip";
@@ -48,6 +48,7 @@ export * from "primereact/slider";
 export * from "primereact/tag";
 export * from "primereact/togglebutton";
 export * from "primereact/tooltip";
+
 
 //* Router Dom
 export { Link } from "react-router-dom";

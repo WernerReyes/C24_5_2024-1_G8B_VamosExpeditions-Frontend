@@ -12,6 +12,7 @@ export * from './tripDetails/tripDetails.service';
 export * from './hotelRoomTripDetails/hotelRoomTripDetails.service';
 export * from "./socket/socket.service";
 export * from "./email/email.service";
+export * from "./distrit/distrit.service";
 
 export * from './reports/report.service';
 //* External

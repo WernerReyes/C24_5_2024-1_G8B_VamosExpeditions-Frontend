@@ -13,6 +13,8 @@ type PrivateRoutes = {
   VIEW_QUOTE: (id?: VersionQuotationEntity["id"]) => string;
   RESERVATIONS: string;
   PROFILE: string;
+  HOTEL: string;
+  COUNTRY: string;
 };
 
 type Routes = {
@@ -42,5 +44,7 @@ export const constantRoutes: Routes = {
         : "/quote/:quoteId/:version/view",
     RESERVATIONS: `${PRIVATE_BASE}/reservations`,
     PROFILE: `${PRIVATE_BASE}/profile`,
+    HOTEL: `${PRIVATE_BASE}/hotel`,
+    COUNTRY: `${PRIVATE_BASE}/country`,
   },
 };
