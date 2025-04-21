@@ -13,12 +13,10 @@ import { NewQuotationDialog } from "../NewQuotationDialog";
 import "./Sidebar.css";
 import { useSidebar } from "../../hooks";
 
-<<<<<<< HEAD
 const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, HOTEL, COUNTRY } =
   constantRoutes.private;
-=======
-const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS } = constantRoutes.private;
->>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
+
+
 
 const ITEMS: MenuItem[] = [
   {
@@ -78,19 +76,16 @@ export const Sidebar = () => {
       onHide={() => {
         toggleSidebar();
       }}
-      header={
-        <img src="/images/logo.webp" alt="Logo" width="200"  />
-      }
+      header={<img src="/images/logo.webp" alt="Logo" width="200" />}
       visible={visible}
       className="w-72"
       baseZIndex={width < MACBOOK ? 1000 : 0}
       blockScroll={false}
       modal={width < TABLET}
       dismissable={width < DESKTOP}
-     
     >
       <hr className="mt-3 mb-2 border-2 border-gray-300 " />
-      <PanelMenu model={ITEMS}  />
+      <PanelMenu model={ITEMS} />
     </SidebarComponent>
   );
 };

@@ -38,15 +38,15 @@ const { QUOTATION_PAGINATION } = constantStorage;
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
-<<<<<<< HEAD
 
-  const dispatch = useDispatch();
+
+  //const dispatch = useDispatch();
   const { currentQuotation } = useSelector(
-    (state: AppState) => state.quotation
-=======
+      (state: AppState) => state.quotation
+    );
+
   const { archivedVersions } = useSelector(
     (state: AppState) => state.versionQuotation
->>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
   );
 
   const {

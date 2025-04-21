@@ -53,7 +53,7 @@ export * from "primereact/tooltip";
 export { ColumnGroup } from "primereact/columngroup";
 export { Row } from "primereact/row";
 
-export { CountdownCircleTimer } from "react-countdown-circle-timer";
+//export { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 export { Offline } from "react-detect-offline";
 

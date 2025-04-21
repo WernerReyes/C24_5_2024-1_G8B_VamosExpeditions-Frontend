@@ -9,12 +9,12 @@ import { EditModalPassword } from "./components/EditModalPassword";
 
 export const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-<<<<<<< HEAD
+
   
-=======
+
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
     useState(false);
->>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
+
   const { authUser } = useSelector((state: AppState) => state.auth);
 
   const { label, severity } = roleRender[authUser!.role!.name];

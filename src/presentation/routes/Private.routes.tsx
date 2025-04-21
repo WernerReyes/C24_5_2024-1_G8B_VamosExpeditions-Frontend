@@ -12,15 +12,14 @@ import {
   useConnectSocketQuery,
   useGetUsersQuery,
 } from "@/infraestructure/store/services";
-import { MainLayout } from "../pages/private/layouts";
+//import { MainLayout } from "../pages/private/layouts";
 
-<<<<<<< HEAD
 
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
-=======
+
 // const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
->>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
+
 
 const DashboardPage = lazy(
   () => import("../pages/private/dashboard/Dashboard.page")

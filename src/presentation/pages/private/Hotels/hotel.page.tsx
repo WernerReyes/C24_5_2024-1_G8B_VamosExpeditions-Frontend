@@ -2,10 +2,10 @@ import {
   
   useUploadExcelMutation,
 } from "@/infraestructure/store/services";
-/* import { FileUpload } from "@/presentation/components"; */
+import { FileUpload } from "@/presentation/components";
 import { FileUpload as FileUploadType } from "primereact/fileupload";
 import { useRef } from "react";
-/* import { NewHotelDialog } from "./components/NewHotelDialog"; */
+import { NewHotelDialog } from "./components/NewHotelDialog";
 import { HotelTable } from "./components/HotelTable";
 
 const Hotelpage = () => {
@@ -36,7 +36,7 @@ const Hotelpage = () => {
 
   return (
     <div className="bg-white p-10 rounded-lg shadow-md overflow-x-hidden">
-      {/* <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
+      <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
         <FileUpload
           ref={fileUploadRef}
           mode="basic"
@@ -53,7 +53,7 @@ const Hotelpage = () => {
         <NewHotelDialog />
 
         
-      </div> */}
+      </div>
       <HotelTable />
     </div>
   );

@@ -11,14 +11,14 @@ export * from "./versionQuotation/versionQuotation.response";
 export * from "./tripDetails/tripDetails.service";
 export * from "./hotelRoomTripDetails/hotelRoomTripDetails.service";
 export * from "./socket/socket.service";
-<<<<<<< HEAD
-export * from "./email/email.service";
+
+
 export * from "./distrit/distrit.service";
-=======
+
 export * from "./notification/notification.socket";
 export * from "./notification/notification.service";
 
->>>>>>> 53147d4b7dc5598ee724249add289ed54404fab2
+
 
 //* External
 export * from "./external/country/country.service";
