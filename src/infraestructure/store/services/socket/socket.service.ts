@@ -41,8 +41,6 @@ const PREFIX = "";
 export const SocketService = createApi({
   reducerPath: "socketApi",
   baseQuery: requestConfig(PREFIX),
-  tagTypes: ["Messages", "User"],
-
   endpoints: (builder) => ({
     connectSocket: builder.query<void, void>({
       queryFn: () => ({ data: undefined }),

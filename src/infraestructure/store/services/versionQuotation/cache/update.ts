@@ -336,8 +336,6 @@ export const archive = function (
 ) {
   const params = extractedParams(getState);
 
-  let totalVersions = 0;
-
   for (const param of params) {
     const {
       getAllOfficialVersionQuotations,
@@ -351,7 +349,6 @@ export const archive = function (
           "getAllUnofficialVersionQuotations",
           getAllUnofficialVersionQuotations,
           (draft) => {
-            totalVersions = draft.data.total - 1;
             Object.assign(draft, {
               data: {
                 ...draft.data,
@@ -388,13 +385,6 @@ export const archive = function (
                     // return data;
                   }
 
-                  if (item.id.quotationId === data.id.quotationId) {
-                    return {
-                      ...item,
-                      hasVersions: totalVersions > 0,
-                    };
-                  }
-
                   return item;
                 }),
               },
@@ -403,6 +393,7 @@ export const archive = function (
         )
       );
     }
+
 
     if (getAllArchivedVersionQuotations) {
       dispatch(

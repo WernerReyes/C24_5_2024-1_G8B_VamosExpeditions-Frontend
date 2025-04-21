@@ -24,7 +24,6 @@ import { PaginatedResponse } from "../response";
 import { versionQuotationCache } from "./versionQuotation.cache";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
-  TotalDraftsVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
 import { reservationCache } from "../reservation/reservation.cache";
@@ -147,13 +146,6 @@ export const versionQuotationService = createApi({
             ]
           : [{ type: "ArchivedQuotations" as const, id: "PARTIAL-LIST" }];
       },
-    }),
-
-    getTotalDraftsVersionQuotations: builder.query<
-      ApiResponse<TotalDraftsVersionQuotation>,
-      void
-    >({
-      query: () => "/drafts",
     }),
 
     updateVersionQuotation: builder.mutation<
@@ -477,7 +469,6 @@ export const versionQuotationService = createApi({
 });
 
 export const {
-  useGetTotalDraftsVersionQuotationsQuery,
   useGetAllOfficialVersionQuotationsQuery,
   useGetAllUnofficialVersionQuotationsQuery,
   useGetAllArchivedVersionQuotationsQuery,

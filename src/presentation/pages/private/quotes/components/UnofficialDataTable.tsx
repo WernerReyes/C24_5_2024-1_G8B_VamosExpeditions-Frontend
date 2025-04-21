@@ -16,6 +16,8 @@ import {
 } from "@/presentation/components";
 import { ColumnGroup } from "primereact/columngroup";
 import { Row } from "primereact/row";
+import { useDispatch } from "react-redux";
+import { onSetNumberOfVersions } from "@/infraestructure/store";
 
 type Props = {
   currentRowExpanded?: VersionQuotationEntity;
@@ -30,16 +32,25 @@ export const UnofficialDataTable = ({
   setSelectedQuotes,
   recentDuplicatedQuotes,
 }: Props) => {
+  const dispatch = useDispatch();
   const { handlePageChange, currentPage, first, limit, filters } =
     usePaginator(5);
   const [
-    { name, clientsIds, startDate, endDate, representativesIds, status, createdAt, updatedAt },
+    {
+      name,
+      clientsIds,
+      startDate,
+      endDate,
+      representativesIds,
+      status,
+      createdAt,
+      updatedAt,
+    },
     setFilters,
   ] = useState<QuotesTableFilters>({});
 
-
   const { currentData, isLoading, isFetching, isError, refetch } =
-  useGetAllUnofficialVersionQuotationsQuery(
+    useGetAllUnofficialVersionQuotationsQuery(
       {
         page: currentPage,
         limit,
@@ -52,7 +63,6 @@ export const UnofficialDataTable = ({
         quotationId: currentRowExpanded?.id.quotationId,
         createdAt,
         updatedAt,
-      
       },
       {
         skip: !currentPage || !currentRowExpanded,
@@ -63,6 +73,19 @@ export const UnofficialDataTable = ({
     if (!filters) return;
     setFilters(getTransformedFilters(filters));
   }, [filters]);
+
+  useEffect(() => {
+    if (!currentData?.data) return;
+
+    dispatch(
+      onSetNumberOfVersions(
+        currentData.data.content.reduce((acc, curr) => {
+          acc[curr.id.quotationId] = (acc[curr.id.quotationId] || 0) + 1;
+          return acc;
+        }, {} as Record<number, number>)
+      )
+    );
+  }, [currentData]);
 
   return (
     <ErrorBoundary

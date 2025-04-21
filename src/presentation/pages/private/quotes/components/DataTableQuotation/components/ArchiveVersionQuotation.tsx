@@ -1,14 +1,17 @@
 import { startShowInfo } from "@/core/utils";
 import { VersionQuotationEntity } from "@/domain/entities";
+import { onDiscountNumberOfVersions } from "@/infraestructure/store";
 import { useArchiveVersionQuotationMutation } from "@/infraestructure/store/services";
 import { Button, InputTextarea, OverlayPanel } from "@/presentation/components";
 import { useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 
 type Props = {
   versionQuotation: VersionQuotationEntity;
 };
 
 export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
+  const dispatch = useDispatch();
   const op = useRef<OverlayPanel>(null);
   const [archiveVersionQuotation, { isLoading: isLoadingArchive }] =
     useArchiveVersionQuotationMutation();
@@ -23,9 +26,15 @@ export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
       archiveReason,
     })
       .unwrap()
-      .then(() => {
+      .then(({ data }) => {
         op.current?.hide();
         setArchiveReason(undefined);
+
+        dispatch(
+          onDiscountNumberOfVersions({
+            quotationId: data.id.quotationId,
+          })
+        );
       });
   };
 

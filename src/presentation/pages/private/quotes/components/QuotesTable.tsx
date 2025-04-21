@@ -30,12 +30,18 @@ import { getTransformedFilters } from "../utils";
 import { ArchivatedQuotesDialog } from "./ArchivatedQuotesDialog";
 import { DataTableQuotation } from "./DataTableQuotation/DataTableQuotation";
 import { UnofficialDataTable } from "./UnofficialDataTable";
+import { useSelector } from "react-redux";
+import { AppState } from "@/app/store";
 
 const { QUOTATION_PAGINATION } = constantStorage;
 
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
+  const { archivedVersions } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+
   const {
     handlePageChange,
     currentPage,
@@ -231,6 +237,16 @@ export const QuotesTable = () => {
           extraColumns={[
             {
               expander: (data: VersionQuotationEntity) => {
+                const quotationId = data.id.quotationId;
+                const hasArchived = archivedVersions?.[quotationId] ?? null;
+
+                // console.log(hasArchived)
+
+                if (hasArchived !== null) {
+                  console.log(hasArchived);
+                  return hasArchived > 0;
+                }
+
                 return data.hasVersions;
               },
 
@@ -302,7 +318,6 @@ export const QuotesTable = () => {
                     q.id.quotationId === quotation.id.quotationId &&
                     q.id.versionNumber === quotation.id.versionNumber
                 ),
-              // "p-disabled": quotation?.reservation
             };
           }}
           rowExpansionTemplate={() => {

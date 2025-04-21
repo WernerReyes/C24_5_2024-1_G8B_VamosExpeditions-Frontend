@@ -59,9 +59,11 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
       unArchiveVersionQuotation({
         versionNumber: selectedQuote.id.versionNumber,
         quotationId: selectedQuote.id.quotationId,
-      }).then(() => {
-        setSelectedQuote(undefined);
-      });
+      })
+        .unwrap()
+        .then(() => {
+          setSelectedQuote(undefined);
+        });
     }
   };
 
@@ -139,13 +141,25 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
                 },
                 {
                   subject: "Fechas de viaje",
-                  message: `${
-                    selectedQuote.tripDetails?.startDate &&
-                    dateFnsAdapter.format(selectedQuote.tripDetails.startDate)
-                  } - ${
-                    selectedQuote.tripDetails?.endDate &&
-                    dateFnsAdapter.format(selectedQuote.tripDetails.endDate)
-                  }`,
+
+                  message: (
+                    <>
+                      {selectedQuote.tripDetails?.startDate &&
+                      selectedQuote.tripDetails?.endDate ? (
+                        <span>
+                          {dateFnsAdapter.format(
+                            selectedQuote.tripDetails.startDate
+                          )}{" "}
+                          -{" "}
+                          {dateFnsAdapter.format(
+                            selectedQuote.tripDetails.endDate
+                          )}
+                        </span>
+                      ) : (
+                        <FieldNotAssigned message="Fechas no asignadas" />
+                      )}
+                    </>
+                  ),
                 },
                 {
                   subject: "Avance",

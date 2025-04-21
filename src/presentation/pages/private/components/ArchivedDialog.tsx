@@ -85,7 +85,7 @@ export const ArchivedDialog = ({
       // visible
       onHide={onHide}
     >
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-2 3xl:grid-cols-3 gap-4">
         {/* Lista de Cotizaciones */}
         <div className="col-span-1 h-full">
           <ErrorBoundary
@@ -133,7 +133,6 @@ export const ArchivedDialog = ({
                   className: "text-center",
                 },
               }}
-              className=" bg-red-300"
               loading={isLoading}
               emptyMessage={emptyMessage}
               value={value}
@@ -143,8 +142,8 @@ export const ArchivedDialog = ({
               totalRecords={totalRecords}
               onPage={onPage}
               lazy
-              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-              currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros archivados"
+              paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+              currentPageReportTemplate="({currentPage} de {totalPages})"
               paginator
             />
           </ErrorBoundary>
@@ -153,7 +152,7 @@ export const ArchivedDialog = ({
         {/* Detalles de la Cotización */}
         <div
           className={cn(
-            "xl:col-span-2 pl-4 self-start",
+            "col-span-1 3xl:col-span-2 pl-4 self-start",
             value?.length === 0 ? "h-full" : "sticky top-0"
           )}
         >
