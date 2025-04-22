@@ -1,7 +1,6 @@
-import { dtoValidator, generateEmptyObject } from "@/core/utils";
+import { dtoValidator } from "@/core/utils";
 import { z } from "zod";
 import { HotelRoomType } from "../hotel";
-import { HotelRoomEntity } from "@/domain/entities";
 
 export const roomDtoSchema = z.object({
   type: z.literal(HotelRoomType.ROOM),

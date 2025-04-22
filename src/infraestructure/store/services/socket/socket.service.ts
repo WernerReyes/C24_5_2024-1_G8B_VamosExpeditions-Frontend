@@ -52,19 +52,28 @@ export const SocketService = createApi({
         await cacheDataLoaded;
 
         const socket = SocketManager.connect();
+        const authSocket = authSocketListeners(
+          dispatch,
+          getState as () => AppState
+        );
+
 
         socket?.on("connect", () => {
-          const authSocket = authSocketListeners(
-            dispatch,
-            getState as () => AppState
-          );
+          // const authSocket = authSocketListeners(
+          //   dispatch,
+          //   getState as () => AppState
+          // );
           authSocket.userConnected(socket);
           authSocket.userDisconnected(socket);
+          
         });
+        
+        authSocket.forceLogout(socket);
 
         const notificationSocket = notificationSocketListeners(dispatch);
         notificationSocket.getPersonalMessages(socket);
 
+        
         socket?.on("disconnect", () => {
           console.log("Disconnected from socket server");
         });

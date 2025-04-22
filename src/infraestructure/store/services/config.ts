@@ -7,3 +7,8 @@ export const requestConfig = (prefix: string) =>
     baseUrl: `${VITE_API_URL}/api/v1${prefix}`,
     credentials: "include",
   });
+
+  
+
+
+  

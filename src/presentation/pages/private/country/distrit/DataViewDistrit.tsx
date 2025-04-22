@@ -1,13 +1,11 @@
 import { DistritEntity } from "@/domain/entities";
 import { useGetDistritsAndCityQuery } from "@/infraestructure/store/services";
-import { Button, Checkbox, Divider } from "@/presentation/components";
-import { DataView, DataViewLayoutOptions } from "primereact/dataview";
-import { Rating } from "primereact/rating";
-import { classNames } from "primereact/utils";
+import { Button, Checkbox } from "@/presentation/components";
+import { DataView } from "primereact/dataview";
 import { useState } from "react";
 
 export const DataViewDistrit = () => {
-  const { data, isLoading } = useGetDistritsAndCityQuery();
+  const { data } = useGetDistritsAndCityQuery();
   /* const [layout, setLayout] = useState<"grid" | "list">("grid"); */
   /* const [check, setCheck] = useState(false); */
 

@@ -1,5 +1,4 @@
-import { dtoValidator, generateEmptyObject } from "@/core/utils";
-import { HotelEntity } from "@/domain/entities";
+import { dtoValidator } from "@/core/utils";
 import { z } from "zod";
 
 export enum HotelRoomType {

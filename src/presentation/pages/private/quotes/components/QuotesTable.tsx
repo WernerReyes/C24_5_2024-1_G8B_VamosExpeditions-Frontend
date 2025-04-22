@@ -41,9 +41,6 @@ export const QuotesTable = () => {
 
 
   //const dispatch = useDispatch();
-  const { currentQuotation } = useSelector(
-      (state: AppState) => state.quotation
-    );
 
   const { archivedVersions } = useSelector(
     (state: AppState) => state.versionQuotation

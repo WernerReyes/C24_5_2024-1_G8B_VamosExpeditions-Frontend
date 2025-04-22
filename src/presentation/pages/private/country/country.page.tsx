@@ -11,7 +11,6 @@ import { DataViewDistrit } from "./distrit/DataViewDistrit";
 const CountryPage = () => {
   /* const [visible, setVisible] = useState(false); */
 
-  const pais = <i className="pi pi-building"></i>;
 
   return (
     <div className="bg-white p-10 rounded-lg shadow-md overflow-x-hidden">
