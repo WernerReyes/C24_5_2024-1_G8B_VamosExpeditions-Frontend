@@ -14,6 +14,7 @@ import {
   StatisticsSummaryGraph,
   StatsOverviewCard,
 } from "./components";
+import { useEffect, useState } from "react";
 
 
 
@@ -36,9 +37,11 @@ const DashboardPage = () => {
   } = useGetReservationsStatsQuery();
 
   const reservationsStats = reservationsStatsData?.data;
+  
 
   return (
     <>
+    <DetectInternet/>
       <div className="flex justify-between max-sm:gap-x-3 items-center">
         <h1 className="text-xl sm:text-3xl text-start font-bold text-primary">
           {getTimeOffDay()}, {authUser?.fullname} 👋
@@ -122,3 +125,25 @@ const getTimeOffDay = () => {
 };
 
 export default DashboardPage;
+
+function DetectInternet(){
+  const [isOnline,setIsOnline] = useState(navigator.onLine)
+
+  const handleCheck = () =>{
+      setIsOnline(navigator.onLine)
+  }
+
+  useEffect(()=>{
+      window.addEventListener('online',handleCheck)
+      window.addEventListener('offline',handleCheck)
+  },[])
+  
+  return(
+      <>
+          <div style={{textAlign:'center'}}>
+             <h1>{isOnline?'Online':'Offline'}</h1>
+          </div>
+      </>
+  )
+}
+
