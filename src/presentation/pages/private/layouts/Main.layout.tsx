@@ -5,7 +5,7 @@ import { onSetCurrentQuotation } from "@/infraestructure/store";
 import { useWindowSize } from "@/presentation/hooks";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navbar, OfflineDialog, Sidebar } from "../components";
+import { Navbar, Sidebar } from "../components";
 import { useSidebar } from "../hooks";
 
 interface MainLayoutProps {
