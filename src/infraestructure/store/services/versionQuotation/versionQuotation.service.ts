@@ -24,6 +24,7 @@ import { PaginatedResponse } from "../response";
 import { versionQuotationCache } from "./versionQuotation.cache";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
+  UnArchiveVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
 import { reservationCache } from "../reservation/reservation.cache";
@@ -129,7 +130,7 @@ export const versionQuotationService = createApi({
           method: "GET",
           params: {
             ...params,
-            official: false,
+            // official: false,
             isArchived: true,
           },
         };
@@ -325,7 +326,7 @@ export const versionQuotationService = createApi({
     }),
 
     unArchiveVersionQuotation: builder.mutation<
-      ApiResponse<VersionQuotationEntity>,
+      ApiResponse<UnArchiveVersionQuotation>,
       VersionQuotationEntity["id"]
     >({
       query: (body) => {
@@ -366,17 +367,6 @@ export const versionQuotationService = createApi({
         }
         return `/${id.quotationId}/${id.versionNumber}`;
       },
-      // providesTags: (result, _, id) => {
-      //   return result
-      //     ? [
-      //         {
-      //           type: "VersionQuotation",
-      //           id: `${id.quotationId}-${id.versionNumber}`,
-      //         },
-      //       ]
-      //     : ["VersionQuotation"];
-      // },
-      // providesTags: ["VersionQuotation"],
 
       transformResponse: (
         response: ApiResponse<VersionQuotationEntity>
@@ -447,7 +437,6 @@ export const versionQuotationService = createApi({
     >({
       query: (body) => {
         const [_, errors] = sendEmailAndGenerateReportDto.create(body);
-        console.log(errors);
         if (errors) throw new Error(errors[0]);
         return {
           url: `/send-email-pdf`,

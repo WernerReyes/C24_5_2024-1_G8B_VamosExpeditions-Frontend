@@ -4,6 +4,7 @@ import { versionQuotationService } from "../versionQuotation.service";
 import { extractedParams } from "./extractedParams";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
+  UnArchiveVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "../versionQuotation.response";
 
@@ -376,24 +377,20 @@ export const archive = function (
             Object.assign(draft, {
               data: {
                 ...draft.data,
-                content: draft.data.content.map((item) => {
-                  if (
-                    item.id.quotationId === data.id.quotationId &&
-                    item.id.versionNumber === data.id.versionNumber
-                  ) {
-                    return { ...item, archived: true };
-                    // return data;
-                  }
-
-                  return item;
-                }),
+                content: draft.data.content.filter(
+                  (item) =>
+                    !(
+                      item.id.quotationId === data.id.quotationId &&
+                      item.id.versionNumber === data.id.versionNumber
+                    )
+                ),
+                total: draft.data.total - 1,
               },
             });
           }
         )
       );
     }
-
 
     if (getAllArchivedVersionQuotations) {
       dispatch(
@@ -416,7 +413,10 @@ export const archive = function (
 };
 
 export const unArchive = function (
-  data: VersionQuotationEntity,
+  {
+    unArchivedVersionQuotation: data,
+    newUnOfficial,
+  }: UnArchiveVersionQuotation,
   dispatch: AppDispatch,
   getState: () => AppState
 ) {
@@ -439,6 +439,7 @@ export const unArchive = function (
               data: {
                 ...draft.data,
                 content: [data, ...draft.data.content],
+                total: draft.data.total + 1,
               },
             });
           }
@@ -456,6 +457,7 @@ export const unArchive = function (
               data: {
                 ...draft.data,
                 content: [data, ...draft.data.content],
+                total: draft.data.total + 1,
               },
             });
           }
@@ -472,13 +474,26 @@ export const unArchive = function (
             Object.assign(draft, {
               data: {
                 ...draft.data,
-                content: draft.data.content.filter(
-                  (item) =>
-                    !(
-                      item.id.quotationId === data.id.quotationId &&
-                      item.id.versionNumber === data.id.versionNumber
-                    )
-                ),
+                content: draft.data.content
+                  .filter(
+                    (item) =>
+                      !(
+                        item.id.quotationId === data.id.quotationId &&
+                        item.id.versionNumber === data.id.versionNumber
+                      )
+                  )
+                  .map((item) => {
+                    if (
+                      item.id.quotationId === newUnOfficial?.quotationId &&
+                      item.id.versionNumber === newUnOfficial?.versionNumber
+                    ) {
+                      return {
+                        ...item,
+                        official: false,
+                      };
+                    }
+                    return item;
+                  }),
                 total: draft.data.total - 1,
               },
             });

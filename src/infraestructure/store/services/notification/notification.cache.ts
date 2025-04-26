@@ -28,7 +28,6 @@ export const notificationCache = {
         (draft) => {
           // Filter out the deleted notifications from the draft
           return draft.filter((notification: NotificationMessageEntity) => {
-            console.log("ids", ids, notification);
             return !ids.includes(notification.id);
           });
         }

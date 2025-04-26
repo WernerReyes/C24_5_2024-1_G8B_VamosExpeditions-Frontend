@@ -48,14 +48,42 @@ export const versionquotationSlice = createSlice({
           ...state,
           archivedVersions: {
             ...rest,
-            [payload.quotationId]: state.archivedVersions[payload.quotationId] - 1,
-          }
+            [payload.quotationId]:
+              state.archivedVersions[payload.quotationId] - 1,
+          },
         };
       }
       return state;
     },
+
+    onAddNumberOfVersions: (
+      state,
+      { payload }: PayloadAction<{ quotationId: number }>
+    ) => {
+      if (state.archivedVersions) {
+        return {
+          ...state,
+          archivedVersions: {
+            ...state.archivedVersions,
+            [payload.quotationId]:
+              state.archivedVersions[payload.quotationId] + 1,
+          },
+        };
+      } else {
+        return {
+          ...state,
+          archivedVersions: {
+            [payload.quotationId]: 1,
+          },
+        };
+      }
+    },
   },
 });
 
-export const { onSetCurrentVersionQuotation, onSetNumberOfVersions, onDiscountNumberOfVersions } =
-  versionquotationSlice.actions;
+export const {
+  onSetCurrentVersionQuotation,
+  onSetNumberOfVersions,
+  onAddNumberOfVersions,
+  onDiscountNumberOfVersions,
+} = versionquotationSlice.actions;

@@ -26,6 +26,7 @@ import {
 } from "./cache/update";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
+  UnArchiveVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
 
@@ -122,7 +123,7 @@ export const versionQuotationCache = {
   ) => archive(data, dispatch, getState),
 
   unArchive: (
-    data: VersionQuotationEntity,
+    data: UnArchiveVersionQuotation,
     dispatch: AppDispatch,
     getState: () => AppState
   ) => unArchive(data, dispatch, getState),

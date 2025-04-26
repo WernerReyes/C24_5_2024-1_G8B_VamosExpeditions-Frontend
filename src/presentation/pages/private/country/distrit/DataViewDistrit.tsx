@@ -6,9 +6,7 @@ import { useState } from "react";
 
 export const DataViewDistrit = () => {
   const { data } = useGetDistritsAndCityQuery();
-  /* const [layout, setLayout] = useState<"grid" | "list">("grid"); */
-  /* const [check, setCheck] = useState(false); */
-
+  
   const [selectedDistrits, setSelectedDistrits] = useState<number[]>([]);
 
   const toggleCheckbox = (id: number) => {

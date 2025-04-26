@@ -31,8 +31,6 @@ export const StatisticsSummaryGraph = () => {
     const textColorSecondary = documentStyle.getPropertyValue("--text-color");
     const surfaceBorder = documentStyle.getPropertyValue("--surface-border");
 
-    console.log(pricesPerMonth);
-
     const data = {
       labels: pricesPerMonth?.map((item) => item.month),
       datasets: [

@@ -38,10 +38,6 @@ const { QUOTATION_PAGINATION } = constantStorage;
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
-
-
-  //const dispatch = useDispatch();
-
   const { archivedVersions } = useSelector(
     (state: AppState) => state.versionQuotation
   );
@@ -56,7 +52,6 @@ export const QuotesTable = () => {
     handleSaveState,
   } = usePaginator(ROW_PER_PAGE[0], QUOTATION_PAGINATION);
 
-
   const [
     {
       name,
@@ -70,7 +65,6 @@ export const QuotesTable = () => {
     },
     setFilters,
   ] = useState<QuotesTableFilters>({});
-
 
   const {
     currentData: officialCurrentData,
@@ -96,7 +90,6 @@ export const QuotesTable = () => {
     }
   );
 
-
   const [duplicateMultipleVersionQuotations, { isLoading: isDuplicating }] =
     useDuplicateMultipleVersionQuotationsMutation();
 
@@ -104,8 +97,6 @@ export const QuotesTable = () => {
     DataTableExpandedRows | DataTableValueArray | undefined
   >(undefined);
 
-  /* expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data) */
-  
   const [selectedQuotes, setSelectedQuotes] = useState<
     VersionQuotationEntity[]
   >([]);
@@ -251,12 +242,7 @@ export const QuotesTable = () => {
                 const quotationId = data.id.quotationId;
                 const hasArchived = archivedVersions?.[quotationId] ?? null;
 
-                // console.log(hasArchived)
-
-                if (hasArchived !== null) {
-                  console.log(hasArchived);
-                  return hasArchived > 0;
-                }
+                if (hasArchived !== null) return hasArchived > 0;
 
                 return data.hasVersions;
               },

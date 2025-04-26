@@ -129,7 +129,6 @@ export const hotelService = createApi({
             setTimeout(() => URL.revokeObjectURL(blobURL), 1000);
           }
     
-          console.log("data", data);
         } catch (error: any) {
           startShowApiError(error.error);
         }

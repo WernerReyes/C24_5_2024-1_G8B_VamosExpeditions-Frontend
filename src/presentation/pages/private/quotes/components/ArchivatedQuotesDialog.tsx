@@ -10,13 +10,16 @@ import {
 } from "@/infraestructure/store/services";
 import { ProgressBar, Tag } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArchivedDialog,
   ClientInfo,
   FieldNotAssigned,
   UserInfo,
 } from "../../components";
+import { useDebounce } from "primereact/hooks";
+import { useDispatch } from "react-redux";
+import { onAddNumberOfVersions } from "@/infraestructure/store";
 
 type Props = {
   visible: boolean;
@@ -26,19 +29,20 @@ type Props = {
 const LIMIT = 10;
 
 export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
+  const dispatch = useDispatch();
   const { currentPage, first, handlePageChange, limit } = usePaginator(LIMIT);
-  const [searchByName, setSearchByName] = useState<string | undefined>(
-    undefined
+
+  const [searchByName, debouncedSearchByName, setSearchByName] = useDebounce(
+    "",
+    400
   );
-  const [debouncedValue, setDebouncedValue] = useState<string | undefined>(
-    undefined
-  );
+
   const { data, isLoading, isError, isFetching, refetch } =
     useGetAllArchivedVersionQuotationsQuery(
       {
         page: currentPage,
         limit,
-        name: debouncedValue,
+        name: debouncedSearchByName,
       },
       {
         skip: !visible,
@@ -62,34 +66,28 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
       })
         .unwrap()
         .then(() => {
+          dispatch(
+            onAddNumberOfVersions({
+              quotationId: selectedQuote.id.quotationId,
+            })
+          );
+
           setSelectedQuote(undefined);
         });
     }
   };
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setDebouncedValue(searchByName);
-    }, 500); // 500ms delay
-
-    return () => clearTimeout(timeout);
-  }, [searchByName]);
-
-  useEffect(() => {
-    if (selectedQuote) {
-      setSelectedQuote(
-        archivedQuotes?.content.find(
-          (quote) =>
-            quote.id.quotationId === selectedQuote.id.quotationId &&
-            quote.id.versionNumber === selectedQuote.id.versionNumber
-        )
-      );
-    }
-  }, [archivedQuotes]);
-
   return (
     <ArchivedDialog
       visible={visible}
+      downloadFilePdf={{
+        handleDownload: () => {},
+        disabled: true,
+      }}
+      downloadFileExcel={{
+        handleDownload: () => {},
+        disabled: true,
+      }}
       onHide={onHide}
       isError={isError}
       isLoading={isLoading}

@@ -117,7 +117,6 @@ export const TripDetailsForm = () => {
         })
       : [];
 
-      console.log(hotelRoomTripDetails)
 
     if (daysToDelete.length > 0) {
       setVisible(true);
@@ -147,7 +146,7 @@ export const TripDetailsForm = () => {
   }, [accept]);
 
   useEffect(() => {
-    if (currentTripDetails) {
+    if (currentTripDetails?.id) {
       reset(tripDetailsDto.parse(currentTripDetails));  
     }
     dispatch(onSetSelectedClient(currentTripDetails?.client ?? null));

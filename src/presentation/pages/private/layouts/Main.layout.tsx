@@ -5,7 +5,7 @@ import { onSetCurrentQuotation } from "@/infraestructure/store";
 import { useWindowSize } from "@/presentation/hooks";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navbar, Sidebar } from "../components";
+import { Navbar, OfflineDialog, Sidebar } from "../components";
 import { useSidebar } from "../hooks";
 
 interface MainLayoutProps {
@@ -43,7 +43,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         <Navbar />
         
         //* Show dialog when the connection is off
-        {/* <OfflineDialog /> */}
+        <OfflineDialog />
 
         <main className="px-5 pt-28 pb-10 md:px-10 h-full xl:px-20">
           {children}

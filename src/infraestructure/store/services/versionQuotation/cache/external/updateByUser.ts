@@ -102,8 +102,6 @@ export const updateByUserId = function (
       getAllArchivedVersionQuotations,
     } = param;
 
-    console.log(getAllArchivedVersionQuotations);
-
     if (getAllOfficialVersionQuotations) {
       dispatch(
         versionQuotationService.util.updateQueryData(
@@ -161,7 +159,6 @@ export const updateByUserId = function (
     }
 
     if (getAllArchivedVersionQuotations) {
-      console.log(getAllArchivedVersionQuotations);
       dispatch(
         versionQuotationService.util.updateQueryData(
           "getAllArchivedVersionQuotations",
@@ -171,7 +168,6 @@ export const updateByUserId = function (
               data: {
                 ...draft.data,
                 content: draft.data.content.map((item) => {
-                  console.log(item?.user?.id, id);
                   if (item?.user?.id === id) {
                     return {
                       ...item,

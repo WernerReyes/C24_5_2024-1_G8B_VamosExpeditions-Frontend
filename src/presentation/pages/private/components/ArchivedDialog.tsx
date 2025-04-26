@@ -7,6 +7,7 @@ import {
   Dialog,
   ErrorBoundary,
   InputText,
+  Skeleton,
 } from "@/presentation/components";
 
 type Props = {
@@ -28,6 +29,14 @@ type Props = {
       message: string | React.ReactNode;
     }[];
   };
+  downloadFilePdf: {
+    handleDownload: () => void;
+    disabled?: boolean;
+  },
+  downloadFileExcel: {
+    handleDownload: () => void;
+    disabled?: boolean;
+  };
   setSearchByName: (value: string) => void;
   dataViewProps: Pick<
     DataViewProps,
@@ -42,6 +51,7 @@ type Props = {
 };
 
 export const ArchivedDialog = ({
+
   visible,
   onHide,
   isError,
@@ -52,6 +62,8 @@ export const ArchivedDialog = ({
   selectedField,
   setSearchByName,
   handleUnArchive,
+  downloadFilePdf,
+  downloadFileExcel,
   title,
   dataViewProps: {
     first,
@@ -90,6 +102,50 @@ export const ArchivedDialog = ({
         <div className="col-span-1 h-full">
           <ErrorBoundary
             error={isError}
+            loadingComponent={
+              <DataView
+                rows={10}
+                header={
+                  <InputText
+                    type="text"
+                    placeholder="Buscar..."
+                    className="p-inputtext-sm w-full"
+                  />
+                }
+                value={Array.from({ length: value?.length ?? 10 })}
+                itemTemplate={(_, index) => (
+                  <div
+                    key={index}
+                    className="max-w-md p-4 space-y-4 border-b border-gray-200 divide-y divide-gray-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Skeleton
+                          height="10px"
+                          width="6rem"
+                          className="rounded-full mb-2.5"
+                        />
+                        <Skeleton
+                          height="8px"
+                          width="8rem"
+                          className="rounded-full"
+                        />
+                      </div>
+
+                      <Skeleton
+                        height="10px"
+                        width="3rem"
+                        className="rounded-full"
+                      />
+                    </div>
+
+                    <span className="sr-only">Loading...</span>
+                  </div>
+                )}
+                pt={{ content: { className: "min-h-[210px]" } }}
+              />
+            }
+            isLoader={isLoading || isFetching}
             fallBackComponent={
               <DataView
                 rows={10}
@@ -158,10 +214,32 @@ export const ArchivedDialog = ({
         >
           {selectedField ? (
             <>
-              <h4 className="font-medium flex items-center gap-x-2 text-xl xl:text-2xl mb-4 text-900">
-                <i className="pi pi-file text-xl xl:text-2xl text-primary" />
-                <strong>{selectedField.title}</strong>
-              </h4>
+              <div className="mb-4 flex w-full items-center justify-between">
+                <h4 className="font-medium flex items-center gap-x-2 text-xl xl:text-2xl text-900">
+                  <i className="pi pi-file text-xl xl:text-2xl text-primary" />
+                  <strong>{selectedField.title}</strong>
+                </h4>
+                <div className="flex gap-x-2 items-center">
+                  <Button
+                    icon="pi pi-file-pdf"
+                    rounded
+                    text
+                    onClick={downloadFilePdf.handleDownload}
+                    disabled={downloadFilePdf.disabled}
+                    tooltip="Descargar PDF"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  <Button
+                    icon="pi pi-file-excel"
+                    rounded
+                    text
+                    onClick={downloadFileExcel.handleDownload}
+                    disabled={downloadFileExcel.disabled}
+                    tooltip="Descargar excel"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                </div>
+              </div>
 
               <div className="flex gap-x-6 justify-between border-1 border-l-4 border-primary rounded-md mb-4 bg-primary/10">
                 <div className="text-sm p-4  self-center text-gray-500">

@@ -130,7 +130,7 @@ const NewQuotePage = () => {
 
     const timeout = setTimeout(() => {
       setIsLoadingStep(false);
-    }, 500);
+    }, 700);
 
     return () => clearTimeout(timeout);
   }, [currentStep]);
@@ -184,6 +184,7 @@ const NewQuotePage = () => {
   }, [currentVersionQuotationData]);
 
   useEffect(() => {
+
     if (isLoadingStep) return;
 
     if (
@@ -191,6 +192,7 @@ const NewQuotePage = () => {
       currentHotelRoomTripDetailsData.length === 0 &&
       currentStep > 0
     ) {
+   
       setTimeout(() => {
         dispatch(onSetCurrentStep(0));
       }, 0);
@@ -202,7 +204,11 @@ const NewQuotePage = () => {
         dispatch(onSetCurrentStep(1));
       }, 0);
     }
-  }, [currentHotelRoomTripDetailsData, isLoadingStep, currentStep]);
+  }, [
+    currentHotelRoomTripDetailsData, 
+    isLoadingStep, 
+    currentStep
+  ]);
 
   useEffect(() => {
     if (!currentVersionQuotationData || !isVerified || isLoadingStep) return;

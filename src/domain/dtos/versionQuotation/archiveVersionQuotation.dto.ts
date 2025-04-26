@@ -7,7 +7,6 @@ const archiveVersionQuotationDtoSchema = z.object({
     versionNumber: z.number().int(),
   }),
   archiveReason: z.string().optional(),
-  official: z.boolean().optional(),
 });
 
 export type ArchiveVersionQuotationDto = z.infer<

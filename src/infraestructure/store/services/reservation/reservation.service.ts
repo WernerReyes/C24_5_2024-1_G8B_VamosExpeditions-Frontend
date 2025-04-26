@@ -1,10 +1,12 @@
 import {
+  archiveReservationDto,
+  type ArchiveReservationDto,
   getReservationsDto,
-  GetReservationsDto,
+  type GetReservationsDto,
   getStadisticsDto,
-  GetStadisticsDto,
+  type GetStadisticsDto,
   reservationDto,
-  ReservationDto,
+  type ReservationDto,
 } from "@/domain/dtos/reservation";
 import { type ReservationEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
@@ -18,11 +20,12 @@ import type {
   GetReservationsStats,
 } from "./reservation.response";
 import { reservationCache } from "./reservation.cache";
+import { dateFnsAdapter } from "@/core/adapters";
 
 const PREFIX = "/reservation";
 
 export const reservationServiceStore = createApi({
-  tagTypes: ["Reservations", "Reservation"],
+  tagTypes: ["Reservations", "Reservation", "ArchivedReservations"],
   reducerPath: "reservationServiceStore",
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
@@ -97,11 +100,80 @@ export const reservationServiceStore = createApi({
           ...response.data,
           content: response.data.content.map((reservation) => ({
             ...reservation,
-            createdAt: new Date(reservation.createdAt),
-            updatedAt: new Date(reservation.updatedAt),
+            createdAt: dateFnsAdapter.parseISO(reservation.createdAt),
+            updatedAt: dateFnsAdapter.parseISO(reservation.updatedAt),
           })),
         },
       }),
+    }),
+
+    getArchivedReservations: builder.query<
+      ApiResponse<PaginatedResponse<ReservationEntity>>,
+      GetReservationsDto
+    >({
+      query: (params) => {
+        const [_, errors] = getReservationsDto.create(params);
+        if (errors) throw errors;
+        return {
+          url: "/archive",
+          params: {
+            ...params,
+            isArchived: true,
+          },
+        };
+      },
+      providesTags: ["ArchivedReservations"],
+      transformResponse: (
+        response: ApiResponse<PaginatedResponse<ReservationEntity>>
+      ) => ({
+        ...response,
+        data: {
+          ...response.data,
+          content: response.data.content.map((reservation) => ({
+            ...reservation,
+            createdAt: dateFnsAdapter.parseISO(reservation.createdAt),
+            updatedAt: dateFnsAdapter.parseISO(reservation.updatedAt),
+          })),
+        },
+      }),
+    }),
+
+    archiveReservation: builder.mutation<
+      ApiResponse<ReservationEntity>,
+      ArchiveReservationDto
+    >({
+      query: ({ id, ...body }) => {
+        const [_, errors] = archiveReservationDto.create({
+          ...body,
+          id,
+        });
+        if (errors) throw errors;
+        return {
+          url: `/archive`,
+          method: "PUT",
+          body,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+
+          // reservationCache.upsertReservation(data.data, dispatch, getState);
+
+          // versionQuotationCache.updateFromAnotherService(
+          //   {
+          //     ...data.data.versionQuotation,
+          //     reservation: data.data,
+          //   },
+          //   dispatch,
+          //   getState as () => AppState
+          // );
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
     }),
 
     cancelReservation: builder.mutation<
@@ -141,7 +213,7 @@ export const reservationServiceStore = createApi({
       query: (params) => {
         const [_, errors] = getStadisticsDto.create(params);
         if (errors) throw errors;
-        
+
         return {
           url: "/stadistics",
           params,
@@ -176,6 +248,8 @@ export const reservationServiceStore = createApi({
             getState
           );
 
+          
+
           // versionQuotationCache.deleteMultipleVersionsFromAnotherService(
           //   data.data.map((reservation) => reservation.versionQuotation),
           //   dispatch,
@@ -193,6 +267,8 @@ export const reservationServiceStore = createApi({
 export const {
   useGetReservationByIdQuery,
   useGetAllReservationsQuery,
+  useGetArchivedReservationsQuery,
+  useArchiveReservationMutation,
   useUpsertReservationMutation,
   useCancelReservationMutation,
   useGetReservationStadisticsQuery,

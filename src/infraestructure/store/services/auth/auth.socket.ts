@@ -1,6 +1,7 @@
 import type { AppState } from "@/app/store";
 import { getDeviceKey } from "@/core/utils";
 import type { UserEntity } from "@/domain/entities";
+import { toasterAdapter } from "@/presentation/components";
 import type { Dispatch } from "@reduxjs/toolkit";
 import type { Socket } from "socket.io-client";
 import { reservationCache } from "../reservation/reservation.cache";
@@ -13,17 +14,11 @@ export const authSocket = {
     const socket = SocketManager.getInstance();
     if (!socket?.connected) {
       socket?.connect();
-
-      // Esperar a que el socket esté listo
       socket?.once("connect", () => {
         socket.emit("connection");
-        console.log("Emitido 'connection' tras establecer conexión");
       });
     } else {
       socket.emit("connection");
-      console.log(
-        "Emitido 'connection' inmediatamente porque ya estaba conectado"
-      );
     }
   },
 
@@ -80,20 +75,28 @@ export const authSocketListeners = (
   forceLogout: (socket: Socket) => {
     socket?.on("force-logout", async (data) => {
       const browserId = await getDeviceKey();
-      console.log(data);
       if (data.oldDeviceId.toLowerCase() === browserId.toLowerCase()) {
-        alert(getLoginMessageFromDeviceId(data.newDeviceId));
+        const { browser, os } = getLoginMessageFromDeviceId(data.newDeviceId);
+
+        toasterAdapter.connected(browser, os);
+
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 5000);
       }
     });
   },
 });
 
-function getLoginMessageFromDeviceId(deviceId: string): string {
+function getLoginMessageFromDeviceId(deviceId: string) {
   const regex = /^([\w-]+)_\d+_([\w\s]+)$/;
   const match = deviceId.match(regex);
 
   if (!match) {
-    return "Se inició sesión desde otro dispositivo.";
+    return {
+      browser: "Desconocido",
+      os: "Desconocido",
+    };
   }
 
   const browser = match[1]
@@ -104,5 +107,8 @@ function getLoginMessageFromDeviceId(deviceId: string): string {
     .replace(/_/g, " ")
     .replace(/\b\w/g, (l) => l.toUpperCase());
 
-  return `Se inició sesión desde otro navegador ${browser} en un dispositivo ${os}.`;
+  return {
+    browser,
+    os,
+  };
 }

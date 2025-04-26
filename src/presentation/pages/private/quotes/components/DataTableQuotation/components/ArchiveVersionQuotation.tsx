@@ -1,10 +1,11 @@
+import { useDispatch, useSelector } from "react-redux";
+import { useRef, useState } from "react";
 import { startShowInfo } from "@/core/utils";
-import { VersionQuotationEntity } from "@/domain/entities";
 import { onDiscountNumberOfVersions } from "@/infraestructure/store";
 import { useArchiveVersionQuotationMutation } from "@/infraestructure/store/services";
 import { Button, InputTextarea, OverlayPanel } from "@/presentation/components";
-import { useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import type { VersionQuotationEntity } from "@/domain/entities";
+import type { AppState } from "@/app/store";
 
 type Props = {
   versionQuotation: VersionQuotationEntity;
@@ -12,6 +13,11 @@ type Props = {
 
 export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
   const dispatch = useDispatch();
+
+  const { archivedVersions } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+
   const op = useRef<OverlayPanel>(null);
   const [archiveVersionQuotation, { isLoading: isLoadingArchive }] =
     useArchiveVersionQuotationMutation();
@@ -48,7 +54,9 @@ export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
         text
         disabled={isLoadingArchive}
         onClick={(e) => {
-          if (versionQuotation.hasVersions) {
+          const hasArchived =
+            archivedVersions?.[versionQuotation.id.quotationId] ?? null;
+          if (hasArchived && versionQuotation.official) {
             startShowInfo(
               "No puedes archivar una cotización oficial que tiene versiones, archiva primero las versiones o pon una version como oficial"
             );

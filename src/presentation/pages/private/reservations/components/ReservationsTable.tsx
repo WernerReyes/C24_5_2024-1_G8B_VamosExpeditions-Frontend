@@ -33,9 +33,7 @@ import {
 } from "../../filters";
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import { constantStorage } from "@/core/constants";
-import { EditorReservationStatus } from "./EditorReservartionStatus";
-import { CancelConfirmReservationDialog } from "./CancelConfirmReservationDialog";
-import { DeleteConfirmReservationDialog } from "./DeleteConfirmReservationDialog";
+import { EditorReservationStatus, CancelConfirmReservationDialog, DeleteConfirmReservationDialog, ArchivatedReservationsDialog } from "./";
 
 const { RESERVATION_PAGINATION } = constantStorage;
 
@@ -74,6 +72,9 @@ export const ReservationTable = () => {
   const [cancelReservation, setCancelReservation] =
     useState<ReservationEntity | null>(null);
 
+  const [visibleArchivatedReservations, setVisibleArchivatedReservations] =
+    useState<boolean>(false);
+
   useEffect(() => {
     if (!filters) return;
     setFormatedFilters(getTransformedFilters(filters));
@@ -102,32 +103,23 @@ export const ReservationTable = () => {
         onHide={setConfirmVisible}
         setSelectedReservations={setSelectedReservations}
       />
+      <ArchivatedReservationsDialog
+        visible={visibleArchivatedReservations}
+        onHide={() => setVisibleArchivatedReservations(false)}
+      />
       <div className="card">
         <Toolbar
           className="mb-4"
-          start={
-            <div className="flex gap-x-5">
-              <Button
-                type="button"
-                label="Eliminar"
-                icon="pi pi-trash"
-                disabled={!selectedReservations.length}
-                onClick={() => {
-                  setConfirmVisible(true);
-                }}
-              />
-            </div>
+          end={
+            <Button
+              icon="pi pi-bookmark"
+              label="Archivadas"
+              outlined
+              size="small"
+              disabled={isFetching || isLoading || isError}
+              onClick={() => setVisibleArchivatedReservations(true)}
+            />
           }
-          // end={
-          //   <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
-          //     <Button
-          //       label="Exportar"
-          //       className="bg-transparent text-black border-[#D0D5DD]"
-          //       icon="pi pi-download"
-          //     />
-          //     <Button label="Importar" icon="pi pi-file-import" />
-          //   </div>
-          // }
         />
 
         <ErrorBoundary
@@ -196,7 +188,6 @@ export const ReservationTable = () => {
                 filters: state.filters,
               });
             }}
-            
             showGridlines
             value={reservations?.content || []}
             selection={selectedReservations}

@@ -15,7 +15,6 @@ const Hotelpage = () => {
 
   const fileUploadRef = useRef<FileUploadType>(null);
 
-  console.log("isLoading", isLoading);
   const onUpload = async (event: any) => {
     const file = event.files[0];
 

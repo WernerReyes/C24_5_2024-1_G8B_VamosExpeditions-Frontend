@@ -64,40 +64,67 @@ export const Toaster = () => {
 export const toasterAdapter = {
   success: (message: string) => toast.success(message),
   error: (message: string) => toast.error(message),
-  warning: (message: string) => toast.custom((t) => {
-    return (
-      <div className="text-white p-4 rounded-lg w-[22rem] shadow-md flex items-start bg-yellow-500">
-        <div className="mr-4">
-          <i className="pi pi-exclamation-triangle"></i>
+  warning: (message: string) =>
+    toast.custom((t) => {
+      return (
+        <div className="text-white p-4 rounded-lg w-[22rem] shadow-md flex items-start bg-yellow-500">
+          <div className="mr-4">
+            <i className="pi pi-exclamation-triangle"></i>
+          </div>
+          <div className="flex-grow text-xs sm:text-sm">
+            <h3 className="font-semibold mb-1 text-md">Warning</h3>
+            {message}
+          </div>
+          <i
+            className="pi pi-times cursor-pointer hover:bg-transparent/10 p-2 rounded-full hover:text-white"
+            onClick={() => toast.dismiss(t.id)}
+          ></i>
         </div>
-        <div className="flex-grow text-xs sm:text-sm">
-          <h3 className="font-semibold mb-1 text-md">Warning</h3>
-          {message}
+      );
+    }),
+  info: (message: string) =>
+    toast.custom((t) => {
+      return (
+        <div className="text-white p-4 rounded-lg w-[22rem] shadow-md flex items-start bg-blue-500">
+          <div className="mr-4">
+            <i className="pi pi-info-circle"></i>
+          </div>
+          <div className="flex-grow text-xs sm:text-sm">
+            <h3 className="font-semibold mb-1 text-md">Info</h3>
+            {message}
+          </div>
+          <i
+            className="pi pi-times cursor-pointer hover:bg-transparent/10 p-2 rounded-full hover:text-white"
+            onClick={() => toast.dismiss(t.id)}
+          ></i>
         </div>
-        <i
-          className="pi pi-times cursor-pointer hover:bg-transparent/10 p-2 rounded-full hover:text-white"
-          onClick={() => toast.dismiss(t.id)}
-        ></i>
-      </div>
-    );
-  }),
-  info: (message: string) => toast.custom((t) => {
-    return (
-      <div className="text-white p-4 rounded-lg w-[22rem] shadow-md flex items-start bg-blue-500">
-        <div className="mr-4">
-          <i className="pi pi-info-circle"></i>
-        </div>
-        <div className="flex-grow text-xs sm:text-sm">
-          <h3 className="font-semibold mb-1 text-md">Info</h3>
-          {message}
-        </div>
-        <i
-          className="pi pi-times cursor-pointer hover:bg-transparent/10 p-2 rounded-full hover:text-white"
-          onClick={() => toast.dismiss(t.id)}
-        ></i>
-      </div>
-    );
-  }),
+      );
+    }),
   dismiss: (id?: string) => toast.dismiss(id),
   remove: (message: string) => toast.remove(message),
+  connected: (browser: string, os: string) =>
+    toast.custom((t) => {
+      return (
+        <div
+          className={`flex items-start p-4 rounded-lg shadow-md bg-white border-l-4 border-primary ${
+            t.visible ? "animate-enter" : "animate-leave"
+          }`}
+          style={{ width: "22rem" }}
+        >
+          <div className="mr-4 text-green-500">
+            <i className="pi pi-wifi text-xl"></i>
+          </div>
+          <div className="flex-grow text-sm">
+            <h3 className="font-semibold text-md text-gray-800">
+              Nueva conexión detectada en
+            </h3>
+            <p className="text-gray-600">{`${browser} on ${os}`}</p>
+          </div>
+          <i
+            className="pi pi-times cursor-pointer text-gray-500 hover:text-gray-800"
+            onClick={() => toast.dismiss(t.id)}
+          ></i>
+        </div>
+      );
+    }),
 };
