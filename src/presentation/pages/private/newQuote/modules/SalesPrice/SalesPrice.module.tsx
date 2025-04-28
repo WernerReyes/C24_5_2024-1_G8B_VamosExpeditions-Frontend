@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
-  GenerateTable,
+  SalesPriceTable,
   ParnerTable,
   QuotationSuccessDialog,
 } from "./components";
@@ -15,7 +15,7 @@ import { deepEqual } from "@/core/utils";
 import { quotationService } from "@/data";
 import { onSetCurrentQuotation } from "@/infraestructure/store";
 
-export const GenerateModule = () => {
+export const SalesPriceModule = () => {
   const dispatch = useDispatch();
   const { quoteId, version } = useParams<{
     quoteId: string;
@@ -155,7 +155,7 @@ export const GenerateModule = () => {
       <ParnerTable setParner={setParner} setComission={setComission} />
 
       {/* Tabla de costos */}
-      <GenerateTable
+      <SalesPriceTable
         setFinalPrice={setFinalPrice}
         profitMargin={profitMargin}
         parnerName={parner?.name}

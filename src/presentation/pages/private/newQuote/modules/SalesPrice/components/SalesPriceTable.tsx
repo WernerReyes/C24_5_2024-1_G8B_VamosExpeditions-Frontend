@@ -11,7 +11,7 @@ type Props = {
   parnerName?: string;
 };
 
-export const GenerateTable = ({
+export const SalesPriceTable = ({
   profitMargin,
   comission,
   setFinalPrice,

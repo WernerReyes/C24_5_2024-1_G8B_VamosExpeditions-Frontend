@@ -46,7 +46,7 @@ export const QuotationSuccessDialog = ({ visible, setVisible }: Props) => {
       navigate(QUOTES);
       setVisible(false);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       await quotationService.deleteCurrentQuotation().then(() => {
         dispatch(onSetCurrentQuotation(null));

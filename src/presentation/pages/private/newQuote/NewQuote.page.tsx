@@ -11,7 +11,7 @@ import {
   CostingModule,
   CostSummaryModule,
   CustomerDataModule,
-  GenerateModule,
+  SalesPriceModule,
 } from "./modules";
 
 import type { AppState } from "@/app/store";
@@ -50,7 +50,7 @@ const STEPS: Title[] = [
   { header: "Datos del Cliente" },
   { header: "Itinerario" },
   { header: "Resumen de Costos" },
-  { header: "Finalización" },
+  { header: "Precio de venta" },
 ];
 
 const renderStepContent = (step: number): React.ReactNode => {
@@ -62,7 +62,7 @@ const renderStepContent = (step: number): React.ReactNode => {
     case 2:
       return <CostSummaryModule />;
     case 3:
-      return <GenerateModule />;
+      return <SalesPriceModule />;
     default:
       return <h2>Finalizar</h2>;
   }
