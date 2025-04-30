@@ -1,11 +1,11 @@
 import { cn } from "@/core/adapters";
 import { useGetReservationStadisticsQuery } from "@/infraestructure/store/services";
 import {
-  Chart,
   DefaultFallBackComponent,
   ErrorBoundary,
   OverlayPanel,
   Skeleton,
+  Bar
 } from "@/presentation/components";
 import {
   Chart as ChartJS,
@@ -16,10 +16,9 @@ import {
   Tooltip,
   Legend,
   ChartData,
-} from 'chart.js';
+} from "chart.js";
 import { useWindowSize } from "@/presentation/hooks";
 import { useEffect, useRef, useState } from "react";
-import { Bar } from 'react-chartjs-2';
 
 export const StatisticsSummaryGraph = () => {
   const op = useRef<any>(null);
@@ -32,7 +31,7 @@ export const StatisticsSummaryGraph = () => {
   const pricesPerMonth = currentData?.data?.pricesPerMonth;
   const years = currentData?.data?.years;
 
-  const [chartData, setChartData] = useState<ChartData<'bar'>>({
+  const [chartData, setChartData] = useState<ChartData<"bar">>({
     labels: [],
     datasets: [],
   });
@@ -46,7 +45,6 @@ export const StatisticsSummaryGraph = () => {
     Tooltip,
     Legend
   );
-  
 
   useEffect(() => {
     if (!currentData) return;
@@ -86,12 +84,14 @@ export const StatisticsSummaryGraph = () => {
         },
       ],
     };
-   
+
     const options = {
-      // responsive: true,
+      responsive: true,
+      
+
       plugins: {
         legend: {
-          position: 'bottom' as const,
+          position: "bottom" as const,
           labels: {
             color: textColor,
           },
@@ -119,7 +119,7 @@ export const StatisticsSummaryGraph = () => {
       maintainAspectRatio: false,
     };
 
-    setChartData(data as ChartData<'bar'>);
+    setChartData(data as ChartData<"bar">);
     setChartOptions(options);
   }, [currentData]);
 
@@ -166,18 +166,10 @@ export const StatisticsSummaryGraph = () => {
           ))}
         </OverlayPanel>
       </div>
-      <div className="flex items-center mt-4 w-full">
+      <div className="flex items-center mt-4 w-full max-w-screen-lg mx-auto h-48 md:h-72 lg:h-96 max-h-96">
         <Bar
-          className="w-full max-w-screen-lg mx-auto h-48 md:h-72 lg:h-96 max-h-96"
-          // type="line"
-          data={chartData}
-          options={chartOptions}
-        />
-
-        <Chart
-
-          className="w-full max-w-screen-lg mx-auto h-48 md:h-72 lg:h-96 max-h-96"
-          type="bar"
+          className="w-full h-full"
+          style={{ maxHeight: "100%" }}
           data={chartData}
           options={chartOptions}
         />

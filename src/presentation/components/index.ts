@@ -26,7 +26,6 @@ export * from "./TreeSelect/TreeSelect";
 export * from "./FileUpload";
 //* PrimeReact Components
 export * from "primereact/badge";
-export { Chart } from "primereact/chart";
 export * from "primereact/chip";
 export * from "primereact/column";
 export * from "primereact/confirmpopup";
@@ -57,6 +56,7 @@ export { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 export { Offline } from "react-detect-offline";
 
+export { Bar } from "react-chartjs-2";
 
 //* Router Dom
 export { Link } from "react-router-dom";

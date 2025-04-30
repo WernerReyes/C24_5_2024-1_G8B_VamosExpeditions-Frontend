@@ -7,7 +7,6 @@ export const OfflineDialog = () => {
 
   return (
     <Offline
-  
       onChange={(online) => {
         dispatch(onOnline(online));
       }}
