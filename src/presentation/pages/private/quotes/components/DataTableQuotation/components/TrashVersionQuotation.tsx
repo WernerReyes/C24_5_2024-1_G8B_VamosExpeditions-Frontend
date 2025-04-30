@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRef, useState } from "react";
 import { startShowInfo } from "@/core/utils";
 import { onDiscountNumberOfVersions } from "@/infraestructure/store";
-import { useArchiveVersionQuotationMutation } from "@/infraestructure/store/services";
+import { useTrashVersionQuotationMutation } from "@/infraestructure/store/services";
 import { Button, InputTextarea, OverlayPanel } from "@/presentation/components";
 import type { VersionQuotationEntity } from "@/domain/entities";
 import type { AppState } from "@/app/store";
@@ -11,30 +11,30 @@ type Props = {
   versionQuotation: VersionQuotationEntity;
 };
 
-export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
+export const TrashVersionQuotation = ({ versionQuotation }: Props) => {
   const dispatch = useDispatch();
 
-  const { archivedVersions } = useSelector(
+  const { trashVersions } = useSelector(
     (state: AppState) => state.versionQuotation
   );
 
   const op = useRef<OverlayPanel>(null);
-  const [archiveVersionQuotation, { isLoading: isLoadingArchive }] =
-    useArchiveVersionQuotationMutation();
+  const [trashVersionQuotation, { isLoading: isLoadingArchive }] =
+    useTrashVersionQuotationMutation();
 
-  const [archiveReason, setArchiveReason] = useState<string | undefined>(
+  const [deleteReason, setDeleteReason] = useState<string | undefined>(
     undefined
   );
 
-  const handleArchiveQuotation = async () => {
-    archiveVersionQuotation({
+  const handleTrashQuotation = async () => {
+    trashVersionQuotation({
       id: versionQuotation.id,
-      archiveReason,
+      deleteReason,
     })
       .unwrap()
       .then(({ data }) => {
         op.current?.hide();
-        setArchiveReason(undefined);
+        setDeleteReason(undefined);
 
         dispatch(
           onDiscountNumberOfVersions({
@@ -47,15 +47,14 @@ export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
   return (
     <>
       <Button
-        icon="pi pi-bookmark"
-        tooltip="Archivar"
-        tooltipOptions={{ position: "top" }}
+        icon="pi pi-trash"
+        tooltip="Mover a papelera"
         rounded
         text
         disabled={isLoadingArchive}
         onClick={(e) => {
           const hasArchived =
-            archivedVersions?.[versionQuotation.id.quotationId] ?? null;
+            trashVersions?.[versionQuotation.id.quotationId] ?? null;
           if (hasArchived && versionQuotation.official) {
             startShowInfo(
               "No puedes archivar una cotización oficial que tiene versiones, archiva primero las versiones o pon una version como oficial"
@@ -76,17 +75,16 @@ export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
 
       <OverlayPanel ref={op} className="w-64">
         <div className="text-tertiary text-sm font-bold mb-4">
-          Motivo de archivado
+          Motivo de movimiento a papelera
         </div>
         <p className="text-gray-500 text-xs mb-4">
-          ¿Por qué deseas archivar esta cotización? Puedes dejar un mensaje
-          opcional.
+          ¿Por qué deseas mover esta cotización a papelera?
         </p>
         <InputTextarea
           className="text-xs"
           rows={5}
-          value={archiveReason}
-          onChange={(e) => setArchiveReason(e.target.value)}
+          value={deleteReason}
+          onChange={(e) => setDeleteReason(e.target.value)}
           placeholder="Escribe aquí..."
         />
         <div className="flex justify-end gap-x-4 mt-4">
@@ -100,10 +98,10 @@ export const ArchiveVersionQuotation = ({ versionQuotation }: Props) => {
             size="small"
           />
           <Button
-            icon="pi pi-bookmark"
+            icon="pi pi-trash"
             type="button"
             size="small"
-            onClick={handleArchiveQuotation}
+            onClick={handleTrashQuotation}
           />
         </div>
       </OverlayPanel>

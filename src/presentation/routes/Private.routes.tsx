@@ -12,14 +12,8 @@ import {
   useConnectSocketQuery,
   useGetUsersQuery,
 } from "@/infraestructure/store/services";
-//import { MainLayout } from "../pages/private/layouts";
-
-
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
-
-// const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
-
 
 const DashboardPage = lazy(
   () => import("../pages/private/dashboard/Dashboard.page")
@@ -32,17 +26,26 @@ const QuotesPage = lazy(() => import("../pages/private/quotes/Quotes.page"));
 const ReservationsPage = lazy(
   () => import("../pages/private/reservations/Reservations.page")
 );
-
 const ProfilePage = lazy(() => import("../pages/private/profile/Profile.page"));
-const Hotelpage  = lazy(() => import("../pages/private/Hotels/hotel.page"));
+const Hotelpage = lazy(() => import("../pages/private/Hotels/hotel.page"));
 const CountryPage = lazy(() => import("../pages/private/country/country.page"));
+
+const NotificationPage = lazy(
+  () => import("../pages/private/notification/Notification.page")
+);
 
 const { BASE, VIEW_QUOTE, EDIT_QUOTE, ...rest } = constantRoutes.private;
 
-const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, PROFILE ,HOTEL,COUNTRY} = removeBaseRoute(
-  rest,
-  BASE
-);
+const {
+  DASHBOARD,
+  QUOTES,
+  NEW_QUOTE,
+  RESERVATIONS,
+  PROFILE,
+  HOTEL,
+  COUNTRY,
+  NOTIFICATIONS,
+} = removeBaseRoute(rest, BASE);
 
 const PrivateRoutes = () => {
   const { isExpired } = useCookieExpirationStore();
@@ -53,7 +56,6 @@ const PrivateRoutes = () => {
 
   //* Get Users
   useGetUsersQuery();
-  
 
   useEffect(() => {
     if (!pathname) return;
@@ -84,9 +86,8 @@ const PrivateRoutes = () => {
           <Route path={PROFILE} element={<ProfilePage />} />
           <Route path={HOTEL} element={<Hotelpage />} />
           <Route path={COUNTRY} element={<CountryPage />} />
-          
 
-          
+          <Route path={NOTIFICATIONS} element={<NotificationPage />} />
 
           {/* <Route path="*" element={<Navigate to="/" />} /> */}
         </Route>

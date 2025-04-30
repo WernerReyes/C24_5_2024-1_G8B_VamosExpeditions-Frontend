@@ -183,9 +183,6 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
                 rooms,
               })
             }
-            tooltipOptions={{
-              position: "top",
-            }}
           />
           <span className="text-lg font-semibold text-gray-800">
             Habitaciones:

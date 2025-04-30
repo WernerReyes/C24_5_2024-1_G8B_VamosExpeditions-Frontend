@@ -4,6 +4,7 @@ import type { ExtraReservationsStatsInfo } from "@/infraestructure/store/service
 import { Card } from "@/presentation/components";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useRef, useState } from "react";
+import { useSidebar } from "../../hooks";
 
 type StatsOverviewProps = {
   title: string;
@@ -33,6 +34,9 @@ export const StatsOverviewCard = ({
   extraInfo,
   type = "quantity",
 }: StatsOverviewProps) => {
+
+   const { visible } = useSidebar();
+  
   const op = useRef<any>(null);
   const [selectedOverlayType, setSelectedOverlayType] = useState(
     OVERLAY_TYPES.CURRENT_MONTH
@@ -42,7 +46,9 @@ export const StatsOverviewCard = ({
   return (
     <Card
       className={cn(
-        "w-full shadow-md rounded-md  col-span-4 md:col-span-2 lg:col-span-1  max-w-screen-lg"
+        "w-full shadow-md rounded-md col-span-4 md:col-span-2 xl:col-span-1 max-w-screen-lg",
+        visible ? "lg:col-span-2" : "lg:col-span-1"
+
       )}
     >
       <div className="flex justify-between">

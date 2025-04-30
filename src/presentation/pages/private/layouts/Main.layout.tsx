@@ -38,14 +38,14 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
           width: visible && width > TABLET ? "calc(100% - 18rem)" : "100%",
           transition: "width 0.5s",
         }}
-        className="ml-auto bg-secondary"
+        className="ml-auto"
       >
         <Navbar />
         
         //* Show dialog when the connection is off
-        <OfflineDialog />
+        {/* <OfflineDialog /> */}
 
-        <main className="px-5 pt-28 pb-10 md:px-10 h-full xl:px-20">
+        <main className="px-5 pt-28 bg-secondary pb-10 md:px-10 h-full xl:px-20">
           {children}
         </main>
       </div>

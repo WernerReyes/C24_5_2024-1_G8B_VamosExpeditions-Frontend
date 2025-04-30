@@ -1,4 +1,4 @@
-export * from './ArchivedDialog';
+export * from './TrashDialog';
 export * from './ClientInfo';
 export * from './FieldNotAssigned';
 export * from './Navbar/Navbar';

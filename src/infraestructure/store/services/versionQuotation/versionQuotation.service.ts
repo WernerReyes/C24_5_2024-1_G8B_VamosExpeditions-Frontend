@@ -1,6 +1,6 @@
 import {
-  archiveVersionQuotationDto,
-  type ArchiveVersionQuotationDto,
+  trashVersionQuotationDto,
+  type TrashVersionQuotationDto,
   duplicateMultipleVersionQuotationDto,
   type DuplicateMultipleVersionQuotationDto,
   getVersionQuotationsDto,
@@ -24,7 +24,7 @@ import { PaginatedResponse } from "../response";
 import { versionQuotationCache } from "./versionQuotation.cache";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
-  UnArchiveVersionQuotation,
+  UnTrashVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
 import { reservationCache } from "../reservation/reservation.cache";
@@ -58,7 +58,7 @@ export const versionQuotationService = createApi({
           params: {
             ...params,
             official: true,
-            isArchived: false,
+            isDeleted: false,
           },
         };
       },
@@ -100,7 +100,7 @@ export const versionQuotationService = createApi({
           params: {
             ...params,
             official: false,
-            isArchived: false,
+            isDeleted: false,
           },
         };
       },
@@ -131,7 +131,7 @@ export const versionQuotationService = createApi({
           params: {
             ...params,
             // official: false,
-            isArchived: true,
+            isDeleted: true,
           },
         };
       },
@@ -292,13 +292,13 @@ export const versionQuotationService = createApi({
       },
     }),
 
-    archiveVersionQuotation: builder.mutation<
+    trashVersionQuotation: builder.mutation<
       ApiResponse<VersionQuotationEntity>,
-      ArchiveVersionQuotationDto
+      TrashVersionQuotationDto
     >({
       query: (body) => {
         //* Validate before sending
-        const [_, errors] = archiveVersionQuotationDto.create(body);
+        const [_, errors] = trashVersionQuotationDto.create(body);
         if (errors) throw errors;
         return {
           url: "/archive",
@@ -325,8 +325,8 @@ export const versionQuotationService = createApi({
       },
     }),
 
-    unArchiveVersionQuotation: builder.mutation<
-      ApiResponse<UnArchiveVersionQuotation>,
+    unTrashVersionQuotation: builder.mutation<
+      ApiResponse<UnTrashVersionQuotation>,
       VersionQuotationEntity["id"]
     >({
       query: (body) => {
@@ -465,8 +465,8 @@ export const {
   useUpdateOfficialVersionQuotationMutation,
   useCancelAndReplaceApprovedOfficialVersionQuotationMutation,
   useDuplicateMultipleVersionQuotationsMutation,
-  useArchiveVersionQuotationMutation,
-  useUnArchiveVersionQuotationMutation,
+  useTrashVersionQuotationMutation,
+  useUnTrashVersionQuotationMutation,
   useGetVersionQuotationByIdQuery,
   useLazyGenerateVersionQuotationPdfQuery,
 

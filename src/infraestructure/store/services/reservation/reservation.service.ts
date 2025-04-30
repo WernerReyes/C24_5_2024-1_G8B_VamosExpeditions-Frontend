@@ -118,7 +118,7 @@ export const reservationServiceStore = createApi({
           url: "/archive",
           params: {
             ...params,
-            isArchived: true,
+            isDeleted: true,
           },
         };
       },

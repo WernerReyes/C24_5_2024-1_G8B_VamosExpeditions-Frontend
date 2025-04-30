@@ -12,7 +12,7 @@ import {
   Button,
   Column,
   DataTable,
-  DataTableSelectionMultipleChangeEvent,
+  type DataTableSelectionMultipleChangeEvent,
   DefaultFallBackComponent,
   ErrorBoundary,
   Skeleton,
@@ -27,18 +27,18 @@ import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
 import { QuotesTableFilters } from "../types";
 import { getTransformedFilters } from "../utils";
-import { ArchivatedQuotesDialog } from "./ArchivatedQuotesDialog";
+import { TrashQuotesDialog } from "./TrashQuotesDialog";
 import { DataTableQuotation } from "./DataTableQuotation/DataTableQuotation";
 import { UnofficialDataTable } from "./UnofficialDataTable";
 import { useSelector } from "react-redux";
-import { AppState } from "@/app/store";
+import type { AppState } from "@/app/store";
 
 const { QUOTATION_PAGINATION } = constantStorage;
 
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
-  const { archivedVersions } = useSelector(
+  const { trashVersions } = useSelector(
     (state: AppState) => state.versionQuotation
   );
 
@@ -107,8 +107,7 @@ export const QuotesTable = () => {
     VersionQuotationEntity | undefined
   >();
 
-  const [visibleArchivatedQuotes, setVisibleArchivatedQuotes] =
-    useState<boolean>(false);
+  const [visibleTrashQuotes, setVisibleTrashQuotes] = useState<boolean>(false);
 
   const handleDuplicateMultiple = async () => {
     if (!selectedQuotes.length) return;
@@ -150,11 +149,11 @@ export const QuotesTable = () => {
       </div>
 
       <Button
-        icon="pi pi-bookmark"
-        label="Archivadas"
+        icon="pi pi-trash"
+        label="Papelera"
         outlined
         size="small"
-        onClick={() => setVisibleArchivatedQuotes(true)}
+        onClick={() => setVisibleTrashQuotes(true)}
         disabled={isFetchingOfficial}
       />
     </div>
@@ -162,9 +161,9 @@ export const QuotesTable = () => {
 
   return (
     <>
-      <ArchivatedQuotesDialog
-        visible={visibleArchivatedQuotes}
-        onHide={() => setVisibleArchivatedQuotes(false)}
+      <TrashQuotesDialog
+        visible={visibleTrashQuotes}
+        onHide={() => setVisibleTrashQuotes(false)}
       />
       <Toolbar
         className="mt-10 mb-4"
@@ -240,9 +239,9 @@ export const QuotesTable = () => {
             {
               expander: (data: VersionQuotationEntity) => {
                 const quotationId = data.id.quotationId;
-                const hasArchived = archivedVersions?.[quotationId] ?? null;
+                const existTrash = trashVersions?.[quotationId] ?? null;
 
-                if (hasArchived !== null) return hasArchived > 0;
+                if (existTrash !== null) return existTrash > 0;
 
                 return data.hasVersions;
               },

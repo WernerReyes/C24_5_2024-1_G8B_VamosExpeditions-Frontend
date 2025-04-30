@@ -74,3 +74,15 @@
 }
 
 
+
+.animation {
+  @apply transition-all duration-300 ease-in-out transform;
+
+  
+}
+.animation-enter {
+  @apply animation opacity-100 scale-100;
+}
+.animation-leave {
+  @apply animation opacity-0 scale-95 pointer-events-none;
+}

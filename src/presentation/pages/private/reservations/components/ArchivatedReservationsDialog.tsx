@@ -7,13 +7,13 @@ import {
 } from "@/domain/entities";
 import {
   useGetAllArchivedVersionQuotationsQuery,
-  useUnArchiveVersionQuotationMutation,
+  useUnTrashVersionQuotationMutation,
 } from "@/infraestructure/store/services";
 import { ProgressBar, Tag } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
 import { useState } from "react";
 import {
-  ArchivedDialog,
+  TrashDialog,
   ClientInfo,
   FieldNotAssigned,
   UserInfo,
@@ -43,7 +43,7 @@ export const ArchivatedReservationsDialog = ({ visible, onHide }: Props) => {
   
 
   return (
-    <ArchivedDialog
+    <TrashDialog
       visible={visible}
       downloadFilePdf={{
         handleDownload: () => {},
@@ -96,7 +96,7 @@ export const ArchivatedReservationsDialog = ({ visible, onHide }: Props) => {
               </p>
               <p className="text-xs text-gray-400">
                 Archivado:{" "}
-                {quote.archivedAt && dateFnsAdapter.format(quote.archivedAt)}
+                {quote.deletedAt && dateFnsAdapter.format(quote.deletedAt)}
               </p> */}
             </div>
           );

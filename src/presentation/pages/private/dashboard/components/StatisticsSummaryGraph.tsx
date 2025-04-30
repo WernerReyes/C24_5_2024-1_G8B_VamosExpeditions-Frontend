@@ -7,8 +7,19 @@ import {
   OverlayPanel,
   Skeleton,
 } from "@/presentation/components";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ChartData,
+} from 'chart.js';
 import { useWindowSize } from "@/presentation/hooks";
 import { useEffect, useRef, useState } from "react";
+import { Bar } from 'react-chartjs-2';
 
 export const StatisticsSummaryGraph = () => {
   const op = useRef<any>(null);
@@ -21,8 +32,21 @@ export const StatisticsSummaryGraph = () => {
   const pricesPerMonth = currentData?.data?.pricesPerMonth;
   const years = currentData?.data?.years;
 
-  const [chartData, setChartData] = useState({});
+  const [chartData, setChartData] = useState<ChartData<'bar'>>({
+    labels: [],
+    datasets: [],
+  });
   const [chartOptions, setChartOptions] = useState({});
+
+  ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+  );
+  
 
   useEffect(() => {
     if (!currentData) return;
@@ -32,13 +56,13 @@ export const StatisticsSummaryGraph = () => {
     const surfaceBorder = documentStyle.getPropertyValue("--surface-border");
 
     const data = {
-      labels: pricesPerMonth?.map((item) => item.month),
+      labels: pricesPerMonth?.map((item) => item.month) || [],
       datasets: [
         {
-          type: "bar",
+          type: "bar" as const,
           label: "Ingresos",
           backgroundColor: documentStyle.getPropertyValue("--tertiary-color"),
-          data: pricesPerMonth?.map((item) => item.income),
+          data: pricesPerMonth?.map((item) => item.income) || [],
           borderColor: "white",
           borderWidth: 2,
         },
@@ -46,33 +70,34 @@ export const StatisticsSummaryGraph = () => {
           type: "bar",
           label: "Margen",
           backgroundColor: documentStyle.getPropertyValue("--primary-color"),
-          data: pricesPerMonth?.map((item) => item.margin),
+          data: pricesPerMonth?.map((item) => item.margin) || [],
           options: {
-            indexAxis: "y",
+            indexAxis: "y" as const,
           },
         },
         {
           type: "bar",
           label: "Viajes",
           backgroundColor: documentStyle.getPropertyValue("black"),
-          data: pricesPerMonth?.map((item) => item.trips),
+          data: pricesPerMonth?.map((item) => item.trips) || [],
           options: {
             indexAxis: "y",
           },
         },
       ],
     };
+   
     const options = {
-      maintainAspectRatio: false,
-      aspectRatio: 0.6,
+      // responsive: true,
       plugins: {
         legend: {
-          position: "bottom",
+          position: 'bottom' as const,
           labels: {
             color: textColor,
           },
         },
       },
+
       scales: {
         x: {
           ticks: {
@@ -91,6 +116,7 @@ export const StatisticsSummaryGraph = () => {
           },
         },
       },
+      maintainAspectRatio: false,
     };
 
     setChartData(data);
@@ -141,9 +167,17 @@ export const StatisticsSummaryGraph = () => {
         </OverlayPanel>
       </div>
       <div className="flex items-center mt-4 w-full">
-        <Chart
+        <Bar
           className="w-full max-w-screen-lg mx-auto h-48 md:h-72 lg:h-96 max-h-96"
           // type="line"
+          data={chartData}
+          options={chartOptions}
+        />
+
+        <Chart
+
+          className="w-full max-w-screen-lg mx-auto h-48 md:h-72 lg:h-96 max-h-96"
+          type="bar"
           data={chartData}
           options={chartOptions}
         />

@@ -1,4 +1,4 @@
-export * from './ArchiveVersionQuotation';
+export * from './TrashVersionQuotation';
 export * from './CancelQuotationDialog';
 export * from './EditQuotationName';
 export * from './EditorQuotationOfficial';

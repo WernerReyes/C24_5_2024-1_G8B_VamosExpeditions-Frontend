@@ -33,7 +33,7 @@ import {
 } from "@/domain/dtos/versionQuotation";
 import { allowVersionQuotationTypesRender } from "@/domain/entities";
 import { useSelector } from "react-redux";
-import { ArchiveVersionQuotation } from "./ArchiveVersionQuotation";
+import { TrashVersionQuotation } from "./TrashVersionQuotation";
 
 const { EDIT_QUOTE } = constantRoutes.private;
 
@@ -111,7 +111,6 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         rounded
         text
         tooltip="Editar"
-        tooltipOptions={{ position: "top" }}
         icon="pi pi-pencil"
         onClick={() => {
           navigate(EDIT_QUOTE(rowData?.id));
@@ -124,7 +123,6 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       <Button
         icon="pi pi-file-pdf"
         tooltip="Generar PDF"
-        tooltipOptions={{ position: "top" }}
         rounded
         text
         disabled={
@@ -143,7 +141,6 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         <Button
           icon="pi pi-envelope"
           tooltip="Enviar correo"
-          tooltipOptions={{ position: "top" }}
           rounded
           disabled={!rowData.tripDetails}
           text
@@ -153,7 +150,7 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
         />
       )}
 
-      <ArchiveVersionQuotation versionQuotation={rowData} />
+      <TrashVersionQuotation versionQuotation={rowData} />
 
       {/*  Dialog*/}
 

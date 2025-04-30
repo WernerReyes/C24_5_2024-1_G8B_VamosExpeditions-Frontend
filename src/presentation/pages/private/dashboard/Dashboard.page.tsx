@@ -1,5 +1,5 @@
 import type { AppState } from "@/app/store";
-import { dateFnsAdapter } from "@/core/adapters";
+import { cn, dateFnsAdapter } from "@/core/adapters";
 import { useGetReservationsStatsQuery } from "@/infraestructure/store/services";
 import {
   Card,
@@ -14,6 +14,7 @@ import {
   StatisticsSummaryGraph,
   StatsOverviewCard,
 } from "./components";
+import { useSidebar } from "../hooks";
 
 const FALLBACK_MESSAGES = [
   "No se pudieron cargar la cantidad de cotizaciones pendientes",
@@ -24,6 +25,8 @@ const FALLBACK_MESSAGES = [
 
 const DashboardPage = () => {
   const { authUser } = useSelector((state: AppState) => state.auth);
+
+  const { visible } = useSidebar();
 
   const {
     currentData: reservationsStatsData,
@@ -43,8 +46,6 @@ const DashboardPage = () => {
         </h1>
         <NewQuotationDialog />
       </div>
-
-      
 
       <div className="grid grid-cols-4 grid-flow-row gap-x-4 gap-y-6 mt-4">
         <div className="w-full bg-white border col-span-4 h-full shadow-md rounded-md p-3">
@@ -101,10 +102,20 @@ const DashboardPage = () => {
           />
         </ErrorBoundary>
 
-        <div className="w-full p-6 bg-white border col-span-4 self-start lg:col-span-2 shadow-md rounded-md">
+        <div
+          className={cn(
+            "w-full p-6 bg-white border col-span-4 self-start xl:col-span-2 shadow-md rounded-md",
+            visible ? "lg:col-span-4" : "lg:col-span-2"
+          )}
+        >
           <RecentQuotes />
         </div>
-        <div className="w-full p-6 bg-white border col-span-4 self-start lg:col-span-2 shadow-md rounded-md   ">
+        <div
+          className={cn(
+            "w-full p-6 bg-white border col-span-4 self-start xl:col-span-2 shadow-md rounded-md",
+            visible ? "lg:col-span-4" : "lg:col-span-2"
+          )}
+        >
           <ActiveReserves />
         </div>
       </div>
@@ -120,5 +131,3 @@ const getTimeOffDay = () => {
 };
 
 export default DashboardPage;
-
-

@@ -109,7 +109,7 @@ export interface VersionQuotationEntity {
 
   hasVersions: boolean;
 
-  isArchived: boolean;
-  archivedAt?: Date;
-  archivedReason?: string;
+  isDeleted: boolean;
+  deletedAt?: Date;
+  deleteReason?: string;
 }

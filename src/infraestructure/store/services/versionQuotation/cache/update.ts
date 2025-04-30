@@ -4,7 +4,7 @@ import { versionQuotationService } from "../versionQuotation.service";
 import { extractedParams } from "./extractedParams";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
-  UnArchiveVersionQuotation,
+  UnTrashVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "../versionQuotation.response";
 
@@ -416,7 +416,7 @@ export const unArchive = function (
   {
     unArchivedVersionQuotation: data,
     newUnOfficial,
-  }: UnArchiveVersionQuotation,
+  }: UnTrashVersionQuotation,
   dispatch: AppDispatch,
   getState: () => AppState
 ) {

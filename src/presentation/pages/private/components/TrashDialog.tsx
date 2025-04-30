@@ -22,8 +22,8 @@ type Props = {
   searchByName?: string;
   selectedField?: {
     title: string;
-    archivedAt: Date | null;
-    archivedReason: string | null;
+    deletedAt: Date | null;
+    deleteReason: string | null;
     archivedDetails: {
       subject: string;
       message: string | React.ReactNode;
@@ -50,7 +50,7 @@ type Props = {
   >;
 };
 
-export const ArchivedDialog = ({
+export const TrashDialog = ({
 
   visible,
   onHide,
@@ -88,9 +88,9 @@ export const ArchivedDialog = ({
           <span className="text-primary font-semibold">
             <i className="pi pi-info-circle text-xs text-primary" /> Nota:{" "}
           </span>
-          La data archivada se eliminará <strong>cada fin de mes </strong>para
+          La data en la papelera <strong>se eliminará cada fin de mes </strong>para
           ahorrar espacio en el servidor. Si necesitas conservar alguna,
-          asegúrate de exportarla antes de que se elimine.
+          asegúrate de exportarla or restaurarla antes de que se elimine.
         </p>
       }
       visible={visible}
@@ -226,8 +226,7 @@ export const ArchivedDialog = ({
                     text
                     onClick={downloadFilePdf.handleDownload}
                     disabled={downloadFilePdf.disabled}
-                    tooltip="Descargar PDF"
-                    tooltipOptions={{ position: "top" }}
+                    tooltip="Descargar PDF"       
                   />
                   <Button
                     icon="pi pi-file-excel"
@@ -236,7 +235,6 @@ export const ArchivedDialog = ({
                     onClick={downloadFileExcel.handleDownload}
                     disabled={downloadFileExcel.disabled}
                     tooltip="Descargar excel"
-                    tooltipOptions={{ position: "top" }}
                   />
                 </div>
               </div>
@@ -244,13 +242,13 @@ export const ArchivedDialog = ({
               <div className="flex gap-x-6 justify-between border-1 border-l-4 border-primary rounded-md mb-4 bg-primary/10">
                 <div className="text-sm p-4  self-center text-gray-500">
                   <strong>
-                    {selectedField?.archivedReason ?? "Sin motivo de archivado"}
+                    {selectedField?.deleteReason ?? "Sin motivo de archivado"}
                   </strong>
 
                   <small className="block">
-                    Archivado el:{" "}
-                    {selectedField.archivedAt &&
-                      dateFnsAdapter.format(selectedField.archivedAt)}
+                    Movido el:{" "}
+                    {selectedField.deletedAt &&
+                      dateFnsAdapter.format(selectedField.deletedAt)}
                   </small>
                 </div>
                 <div className="gap-2 items-center self-start justify-center">
@@ -261,7 +259,6 @@ export const ArchivedDialog = ({
                     text
                     icon="pi pi-replay"
                     tooltip="Restaurar"
-                    tooltipOptions={{ position: "top" }}
                     onClick={handleUnArchive}
                     disabled={isLoading || isFetching}
                   />
@@ -273,7 +270,6 @@ export const ArchivedDialog = ({
                     text
                     icon="pi pi-trash"
                     tooltip="Eliminar"
-                    tooltipOptions={{ position: "top" }}
                     onClick={() => {}}
                     disabled={isLoading || isFetching}
                   />

@@ -25,7 +25,7 @@ const ResetPasswordPage = lazy(
 
 const {
   public: { LOGIN, FORGET_PASSWORD, RESET_PASSWORD },
-  private: { BASE, DASHBOARD },
+  private: { BASE: PRIVATE_BASE, DASHBOARD },
 } = constantRoutes;
 
 export const AppRouter = () => {
@@ -36,7 +36,7 @@ export const AppRouter = () => {
     isLoading: isUserAuthenticatedLoading,
   } = useUserAuthenticatedQuery(undefined, {
     skip: !(
-      pathname?.split("/").includes(BASE.replace("/", "")) || pathname === "/"
+      pathname?.split("/").includes(PRIVATE_BASE.replace("/", "")) || pathname === "/"
     ),
   });
 
@@ -75,8 +75,9 @@ export const AppRouter = () => {
         <Route path={FORGET_PASSWORD} element={<ForgetPasswordPage />} />
         <Route path={RESET_PASSWORD()} element={<ResetPasswordPage />} />
         <Route element={<AuthGuard privateValidation />}>
-          <Route path={BASE} element={<Navigate to={DASHBOARD} />} />
-          <Route path={`${BASE}/*`} element={<PrivateRoutes />} />
+          <Route path={PRIVATE_BASE}>
+            <Route path={"*"} element={<PrivateRoutes />} />
+          </Route>
         </Route>
       </RouterWithNotFound>
     </BrowserRouter>

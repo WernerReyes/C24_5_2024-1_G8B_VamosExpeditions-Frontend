@@ -6,13 +6,13 @@ import {
 } from "@/domain/entities";
 import {
   useGetAllArchivedVersionQuotationsQuery,
-  useUnArchiveVersionQuotationMutation,
+  useUnTrashVersionQuotationMutation,
 } from "@/infraestructure/store/services";
 import { ProgressBar, Tag } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
 import { useState } from "react";
 import {
-  ArchivedDialog,
+  TrashDialog,
   ClientInfo,
   FieldNotAssigned,
   UserInfo,
@@ -28,7 +28,7 @@ type Props = {
 
 const LIMIT = 10;
 
-export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
+export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
   const dispatch = useDispatch();
   const { currentPage, first, handlePageChange, limit } = usePaginator(LIMIT);
 
@@ -51,8 +51,8 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
 
   const archivedQuotes = data?.data;
 
-  const [unArchiveVersionQuotation, { isLoading: isLoadingUnArchive }] =
-    useUnArchiveVersionQuotationMutation();
+  const [unTrashVersionQuotation, { isLoading: isLoadingUnArchive }] =
+    useUnTrashVersionQuotationMutation();
 
   const [selectedQuote, setSelectedQuote] = useState<
     VersionQuotationEntity | undefined
@@ -60,7 +60,7 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
 
   const handleUnArchive = () => {
     if (selectedQuote) {
-      unArchiveVersionQuotation({
+      unTrashVersionQuotation({
         versionNumber: selectedQuote.id.versionNumber,
         quotationId: selectedQuote.id.quotationId,
       })
@@ -78,7 +78,7 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
   };
 
   return (
-    <ArchivedDialog
+    <TrashDialog
       visible={visible}
       downloadFilePdf={{
         handleDownload: () => {},
@@ -96,13 +96,13 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
       handleUnArchive={handleUnArchive}
       searchByName={searchByName}
       setSearchByName={setSearchByName}
-      title="Cotizaciones Archivadas"
+      title="Cotizaciones movidas a papelera"
       selectedField={
         selectedQuote
           ? {
               title: selectedQuote.name,
-              archivedAt: selectedQuote.archivedAt ?? null,
-              archivedReason: selectedQuote.archivedReason ?? null,
+              deletedAt: selectedQuote.deletedAt ?? null,
+              deleteReason: selectedQuote.deleteReason ?? null,
               archivedDetails: [
                 {
                   subject: "Cliente",
@@ -242,7 +242,7 @@ export const ArchivatedQuotesDialog = ({ visible, onHide }: Props) => {
               </p>
               <p className="text-xs text-gray-400">
                 Archivado:{" "}
-                {quote.archivedAt && dateFnsAdapter.format(quote.archivedAt)}
+                {quote.deletedAt && dateFnsAdapter.format(quote.deletedAt)}
               </p>
             </div>
           );

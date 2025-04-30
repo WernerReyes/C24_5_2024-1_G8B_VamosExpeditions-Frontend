@@ -35,7 +35,7 @@ export const messageTimestamp = (fechaInicio: Date): string => {
   } else if (minutos > 0) {
     mensaje += `${minutos} minuto${minutos > 1 ? "s" : ""}`;
   } else {
-    mensaje += "Algunos segundos";
+    mensaje += "algunos segundos";
   }
 
   return mensaje;

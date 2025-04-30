@@ -3,12 +3,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type VersionQuotationSliceState = {
   currentVersionQuotation: VersionQuotationEntity | null;
-  archivedVersions?: Record<number, number>;
+  trashVersions?: Record<number, number>;
 };
 
 const initialState: VersionQuotationSliceState = {
   currentVersionQuotation: null,
-  archivedVersions: undefined,
+  trashVersions: undefined,
 };
 
 export const versionquotationSlice = createSlice({
@@ -31,8 +31,8 @@ export const versionquotationSlice = createSlice({
     ) => {
       return {
         ...state,
-        archivedVersions: {
-          ...state.archivedVersions,
+        trashVersions: {
+          ...state.trashVersions,
           ...payload,
         },
       };
@@ -42,14 +42,14 @@ export const versionquotationSlice = createSlice({
       state,
       { payload }: PayloadAction<{ quotationId: number }>
     ) => {
-      if (state.archivedVersions) {
-        const { [payload.quotationId]: _, ...rest } = state.archivedVersions;
+      if (state.trashVersions) {
+        const { [payload.quotationId]: _, ...rest } = state.trashVersions;
         return {
           ...state,
-          archivedVersions: {
+          trashVersions: {
             ...rest,
             [payload.quotationId]:
-              state.archivedVersions[payload.quotationId] - 1,
+              state.trashVersions[payload.quotationId] - 1,
           },
         };
       }
@@ -60,19 +60,19 @@ export const versionquotationSlice = createSlice({
       state,
       { payload }: PayloadAction<{ quotationId: number }>
     ) => {
-      if (state.archivedVersions) {
+      if (state.trashVersions) {
         return {
           ...state,
-          archivedVersions: {
-            ...state.archivedVersions,
+          trashVersions: {
+            ...state.trashVersions,
             [payload.quotationId]:
-              state.archivedVersions[payload.quotationId] + 1,
+              state.trashVersions[payload.quotationId] + 1,
           },
         };
       } else {
         return {
           ...state,
-          archivedVersions: {
+          trashVersions: {
             [payload.quotationId]: 1,
           },
         };

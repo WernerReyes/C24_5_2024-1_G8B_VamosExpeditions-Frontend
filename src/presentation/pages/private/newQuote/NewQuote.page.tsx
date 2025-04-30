@@ -291,7 +291,6 @@ const NewQuotePage = () => {
                     icon="pi pi-arrow-left"
                     iconPos="left"
                     tooltip={width <= MOVILE ? "Atrás" : undefined}
-                    tooltipOptions={{ position: "top" }}
                     onClick={handleBack}
                   />
                 )}
@@ -302,7 +301,6 @@ const NewQuotePage = () => {
                     icon="pi pi-arrow-right"
                     iconPos="right"
                     tooltip={width <= MOVILE ? "Continuar" : undefined}
-                    tooltipOptions={{ position: "top" }}
                     onClick={handleNext}
                     disabled={
                       (index === 0 && !currentTripDetailsData) ||
