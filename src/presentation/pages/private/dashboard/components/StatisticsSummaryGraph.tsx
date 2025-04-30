@@ -119,7 +119,7 @@ export const StatisticsSummaryGraph = () => {
       maintainAspectRatio: false,
     };
 
-    setChartData(data);
+    setChartData(data as ChartData<'bar'>);
     setChartOptions(options);
   }, [currentData]);
 

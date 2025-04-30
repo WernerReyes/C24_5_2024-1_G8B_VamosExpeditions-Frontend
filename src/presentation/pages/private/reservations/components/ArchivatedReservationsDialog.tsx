@@ -1,26 +1,13 @@
-import { cn, dateFnsAdapter } from "@/core/adapters";
-import { formatCurrency } from "@/core/utils";
+import { cn } from "@/core/adapters";
 import {
-  ReservationEntity,
-  versionQuotationRender,
-  type VersionQuotationEntity,
+  ReservationEntity
 } from "@/domain/entities";
-import {
-  useGetAllArchivedVersionQuotationsQuery,
-  useUnTrashVersionQuotationMutation,
-} from "@/infraestructure/store/services";
-import { ProgressBar, Tag } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
+import { useDebounce } from "primereact/hooks";
 import { useState } from "react";
 import {
-  TrashDialog,
-  ClientInfo,
-  FieldNotAssigned,
-  UserInfo,
+  TrashDialog
 } from "../../components";
-import { useDebounce } from "primereact/hooks";
-import { useDispatch } from "react-redux";
-import { onAddNumberOfVersions } from "@/infraestructure/store";
 
 type Props = {
   visible: boolean;
@@ -30,12 +17,12 @@ type Props = {
 const LIMIT = 10;
 
 export const ArchivatedReservationsDialog = ({ visible, onHide }: Props) => {
-  const dispatch = useDispatch();
-  const { currentPage, first, handlePageChange, limit } = usePaginator(LIMIT);
+ 
+  const { first, handlePageChange, limit } = usePaginator(LIMIT);
    
   const [selectedReservation, setSelectedReservation] = useState<ReservationEntity>();
 
-  const [searchByName, debouncedSearchByName, setSearchByName] = useDebounce(
+  const [searchByName, _, setSearchByName] = useDebounce(
     "",
     400
   );

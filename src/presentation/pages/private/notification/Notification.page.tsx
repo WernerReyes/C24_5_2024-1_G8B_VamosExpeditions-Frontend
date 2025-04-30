@@ -1,23 +1,77 @@
-import React, { useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { Badge } from "primereact/badge";
+import { Button } from "primereact/button";
 import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { InputText } from "primereact/inputtext";
+import { useState } from "react";
 
 const NotificationsPage = () => {
   const [globalFilter, setGlobalFilter] = useState("");
 
   const emails = [
-    { id: 1, sender: "Material UI", subject: "Lorem ipsum dolor sit amet", tag: "Important", date: "12:16 pm" },
-    { id: 2, sender: "Wise", subject: "Lorem ipsum dolor sit amet", tag: "", date: "12:16 pm" },
-    { id: 3, sender: "Search Console", subject: "Lorem ipsum dolor sit amet", tag: "Social", date: "Apr 24" },
-    { id: 4, sender: "PayPal", subject: "Lorem ipsum dolor sit amet", tag: "", date: "Apr 20" },
-    { id: 5, sender: "Google Meet", subject: "Lorem ipsum dolor sit amet", tag: "", date: "Apr 16" },
-    { id: 6, sender: "Loom", subject: "Lorem ipsum dolor sit amet", tag: "", date: "Mar 10" },
-    { id: 7, sender: "Airbnb", subject: "Lorem ipsum dolor sit amet", tag: "", date: "Mar 05" },
-    { id: 8, sender: "Facebook", subject: "Lorem ipsum dolor sit amet", tag: "", date: "Feb 25" },
-    { id: 9, sender: "Instagram", subject: "Lorem ipsum dolor sit amet", tag: "Promotional", date: "Feb 20" },
+    {
+      id: 1,
+      sender: "Material UI",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "Important",
+      date: "12:16 pm",
+    },
+    {
+      id: 2,
+      sender: "Wise",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "",
+      date: "12:16 pm",
+    },
+    {
+      id: 3,
+      sender: "Search Console",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "Social",
+      date: "Apr 24",
+    },
+    {
+      id: 4,
+      sender: "PayPal",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "",
+      date: "Apr 20",
+    },
+    {
+      id: 5,
+      sender: "Google Meet",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "",
+      date: "Apr 16",
+    },
+    {
+      id: 6,
+      sender: "Loom",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "",
+      date: "Mar 10",
+    },
+    {
+      id: 7,
+      sender: "Airbnb",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "",
+      date: "Mar 05",
+    },
+    {
+      id: 8,
+      sender: "Facebook",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "",
+      date: "Feb 25",
+    },
+    {
+      id: 9,
+      sender: "Instagram",
+      subject: "Lorem ipsum dolor sit amet",
+      tag: "Promotional",
+      date: "Feb 20",
+    },
   ];
 
   const renderTag = (rowData: any) => {
@@ -27,7 +81,12 @@ const NotificationsPage = () => {
         Social: "green",
         Promotional: "blue",
       };
-      return <Badge value={rowData.tag} severity={tagColors[rowData.tag]} />;
+      return (
+        <Badge
+          value={rowData.tag}
+          severity={tagColors[rowData.tag as keyof typeof tagColors] as any}
+        />
+      );
     }
     return null;
   };
@@ -36,7 +95,11 @@ const NotificationsPage = () => {
     <div className="grid grid-cols-12 gap-4 p-4">
       {/* Sidebar */}
       <div className="col-span-3 bg-gray-100 p-4 rounded-lg shadow-md">
-        <Button label="Compose" icon="pi pi-pencil" className="w-full mb-4 p-button-primary" />
+        <Button
+          label="Compose"
+          icon="pi pi-pencil"
+          className="w-full mb-4 p-button-primary"
+        />
         <h4 className="text-lg font-semibold mb-3">MAILBOX</h4>
         <ul className="space-y-2">
           <li className="flex justify-between items-center">
@@ -103,8 +166,17 @@ const NotificationsPage = () => {
           </span>
         </div>
 
-        <DataTable value={emails} paginator rows={10} globalFilter={globalFilter} className="p-datatable-sm">
-          <Column selectionMode="multiple" headerStyle={{ width: "3rem" }}></Column>
+        <DataTable
+          value={emails}
+          paginator
+          rows={10}
+          globalFilter={globalFilter}
+          className="p-datatable-sm"
+        >
+          <Column
+            selectionMode="multiple"
+            headerStyle={{ width: "3rem" }}
+          ></Column>
           <Column field="sender" header="Sender" sortable></Column>
           <Column field="subject" header="Subject" sortable></Column>
           <Column body={renderTag} header="Tag"></Column>

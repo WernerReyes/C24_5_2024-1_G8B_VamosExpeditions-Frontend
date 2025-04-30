@@ -154,7 +154,7 @@ export const reservationServiceStore = createApi({
           body,
         };
       },
-      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+      async onQueryStarted(_, { queryFulfilled, }) {
         try {
           const { data } = await queryFulfilled;
           startShowSuccess(data.message);
