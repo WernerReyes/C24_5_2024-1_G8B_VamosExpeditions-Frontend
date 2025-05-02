@@ -18,7 +18,7 @@ type Props = {
   isFetching: boolean;
   isError: boolean;
   refetch: () => void;
-  handleUnArchive: () => void;
+  handleRestore: () => void;
   searchByName?: string;
   selectedField?: {
     title: string;
@@ -58,10 +58,10 @@ export const TrashDialog = ({
   isFetching,
   isLoading,
   refetch,
-  searchByName,
+  searchByName = "",
   selectedField,
   setSearchByName,
-  handleUnArchive,
+  handleRestore,
   downloadFilePdf,
   downloadFileExcel,
   title,
@@ -79,7 +79,7 @@ export const TrashDialog = ({
     <Dialog
       header={
         <div className="flex items-center gap-2">
-          <i className="pi pi-bookmark text-2xl text-primary" />
+          <i className="pi pi-trash text-2xl text-primary" />
           <h3 className="text-xl font-bold">{title}</h3>
         </div>
       }
@@ -107,12 +107,14 @@ export const TrashDialog = ({
                 rows={10}
                 header={
                   <InputText
-                    type="text"
-                    placeholder="Buscar..."
-                    className="p-inputtext-sm w-full"
-                  />
+                  type="text"
+                  placeholder="Buscar..."
+                  className="p-inputtext-sm w-full"
+                  value={searchByName}
+             
+                />
                 }
-                value={Array.from({ length: value?.length ?? 10 })}
+                value={Array.from({ length: Math.max(5, value?.length ?? 0) })}
                 itemTemplate={(_, index) => (
                   <div
                     key={index}
@@ -151,10 +153,12 @@ export const TrashDialog = ({
                 rows={10}
                 header={
                   <InputText
-                    type="text"
-                    placeholder="Buscar..."
-                    className="p-inputtext-sm w-full"
-                  />
+                  type="text"
+                  placeholder="Buscar..."
+                  className="p-inputtext-sm w-full"
+                  value={searchByName}
+                 
+                />
                 }
                 paginator
                 pt={{ content: { className: "min-h-[210px]" } }}
@@ -164,7 +168,7 @@ export const TrashDialog = ({
                       isLoading={isLoading}
                       isFetching={isFetching}
                       refetch={refetch}
-                      message="Error al cargar las cotizaciones archivadas"
+                      message="Error al cargar los datos"
                     />
                   ) as any
                 }
@@ -178,6 +182,12 @@ export const TrashDialog = ({
                   placeholder="Buscar..."
                   className="p-inputtext-sm w-full"
                   value={searchByName}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      setSearchByName(e.currentTarget.value);
+                    }
+                  }}
                   onChange={(e) => setSearchByName(e.target.value)}
                 />
               }
@@ -259,7 +269,7 @@ export const TrashDialog = ({
                     text
                     icon="pi pi-replay"
                     tooltip="Restaurar"
-                    onClick={handleUnArchive}
+                    onClick={handleRestore}
                     disabled={isLoading || isFetching}
                   />
 
@@ -282,10 +292,10 @@ export const TrashDialog = ({
                     key={index}
                     className="flex items-center text-sm w-full py-3 px-2 gap-x-4 border-1 border-y "
                   >
-                    <span className="text-500 w-2/5 font-medium">
+                    <span className="text-500 w-2/6 font-medium">
                       {detail.subject}
                     </span>
-                    <div className="text-900 w-3/5">{detail.message}</div>
+                    <div className="text-900 w-4/6">{detail.message}</div>
                   </li>
                 ))}
               </ul>

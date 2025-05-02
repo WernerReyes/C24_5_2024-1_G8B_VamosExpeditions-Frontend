@@ -30,14 +30,16 @@ import { getTransformedFilters } from "../utils";
 import { TrashQuotesDialog } from "./TrashQuotesDialog";
 import { DataTableQuotation } from "./DataTableQuotation/DataTableQuotation";
 import { UnofficialDataTable } from "./UnofficialDataTable";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
+import { onSetNumberOfVersions } from "@/infraestructure/store";
 
 const { QUOTATION_PAGINATION } = constantStorage;
 
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
+  const dispatch = useDispatch();
   const { trashVersions } = useSelector(
     (state: AppState) => state.versionQuotation
   );
@@ -78,12 +80,12 @@ export const QuotesTable = () => {
       limit,
       name,
       clientsIds,
-      startDate,
-      endDate,
+      startDate: startDate && new Date(startDate),
+      endDate: endDate && new Date(endDate),
       representativesIds,
       status,
-      createdAt,
-      updatedAt,
+      createdAt: createdAt && new Date(createdAt),
+      updatedAt: updatedAt && new Date(updatedAt),
     },
     {
       skip: !currentPage,
@@ -123,6 +125,21 @@ export const QuotesTable = () => {
     if (!filters) return;
     setFilters(getTransformedFilters(filters));
   }, [filters]);
+
+  useEffect(() => {
+    if (!officialCurrentData?.data) return;
+
+    dispatch(
+      onSetNumberOfVersions(
+        officialCurrentData.data.content.reduce((acc, curr) => {
+          if (!curr.hasVersions) return acc;
+          const quotationId = curr.id.quotationId;
+          acc[quotationId] = trashVersions?.[quotationId] ?? 1;
+          return acc;
+        }, {} as Record<number, number>)
+      )
+    );
+  }, [officialCurrentData]);
 
   const header = (
     <div className="flex sm:justify-between gap-y-3 flex-wrap justify-center items-center">
@@ -204,6 +221,7 @@ export const QuotesTable = () => {
         }
         fallBackComponent={
           <DataTableQuotation
+          filters={filters}
             value={[]}
             header={header}
             extraColumns={[

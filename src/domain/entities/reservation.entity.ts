@@ -35,6 +35,10 @@ export interface ReservationEntity {
   updatedAt: Date;
   status: ReservationStatus;
   versionQuotation: VersionQuotationEntity;
+
+  isDeleted: boolean;
+  deletedAt?: Date;
+  deleteReason?: string;
 }
 
 

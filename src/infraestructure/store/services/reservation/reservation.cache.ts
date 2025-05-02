@@ -24,8 +24,6 @@ export const reservationCache = {
       {
         getAllReservations: GetReservationsDto;
       }[]
-
-      
     >(cachedQueries);
     for (const query of extractedParams) {
       if (query.getAllReservations) {
@@ -138,33 +136,114 @@ export const reservationCache = {
     }
   },
 
-  deleteMultipleReservations: (
-    reservations: ReservationEntity[],
+  trashReservation: (
+    data: ReservationEntity,
     dispatch: ThunkDispatch<any, any, UnknownAction>,
     getState: () => RootState<any, any, Reservation>
   ) => {
-    const args = reservationServiceStore.util.selectCachedArgsForQuery(
-      getState(),
-      "getAllReservations"
-    );
-    for (const query of args) {
-      dispatch(
-        reservationServiceStore.util.updateQueryData(
-          "getAllReservations",
-          query,
-          (draft) => {
-            Object.assign(draft, {
-              data: {
-                ...draft.data,
-                content: draft.data.content.filter(
-                  (reservation) =>
-                    !reservations.some((r) => r.id === reservation.id)
-                ),
-              },
-            });
-          }
-        )
-      );
+    const cachedQueries = (getState() as AppState).reservationServiceStore
+      .queries;
+    const extractedParams = extractParams<
+      {
+        getAllReservations: GetReservationsDto;
+        getTrashReservations: GetReservationsDto;
+      }[]
+    >(cachedQueries);
+    for (const query of extractedParams) {
+      const { getAllReservations, getTrashReservations } = query;
+      if (getAllReservations) {
+        dispatch(
+          reservationServiceStore.util.updateQueryData(
+            "getAllReservations",
+            getAllReservations,
+            (draft) => {
+              Object.assign(draft, {
+                data: {
+                  ...draft.data,
+                  content: draft.data.content.filter(
+                    (reservation) => reservation.id !== data.id
+                  ),
+                  total: draft.data.total - 1,
+                },
+              });
+            }
+          )
+        );
+      }
+
+      if (getTrashReservations) {
+        dispatch(
+          reservationServiceStore.util.updateQueryData(
+            "getTrashReservations",
+            getTrashReservations,
+            (draft) => {
+              Object.assign(draft, {
+                data: {
+                  ...draft.data,
+                  content: [...draft.data.content, data],
+                  total: draft.data.total + 1,
+                },
+              });
+            }
+          )
+        );
+      }
     }
   },
+
+  restoreReservation: (
+    data: ReservationEntity,
+    dispatch: ThunkDispatch<any, any, UnknownAction>,
+    getState: () => RootState<any, any, Reservation>
+  ) => {
+    const cachedQueries = (getState() as AppState).reservationServiceStore
+      .queries;
+    const extractedParams = extractParams<
+      {
+        getAllReservations: GetReservationsDto;
+        getTrashReservations: GetReservationsDto;
+      }[]
+    >(cachedQueries);
+    for (const query of extractedParams) {
+      const { getAllReservations, getTrashReservations } = query;
+      if (getAllReservations) {
+        dispatch(
+          reservationServiceStore.util.updateQueryData(
+            "getAllReservations",
+            getAllReservations,
+            (draft) => {
+              Object.assign(draft, {
+                data: {
+                  ...draft.data,
+                  content: [...draft.data.content, data],
+                  total: draft.data.total + 1,
+                },
+              });
+            }
+          )
+        );
+      }
+
+      if (getTrashReservations) {
+        dispatch(
+          reservationServiceStore.util.updateQueryData(
+            "getTrashReservations",
+            getTrashReservations,
+            (draft) => {
+              Object.assign(draft, {
+                data: {
+                  ...draft.data,
+                  content: draft.data.content.filter(
+                    (reservation) => reservation.id !== data.id
+                  ),
+                  total: draft.data.total - 1,
+                },
+              });
+            }
+          )
+        );
+      }
+
+    }
+  }
 };

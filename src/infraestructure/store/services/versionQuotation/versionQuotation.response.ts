@@ -10,7 +10,7 @@ export interface CancelAndReplaceApprovedOfficialVersionQuotation {
   oldApproved: VersionQuotationEntity;
 }
 
-export interface UnTrashVersionQuotation {
+export interface RestoreVersionQuotation {
   newUnOfficial?: VersionQuotationEntity["id"];
-  unArchivedVersionQuotation: VersionQuotationEntity;
+  restoreVersionQuotation: VersionQuotationEntity;
 }

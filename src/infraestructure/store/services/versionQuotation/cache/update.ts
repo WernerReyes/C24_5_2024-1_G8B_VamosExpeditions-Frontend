@@ -4,7 +4,7 @@ import { versionQuotationService } from "../versionQuotation.service";
 import { extractedParams } from "./extractedParams";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
-  UnTrashVersionQuotation,
+  RestoreVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "../versionQuotation.response";
 
@@ -330,7 +330,7 @@ export const duplicateMultiple = function (
   }
 };
 
-export const archive = function (
+export const trash = function (
   data: VersionQuotationEntity,
   dispatch: AppDispatch,
   getState: () => AppState
@@ -341,7 +341,7 @@ export const archive = function (
     const {
       getAllOfficialVersionQuotations,
       getAllUnofficialVersionQuotations,
-      getAllArchivedVersionQuotations,
+      getAllTrashVersionQuotations,
     } = param;
 
     if (getAllUnofficialVersionQuotations) {
@@ -392,11 +392,11 @@ export const archive = function (
       );
     }
 
-    if (getAllArchivedVersionQuotations) {
+    if (getAllTrashVersionQuotations) {
       dispatch(
         versionQuotationService.util.updateQueryData(
-          "getAllArchivedVersionQuotations",
-          getAllArchivedVersionQuotations,
+          "getAllTrashVersionQuotations",
+          getAllTrashVersionQuotations,
           (draft) => {
             Object.assign(draft, {
               data: {
@@ -412,11 +412,11 @@ export const archive = function (
   }
 };
 
-export const unArchive = function (
+export const restore = function (
   {
-    unArchivedVersionQuotation: data,
+    restoreVersionQuotation: data,
     newUnOfficial,
-  }: UnTrashVersionQuotation,
+  }: RestoreVersionQuotation,
   dispatch: AppDispatch,
   getState: () => AppState
 ) {
@@ -425,7 +425,7 @@ export const unArchive = function (
   for (const param of params) {
     const {
       getAllOfficialVersionQuotations,
-      getAllArchivedVersionQuotations,
+      getAllTrashVersionQuotations,
       getAllUnofficialVersionQuotations,
     } = param;
 
@@ -465,11 +465,11 @@ export const unArchive = function (
       );
     }
 
-    if (getAllArchivedVersionQuotations) {
+    if (getAllTrashVersionQuotations) {
       dispatch(
         versionQuotationService.util.updateQueryData(
-          "getAllArchivedVersionQuotations",
-          getAllArchivedVersionQuotations,
+          "getAllTrashVersionQuotations",
+          getAllTrashVersionQuotations,
           (draft) => {
             Object.assign(draft, {
               data: {

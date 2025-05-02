@@ -17,16 +17,16 @@ import {
   updateManyHotelRoomTripDetailsByDate,
 } from "./cache/external";
 import {
-  archive,
+  trash,
   cancelAndReplaceApprovedOfficial,
   duplicateMultiple,
-  unArchive,
+  restore,
   update,
   updateOfficial,
 } from "./cache/update";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
-  UnTrashVersionQuotation,
+  RestoreVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
 
@@ -116,15 +116,15 @@ export const versionQuotationCache = {
     getState: () => AppState
   ) => duplicateMultiple(data, dispatch, getState),
 
-  archive: (
+  trash: (
     data: VersionQuotationEntity,
     dispatch: AppDispatch,
     getState: () => AppState
-  ) => archive(data, dispatch, getState),
+  ) => trash(data, dispatch, getState),
 
-  unArchive: (
-    data: UnTrashVersionQuotation,
+  restore: (
+    data: RestoreVersionQuotation,
     dispatch: AppDispatch,
     getState: () => AppState
-  ) => unArchive(data, dispatch, getState),
+  ) => restore(data, dispatch, getState),
 };

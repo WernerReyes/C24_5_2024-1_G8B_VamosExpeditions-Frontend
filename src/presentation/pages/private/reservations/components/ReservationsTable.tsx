@@ -33,7 +33,12 @@ import {
 } from "../../filters";
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import { constantStorage } from "@/core/constants";
-import { EditorReservationStatus, CancelConfirmReservationDialog, DeleteConfirmReservationDialog, ArchivatedReservationsDialog } from "./";
+import {
+  EditorReservationStatus,
+  CancelConfirmReservationDialog,
+  TrashReservationsDialog,
+  TrashReservation,
+} from "./";
 
 const { RESERVATION_PAGINATION } = constantStorage;
 
@@ -58,8 +63,8 @@ export const ReservationTable = () => {
       page: currentPage,
       limit,
       status,
-      createdAt,
-      updatedAt,
+      createdAt: createdAt && new Date(createdAt),
+      updatedAt: updatedAt && new Date(updatedAt),
     });
 
   const reservations = currentData?.data;
@@ -67,8 +72,7 @@ export const ReservationTable = () => {
   const [selectedReservations, setSelectedReservations] = useState<
     ReservationEntity[]
   >([]);
-  const [confirmVisible, setConfirmVisible] = useState(false);
-
+  
   const [cancelReservation, setCancelReservation] =
     useState<ReservationEntity | null>(null);
 
@@ -86,10 +90,9 @@ export const ReservationTable = () => {
       "#fallback-reservations .p-datatable-emptymessage td"
     );
 
-    if (tdEmpty) {
-      tdEmpty.setAttribute("colspan", "12");
-    }
+    if (tdEmpty) tdEmpty.setAttribute("colspan", "12");
   }, [isError]);
+
 
   return (
     <div>
@@ -97,13 +100,7 @@ export const ReservationTable = () => {
         cancelReservation={cancelReservation}
         setCancelReservation={setCancelReservation}
       />
-      <DeleteConfirmReservationDialog
-        selectedReservations={selectedReservations}
-        visible={confirmVisible}
-        onHide={setConfirmVisible}
-        setSelectedReservations={setSelectedReservations}
-      />
-      <ArchivatedReservationsDialog
+      <TrashReservationsDialog
         visible={visibleArchivatedReservations}
         onHide={() => setVisibleArchivatedReservations(false)}
       />
@@ -112,8 +109,8 @@ export const ReservationTable = () => {
           className="mb-4"
           end={
             <Button
-              icon="pi pi-bookmark"
-              label="Archivadas"
+              icon="pi pi-trash"
+              label="Papelera"
               outlined
               size="small"
               disabled={isFetching || isLoading || isError}
@@ -176,9 +173,11 @@ export const ReservationTable = () => {
           error={isError}
         >
           <DataTable
+            selectionMode="multiple"
             ref={dt}
             scrollable
             size="small"
+            filterDelay={1000}
             stateStorage="custom"
             stateKey={RESERVATION_PAGINATION}
             customSaveState={(state: any) => {
@@ -198,6 +197,7 @@ export const ReservationTable = () => {
                 setSelectedReservations(e.value);
               }
             }}
+            lazy
             className="md:text-sm"
             emptyMessage={"No hay reservaciones"}
             filterDisplay="menu"
@@ -231,9 +231,7 @@ export const ReservationTable = () => {
                 currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} cotizaciones"
               />
             }
-            selectionMode="multiple"
           >
-            <Column selectionMode="multiple"></Column>
             <Column field="id" align="center" />
             <Column
               align="center"
@@ -253,6 +251,7 @@ export const ReservationTable = () => {
                   />
                 );
               }}
+             
               filterField="status"
             />
 
@@ -260,7 +259,6 @@ export const ReservationTable = () => {
               align="center"
               dataType="date"
               filterMatchMode="gte"
-              filterType="dateIs"
               filterField="createdAt"
               body={(reservation: ReservationEntity) => {
                 return dateFnsAdapter.format(reservation.createdAt);
@@ -269,6 +267,8 @@ export const ReservationTable = () => {
 
             <Column
               align="center"
+              dataType="date"
+              filterMatchMode="gte"
               filterField="updatedAt"
               body={(reservation: ReservationEntity) => {
                 return dateFnsAdapter.format(reservation.updatedAt);
@@ -335,10 +335,23 @@ export const ReservationTable = () => {
             <Column
               header="Cotización"
               align="center"
+              className="min-w-44"
               body={(reservation: ReservationEntity) => {
                 const representative = reservation.versionQuotation?.user;
                 if (!representative) return "";
                 return <UserInfo user={representative} />;
+              }}
+            />
+
+            <Column
+              header="Acciones"
+              align="center"
+              body={(reservation: ReservationEntity) => {
+                return (
+                  <div className="flex justify-center gap-x-2">
+                    <TrashReservation reservation={reservation} />
+                  </div>
+                );
               }}
             />
           </DataTable>
@@ -353,10 +366,6 @@ const headerColumnGroup = (
     <Row>
       <Column
         headerClassName="bg-primary text-white"
-        selectionMode="multiple"
-      />
-      <Column
-        headerClassName="bg-primary text-white"
         header="Código"
         align="center"
       />
@@ -366,6 +375,9 @@ const headerColumnGroup = (
         align="center"
         filterHeaderClassName="bg-red-400"
         filterField="status"
+        filterMatchMode="custom"
+        filterFunction={filterByStatus}
+        filterType="custom"
         pt={{
           filterMenuButton: ({ context }: { context: any }) => {
             return {
@@ -394,7 +406,7 @@ const headerColumnGroup = (
         filterField="createdAt"
         dataType="date"
         filterMatchMode="gte"
-        filterType="dateIs"
+
         pt={{
           filterMenuButton: ({ context }: { context: any }) => {
             return {
@@ -420,7 +432,10 @@ const headerColumnGroup = (
         showFilterMatchModes={false}
         showFilterOperator={false}
         showAddButton={false}
+        showApplyButton={false}
         filterField="updatedAt"
+        dataType="date"
+        filterMatchMode="gte"
         pt={{
           filterMenuButton: ({ context }: { context: any }) => {
             return {
@@ -433,7 +448,7 @@ const headerColumnGroup = (
             };
           },
         }}
-        filterApply={(options) => <FilterApplyButton {...options} />}
+    
         filterClear={(options) => <FilterClearButton {...options} />}
         filter
         filterElement={(options) => (
@@ -456,8 +471,7 @@ const headerColumnGroup = (
       />
     </Row>
     <Row>
-      <Column colSpan={5} />
-
+      <Column colSpan={4} />
       <Column header="Código" />
       <Column header="Nombre" />
       <Column header="Cliente" headerClassName="min-w-48" />
@@ -465,6 +479,7 @@ const headerColumnGroup = (
       <Column header="Fecha de fin" />
       <Column header="Precio" />
       <Column header="Representante" />
+      <Column header="Acciones" align="center" className="min-w-32" />
     </Row>
   </ColumnGroup>
 );

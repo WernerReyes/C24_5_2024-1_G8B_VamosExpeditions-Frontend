@@ -75,6 +75,7 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           },
           ...rest.pt,
         }}
+        lazy
         ref={dataTableRef}
         className={cn("max-sm:text-xs", rest.className)}
       >
@@ -162,6 +163,7 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           headerClassName="min-w-32"
           filterMenuStyle={{ width: "16rem" }}
           dataType="date"
+          filterMatchMode="gte"
           filter
           showFilterOperator={false}
           showAddButton={false}
@@ -187,6 +189,7 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           headerClassName="min-w-32"
           dataType="date"
           filter
+          filterMatchMode="lte"
           showFilterOperator={false}
           showAddButton={false}
           showFilterMatchModes={false}
@@ -328,6 +331,7 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           filterMenuStyle={{ width: "16rem" }}
           dataType="date"
           filter
+          filterMatchMode="gte"
           showFilterOperator={false}
           showAddButton={false}
           showFilterMatchModes={false}
@@ -350,6 +354,7 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           filterMenuStyle={{ width: "16rem" }}
           dataType="date"
           filter
+          filterMatchMode="gte"
           showFilterOperator={false}
           showAddButton={false}
           showFilterMatchModes={false}

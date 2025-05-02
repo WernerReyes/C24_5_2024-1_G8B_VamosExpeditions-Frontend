@@ -1,6 +1,4 @@
 import {
-  archiveReservationDto,
-  type ArchiveReservationDto,
   getReservationsDto,
   type GetReservationsDto,
   getStadisticsDto,
@@ -21,11 +19,12 @@ import type {
 } from "./reservation.response";
 import { reservationCache } from "./reservation.cache";
 import { dateFnsAdapter } from "@/core/adapters";
+import { type TrashDto, trashDto } from "@/domain/dtos/common";
 
 const PREFIX = "/reservation";
 
 export const reservationServiceStore = createApi({
-  tagTypes: ["Reservations", "Reservation", "ArchivedReservations"],
+  tagTypes: ["Reservations", "Reservation", "TrashReservations"],
   reducerPath: "reservationServiceStore",
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
@@ -88,7 +87,10 @@ export const reservationServiceStore = createApi({
         if (errors) throw errors;
         return {
           url: "/",
-          params,
+          params: {
+            ...params,
+            isDeleted: false,
+          },
         };
       },
       providesTags: ["Reservations"],
@@ -107,7 +109,7 @@ export const reservationServiceStore = createApi({
       }),
     }),
 
-    getArchivedReservations: builder.query<
+    getTrashReservations: builder.query<
       ApiResponse<PaginatedResponse<ReservationEntity>>,
       GetReservationsDto
     >({
@@ -115,14 +117,14 @@ export const reservationServiceStore = createApi({
         const [_, errors] = getReservationsDto.create(params);
         if (errors) throw errors;
         return {
-          url: "/archive",
+          url: "/",
           params: {
             ...params,
             isDeleted: true,
           },
         };
       },
-      providesTags: ["ArchivedReservations"],
+      providesTags: ["TrashReservations"],
       transformResponse: (
         response: ApiResponse<PaginatedResponse<ReservationEntity>>
       ) => ({
@@ -138,37 +140,49 @@ export const reservationServiceStore = createApi({
       }),
     }),
 
-    archiveReservation: builder.mutation<
+    trashReservation: builder.mutation<
       ApiResponse<ReservationEntity>,
-      ArchiveReservationDto
+      TrashDto
     >({
       query: ({ id, ...body }) => {
-        const [_, errors] = archiveReservationDto.create({
+        const [_, errors] = trashDto.create({
           ...body,
           id,
         });
         if (errors) throw errors;
         return {
-          url: `/archive`,
+          url: `/trash/${id}`,
           method: "PUT",
           body,
         };
       },
-      async onQueryStarted(_, { queryFulfilled, }) {
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          reservationCache.trashReservation(data.data, dispatch, getState);
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
+
+    restoreReservation: builder.mutation<
+      ApiResponse<ReservationEntity>,
+      ReservationEntity["id"]
+    >({
+      query: (id) => ({
+        url: `/restore/${id}`,
+        method: "PUT",
+      }),
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
         try {
           const { data } = await queryFulfilled;
           startShowSuccess(data.message);
 
-          // reservationCache.upsertReservation(data.data, dispatch, getState);
-
-          // versionQuotationCache.updateFromAnotherService(
-          //   {
-          //     ...data.data.versionQuotation,
-          //     reservation: data.data,
-          //   },
-          //   dispatch,
-          //   getState as () => AppState
-          // );
+          reservationCache.restoreReservation(data.data, dispatch, getState);
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
           throw error;
@@ -227,51 +241,17 @@ export const reservationServiceStore = createApi({
     >({
       query: () => `/stats`,
     }),
-
-    deleteMultipleReservations: builder.mutation<
-      ApiResponse<ReservationEntity[]>,
-      ReservationEntity["id"][]
-    >({
-      query: (ids) => ({
-        url: "/multiple",
-        method: "DELETE",
-        body: ids,
-      }),
-      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
-        try {
-          const { data } = await queryFulfilled;
-          startShowSuccess(data.message);
-
-          reservationCache.deleteMultipleReservations(
-            data.data,
-            dispatch,
-            getState
-          );
-
-          
-
-          // versionQuotationCache.deleteMultipleVersionsFromAnotherService(
-          //   data.data.map((reservation) => reservation.versionQuotation),
-          //   dispatch,
-          //   getState as () => AppState
-          // );
-        } catch (error: any) {
-          if (error.error) startShowApiError(error.error);
-          throw error;
-        }
-      },
-    }),
   }),
 });
 
 export const {
   useGetReservationByIdQuery,
   useGetAllReservationsQuery,
-  useGetArchivedReservationsQuery,
-  useArchiveReservationMutation,
+  useGetTrashReservationsQuery,
+  useTrashReservationMutation,
+  useRestoreReservationMutation,
   useUpsertReservationMutation,
   useCancelReservationMutation,
   useGetReservationStadisticsQuery,
   useGetReservationsStatsQuery,
-  useDeleteMultipleReservationsMutation,
 } = reservationServiceStore;

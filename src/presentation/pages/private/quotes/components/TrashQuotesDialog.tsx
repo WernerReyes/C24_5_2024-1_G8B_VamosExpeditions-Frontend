@@ -5,8 +5,8 @@ import {
   type VersionQuotationEntity,
 } from "@/domain/entities";
 import {
-  useGetAllArchivedVersionQuotationsQuery,
-  useUnTrashVersionQuotationMutation,
+  useGetAllTrashVersionQuotationsQuery,
+  useRestoreVersionQuotationMutation,
 } from "@/infraestructure/store/services";
 import { ProgressBar, Tag } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
@@ -38,7 +38,7 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
   );
 
   const { data, isLoading, isError, isFetching, refetch } =
-    useGetAllArchivedVersionQuotationsQuery(
+    useGetAllTrashVersionQuotationsQuery(
       {
         page: currentPage,
         limit,
@@ -51,16 +51,16 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
 
   const archivedQuotes = data?.data;
 
-  const [unTrashVersionQuotation, { isLoading: isLoadingUnArchive }] =
-    useUnTrashVersionQuotationMutation();
+  const [restoreVersionQuotation, { isLoading: isLoadingUnArchive }] =
+    useRestoreVersionQuotationMutation();
 
   const [selectedQuote, setSelectedQuote] = useState<
     VersionQuotationEntity | undefined
   >(undefined);
 
-  const handleUnArchive = () => {
+  const handleRestore = () => {
     if (selectedQuote) {
-      unTrashVersionQuotation({
+      restoreVersionQuotation({
         versionNumber: selectedQuote.id.versionNumber,
         quotationId: selectedQuote.id.quotationId,
       })
@@ -93,10 +93,10 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
       isLoading={isLoading}
       isFetching={isFetching || isLoadingUnArchive}
       refetch={refetch}
-      handleUnArchive={handleUnArchive}
+      handleRestore={handleRestore}
       searchByName={searchByName}
       setSearchByName={setSearchByName}
-      title="Cotizaciones movidas a papelera"
+      title="Cotizaciones en papelera"
       selectedField={
         selectedQuote
           ? {
@@ -247,7 +247,7 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
             </div>
           );
         },
-        emptyMessage: "No hay cotizaciones archivadas",
+        emptyMessage: "No hay cotizaciones en la papelera",
       }}
     />
   );

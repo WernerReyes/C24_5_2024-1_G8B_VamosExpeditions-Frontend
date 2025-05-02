@@ -24,6 +24,7 @@ export * from "./TabView";
 export * from "./Toaster";
 export * from "./TreeSelect/TreeSelect";
 export * from "./FileUpload";
+export * from "./PDFPreview";
 //* PrimeReact Components
 export * from "primereact/badge";
 export * from "primereact/chip";

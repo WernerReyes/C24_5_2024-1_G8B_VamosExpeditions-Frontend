@@ -49,6 +49,7 @@ export const UnofficialDataTable = ({
     setFilters,
   ] = useState<QuotesTableFilters>({});
 
+
   const { currentData, isLoading, isFetching, isError, refetch } =
     useGetAllUnofficialVersionQuotationsQuery(
       {
@@ -86,6 +87,8 @@ export const UnofficialDataTable = ({
       )
     );
   }, [currentData]);
+
+
 
   return (
     <ErrorBoundary

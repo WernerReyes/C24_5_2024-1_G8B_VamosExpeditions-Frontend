@@ -14,6 +14,7 @@ export const MoreInformation = ({
   userFullname,
   handleViewDetails,
 }: Props) => {
+ 
   return (
     <div className="bg-gray-50 p-3 mt-4 border-gray-100 text-sm">
       <div className="grid grid-cols-1 gap-y-3 md:grid-cols-3">

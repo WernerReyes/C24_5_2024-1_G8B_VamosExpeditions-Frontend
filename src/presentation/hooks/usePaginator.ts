@@ -1,4 +1,4 @@
-import {
+import type {
   DataTableFilterMeta,
   DataTableSortEvent,
   DataTableStateEvent,
@@ -13,8 +13,8 @@ export const usePaginator = (initialLimit: number, sessionKey?: string) => {
   const [currentPage, setCurrentPage] = useState<number>(
     initialState.currentPage ?? 1
   );
-  const [filters, setFilters] = useState<DataTableFilterMeta>(
-    initialState.filters ?? undefined
+  const [filters, setFilters] = useState<DataTableFilterMeta | undefined>(
+    () => initialState?.filters ?? undefined
   );
   const [sortField, setSortField] = useState<DataTableSortEvent>();
   const [first, setFirst] = useState<number>(initialState.first ?? 0);
@@ -43,7 +43,7 @@ export const usePaginator = (initialLimit: number, sessionKey?: string) => {
   const handleSaveState = (state: {
     first: number;
     rows: number;
-    filters: {};
+    filters?: DataTableFilterMeta;
   }) => {
     if (!sessionKey) return;
     sessionStorage.setItem(
@@ -56,7 +56,6 @@ export const usePaginator = (initialLimit: number, sessionKey?: string) => {
       })
     );
   };
-
 
   return {
     currentPage,

@@ -10,6 +10,8 @@ export const filterByStatus = (
   }[]
 ) => {
   if (Array.isArray(filter) && filter.length === 0) return true;
+
+  console.log("filter", filter, value);
   
   return Array.isArray(filter)
     ? filter.some((item) => item?.id === value)
@@ -30,10 +32,10 @@ export const getTransformedFilters = (
   filters: any
 ): ReservationTableFilters => {
   return {
-    createdAt: filters["createdAt"].constraints[0].value ?? undefined,
-    updatedAt: filters["updatedAt"].constraints[0].value ?? undefined,
+    createdAt: filters["createdAt"]?.constraints[0].value ?? undefined,
+    updatedAt: filters["updatedAt"]?.constraints[0].value ?? undefined,
     status:
-      filters["status"].constraints[0].value?.map(
+      filters["status"]?.constraints[0].value?.map(
         (item: { label: string; id: ReservationStatus }) => item.id
       ) ?? undefined,
   };

@@ -11,7 +11,7 @@ export const extractedParams = function (getState: () => AppState) {
     {
       getAllOfficialVersionQuotations: GetVersionQuotationsDto;
       getAllUnofficialVersionQuotations: GetVersionQuotationsDto;
-      getAllArchivedVersionQuotations: GetVersionQuotationsDto;
+      getAllTrashVersionQuotations: GetVersionQuotationsDto;
       getVersionQuotationById: VersionQuotationEntity["id"];
     }[]
   >(cachedQueries);

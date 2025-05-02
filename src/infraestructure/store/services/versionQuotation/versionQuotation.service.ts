@@ -1,6 +1,4 @@
 import {
-  trashVersionQuotationDto,
-  type TrashVersionQuotationDto,
   duplicateMultipleVersionQuotationDto,
   type DuplicateMultipleVersionQuotationDto,
   getVersionQuotationsDto,
@@ -24,19 +22,20 @@ import { PaginatedResponse } from "../response";
 import { versionQuotationCache } from "./versionQuotation.cache";
 import type {
   CancelAndReplaceApprovedOfficialVersionQuotation,
-  UnTrashVersionQuotation,
+  RestoreVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
 import { reservationCache } from "../reservation/reservation.cache";
 import type { AppState } from "@/app/store";
 import { dateFnsAdapter } from "@/core/adapters";
+import { trashDto, type TrashDto } from "@/domain/dtos/common";
 
 const PREFIX = "/version-quotation";
 
 export const versionQuotationService = createApi({
   reducerPath: "versionQuotationService",
   tagTypes: [
-    "ArchivedQuotations",
+    "TrashQuotations",
     "OfficialQuotations",
     "UnofficialQuotations",
     "Drafts",
@@ -117,7 +116,7 @@ export const versionQuotationService = createApi({
       },
     }),
 
-    getAllArchivedVersionQuotations: builder.query<
+    getAllTrashVersionQuotations: builder.query<
       ApiResponse<PaginatedResponse<VersionQuotationEntity>>,
       GetVersionQuotationsDto
     >({
@@ -140,12 +139,12 @@ export const versionQuotationService = createApi({
         return result
           ? [
               ...result.data.content.map((versionQuotation) => ({
-                type: "ArchivedQuotations" as const,
+                type: "TrashQuotations" as const,
                 id: `${versionQuotation.id.quotationId}-${versionQuotation.id.versionNumber}`,
               })),
-              { type: "ArchivedQuotations" as const, id: "PARTIAL-LIST" },
+              { type: "TrashQuotations" as const, id: "PARTIAL-LIST" },
             ]
-          : [{ type: "ArchivedQuotations" as const, id: "PARTIAL-LIST" }];
+          : [{ type: "TrashQuotations" as const, id: "PARTIAL-LIST" }];
       },
     }),
 
@@ -294,14 +293,14 @@ export const versionQuotationService = createApi({
 
     trashVersionQuotation: builder.mutation<
       ApiResponse<VersionQuotationEntity>,
-      TrashVersionQuotationDto
+      TrashDto
     >({
       query: (body) => {
         //* Validate before sending
-        const [_, errors] = trashVersionQuotationDto.create(body);
+        const [_, errors] = trashDto.create(body);
         if (errors) throw errors;
         return {
-          url: "/archive",
+          url: "/trash",
           method: "PUT",
           body,
         };
@@ -311,7 +310,7 @@ export const versionQuotationService = createApi({
           const { data } = await queryFulfilled;
 
           //* Update the cache
-          versionQuotationCache.archive(
+          versionQuotationCache.trash(
             data.data,
             dispatch,
             getState as () => AppState
@@ -325,8 +324,8 @@ export const versionQuotationService = createApi({
       },
     }),
 
-    unTrashVersionQuotation: builder.mutation<
-      ApiResponse<UnTrashVersionQuotation>,
+    restoreVersionQuotation: builder.mutation<
+      ApiResponse<RestoreVersionQuotation>,
       VersionQuotationEntity["id"]
     >({
       query: (body) => {
@@ -334,7 +333,7 @@ export const versionQuotationService = createApi({
           throw "QuotationId and VersionNumber are required";
         }
         return {
-          url: "/unarchive",
+          url: "/restore",
           method: "PUT",
           body,
         };
@@ -342,14 +341,15 @@ export const versionQuotationService = createApi({
       async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
         try {
           const { data } = await queryFulfilled;
-          startShowSuccess(data.message);
 
           //* Update the cache
-          versionQuotationCache.unArchive(
+          versionQuotationCache.restore(
             data.data,
             dispatch,
             getState as () => AppState
           );
+
+          startShowSuccess(data.message);
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
           throw error;
@@ -431,6 +431,22 @@ export const versionQuotationService = createApi({
       },
     }),
 
+    previewVersionQuotationPdf: builder.query<
+      Blob,
+      VersionQuotationEntity["id"]
+    >({
+      query: (id) => {
+        if (!id.quotationId || !id.versionNumber) {
+          throw "QuotationId and VersionNumber are required";
+        }
+        return {
+          url: `/pdf/${id.quotationId}/${id.versionNumber}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      },
+    }),
+
     sendEmailAndGenerateReport: builder.mutation<
       ApiResponse<void>,
       SendEmailAndGenerateReportDto
@@ -460,15 +476,16 @@ export const versionQuotationService = createApi({
 export const {
   useGetAllOfficialVersionQuotationsQuery,
   useGetAllUnofficialVersionQuotationsQuery,
-  useGetAllArchivedVersionQuotationsQuery,
+  useGetAllTrashVersionQuotationsQuery,
   useUpdateVersionQuotationMutation,
   useUpdateOfficialVersionQuotationMutation,
   useCancelAndReplaceApprovedOfficialVersionQuotationMutation,
   useDuplicateMultipleVersionQuotationsMutation,
   useTrashVersionQuotationMutation,
-  useUnTrashVersionQuotationMutation,
+  useRestoreVersionQuotationMutation,
   useGetVersionQuotationByIdQuery,
   useLazyGenerateVersionQuotationPdfQuery,
+  useLazyPreviewVersionQuotationPdfQuery,
 
   useSendEmailAndGenerateReportMutation,
 } = versionQuotationService;

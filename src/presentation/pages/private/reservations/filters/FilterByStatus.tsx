@@ -29,8 +29,8 @@ export const FilterByStatus = ({ options }: Props) => {
       dataKey="id"
       placeholder="Selecciona un estado"
       selectAllLabel="Todos"
-      // maxSelectedLabels={2}
-      className="p-column-filter"
+      maxSelectedLabels={2}
+      className="p-column-filter max-w-[200px]"
     />
   );
 };

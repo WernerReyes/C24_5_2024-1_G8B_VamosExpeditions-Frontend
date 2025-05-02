@@ -99,7 +99,7 @@ export const updateByUserId = function (
     const {
       getAllOfficialVersionQuotations,
       getAllUnofficialVersionQuotations,
-      getAllArchivedVersionQuotations,
+      getAllTrashVersionQuotations,
     } = param;
 
     if (getAllOfficialVersionQuotations) {
@@ -158,11 +158,11 @@ export const updateByUserId = function (
       );
     }
 
-    if (getAllArchivedVersionQuotations) {
+    if (getAllTrashVersionQuotations) {
       dispatch(
         versionQuotationService.util.updateQueryData(
-          "getAllArchivedVersionQuotations",
-          getAllArchivedVersionQuotations,
+          "getAllTrashVersionQuotations",
+          getAllTrashVersionQuotations,
           (draft) => {
             Object.assign(draft, {
               data: {

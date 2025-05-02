@@ -11,9 +11,10 @@ type Props = {
 export const FilterByDate = ({ options, placeholder }: Props) => {
   return (
     <Calendar
-      value={options.value}
-      onChange={(e) =>
+      value={options.value && new Date(options.value)}
+      onChange={(e) => {
         e.value && options.filterApplyCallback(e.value, options.index)
+      }
       }
       placeholder={placeholder}
       dateFormat={"dd/mm/yy"}
