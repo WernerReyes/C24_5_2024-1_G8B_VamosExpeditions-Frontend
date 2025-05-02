@@ -32,7 +32,7 @@ export const PDFPreview = ({ blob, name = "document" }: Props) => {
         contentClassName="p-0"
       >
         <i
-          className="pi pi-times absolute text-xs top-2 right-2 text-white hover:text-slate-200 cursor-pointer"
+          className="pi pi-times absolute md:text-xs top-2 right-2 md:text-white md:hover:text-slate-200 cursor-pointer"
           onClick={() => setUrl(null)}
         ></i>
 

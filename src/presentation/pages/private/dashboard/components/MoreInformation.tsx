@@ -6,6 +6,7 @@ type Props = {
   updatedAt: Date;
   userFullname: string;
   handleViewDetails: () => void;
+  disabled?: boolean;
 };
 
 export const MoreInformation = ({
@@ -13,8 +14,8 @@ export const MoreInformation = ({
   updatedAt,
   userFullname,
   handleViewDetails,
+  disabled = false,
 }: Props) => {
- 
   return (
     <div className="bg-gray-50 p-3 mt-4 border-gray-100 text-sm">
       <div className="grid grid-cols-1 gap-y-3 md:grid-cols-3">
@@ -49,8 +50,11 @@ export const MoreInformation = ({
 
       <div className="w-full flex md:justify-end">
         <Button
+          loading={disabled}
           size="small"
           label="Ver detalles"
+          disabled={disabled}
+          icon="pi pi-eye"
           className="mt-4 w-full md:max-w-48 text-sm"
           onClick={() => handleViewDetails()}
         />
