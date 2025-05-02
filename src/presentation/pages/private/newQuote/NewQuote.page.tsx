@@ -16,7 +16,6 @@ import {
 
 import type { AppState } from "@/app/store";
 
-import { constantRoutes } from "@/core/constants";
 import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 import {
   onSetCurrentQuotation,
@@ -29,10 +28,8 @@ import {
   useGetVersionQuotationByIdQuery,
   useUpdateVersionQuotationMutation,
 } from "@/infraestructure/store/services";
-import { BlockUI } from "primereact/blockui";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { useLocation } from "react-use";
 import { EditableQuotationName, ProgressBarQuotation } from "./components";
 
 import { constantStorage } from "@/core/constants/storage.const";
@@ -68,11 +65,8 @@ const renderStepContent = (step: number): React.ReactNode => {
   }
 };
 
-const { VIEW_QUOTE } = constantRoutes.private;
-
 const NewQuotePage = () => {
   const dispatch = useDispatch();
-  const location = useLocation();
   const { quoteId, version } = useParams<{
     quoteId: string;
     version: string;
@@ -184,7 +178,6 @@ const NewQuotePage = () => {
   }, [currentVersionQuotationData]);
 
   useEffect(() => {
-
     if (isLoadingStep) return;
 
     if (
@@ -192,7 +185,6 @@ const NewQuotePage = () => {
       currentHotelRoomTripDetailsData.length === 0 &&
       currentStep > 0
     ) {
-   
       setTimeout(() => {
         dispatch(onSetCurrentStep(0));
       }, 0);
@@ -204,11 +196,7 @@ const NewQuotePage = () => {
         dispatch(onSetCurrentStep(1));
       }, 0);
     }
-  }, [
-    currentHotelRoomTripDetailsData, 
-    isLoadingStep, 
-    currentStep
-  ]);
+  }, [currentHotelRoomTripDetailsData, isLoadingStep, currentStep]);
 
   useEffect(() => {
     if (!currentVersionQuotationData || !isVerified || isLoadingStep) return;
@@ -274,15 +262,7 @@ const NewQuotePage = () => {
           header: step.header,
           children: !isLoadingStep ? (
             <div className={"pe-4 h-full sm:pe-0"}>
-              <BlockUI
-                blocked={location.pathname === VIEW_QUOTE(versionQuotationId)}
-                className="!z-10"
-                template={
-                  <i className="pi pi-lock" style={{ fontSize: "3rem" }}></i>
-                }
-              >
-                {renderStepContent(index)}
-              </BlockUI>
+              {renderStepContent(index)}
               <div className="flex pt-4  justify-between">
                 {index > 0 && (
                   <Button

@@ -12,7 +12,6 @@ type PrivateRoutes = {
   QUOTES: string;
   NEW_QUOTE: string;
   EDIT_QUOTE: (id?: VersionQuotationEntity["id"]) => string;
-  VIEW_QUOTE: (id?: VersionQuotationEntity["id"]) => string;
   RESERVATIONS: string;
   PROFILE: string;
   HOTEL: string;
@@ -44,10 +43,6 @@ export const constantRoutes: Routes = {
       id
         ? `${PRIVATE_BASE}/quote/${id.quotationId}/${id.versionNumber}`
         : "/quote/:quoteId/:version",
-    VIEW_QUOTE: (id?: VersionQuotationEntity["id"]) =>
-      id
-        ? `${PRIVATE_BASE}/quote/${id.quotationId}/${id.versionNumber}/view`
-        : "/quote/:quoteId/:version/view",
     RESERVATIONS: `${PRIVATE_BASE}/reservations`,
     PROFILE: `${PRIVATE_BASE}/profile`,
     HOTEL: `${PRIVATE_BASE}/hotel`,

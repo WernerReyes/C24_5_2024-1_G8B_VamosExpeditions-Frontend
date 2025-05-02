@@ -5,7 +5,7 @@ import {
 import { useGetAllReservationsQuery } from "@/infraestructure/store/services";
 import {
   DefaultFallBackComponent,
-  ErrorBoundary
+  ErrorBoundary,
 } from "@/presentation/components";
 import { ItemSkeleton } from "../ItemSkeleton";
 import { EmptyReservations } from "./components/EmptyReservations";
@@ -29,9 +29,13 @@ export const ActiveReserves = () => {
       <ErrorBoundary
         error={isError}
         isLoader={isLoading || isFetching}
-        loadingComponent={Array.from({ length: 6 }).map((_, index) => (
-          <ItemSkeleton key={index} />
-        ))}
+        loadingComponent={
+          <div className="space-y-4">
+            {[...Array(6)].map((_, index) => (
+              <ItemSkeleton key={index} />
+            ))}
+          </div>
+        }
         fallBackComponent={
           <DefaultFallBackComponent
             isFetching={isFetching}
@@ -54,6 +58,3 @@ export const ActiveReserves = () => {
     </>
   );
 };
-
-
-

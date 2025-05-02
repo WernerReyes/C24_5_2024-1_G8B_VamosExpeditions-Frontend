@@ -34,7 +34,7 @@ const NotificationPage = lazy(
   () => import("../pages/private/notification/Notification.page")
 );
 
-const { BASE, VIEW_QUOTE, EDIT_QUOTE, ...rest } = constantRoutes.private;
+const { BASE,  EDIT_QUOTE, ...rest } = constantRoutes.private;
 
 const {
   DASHBOARD,
@@ -80,7 +80,6 @@ const PrivateRoutes = () => {
             <Route path={NEW_QUOTE} element={<NewQuotePage />} />
           </Route>
           <Route path={EDIT_QUOTE()} element={<NewQuotePage />} />
-          <Route path={VIEW_QUOTE()} element={<NewQuotePage />} />
           <Route path={RESERVATIONS} element={<ReservationsPage />} />
 
           <Route path={PROFILE} element={<ProfilePage />} />
