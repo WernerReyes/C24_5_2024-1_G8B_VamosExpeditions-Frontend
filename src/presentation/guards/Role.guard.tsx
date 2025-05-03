@@ -8,13 +8,14 @@ const { LOGIN } = constantRoutes.public;
 
 type Props = {
   roles: RoleEnum[];
+  navigateTo?: string;
 };
 
-export const RoleGuard = ({ roles }: Props) => {
+export const RoleGuard = ({ roles, navigateTo=LOGIN }: Props) => {
   const { authUser } = useSelector((state: AppState) => state.auth);
   return authUser && authUser.role && roles.includes(authUser.role.name) ? (
     <Outlet />
   ) : (
-    <Navigate to={LOGIN} />
+    <Navigate to={navigateTo} />
   );
 };

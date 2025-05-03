@@ -12,11 +12,11 @@ import { NewQuotationDialog } from "../NewQuotationDialog";
 
 import "./Sidebar.css";
 import { useSidebar } from "../../hooks";
+import { useSelector } from "react-redux";
+import { AppState } from "@/app/store";
 
 const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, HOTEL, COUNTRY } =
   constantRoutes.private;
-
-
 
 const ITEMS: MenuItem[] = [
   {
@@ -36,7 +36,6 @@ const ITEMS: MenuItem[] = [
     label: "Cotizaciones",
     className: "text-xs",
     icon: "pi  pi-book",
-    expanded: true,
     items: [
       {
         label: "Nueva Cotización",
@@ -65,11 +64,20 @@ const ITEMS: MenuItem[] = [
     url: COUNTRY,
     template: (e) => <Template menuItem={e} />,
   },
+
+  {
+    id: "users",
+    label: "Usuarios",
+    icon: "pi pi-users",
+    url: "/app/users",
+    template: (e) => <Template menuItem={e} />,
+  },
 ];
 
 export const Sidebar = () => {
   const { width, DESKTOP, MACBOOK, TABLET } = useWindowSize();
   const { toggleSidebar, visible } = useSidebar();
+  const { isManager } = useSelector((state: AppState) => state.auth);
 
   return (
     <SidebarComponent
@@ -85,7 +93,17 @@ export const Sidebar = () => {
       dismissable={width < DESKTOP}
     >
       <hr className="mt-3 mb-2 border-2 border-gray-300 " />
-      <PanelMenu model={ITEMS} />
+      <PanelMenu
+        model={ITEMS.map((item) => {
+          if (item.id === "users") {
+            return {
+              ...item,
+              visible: isManager,
+            };
+          }
+          return item;
+        })}
+      />
     </SidebarComponent>
   );
 };

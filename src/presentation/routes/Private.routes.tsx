@@ -34,7 +34,9 @@ const NotificationPage = lazy(
   () => import("../pages/private/notification/Notification.page")
 );
 
-const { BASE,  EDIT_QUOTE, ...rest } = constantRoutes.private;
+const UsersPage = lazy(() => import("../pages/private/users/Users.page"));
+
+const { BASE, EDIT_QUOTE, ...rest } = constantRoutes.private;
 
 const {
   DASHBOARD,
@@ -45,6 +47,7 @@ const {
   HOTEL,
   COUNTRY,
   NOTIFICATIONS,
+  USERS,
 } = removeBaseRoute(rest, BASE);
 
 const PrivateRoutes = () => {
@@ -75,20 +78,27 @@ const PrivateRoutes = () => {
         >
           <Route path={DASHBOARD} element={<DashboardPage />} />
           <Route path={QUOTES} element={<QuotesPage />} />
-
           <Route element={<NewQuotationGuard />}>
             <Route path={NEW_QUOTE} element={<NewQuotePage />} />
           </Route>
           <Route path={EDIT_QUOTE()} element={<NewQuotePage />} />
           <Route path={RESERVATIONS} element={<ReservationsPage />} />
-
           <Route path={PROFILE} element={<ProfilePage />} />
           <Route path={HOTEL} element={<Hotelpage />} />
           <Route path={COUNTRY} element={<CountryPage />} />
-
           <Route path={NOTIFICATIONS} element={<NotificationPage />} />
-
-          {/* <Route path="*" element={<Navigate to="/" />} /> */}
+          
+          //* Guard for users
+          <Route
+            element={
+              <RoleGuard
+                roles={[RoleEnum.MANAGER_ROLE]}
+                navigateTo={`${BASE}${DASHBOARD}`}
+              />
+            }
+          >
+            <Route path={USERS} element={<UsersPage />} />
+          </Route>
         </Route>
       </RouterWithNotFound>
     </MainLayout>

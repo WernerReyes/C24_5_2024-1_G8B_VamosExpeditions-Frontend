@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { UserEntity } from "@/domain/entities";
+import { RoleEnum, type UserEntity } from "@/domain/entities";
 
 export enum AuthStatus {
   AUTHENTICATED = "authenticated",
@@ -9,11 +9,13 @@ export enum AuthStatus {
 export type AuthSliceState = {
   status: AuthStatus;
   authUser: null | UserEntity;
+  isManager: boolean;
 };
 
 const initialState: AuthSliceState = {
   status: AuthStatus.UNAUTHENTICATED,
   authUser: null,
+  isManager: false,
 };
 
 export const authSlice = createSlice({
@@ -25,17 +27,17 @@ export const authSlice = createSlice({
         ...state,
         status: AuthStatus.AUTHENTICATED,
         authUser: payload,
+        isManager: payload.role?.name === RoleEnum.MANAGER_ROLE,
       };
     },
 
-    
     onOnline: (state, { payload }: PayloadAction<UserEntity["online"]>) => {
       if (state.authUser?.id) {
         return {
           ...state,
           authUser: {
             ...state.authUser,
-            online: payload
+            online: payload,
           },
         };
       }

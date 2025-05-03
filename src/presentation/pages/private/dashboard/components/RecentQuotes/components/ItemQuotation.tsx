@@ -26,9 +26,8 @@ export const ItemQuotation = ({ quotation }: Props) => {
 
   const [blob, setBlob] = useState<Blob | null>(null);
 
-  const [triggerPreviewQuotationPdf, {
-    isLoading
-  }] = useLazyPreviewVersionQuotationPdfQuery();
+  const [triggerPreviewQuotationPdf, { isLoading, isFetching }] =
+    useLazyPreviewVersionQuotationPdfQuery();
 
   const handlePreviewQuotationPdf = async (
     quoteId: VersionQuotationEntity["id"]
@@ -117,7 +116,7 @@ export const ItemQuotation = ({ quotation }: Props) => {
         {/* Información Expandible */}
         {expanded && (
           <MoreInformation
-            disabled={isLoading}
+            disabled={isLoading || isFetching}
             createdAt={quotation.createdAt}
             updatedAt={quotation.updatedAt}
             userFullname={quotation.user?.fullname || "Usuario desconocido"}
