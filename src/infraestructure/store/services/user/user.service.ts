@@ -1,20 +1,23 @@
 import { AppState } from "@/app/store";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
 import {
-  ChangePasswordDto,
+  type ChangePasswordDto,
   changePasswordDto,
+  type GetUsersDto,
+  getUsersDto,
   userDto,
   type UserDto,
 } from "@/domain/dtos/user";
 import type { UserEntity } from "@/domain/entities";
+import { userModel } from "@/domain/models";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { onLogin } from "../../slices/auth.slice";
-import { setUsers } from "../../slices/users.slice";
 import { requestConfig } from "../config";
 import { reservationCache } from "../reservation/reservation.cache";
 import type { ApiResponse } from "../response";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
 import { userCache } from "./user.cache";
+import type { PaginatedResponse } from '../response';
 
 const PREFIX = "/user";
 
@@ -23,15 +26,19 @@ export const userService = createApi({
   tagTypes: ["Users"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    getUsers: builder.query<ApiResponse<UserEntity[]>, void>({
-      query: () => "/",
-      async onQueryStarted(_, { queryFulfilled, dispatch }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setUsers(data.data));
-        } catch (error) {
-          throw error;
-        }
+    getUsers: builder.query<ApiResponse<PaginatedResponse<UserEntity>>, GetUsersDto>({
+      query: (params) => {
+        const [_, errors] = getUsersDto.create(params);
+        if (errors) throw errors;
+
+        return {
+          url: "/",
+          method: "GET",
+          params: {
+            ...params,
+            select: userModel.toSelect(params.select),
+          },
+        };
       },
       providesTags: ["Users"],
     }),

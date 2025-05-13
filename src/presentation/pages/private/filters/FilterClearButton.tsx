@@ -12,6 +12,7 @@ export const FilterClearButton = (
     <Button
       label={width < TABLET ? "" : "Limpiar"}
       icon={width < TABLET ? "pi pi-times" : ""}
+      size='small'
       outlined
       onClick={() => options.filterClearCallback()}
     />

@@ -8,6 +8,8 @@ import { reservationCache } from "../reservation/reservation.cache";
 import { SocketManager } from "../socket/socket.service";
 import { userCache } from "../user/user.cache";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
+import { setusersDevicesConnections } from "../../slices/users.slice";
+import type { DeviceSocketRes } from "./auth.response";
 
 export const authSocket = {
   userConnected: () => {
@@ -33,43 +35,92 @@ export const authSocketListeners = (
   getState: () => AppState
 ) => ({
   userConnected: (socket: Socket) => {
-    socket?.on("userConnected", (data: UserEntity["id"]) => {
-      // dispatch(onOnline(true));
+    socket?.on(
+      "userConnected",
+      (data: { userId: UserEntity["id"]; devices: DeviceSocketRes[] }) => {
+        // dispatch(onOnline(true));
 
-      //* Update user to online
-      versionQuotationCache.updateByUserId(+data, true, dispatch, getState);
+    
 
-      userCache.updateById(+data, true, dispatch, getState as () => AppState);
+        //* Update user to online
+        versionQuotationCache.updateByUserId(
+          +data.userId,
+          true,
+          dispatch,
+          getState
+        );
 
-      reservationCache.updateReservationByUser(
-        {
-          id: +data,
-          online: true,
-        },
-        dispatch,
-        getState
-      );
-    });
+        userCache.updateById(
+          +data.userId,
+          true,
+          dispatch,
+          getState as () => AppState
+          // data.devices
+        );
+
+        dispatch(
+          setusersDevicesConnections(data.devices)
+        );
+
+       
+
+        reservationCache.updateReservationByUser(
+          {
+            id: +data.userId,
+            online: true,
+          },
+          dispatch,
+          getState
+        );
+      }
+    );
   },
 
   userDisconnected: (socket: Socket) => {
-    socket?.on("userDisconnected", (data: UserEntity["id"]) => {
-      // dispatch(onOnline(false));
+    socket?.on(
+      "userDisconnected",
+      (data: UserEntity["id"]) => {
+        // dispatch(onOnline(false));
 
-      //* Update user to online
-      versionQuotationCache.updateByUserId(+data, false, dispatch, getState);
+        //* Update user to online
+        versionQuotationCache.updateByUserId(
+          +data,
+          false,
+          dispatch,
+          getState
+        );
 
-      userCache.updateById(+data, false, dispatch, getState as () => AppState);
+        
+       
 
-      reservationCache.updateReservationByUser(
-        {
-          id: +data,
-          online: false,
-        },
-        dispatch,
-        getState
-      );
-    });
+        userCache.updateById(
+          +data,
+          false,
+          dispatch,
+          getState as () => AppState
+        );
+
+        reservationCache.updateReservationByUser(
+          {
+            id: +data,
+            online: false,
+          },
+          dispatch,
+          getState
+        );
+      }
+    );
+  },
+
+  deviceDisconnected: (socket: Socket) => {
+    socket?.on(
+      "deviceDisconnected",
+      (data: { devices: DeviceSocketRes[]; userId: UserEntity["id"] }) => {
+        dispatch(
+          setusersDevicesConnections(data.devices)
+        );
+      }
+    );
   },
 
   forceLogout: (socket: Socket) => {

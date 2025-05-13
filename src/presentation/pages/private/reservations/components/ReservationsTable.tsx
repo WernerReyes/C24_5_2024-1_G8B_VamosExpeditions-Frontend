@@ -31,7 +31,6 @@ import {
   FilterByDate,
   FilterClearButton,
 } from "../../filters";
-import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import { constantStorage } from "@/core/constants";
 import {
   EditorReservationStatus,
@@ -107,6 +106,19 @@ export const ReservationTable = () => {
       <div className="card">
         <Toolbar
           className="mb-4"
+          start={
+            <div className="flex gap-x-2 items-center">
+              <h4 className="m-0 text-sm md:text-lg font-semibold text-slate-900">Reservaciones</h4>
+              <Tag
+                value={
+                  (reservations?.total ?? 0) > 0
+                    ? `Total: ${reservations?.total ?? 0}`
+                    : "Total: 0"
+                }
+              />
+            </div>
+          }
+         
           end={
             <Button
               icon="pi pi-trash"
@@ -177,7 +189,6 @@ export const ReservationTable = () => {
             ref={dt}
             scrollable
             size="small"
-            filterDelay={1000}
             stateStorage="custom"
             stateKey={RESERVATION_PAGINATION}
             customSaveState={(state: any) => {
@@ -212,25 +223,15 @@ export const ReservationTable = () => {
                 className: "bg-white",
               },
             }}
-            footer={
-              <Paginator
-                first={first}
-                rows={limit}
-                totalRecords={reservations?.total || 0}
-                rowsPerPageOptions={ROW_PER_PAGE}
-                onPageChange={(e: PaginatorPageChangeEvent) => {
-                  handlePageChange(e);
-                  handleSaveState({
-                    first: e.first,
-                    rows: e.rows,
-
-                    filters,
-                  });
-                }}
-                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} cotizaciones"
-              />
-            }
+            first={first}
+            onPage={handlePageChange}
+            rowsPerPageOptions={ROW_PER_PAGE}
+            totalRecords={reservations?.total || 0}
+            paginator
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+           
+            currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} reservaciones"
+            
           >
             <Column field="id" align="center" />
             <Column
@@ -373,7 +374,6 @@ const headerColumnGroup = (
         headerClassName="bg-primary text-white"
         header="Estado"
         align="center"
-        filterHeaderClassName="bg-red-400"
         filterField="status"
         filterMatchMode="custom"
         filterFunction={filterByStatus}

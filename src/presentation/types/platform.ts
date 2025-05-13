@@ -1,0 +1,1 @@
+export type Platform = "Windows" | "MacOS" | "Linux" | "Android" | "iOS";

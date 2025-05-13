@@ -10,7 +10,7 @@ import {
 } from "@/infraestructure/store/services";
 import { ProgressBar, Tag } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   TrashDialog,
   ClientInfo,
@@ -76,6 +76,17 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
         });
     }
   };
+
+  useEffect(() => {
+    if (!archivedQuotes && !selectedQuote) return;
+
+    const editSelectedQuote = archivedQuotes?.content.find(
+      (quote) =>
+        quote.id.quotationId === selectedQuote?.id.quotationId &&
+        quote.id.versionNumber === selectedQuote?.id.versionNumber
+    );
+    if (editSelectedQuote) setSelectedQuote(editSelectedQuote);
+  }, [archivedQuotes]);
 
   return (
     <TrashDialog

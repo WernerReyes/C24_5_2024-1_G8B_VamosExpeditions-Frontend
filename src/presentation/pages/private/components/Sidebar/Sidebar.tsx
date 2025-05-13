@@ -84,7 +84,13 @@ export const Sidebar = () => {
       onHide={() => {
         toggleSidebar();
       }}
-      header={<img src="/images/logo.webp" alt="Logo" width="200" />}
+      header={
+        <div  className="flex flex-col items-center justify-center">
+          <img src="/images/logo.webp" alt="Logo"  width="200" />
+          
+          <hr className="mt-3 border-2 w-full border-gray-300 " />
+        </div>
+      }
       visible={visible}
       className="w-72"
       baseZIndex={width < MACBOOK ? 1000 : 0}
@@ -92,7 +98,6 @@ export const Sidebar = () => {
       modal={width < TABLET}
       dismissable={width < DESKTOP}
     >
-      <hr className="mt-3 mb-2 border-2 border-gray-300 " />
       <PanelMenu
         model={ITEMS.map((item) => {
           if (item.id === "users") {

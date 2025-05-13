@@ -85,6 +85,7 @@ export const updateByUser = function (
       );
     }
 
+
   }
 };
 
@@ -164,6 +165,7 @@ export const updateByUserId = function (
           "getAllTrashVersionQuotations",
           getAllTrashVersionQuotations,
           (draft) => {
+            console.log("draft", id, online, draft);
             Object.assign(draft, {
               data: {
                 ...draft.data,

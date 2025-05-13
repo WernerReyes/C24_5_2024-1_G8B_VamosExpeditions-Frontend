@@ -1,3 +1,4 @@
+import type { RenderStatus } from "@/presentation/types";
 import type { PartnerEntity } from "./partner.entity";
 import type { ReservationEntity } from "./reservation.entity";
 import type { TripDetailsEntity } from "./tripDetails.entity";
@@ -10,16 +11,9 @@ export enum VersionQuotationStatus {
   APPROVED = "APPROVED",
 }
 
-type VersionQuotationRender<T> = {
-  label: string;
-  icon: string;
-  severity: "info" | "warning" | "success" | "danger" | "secondary";
-  value: T;
-};
-
 export const versionQuotationRender: Record<
   VersionQuotationStatus,
-  VersionQuotationRender<VersionQuotationStatus>
+  RenderStatus<VersionQuotationStatus>
 > = {
   [VersionQuotationStatus.DRAFT]: {
     label: "Borrador",
@@ -57,7 +51,7 @@ export enum AllowVersionQuotationType {
 
 export const allowVersionQuotationTypesRender: Record<
   AllowVersionQuotationType,
-  VersionQuotationRender<AllowVersionQuotationType>
+  RenderStatus<AllowVersionQuotationType>
 > = {
   [AllowVersionQuotationType.TRANSPORTATION]: {
     label: "Transporte",

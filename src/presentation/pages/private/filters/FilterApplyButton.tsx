@@ -13,6 +13,7 @@ export const FilterApplyButton = (
     <Button
       label={width < TABLET ? "" : "Aplicar"}
       icon={width < TABLET ? "pi pi-check" : ""}
+      size="small"
       onClick={() => {
         const value = (
           options.filterModel as any as ColumnFilterMetaDataWithConstraint

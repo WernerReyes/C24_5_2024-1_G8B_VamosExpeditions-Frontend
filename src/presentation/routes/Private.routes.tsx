@@ -58,7 +58,7 @@ const PrivateRoutes = () => {
   useConnectSocketQuery();
 
   //* Get Users
-  useGetUsersQuery();
+  // useGetUsersQuery({});
 
   useEffect(() => {
     if (!pathname) return;

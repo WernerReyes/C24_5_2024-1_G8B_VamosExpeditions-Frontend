@@ -252,7 +252,7 @@ export const TrashDialog = ({
               <div className="flex gap-x-6 justify-between border-1 border-l-4 border-primary rounded-md mb-4 bg-primary/10">
                 <div className="text-sm p-4  self-center text-gray-500">
                   <strong>
-                    {selectedField?.deleteReason ?? "Sin motivo de archivado"}
+                    {selectedField?.deleteReason ?? "Sin motivo de eliminación"}
                   </strong>
 
                   <small className="block">

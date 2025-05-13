@@ -5,8 +5,10 @@ import { io, Socket } from "socket.io-client";
 import { authSocketListeners } from "../auth/auth.socket";
 import { requestConfig } from "../config";
 import { notificationSocketListeners } from "../notification/notification.socket";
+import { detectBrowser } from "@/core/utils";
 
 const { VITE_API_URL } = constantEnvs;
+
 
 export class SocketManager {
   private static instance: Socket | null = null;
@@ -16,6 +18,9 @@ export class SocketManager {
     if (!this.instance) {
       this.instance = io(VITE_API_URL, {
         transports: ["websocket"],
+       auth: {
+        "browserName": detectBrowser(),
+       },
         autoConnect: true,
         withCredentials: true,
       });
@@ -59,12 +64,9 @@ export const SocketService = createApi({
 
 
         socket?.on("connect", () => {
-          // const authSocket = authSocketListeners(
-          //   dispatch,
-          //   getState as () => AppState
-          // );
           authSocket.userConnected(socket);
           authSocket.userDisconnected(socket);
+          authSocket.deviceDisconnected(socket);
           
         });
         

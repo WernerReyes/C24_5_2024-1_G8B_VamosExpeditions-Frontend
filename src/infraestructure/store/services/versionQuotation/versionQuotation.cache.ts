@@ -2,6 +2,7 @@ import type { AppDispatch, AppState } from "@/app/store";
 import type {
   ClientEntity,
   HotelRoomTripDetailsEntity,
+  ReservationEntity,
   TripDetailsEntity,
   UserEntity,
   VersionQuotationEntity,
@@ -10,6 +11,7 @@ import {
   addMultipleHotelRoomTripDetails,
   deleteManyHotelRoomTripDetails,
   updateByClient,
+  updateByReservation,
   updateByTripDetails,
   updateByUser,
   updateByUserId,
@@ -89,6 +91,14 @@ export const versionQuotationCache = {
     dispatch: AppDispatch,
     getState: () => AppState
   ) => deleteManyHotelRoomTripDetails([data], dispatch, getState),
+
+
+  //* Reservation
+  updateByReservation: (
+    data: Partial<ReservationEntity>,
+    dispatch: AppDispatch,
+    getState: () => AppState
+  ) => updateByReservation(data, dispatch, getState),
 
   //* VersionQuotation
 

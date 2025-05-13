@@ -226,6 +226,7 @@ export const TrashReservationsDialog = ({ visible, onHide }: Props) => {
         first,
         rows: limit,
         totalRecords: 0,
+        emptyMessage: "No hay reservas en papelera",
         onPage: handlePageChange,
         value: reservations?.content ?? [],
         itemTemplate: (reservation: ReservationEntity) => {

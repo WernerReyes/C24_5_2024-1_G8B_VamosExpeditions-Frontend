@@ -161,6 +161,12 @@ export const reservationServiceStore = createApi({
           const { data } = await queryFulfilled;
 
           reservationCache.trashReservation(data.data, dispatch, getState);
+
+          versionQuotationCache.updateByReservation(
+            data.data,
+            dispatch,
+            getState as () => AppState
+          );
           startShowSuccess(data.message);
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
@@ -183,6 +189,12 @@ export const reservationServiceStore = createApi({
           startShowSuccess(data.message);
 
           reservationCache.restoreReservation(data.data, dispatch, getState);
+
+          versionQuotationCache.updateByReservation(
+            data.data,
+            dispatch,
+            getState as () => AppState
+          );
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
           throw error;

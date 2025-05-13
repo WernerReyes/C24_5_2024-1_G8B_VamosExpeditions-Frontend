@@ -22,7 +22,7 @@ import { Controller, useForm } from "react-hook-form";
 import {
   type HotelRoomTripDetailsEntity,
   OrderType,
-  TravelerStyle
+  TravelerStyle,
 } from "@/domain/entities";
 import { generateCode } from "../../utils";
 
@@ -34,7 +34,7 @@ import {
   useDeleteManyHotelRoomTripDetailsMutation,
   useGetAllClientsQuery,
   useGetCountriesQuery,
-  useUpsertTripDetailsMutation
+  useUpsertTripDetailsMutation,
 } from "@/infraestructure/store/services";
 import { useDispatch, useSelector } from "react-redux";
 import Style from "../Style.module.css";
@@ -74,7 +74,6 @@ export const TripDetailsForm = () => {
 
   const { selectedClient } = useSelector((state: AppState) => state.client);
 
- 
   const [upsertTripDetails, { isLoading: isUpsertingTripDetails }] =
     useUpsertTripDetailsMutation();
   const { data: clients, isLoading: isGettingAllClients } =
@@ -106,17 +105,26 @@ export const TripDetailsForm = () => {
     const daysToDelete = !accept
       ? hotelRoomTripDetails.filter((quote) => {
           const cityId = quote?.hotelRoom?.hotel?.distrit?.city?.id;
-          if (!tripDetailsDto.destination[cityId!]) setDeleteByDestination(true);
-          return (
-            !dateFnsAdapter.isWithinInterval(
-              quote.date,
-              tripDetailsDto.travelDates[0],
-              tripDetailsDto.travelDates[1]
-            )
+
+          console.log({
+            cityId,
+            destination: tripDetailsDto.destination,
+          });
+
+          if (!tripDetailsDto.destination[cityId!]) {
+            setDeleteByDestination(true);
+            return !Object.keys(tripDetailsDto.destination).includes(cityId!.toString());
+           
+          }
+          return !dateFnsAdapter.isWithinInterval(
+            quote.date,
+            tripDetailsDto.travelDates[0],
+            tripDetailsDto.travelDates[1]
           );
         })
       : [];
 
+    console.log({ daysToDelete });
 
     if (daysToDelete.length > 0) {
       setVisible(true);
@@ -125,9 +133,7 @@ export const TripDetailsForm = () => {
     }
     await upsertTripDetails({
       tripDetailsDto,
-    })
-      
-      
+    });
   };
 
   useEffect(() => {
@@ -147,7 +153,7 @@ export const TripDetailsForm = () => {
 
   useEffect(() => {
     if (currentTripDetails?.id) {
-      reset(tripDetailsDto.parse(currentTripDetails));  
+      reset(tripDetailsDto.parse(currentTripDetails));
     }
     dispatch(onSetSelectedClient(currentTripDetails?.client ?? null));
 
@@ -320,7 +326,6 @@ export const TripDetailsForm = () => {
           <div className={Style.container}>
             <ErrorBoundary
               isLoader={isGettingCountries || isFetchingCountries}
-              
               loadingComponent={
                 <div className="font-bold flex flex-col gap-2 mb-5">
                   <InputText

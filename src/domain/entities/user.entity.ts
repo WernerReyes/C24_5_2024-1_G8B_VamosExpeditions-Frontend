@@ -1,12 +1,20 @@
-
 import type { RoleEntity } from "./role.entity";
 export interface UserEntity {
-  id: number;
-  fullname: string;
-  email: string;
-  online?: boolean;
-  role?: RoleEntity;
-  phoneNumber?: string;
-  description?: string;
-}
+  readonly id: number;
+  readonly fullname: string;
+  readonly email: string;
+  readonly online?: boolean;
+  readonly role?: RoleEntity;
+  readonly phoneNumber?: string;
+  readonly description?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
 
+  readonly isDeleted?: boolean;
+  readonly deletedAt?: string;
+  readonly deletedReason?: string;
+  readonly activeDevices?: {
+    readonly deviceId: string;
+    readonly isOnline: boolean;
+  }[]
+}

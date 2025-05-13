@@ -4,7 +4,7 @@ import { requestConfig } from "../config";
 import type { ApiResponse } from "../response";
 import type { DistritEntity } from "@/domain/entities";
 
-const PREFIX = "/";
+const PREFIX = "/distrit";
 
 export const distritService = createApi({
   reducerPath: "distritService",
@@ -12,11 +12,11 @@ export const distritService = createApi({
 
   endpoints: (builder) => ({
     getDistrits: builder.query<ApiResponse<DistritEntity[]>, void>({
-      query: () => "country/distrit",
+      query: () => "/",
       keepUnusedDataFor: 1000 * 60 * 60 * 60, 
     }),
     getDistritsAndCity: builder.query<ApiResponse<DistritEntity[]>, void>({
-      query: () => "distrit",
+      query: () => "/",
       keepUnusedDataFor: 1000 * 60 * 60 * 60,
     }),
   }),

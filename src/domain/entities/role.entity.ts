@@ -1,4 +1,4 @@
-import { Severity } from "@/presentation/types";
+import type { RenderStatus } from "@/presentation/types";
 
 export enum RoleEnum {
   MANAGER_ROLE = "MANAGER_ROLE",
@@ -9,25 +9,15 @@ export interface RoleEntity {
   readonly name: RoleEnum;
 }
 
-export type RoleRender = {
-  label: string;
-  value: RoleEnum;
-  icon: string;
-  severity: Severity;
-};
-
-export const roleRender: Record<
-  RoleEnum,
-  RoleRender
-> = {
+export const roleRender: Record<RoleEnum, RenderStatus<RoleEnum>> = {
   [RoleEnum.MANAGER_ROLE]: {
-    label: "Manager",
+    label: "Gerente",
     value: RoleEnum.MANAGER_ROLE,
     icon: "pi pi-user",
     severity: "success",
   },
   [RoleEnum.EMPLOYEE_ROLE]: {
-    label: "Employee",
+    label: "Empleado",
     value: RoleEnum.EMPLOYEE_ROLE,
     icon: "pi pi-user",
     severity: "info",

@@ -1,8 +1,7 @@
 import type { UserEntity } from "@/domain/entities";
-import { userService } from "./user.service";
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 import type { RootState } from "@reduxjs/toolkit/query";
-import { setUsers } from "../../slices/users.slice";
+import { userService } from "./user.service";
 
 type Service = typeof userService.reducerPath;
 export const userCache = {
@@ -19,13 +18,15 @@ export const userCache = {
     args.forEach((arg) => {
       dispatch(
         userService.util.updateQueryData("getUsers", arg, (draft) => {
-          const existUser = draft.data.findIndex((user) => user.id === data.id);
+          const existUser = draft.data.content.findIndex(
+            (user) => user.id === data.id
+          );
           if (existUser !== -1) {
-            draft.data = draft.data.map((user) =>
+            draft.data.content = draft.data.content.map((user) =>
               user.id === data.id ? data : user
             );
           } else {
-            draft.data.push(data);
+            draft.data.content.push(data);
           }
         })
       );
@@ -34,6 +35,58 @@ export const userCache = {
 
   updateById: function (
     id: UserEntity["id"],
+    online: boolean,
+    dispatch: ThunkDispatch<any, any, UnknownAction>,
+    getState: () => RootState<any, any, Service>,
+    devices: string[] = [],
+  ) {
+    const args = userService.util.selectCachedArgsForQuery(
+      getState(),
+      "getUsers"
+    );
+
+    args.forEach((arg) => {
+      dispatch(
+        userService.util.updateQueryData("getUsers", arg, (draft) => {
+          console.log({
+            hola: draft.data.content.map((user) => {
+              if (user.id === id) {
+                return {
+                  ...user,
+                  activeDevices: user.activeDevices?.map((device) =>
+                    devices.includes(device.deviceId)
+                      ? { ...device, isOnline: online }
+                      : device
+                  ),
+                };
+              }
+
+              return user;
+            }),
+          });
+          const updated = draft.data.content.map((user) =>
+            user.id === id
+              ? {
+                  ...user,
+                  online,
+                  activeDevices: user.activeDevices?.map((device) =>
+                    devices.includes(device.deviceId)
+                      ? { ...device, isOnline: online }
+                      : device
+                  ),
+                }
+              : user
+          );
+
+          draft.data.content = updated;
+        })
+      );
+    });
+  },
+
+  updateByDeviceId: function (
+    devices: string[],
+    userId: UserEntity["id"],
     online: boolean,
     dispatch: ThunkDispatch<any, any, UnknownAction>,
     getState: () => RootState<any, any, Service>
@@ -46,18 +99,40 @@ export const userCache = {
     args.forEach((arg) => {
       dispatch(
         userService.util.updateQueryData("getUsers", arg, (draft) => {
-          const updated = draft.data.map((user) =>
-            user.id === id ? { ...user, online } : user
-          );
+          console.log({
+            hola: draft.data.content.map((user) => {
+              if (user.id === userId) {
+                return {
+                  ...user,
+                  activeDevices: user.activeDevices?.map((device) =>
+                    devices.includes(device.deviceId)
+                      ? { ...device, isOnline: online }
+                      : device
+                  ),
+                };
+              }
 
-          const sortedUsers = [...updated].sort((a, b) => {
-            if (a.online === b.online) return 0;
-            return a.online ? -1 : 1;
+              return user;
+            }),
+          });
+          const updated = draft.data.content.map((user) => {
+            if (user.id === userId) {
+              return {
+                ...user,
+                activeDevices: user.activeDevices?.map((device) =>
+                  devices.includes(device.deviceId)
+                    ? { ...device, isOnline: online }
+                    : device
+                ),
+              };
+            }
+
+            return user;
           });
 
-          draft.data = sortedUsers;
+          draft.data.content = updated;
 
-          dispatch(setUsers(sortedUsers));
+          // dispatch(setUsers(sortedUsers));
         })
       );
     });

@@ -33,6 +33,7 @@ import { UnofficialDataTable } from "./UnofficialDataTable";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
 import { onSetNumberOfVersions } from "@/infraestructure/store";
+import { FieldNotAssigned } from "../../components";
 
 const { QUOTATION_PAGINATION } = constantStorage;
 
@@ -221,7 +222,7 @@ export const QuotesTable = () => {
         }
         fallBackComponent={
           <DataTableQuotation
-          filters={filters}
+            filters={filters}
             value={[]}
             header={header}
             extraColumns={[
@@ -268,9 +269,10 @@ export const QuotesTable = () => {
             },
             {
               header: "Reserva relacionada",
+              headerClassName: "min-w-40",
               body: (data: VersionQuotationEntity) => {
                 if (!data?.reservation?.id) {
-                  return "Ninguno";
+                  return <FieldNotAssigned message="No asignada" />;
                 }
 
                 const { icon, label, severity } =
@@ -279,7 +281,15 @@ export const QuotesTable = () => {
                 return (
                   <div className="flex items-center gap-2">
                     <span>#{data.reservation?.id}</span>
-                    <Tag icon={icon} severity={severity} value={label} />
+                    {data.reservation?.isDeleted ? (
+                      <Tag
+                        icon="pi pi-trash"
+                        value="En papelera"
+                        severity="danger"
+                      />
+                    ) : (
+                      <Tag icon={icon} severity={severity} value={label} />
+                    )}
                   </div>
                 );
               },

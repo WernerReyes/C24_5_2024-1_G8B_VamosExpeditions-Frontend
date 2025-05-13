@@ -11,8 +11,6 @@ export const filterByStatus = (
 ) => {
   if (Array.isArray(filter) && filter.length === 0) return true;
 
-  console.log("filter", filter, value);
-  
   return Array.isArray(filter)
     ? filter.some((item) => item?.id === value)
     : false;
