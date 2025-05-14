@@ -1,12 +1,6 @@
 import { VersionQuotationEntity } from "@/domain/entities";
+import { onSetNumberOfVersions } from "@/infraestructure/store";
 import { useGetAllUnofficialVersionQuotationsQuery } from "@/infraestructure/store/services";
-import { usePaginator } from "@/presentation/hooks";
-import { DataTableSelectionMultipleChangeEvent } from "primereact/datatable";
-import { Paginator } from "primereact/paginator";
-import { useEffect, useState } from "react";
-import { QuotesTableFilters } from "../types";
-import { getTransformedFilters } from "../utils";
-import { DataTableQuotation } from "./DataTableQuotation/DataTableQuotation";
 import {
   Column,
   DataTable,
@@ -14,10 +8,16 @@ import {
   ErrorBoundary,
   Skeleton,
 } from "@/presentation/components";
+import { usePaginator } from "@/presentation/hooks";
 import { ColumnGroup } from "primereact/columngroup";
+import { DataTableSelectionMultipleChangeEvent } from "primereact/datatable";
+import { Paginator } from "primereact/paginator";
 import { Row } from "primereact/row";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { onSetNumberOfVersions } from "@/infraestructure/store";
+import { QuotesTableFilters } from "../types";
+import { getTransformedFilters } from "../utils";
+import { DataTableQuotation } from "./DataTableQuotation/DataTableQuotation";
 
 type Props = {
   currentRowExpanded?: VersionQuotationEntity;
@@ -49,7 +49,6 @@ export const UnofficialDataTable = ({
     setFilters,
   ] = useState<QuotesTableFilters>({});
 
-
   const { currentData, isLoading, isFetching, isError, refetch } =
     useGetAllUnofficialVersionQuotationsQuery(
       {
@@ -64,6 +63,34 @@ export const UnofficialDataTable = ({
         quotationId: currentRowExpanded?.id.quotationId,
         createdAt,
         updatedAt,
+
+        select: {
+          version_number: true,
+          quotation_id: true,
+          name: true,
+          trip_details: {
+            client: {
+              id: true,
+              country: true,
+              email: true,
+              phone: true,
+              fullName: true,
+            },
+            number_of_people: true,
+            start_date: true,
+            end_date: true,
+          },
+          user: {
+            id_user: true,
+            fullname: true,
+          },
+          completion_percentage: true,
+          status: true,
+          official: true,
+
+          created_at: true,
+          updated_at: true,
+        },
       },
       {
         skip: !currentPage || !currentRowExpanded,
@@ -87,8 +114,6 @@ export const UnofficialDataTable = ({
       )
     );
   }, [currentData]);
-
-
 
   return (
     <ErrorBoundary

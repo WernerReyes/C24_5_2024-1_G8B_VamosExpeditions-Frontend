@@ -43,6 +43,38 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
         page: currentPage,
         limit,
         name: debouncedSearchByName,
+
+        select: {
+          version_number: true,
+          quotation_id: true,
+          name: true,
+          trip_details: {
+            client: {
+              id: true,
+              country: true,
+              email: true,
+              phone: true,
+              fullName: true,
+            },
+            number_of_people: true,
+            start_date: true,
+            end_date: true,
+          },
+          user: {
+            id_user: true,
+            fullname: true,
+          },
+          completion_percentage: true,
+          status: true,
+          official: true,
+
+          created_at: true,
+          updated_at: true,
+
+          deleted_at: true,
+          delete_reason: true,
+          is_deleted: true,
+        },
       },
       {
         skip: !visible,

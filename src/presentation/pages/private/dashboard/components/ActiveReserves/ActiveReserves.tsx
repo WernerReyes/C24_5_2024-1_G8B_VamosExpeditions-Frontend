@@ -17,6 +17,41 @@ export const ActiveReserves = () => {
       limit: 6,
       page: 1,
       status: [ReservationStatus.ACTIVE],
+      select: {
+        id: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+        quotation: {
+          version_quotation: [
+            {
+              version_number: true,
+              quotation_id: true,
+
+              trip_details: {
+                start_date: true,
+                end_date: true,
+
+                client: {
+                  fullName: true,
+                },
+                number_of_people: true,
+                trip_details_has_city: [
+                  {
+                    city: {
+                      name: true,
+                    },
+                  },
+                ],
+              },
+              final_price: true,
+              user: {
+                fullname: true,
+              },
+            },
+          ],
+        },
+      },
     });
 
   const reservations = currentData?.data?.content;

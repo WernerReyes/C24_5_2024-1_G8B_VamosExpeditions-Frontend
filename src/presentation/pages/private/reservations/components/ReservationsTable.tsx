@@ -64,6 +64,37 @@ export const ReservationTable = () => {
       status,
       createdAt: createdAt && new Date(createdAt),
       updatedAt: updatedAt && new Date(updatedAt),
+      select: {
+        id: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+        quotation: {
+          version_quotation: [
+            {
+              version_number: true,
+              quotation_id: true,
+              name: true,
+              trip_details: {
+                start_date: true,
+                end_date: true,
+                client: {
+                  id: true,
+                  fullName: true,
+                  email: true,
+                  country: true,
+                  phone: true,
+                },
+              },
+              user: {
+                id_user: true,
+                fullname: true,
+              },
+              final_price: true,
+            },
+          ],
+        },
+      },
     });
 
   const reservations = currentData?.data;
@@ -71,7 +102,7 @@ export const ReservationTable = () => {
   const [selectedReservations, setSelectedReservations] = useState<
     ReservationEntity[]
   >([]);
-  
+
   const [cancelReservation, setCancelReservation] =
     useState<ReservationEntity | null>(null);
 
@@ -92,7 +123,6 @@ export const ReservationTable = () => {
     if (tdEmpty) tdEmpty.setAttribute("colspan", "12");
   }, [isError]);
 
-
   return (
     <div>
       <CancelConfirmReservationDialog
@@ -108,7 +138,9 @@ export const ReservationTable = () => {
           className="mb-4"
           start={
             <div className="flex gap-x-2 items-center">
-              <h4 className="m-0 text-sm md:text-lg font-semibold text-slate-900">Reservaciones</h4>
+              <h4 className="m-0 text-sm md:text-lg font-semibold text-slate-900">
+                Reservaciones
+              </h4>
               <Tag
                 value={
                   (reservations?.total ?? 0) > 0
@@ -118,7 +150,6 @@ export const ReservationTable = () => {
               />
             </div>
           }
-         
           end={
             <Button
               icon="pi pi-trash"
@@ -229,9 +260,7 @@ export const ReservationTable = () => {
             totalRecords={reservations?.total || 0}
             paginator
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-           
             currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} reservaciones"
-            
           >
             <Column field="id" align="center" />
             <Column
@@ -252,7 +281,6 @@ export const ReservationTable = () => {
                   />
                 );
               }}
-             
               filterField="status"
             />
 
@@ -406,7 +434,6 @@ const headerColumnGroup = (
         filterField="createdAt"
         dataType="date"
         filterMatchMode="gte"
-
         pt={{
           filterMenuButton: ({ context }: { context: any }) => {
             return {
@@ -448,7 +475,6 @@ const headerColumnGroup = (
             };
           },
         }}
-    
         filterClear={(options) => <FilterClearButton {...options} />}
         filter
         filterElement={(options) => (

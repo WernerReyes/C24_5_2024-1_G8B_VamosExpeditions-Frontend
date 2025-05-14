@@ -12,6 +12,25 @@ export const RecentQuotes = () => {
     useGetAllOfficialVersionQuotationsQuery({
       page: 1,
       limit: 5,
+      select: {
+        version_number: true,
+        quotation_id: true,
+        completion_percentage: true,
+        trip_details: {
+          start_date: true,
+          end_date: true,
+          client: {
+            fullName: true,
+          },
+        },
+        final_price: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+        user: {
+          fullname: true,
+        },
+      },
     });
 
   const quotes = currentData?.data.content;
@@ -25,7 +44,7 @@ export const RecentQuotes = () => {
         isLoader={isLoading || isFetching}
         loadingComponent={
           <div className="space-y-4">
-            {[...Array(6)].map((_, index) => (
+            {[...Array(6)].map((_, index: number) => (
               <ItemSkeleton key={index} />
             ))}
           </div>

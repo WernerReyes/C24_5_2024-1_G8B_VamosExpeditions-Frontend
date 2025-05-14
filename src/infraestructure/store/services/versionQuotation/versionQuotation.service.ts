@@ -29,17 +29,13 @@ import { reservationCache } from "../reservation/reservation.cache";
 import type { AppState } from "@/app/store";
 import { dateFnsAdapter } from "@/core/adapters";
 import { trashDto, type TrashDto } from "@/domain/dtos/common";
+import { versionQuotationModel } from "@/infraestructure/models";
 
 const PREFIX = "/version-quotation";
 
 export const versionQuotationService = createApi({
   reducerPath: "versionQuotationService",
-  tagTypes: [
-    "TrashQuotations",
-    "OfficialQuotations",
-    "UnofficialQuotations",
-    "Drafts",
-  ],
+  tagTypes: ["TrashQuotations", "OfficialQuotations", "UnofficialQuotations"],
 
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
@@ -58,6 +54,7 @@ export const versionQuotationService = createApi({
             ...params,
             official: true,
             isDeleted: false,
+            select: versionQuotationModel.toString(params.select),
           },
         };
       },
@@ -100,6 +97,7 @@ export const versionQuotationService = createApi({
             ...params,
             official: false,
             isDeleted: false,
+            select: versionQuotationModel.toString(params.select),
           },
         };
       },
@@ -131,6 +129,7 @@ export const versionQuotationService = createApi({
             ...params,
             // official: false,
             isDeleted: true,
+            select: versionQuotationModel.toString(params.select),
           },
         };
       },

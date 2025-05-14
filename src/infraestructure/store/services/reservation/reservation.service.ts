@@ -20,6 +20,7 @@ import type {
 import { reservationCache } from "./reservation.cache";
 import { dateFnsAdapter } from "@/core/adapters";
 import { type TrashDto, trashDto } from "@/domain/dtos/common";
+import { reservationModel } from '@/infraestructure/models';
 
 const PREFIX = "/reservation";
 
@@ -90,6 +91,7 @@ export const reservationServiceStore = createApi({
           params: {
             ...params,
             isDeleted: false,
+            select: reservationModel.toString(params.select),
           },
         };
       },
@@ -121,6 +123,7 @@ export const reservationServiceStore = createApi({
           params: {
             ...params,
             isDeleted: true,
+            select: reservationModel.toString(params.select),
           },
         };
       },

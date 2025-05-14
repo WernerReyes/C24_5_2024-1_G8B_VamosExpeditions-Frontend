@@ -8,10 +8,7 @@ import { removeBaseRoute } from "@/core/utils";
 import { ExpiredSessionCountdown } from "../components";
 import { useCookieExpirationStore } from "../../infraestructure/hooks/useCookieExpirationStore";
 import { useLocation } from "react-use";
-import {
-  useConnectSocketQuery,
-  useGetUsersQuery,
-} from "@/infraestructure/store/services";
+import { useConnectSocketQuery } from "@/infraestructure/store/services";
 
 const MainLayout = lazy(() => import("../pages/private/layouts/Main.layout"));
 
@@ -57,9 +54,6 @@ const PrivateRoutes = () => {
   //* Connect to socket
   useConnectSocketQuery();
 
-  //* Get Users
-  // useGetUsersQuery({});
-
   useEffect(() => {
     if (!pathname) return;
     localStorage.setItem(constantStorage.CURRENT_ROUTE, pathname);
@@ -87,7 +81,6 @@ const PrivateRoutes = () => {
           <Route path={HOTEL} element={<Hotelpage />} />
           <Route path={COUNTRY} element={<CountryPage />} />
           <Route path={NOTIFICATIONS} element={<NotificationPage />} />
-          
           //* Guard for users
           <Route
             element={

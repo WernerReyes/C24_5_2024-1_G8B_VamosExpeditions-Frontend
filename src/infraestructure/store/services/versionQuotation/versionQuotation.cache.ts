@@ -121,6 +121,7 @@ export const versionQuotationCache = {
   ) => cancelAndReplaceApprovedOfficial(data, dispatch, getState),
 
   duplicateMultiple: (
+    // ids: VersionQuotationEntity["id"][],
     data: VersionQuotationEntity[],
     dispatch: AppDispatch,
     getState: () => AppState

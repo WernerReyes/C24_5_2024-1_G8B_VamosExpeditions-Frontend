@@ -1,7 +1,8 @@
+import { fromModelToString } from "@/core/utils";
 import { z } from "zod";
-import { roleModel } from "./role.model";
+import { roleModelSchema } from "./role.model";
 
-const userModelSchema = z.object({
+export const userModelSchemaPartial = z.object({
   id_user: z.boolean().optional(),
   fullname: z.boolean().optional(),
   email: z.boolean().optional(),
@@ -14,23 +15,17 @@ const userModelSchema = z.object({
   id_role: z.boolean().optional(),
   deleted_at: z.boolean().optional(),
   delete_reason: z.boolean().optional(),
-  role: z
-    .object({
-      id_role: z.boolean().optional(),
-      name: z.boolean().optional(),
-    })
-    .optional(),
 });
+
+const userModelSchema = userModelSchemaPartial.merge(
+  z.object({
+    role: z.lazy(() => roleModelSchema).optional(),
+  })
+);
 
 export type UserModel = z.infer<typeof userModelSchema>;
 
 export const userModel = {
   schema: userModelSchema,
-  toSelect: (user?: UserModel): string | undefined => {
-    if (!user) return undefined;
-    const { role, ...rest } = user;
-    return Object.keys(rest)
-      .join(",")
-      .concat(roleModel.toSelectPrefix(role));
-  },
+  toString: (user?: UserModel): string | undefined => user ? fromModelToString(user) : undefined,
 };

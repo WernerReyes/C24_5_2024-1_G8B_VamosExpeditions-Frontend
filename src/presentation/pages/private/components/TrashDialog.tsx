@@ -118,7 +118,7 @@ export const TrashDialog = ({
                 itemTemplate={(_, index) => (
                   <div
                     key={index}
-                    className="max-w-md p-4 space-y-4 border-b border-gray-200 divide-y divide-gray-200"
+                    className="w-full p-4 space-y-4 border-b border-gray-200 divide-y divide-gray-200"
                   >
                     <div className="flex items-center justify-between">
                       <div>

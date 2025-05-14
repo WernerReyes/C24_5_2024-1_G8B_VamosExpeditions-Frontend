@@ -2,6 +2,7 @@ import { z } from "zod";
 import { paginationDtoSchema } from "../common";
 import { dtoValidator } from "@/core/utils";
 import { VersionQuotationStatus } from "@/domain/entities";
+import { versionQuotationModel } from "@/infraestructure/models";
 
 const getVersionQuotationsDtoSchema = z
   .object({
@@ -14,6 +15,9 @@ const getVersionQuotationsDtoSchema = z
     quotationId: z.number().nullable().optional(),
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),
+    select: z.lazy(() => z.object({
+      ...versionQuotationModel.schema.shape,
+    })).optional(),
   })
   .merge(paginationDtoSchema);
 

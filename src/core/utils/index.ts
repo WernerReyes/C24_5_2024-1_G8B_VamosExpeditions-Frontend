@@ -3,6 +3,7 @@ export * from './device';
 export * from './dtoValidator';
 export * from './extractParams';
 export * from './format';
+export * from './fromModelToString';
 export * from './generateEmptyObject';
 export * from './measureExecutionTime';
 export * from './removeBaseRoute';

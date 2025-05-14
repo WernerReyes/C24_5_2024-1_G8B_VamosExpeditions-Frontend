@@ -48,9 +48,6 @@ export const usersSlice = createSlice({
         payload,
       }: PayloadAction<DeviceSocketRes[]>
     ) => {
-      console.log({
-        payload,
-      });
       return {
         ...state,
         usersDevicesConnections: payload,

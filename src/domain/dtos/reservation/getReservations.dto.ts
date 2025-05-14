@@ -1,17 +1,23 @@
 import { dtoValidator } from "@/core/utils";
+import { ReservationStatus } from "@/domain/entities";
+import { reservationModel } from "@/infraestructure/models";
 import { z } from "zod";
 import { paginationDtoSchema } from "../common";
-import { ReservationStatus } from "@/domain/entities";
 
 const getReservationsDtoSchema = z
   .object({
-    // status: z.optional(z.nativeEnum(ReservationStatus)),
     quotationId: z.number().min(1).optional(),
     versionNumber: z.number().min(1).optional(),
     status: z.nativeEnum(ReservationStatus).array().optional(),
     createdAt: z.date().optional(),
     updatedAt: z.date().optional(),
-
+    select: z
+      .lazy(() =>
+        z.object({
+          ...reservationModel.schema.shape,
+        })
+      )
+      .optional(),
   })
   .merge(paginationDtoSchema);
 
@@ -23,15 +29,4 @@ export const getReservationsDto = {
     if (errors) return [undefined, errors];
     return [dto, undefined];
   },
-  getQueryParams: (dto: GetReservationsDto) =>
-    new URLSearchParams(
-      Object.entries({
-        ...dto,
-        quotationId: dto.quotationId?.toString(),
-        versionNumber: dto.versionNumber?.toString(),
-      }).reduce((acc, [key, value]) => {
-        if (value !== undefined) acc[key] = value.toString();
-        return acc;
-      }, {} as Record<string, string>)
-    ).toString(),
 };

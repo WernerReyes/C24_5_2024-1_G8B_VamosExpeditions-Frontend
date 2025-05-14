@@ -9,7 +9,7 @@ import {
   type UserDto,
 } from "@/domain/dtos/user";
 import type { UserEntity } from "@/domain/entities";
-import { userModel } from "@/domain/models";
+import { userModel } from "@/infraestructure/models";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { onLogin } from "../../slices/auth.slice";
 import { requestConfig } from "../config";
@@ -17,7 +17,7 @@ import { reservationCache } from "../reservation/reservation.cache";
 import type { ApiResponse } from "../response";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
 import { userCache } from "./user.cache";
-import type { PaginatedResponse } from '../response';
+import type { PaginatedResponse } from "../response";
 
 const PREFIX = "/user";
 
@@ -26,7 +26,10 @@ export const userService = createApi({
   tagTypes: ["Users"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    getUsers: builder.query<ApiResponse<PaginatedResponse<UserEntity>>, GetUsersDto>({
+    getUsers: builder.query<
+      ApiResponse<PaginatedResponse<UserEntity>>,
+      GetUsersDto
+    >({
       query: (params) => {
         const [_, errors] = getUsersDto.create(params);
         if (errors) throw errors;
@@ -36,7 +39,7 @@ export const userService = createApi({
           method: "GET",
           params: {
             ...params,
-            select: userModel.toSelect(params.select),
+            select: userModel.toString(params.select),
           },
         };
       },

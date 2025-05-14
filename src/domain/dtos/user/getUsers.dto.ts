@@ -1,5 +1,5 @@
 import { dtoValidator } from "@/core/utils";
-import { userModel } from "@/domain/models/user.model";
+import { userModel } from "@/infraestructure/models/user.model";
 import { z } from "zod";
 import { paginationDtoSchema } from "../common";
 import { RoleEnum } from "../../entities/role.entity";
@@ -13,7 +13,12 @@ const getUsersDtoSchema = z
     createdAt: z.date().optional(),
     updatedAt: z.date().optional(),
     showDevices: z.boolean().optional().default(false),
-    select: userModel.schema.optional(),
+    select: z.lazy(() =>
+      z.object({
+        ...userModel.schema.shape,
+      })
+    ).optional(),
+
   })
   .merge(paginationDtoSchema);
 

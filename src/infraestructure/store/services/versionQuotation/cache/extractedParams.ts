@@ -1,7 +1,7 @@
-import { AppState } from "@/app/store";
+import type { AppState } from "@/app/store";
 import { extractParams } from "@/core/utils";
-import { GetVersionQuotationsDto } from "@/domain/dtos/versionQuotation";
-import { VersionQuotationEntity } from "@/domain/entities";
+import type { GetVersionQuotationsDto } from "@/domain/dtos/versionQuotation";
+import type { VersionQuotationEntity } from "@/domain/entities";
 
 export const extractedParams = function (getState: () => AppState) {
   //* Update the data in the cache for the query "getVersionQuotationById"

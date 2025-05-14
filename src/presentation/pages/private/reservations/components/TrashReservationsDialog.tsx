@@ -29,7 +29,38 @@ export const TrashReservationsDialog = ({ visible, onHide }: Props) => {
       {
         page: currentPage,
         limit,
+        select: {
+          id: true,
+          status: true,
+          created_at: true,
+          updated_at: true,
+          is_deleted: true,
+          deleted_at: true,
+          delete_reason: true,
+          quotation: {
+            version_quotation: [
+              {
+                version_number: true,
+                quotation_id: true,
+                name: true,
+                trip_details: {
+                  start_date: true,
+                  end_date: true,
+                  client: {
+                    fullName: true,
+                  },
+                  number_of_people: true,
+                },
+                user: {
+                  fullname: true,
+                },
+                final_price: true,
+              },
+            ],
+          },
+        },
       },
+
       {
         skip: !visible,
       }

@@ -41,6 +41,7 @@ const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const QuotesTable = () => {
   const dispatch = useDispatch();
+
   const { trashVersions } = useSelector(
     (state: AppState) => state.versionQuotation
   );
@@ -87,6 +88,45 @@ export const QuotesTable = () => {
       status,
       createdAt: createdAt && new Date(createdAt),
       updatedAt: updatedAt && new Date(updatedAt),
+      select: {
+        version_number: true,
+        quotation_id: true,
+        name: true,
+        trip_details: {
+          client: {
+            id: true,
+            country: true,
+            email: true,
+            phone: true,
+            fullName: true,
+          },
+          number_of_people: true,
+          start_date: true,
+          end_date: true,
+        },
+        user: {
+          id_user: true,
+          fullname: true,
+        },
+        completion_percentage: true,
+        status: true,
+        official: true,
+        quotation: {
+          reservation: {
+            id: true,
+            status: true,
+            is_deleted: true,
+          },
+          version_quotation: [
+            {
+              official: true,
+              is_deleted: true,
+            },
+          ],
+        },
+        created_at: true,
+        updated_at: true,
+      },
     },
     {
       skip: !currentPage,

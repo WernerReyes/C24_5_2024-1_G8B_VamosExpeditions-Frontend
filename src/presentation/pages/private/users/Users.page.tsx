@@ -73,7 +73,20 @@ const UsersPage = () => {
     createdAt,
     updatedAt,
     showDevices: true,
+    select: {
+      id_user: true,
+      fullname: true,
+      email: true,
+      role: {
+        name: true,
+      },
+      phone_number: true,
+      description: true,
+      created_at: true,
+      updated_at: true,
+    },
   });
+
 
   const [usersWithDevices, setUsersWithDevices] = useState<UserEntity[]>(
     usersData?.data.content || []
@@ -86,7 +99,6 @@ const UsersPage = () => {
     if (!filters) return;
     setFilters(getTransformedFilters(filters));
   }, [filters]);
-
 
   useEffect(() => {
     if (!usersData) return;
@@ -187,7 +199,11 @@ const UsersPage = () => {
         error={isErrorUsers}
       >
         <DataTable
-          value={usersWithDevices.length > 0 ? usersWithDevices : users?.content ?? []}
+          value={
+            usersWithDevices.length > 0
+              ? usersWithDevices
+              : users?.content ?? []
+          }
           stateStorage="custom"
           stateKey={USERS_PAGINATION}
           customSaveState={(state: any) => {
