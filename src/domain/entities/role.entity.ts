@@ -7,6 +7,11 @@ export enum RoleEnum {
 export interface RoleEntity {
   readonly id: string;
   readonly name: RoleEnum;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly isDeleted: boolean;
+  readonly deletedAt: Date | null;
+  readonly deleteReason: string | null;
 }
 
 export const roleRender: Record<RoleEnum, RenderStatus<RoleEnum>> = {

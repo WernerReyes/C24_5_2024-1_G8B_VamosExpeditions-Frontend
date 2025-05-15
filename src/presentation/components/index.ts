@@ -52,6 +52,7 @@ export * from "primereact/togglebutton";
 export * from "primereact/tooltip";
 export { ColumnGroup } from "primereact/columngroup";
 export { Row } from "primereact/row";
+export { Toolbar } from "primereact/toolbar";
 
 export { CountdownCircleTimer } from "react-countdown-circle-timer";
 

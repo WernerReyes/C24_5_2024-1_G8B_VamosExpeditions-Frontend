@@ -1,1 +1,2 @@
-export * from './UserTableFilters';
+export * from './roleTableFilters';
+export * from './userTableFilters';

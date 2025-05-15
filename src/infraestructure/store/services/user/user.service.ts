@@ -18,6 +18,7 @@ import type { ApiResponse } from "../response";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
 import { userCache } from "./user.cache";
 import type { PaginatedResponse } from "../response";
+import { trashDto, TrashDto } from "@/domain/dtos/common";
 
 const PREFIX = "/user";
 
@@ -93,6 +94,31 @@ export const userService = createApi({
       },
     }),
 
+    trashUser: builder.mutation<ApiResponse<UserEntity>, TrashDto>({
+      query: (body) => {
+        const [_, errors] = trashDto.create(body);
+        if (errors) throw errors;
+        return {
+          url: `/${body.id}/trash`,
+          method: "PUT",
+          body: {
+            deleteReason: body.deleteReason,
+          },
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          userCache.toogleTrash(data.data, dispatch, getState as () => AppState);
+
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      },
+    }),
+
     changePassword: builder.mutation<ApiResponse<void>, ChangePasswordDto>({
       query: (body) => {
         const [_, errors] = changePasswordDto.create(body);
@@ -119,5 +145,6 @@ export const userService = createApi({
 export const {
   useGetUsersQuery,
   useUpsertUserMutation,
+  useTrashUserMutation,
   useChangePasswordMutation,
 } = userService;

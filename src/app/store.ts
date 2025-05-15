@@ -13,11 +13,9 @@ import {
   userService,
   rtkQueryErrorLogger,
   SocketService,
-
-  //EmailService,
+  roleService,
   distritService,
   notificationService,
-
 } from "@/infraestructure/store/services";
 
 import {
@@ -47,11 +45,11 @@ export const store = configureStore({
     country: countrySlice.reducer,
     tripDetails: tripDetailsSlice.reducer,
     cookieExpiration: cookieExpirationSlice.reducer,
-
     chatNotifications: userNotificationSlice.reducer,
     users: usersSlice.reducer,
     [tripDetailsServiceStore.reducerPath]: tripDetailsServiceStore.reducer,
     [authService.reducerPath]: authService.reducer,
+    [roleService.reducerPath]: roleService.reducer,
     [userService.reducerPath]: userService.reducer,
     [countryService.reducerPath]: countryService.reducer,
     [clientService.reducerPath]: clientService.reducer,
@@ -63,17 +61,15 @@ export const store = configureStore({
     [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
     [SocketService.reducerPath]: SocketService.reducer,
-
-    //[EmailService.reducerPath]: EmailService.reducer,
     [distritService.reducerPath]: distritService.reducer,
     [notificationService.reducerPath]: notificationService.reducer,
-
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     })
       .concat(authService.middleware)
+      .concat(roleService.middleware)
       .concat(userService.middleware)
       .concat(countryService.middleware)
       .concat(clientService.middleware)
@@ -85,7 +81,6 @@ export const store = configureStore({
       .concat(hotelRoomTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
       .concat(SocketService.middleware)
-      //.concat(EmailService.middleware)
       .concat(distritService.middleware)
       .concat(notificationService.middleware)
       .concat(rtkQueryErrorLogger),

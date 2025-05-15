@@ -7,12 +7,12 @@ export interface UserEntity {
   readonly role?: RoleEntity;
   readonly phoneNumber?: string;
   readonly description?: string;
-  readonly createdAt: string;
-  readonly updatedAt: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
 
   readonly isDeleted?: boolean;
-  readonly deletedAt?: string;
-  readonly deletedReason?: string;
+  readonly deletedAt?: Date;
+  readonly deleteReason?: string;
   readonly activeDevices?: {
     readonly deviceId: string;
     readonly isOnline: boolean;

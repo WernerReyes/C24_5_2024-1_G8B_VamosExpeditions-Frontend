@@ -1,4 +1,5 @@
 export * from "./auth/auth.service";
+export * from "./role/role.service";
 export * from "./user/user.service";
 export * from "./client/client.service";
 export * from "./reservation/reservation.service";

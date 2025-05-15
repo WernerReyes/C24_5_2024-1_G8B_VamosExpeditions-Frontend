@@ -38,7 +38,7 @@ export const userCache = {
     online: boolean,
     dispatch: ThunkDispatch<any, any, UnknownAction>,
     getState: () => RootState<any, any, Service>,
-    devices: string[] = [],
+    devices: string[] = []
   ) {
     const args = userService.util.selectCachedArgsForQuery(
       getState(),
@@ -48,22 +48,6 @@ export const userCache = {
     args.forEach((arg) => {
       dispatch(
         userService.util.updateQueryData("getUsers", arg, (draft) => {
-          console.log({
-            hola: draft.data.content.map((user) => {
-              if (user.id === id) {
-                return {
-                  ...user,
-                  activeDevices: user.activeDevices?.map((device) =>
-                    devices.includes(device.deviceId)
-                      ? { ...device, isOnline: online }
-                      : device
-                  ),
-                };
-              }
-
-              return user;
-            }),
-          });
           const updated = draft.data.content.map((user) =>
             user.id === id
               ? {
@@ -133,6 +117,36 @@ export const userCache = {
           draft.data.content = updated;
 
           // dispatch(setUsers(sortedUsers));
+        })
+      );
+    });
+  },
+
+  // TODO: When I delete a user, I need to remove it from the cache and add it to the trash
+  toogleTrash: function (
+    data: UserEntity,
+    dispatch: ThunkDispatch<any, any, UnknownAction>,
+    getState: () => RootState<any, any, Service>
+  ) {
+    const args = userService.util.selectCachedArgsForQuery(
+      getState(),
+      "getUsers"
+    );
+
+    args.forEach((arg) => {
+      dispatch(
+        userService.util.updateQueryData("getUsers", arg, (draft) => {
+          console.log("draft", data);
+          if (data.isDeleted) {
+            draft.data.content = draft.data.content.filter(
+              (user) => user.id !== data.id
+            );
+            return;
+          }
+          const updated = draft.data.content.map((user) =>
+            user.id === data.id ? { ...user, ...data } : user
+          );
+          draft.data.content = updated;
         })
       );
     });

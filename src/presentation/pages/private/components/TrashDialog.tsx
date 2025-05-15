@@ -29,6 +29,7 @@ type Props = {
       message: string | React.ReactNode;
     }[];
   };
+  placeholder?: string;
   downloadFilePdf: {
     handleDownload: () => void;
     disabled?: boolean;
@@ -60,6 +61,7 @@ export const TrashDialog = ({
   refetch,
   searchByName = "",
   selectedField,
+  placeholder,
   setSearchByName,
   handleRestore,
   downloadFilePdf,
@@ -108,7 +110,7 @@ export const TrashDialog = ({
                 header={
                   <InputText
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder={placeholder ?? "Buscar..."}
                   className="p-inputtext-sm w-full"
                   value={searchByName}
              
@@ -154,7 +156,7 @@ export const TrashDialog = ({
                 header={
                   <InputText
                   type="text"
-                  placeholder="Buscar..."
+                   placeholder={placeholder ?? "Buscar..."}
                   className="p-inputtext-sm w-full"
                   value={searchByName}
                  
@@ -179,7 +181,7 @@ export const TrashDialog = ({
               header={
                 <InputText
                   type="text"
-                  placeholder="Buscar..."
+                   placeholder={placeholder ?? "Buscar..."}
                   className="p-inputtext-sm w-full"
                   value={searchByName}
                   onKeyDown={(e) => {

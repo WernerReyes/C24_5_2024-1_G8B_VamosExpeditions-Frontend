@@ -8,6 +8,7 @@ export type UsersState = {
   isLoadingUsers?: boolean;
   newLimit: number;
   usersDevicesConnections: DeviceSocketRes[];
+ 
 };
 
 const initialState: UsersState = {
@@ -21,6 +22,7 @@ const initialState: UsersState = {
   isLoadingUsers: false,
   newLimit: 10,
   usersDevicesConnections: [],
+  
 };
 
 export const usersSlice = createSlice({
@@ -44,15 +46,14 @@ export const usersSlice = createSlice({
 
     setusersDevicesConnections: (
       state,
-      {
-        payload,
-      }: PayloadAction<DeviceSocketRes[]>
+      { payload }: PayloadAction<DeviceSocketRes[]>
     ) => {
       return {
         ...state,
         usersDevicesConnections: payload,
       };
     },
+
   },
 });
 

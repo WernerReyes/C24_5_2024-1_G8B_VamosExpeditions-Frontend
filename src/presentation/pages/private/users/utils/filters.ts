@@ -1,5 +1,5 @@
 import { RoleEnum } from "@/domain/entities";
-import type { UserTableFilters } from "../types";
+import type { RoleTableFilters, UserTableFilters } from "../types";
 
 export const filterByStatus = (
   value: RoleEnum,
@@ -15,7 +15,7 @@ export const filterByStatus = (
     : false;
 };
 
-export const getTransformedFilters = (filters: any): UserTableFilters => {
+export const getUserTransformedFilters = (filters: any): UserTableFilters => {
   return {
     createdAt: filters["createdAt"]?.constraints[0].value ?? undefined,
     updatedAt: filters["updatedAt"]?.constraints[0].value ?? undefined,
@@ -26,5 +26,13 @@ export const getTransformedFilters = (filters: any): UserTableFilters => {
       filters["role.name"]?.constraints[0].value?.map(
         (role: { id: RoleEnum; label: string }) => role.id
       ) ?? undefined,
+  };
+};
+
+export const getRoleTransformedFilters = (filters: any): RoleTableFilters => {
+  return {
+    createdAt: filters["createdAt"]?.constraints[0].value ?? undefined,
+    updatedAt: filters["updatedAt"]?.constraints[0].value ?? undefined,
+    name: filters["name"]?.constraints[0].value ?? undefined,
   };
 };
