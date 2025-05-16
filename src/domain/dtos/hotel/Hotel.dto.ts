@@ -26,6 +26,7 @@ export const hotelDtoSchema = z.object({
   
 });
 
+
 export const registerRoomDtoSchema = z.object({
   type: z.literal(HotelRoomType.ROOM),
   roomType: z
@@ -109,22 +110,6 @@ export const hotelDto ={
     return [dto, undefined];
   },
 
-  /* getDefault: (entity: HotelEntity | null) => {
-    if (entity) {
-      return {
-        id: entity.id,
-        category: entity.category,
-        name: entity.name,
-        address: entity.address,
-        distrit: entity.distrit,
-      };
-    }
-
-    return null;
-  },
-  getEmpty: generateEmptyObject<HotelDto>(hotelDtoSchema, {
-    id: 0,
-  }), */
 
   getSchema: hotelDtoSchema,
 }

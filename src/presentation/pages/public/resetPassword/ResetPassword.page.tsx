@@ -52,7 +52,7 @@ const ResetPasswordPage = () => {
         setDecodedToken(decoded);
         setRemainingTime(
           (function () {
-            const now = Math.floor(Date.now() / 1000); //* Current time in seconds
+            const now = Math.floor(Date.now() / 1000); 
             const exp = decoded?.exp;
             const diff = (exp ?? 0) - now;
             return diff;

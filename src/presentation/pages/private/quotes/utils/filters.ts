@@ -42,3 +42,5 @@ export const getTransformedFilters = (filters: any): QuotesTableFilters => {
     updatedAt: filters["updatedAt"].constraints[0].value ?? undefined,
   };
 };
+
+

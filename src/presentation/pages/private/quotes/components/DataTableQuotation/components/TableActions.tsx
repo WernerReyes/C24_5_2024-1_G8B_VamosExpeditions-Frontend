@@ -1,14 +1,14 @@
 import { constantRoutes } from "@/core/constants";
 import {
   VersionQuotationStatus,
-  type VersionQuotationEntity
+  type VersionQuotationEntity,
 } from "@/domain/entities";
+
 import {
-  useLazyGenerateVersionQuotationPdfQuery
+  useLazyGenerateVersionQuotationExcelQuery,
+  useLazyGenerateVersionQuotationPdfQuery,
 } from "@/infraestructure/store/services";
-import {
-  Button
-} from "@/presentation/components";
+import { Button } from "@/presentation/components";
 import { useNavigate } from "react-router-dom";
 
 import { SendReportToEmailDialog } from "./SendReportToEmailDialog";
@@ -24,8 +24,13 @@ type TyoeTableActions = {
 export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   const navigate = useNavigate();
 
+  // pdf and excel
   const [handleGeneratePdf, { isLoading: isLoadingGeneratePdf }] =
     useLazyGenerateVersionQuotationPdfQuery();
+
+  // excel
+  const [handleGenerateExcel, { isLoading: isLoadingGenerateExcel }] =
+    useLazyGenerateVersionQuotationExcelQuery();
 
   return (
     <div className="space-x-1">
@@ -43,8 +48,10 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       />
 
       <Button
-        icon="pi pi-file-pdf"
+        icon={isLoadingGeneratePdf ? "pi pi-spin pi-spinner" : "pi pi-file-pdf"}
         tooltip="Generar PDF"
+        className="text-red-500"
+        tooltipOptions={{ position: "top" }}
         rounded
         text
         disabled={
@@ -59,10 +66,32 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
           });
         }}
       />
+
       {type === "principal" && <SendReportToEmailDialog rowData={rowData} />}
 
-      <TrashVersionQuotation versionQuotation={rowData} />
+      <Button
+        icon={
+          isLoadingGenerateExcel ? "pi pi-spin pi-spinner" : "pi pi-file-excel"
+        }
+        tooltip="Descargar Excel"
+        className="text-green-500"
+        tooltipOptions={{ position: "top" }}
+        rounded
+        text
+        disabled={
+          isLoadingGenerateExcel ||
+          rowData.status === VersionQuotationStatus.DRAFT
+        }
+        onClick={() => {
+          if (!rowData.tripDetails) return;
+          handleGenerateExcel({
+            id: rowData.id,
+            name: rowData?.tripDetails?.client?.fullName || "",
+          });
+        }}
+      />
 
+      <TrashVersionQuotation versionQuotation={rowData} />
     </div>
   );
 };

@@ -16,12 +16,15 @@ import {
   /* InputText, */
 } from "@/presentation/components";
 import { RoomWithHotelInfo } from "./TableRoomActions";
-import { useGetHotelsAllQuery } from "@/infraestructure/store/services";
+import {
+  useGetHotelsAllQuery,
+  useUpsertRoomMutation,
+} from "@/infraestructure/store/services";
 import { roomDto, RoomDto } from "@/domain/dtos/room";
 
 import Styles from "../Style.module.css";
 import { HotelRoomType } from "@/domain/dtos/hotel";
-import {  useState } from "react";
+import { useState } from "react";
 
 type Props = {
   rowData: RoomWithHotelInfo;
@@ -51,11 +54,12 @@ export const RoomEditAndRegisterModal = ({
     control,
     handleSubmit,
     formState: { isDirty },
+    reset,
   } = useForm<RoomDto>({
     resolver: zodResolver(roomDto.getSchema),
     defaultValues: rowData?.id
       ? {
-          id: rowData.id,
+          roomId: rowData.id,
           type: HotelRoomType.ROOM,
           roomType: rowData.roomType,
           capacity: rowData.capacity,
@@ -67,7 +71,7 @@ export const RoomEditAndRegisterModal = ({
           hotelId: rowData.hotels?.id,
         }
       : {
-          id: undefined,
+          roomId: undefined,
           roomType: "",
           type: HotelRoomType.ROOM,
           capacity: 1,
@@ -80,8 +84,15 @@ export const RoomEditAndRegisterModal = ({
         },
   });
 
+  const [upsertRoom, { isLoading }] = useUpsertRoomMutation();
+
   const handleUpsertRoom = async (data: RoomDto) => {
-    console.log(data);
+    upsertRoom(data)
+      .unwrap()
+      .then(() => {
+        reset();
+        
+      });
   };
 
   return (
@@ -175,9 +186,7 @@ export const RoomEditAndRegisterModal = ({
                       name="hotelId"
                       defaultValue={undefined}
                       render={({ field, fieldState: { error } }) => {
-                        /* const country = distrits?.data.find(
-                                          (country) => country.name === field?.value
-                                        ); */
+                        
                         return (
                           <Dropdown
                             label={{ text: "Nombre del hotel" }}
@@ -410,9 +419,8 @@ export const RoomEditAndRegisterModal = ({
 
         <div className="flex justify-end mt-3">
           <Button
-            icon="pi pi-save"
-            /* type="submit" */
-            disabled={!isDirty}
+            icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-save"}
+            disabled={!isDirty || isLoading}
             label={`${rowData.id ? "Editar" : "Registrar"} `}
           />
         </div>

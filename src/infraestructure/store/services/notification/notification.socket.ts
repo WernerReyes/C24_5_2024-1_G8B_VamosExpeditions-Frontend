@@ -5,8 +5,9 @@ import {
 import { SocketManager } from "../socket/socket.service";
 import { Dispatch } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
-import type { NotificationMessageEntity } from '@/domain/entities';
+import type { NotificationMessageEntity } from "@/domain/entities";
 import { notificationCache } from "./notification.cache";
+import { startShowSuccess } from "@/core/utils";
 
 export const notificationSocket = {
   sendNotification: (notification: SendNotificationDto) => {
@@ -26,17 +27,19 @@ export const notificationSocket = {
   },
 };
 
-
 export const notificationSocketListeners = (
-  dispatch: Dispatch,
+  dispatch: Dispatch
   // getState: () => AppState
 ) => ({
   getPersonalMessages: (socket: Socket) => {
     socket?.on("personal-message", (data: NotificationMessageEntity) => {
-      notificationCache.updateNotification(
-        data,
-        dispatch
-      );
+      const audio = new Audio("/sounds/notification.mp3");
+      audio.play();
+      
+
+      startShowSuccess(data.user?.fullname + " te ha enviado un mensaje");
+
+      notificationCache.updateNotification(data, dispatch);
     });
   },
 });

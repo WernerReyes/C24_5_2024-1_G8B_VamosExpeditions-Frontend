@@ -46,10 +46,12 @@ export const RoomTable = ({ rowData }: TyoeTableActions) => {
                   label="Agregar Habitación"
                   icon="pi pi-plus"
                   size="small"
+                  
                   onClick={() => {
                     setModalOpen(true);
                   }}
                 />
+                {/* new room  */}
                 <RoomEditAndRegisterModal
                   showModal={isModalOpen}
                   setShowModal={setModalOpen}

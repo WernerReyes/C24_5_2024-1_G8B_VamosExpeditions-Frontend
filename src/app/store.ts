@@ -16,6 +16,8 @@ import {
   roleService,
   distritService,
   notificationService,
+  roomService,
+  cityService,
 } from "@/infraestructure/store/services";
 
 import {
@@ -51,9 +53,7 @@ export const store = configureStore({
     [authService.reducerPath]: authService.reducer,
     [roleService.reducerPath]: roleService.reducer,
     [userService.reducerPath]: userService.reducer,
-    [countryService.reducerPath]: countryService.reducer,
     [clientService.reducerPath]: clientService.reducer,
-    [hotelService.reducerPath]: hotelService.reducer,
     [quotationServiceStore.reducerPath]: quotationServiceStore.reducer,
     [versionQuotationService.reducerPath]: versionQuotationService.reducer,
     [hotelRoomTripDetailsService.reducerPath]:
@@ -62,7 +62,11 @@ export const store = configureStore({
     [externalCountryService.reducerPath]: externalCountryService.reducer,
     [SocketService.reducerPath]: SocketService.reducer,
     [distritService.reducerPath]: distritService.reducer,
+    [cityService.reducerPath]: cityService.reducer,
+    [countryService.reducerPath]: countryService.reducer,
     [notificationService.reducerPath]: notificationService.reducer,
+    [hotelService.reducerPath]: hotelService.reducer,
+    [roomService.reducerPath]: roomService.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -71,9 +75,7 @@ export const store = configureStore({
       .concat(authService.middleware)
       .concat(roleService.middleware)
       .concat(userService.middleware)
-      .concat(countryService.middleware)
       .concat(clientService.middleware)
-      .concat(hotelService.middleware)
       .concat(reservationServiceStore.middleware)
       .concat(tripDetailsServiceStore.middleware)
       .concat(quotationServiceStore.middleware)
@@ -81,9 +83,17 @@ export const store = configureStore({
       .concat(hotelRoomTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
       .concat(SocketService.middleware)
+
       .concat(distritService.middleware)
+      .concat(cityService.middleware)
+      .concat(countryService.middleware)
+
       .concat(notificationService.middleware)
-      .concat(rtkQueryErrorLogger),
+      .concat(rtkQueryErrorLogger)
+
+      // apis hotel and room
+      .concat(hotelService.middleware)
+      .concat(roomService.middleware),
 });
 
 export type AppState = ReturnType<typeof store.getState>;

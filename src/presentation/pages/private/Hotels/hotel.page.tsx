@@ -1,19 +1,19 @@
-import {
+/* import {
   
   useUploadExcelMutation,
 } from "@/infraestructure/store/services";
 import { FileUpload } from "@/presentation/components";
 import { FileUpload as FileUploadType } from "primereact/fileupload";
-import { useRef } from "react";
-import { NewHotelDialog } from "./components/NewHotelDialog";
+import { useRef } from "react"; 
+import { NewHotelDialog } from "./components/NewHotelDialog";*/
 import { HotelTable } from "./components/HotelTable";
 
 const Hotelpage = () => {
-  const [uploadExcel, { isLoading }] = useUploadExcelMutation();
+  /* const [uploadExcel, { isLoading }] = useUploadExcelMutation(); */
   
   
 
-  const fileUploadRef = useRef<FileUploadType>(null);
+/*   const fileUploadRef = useRef<FileUploadType>(null);
 
   const onUpload = async (event: any) => {
     const file = event.files[0];
@@ -31,11 +31,11 @@ const Hotelpage = () => {
       console.log("Error uploading file:", error);
       fileUploadRef.current?.clear();
     }
-  };
+  }; */
 
   return (
     <div className="bg-white p-10 rounded-lg shadow-md overflow-x-hidden">
-      <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
+    {/*   <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
         <FileUpload
           ref={fileUploadRef}
           mode="basic"
@@ -52,7 +52,7 @@ const Hotelpage = () => {
         <NewHotelDialog />
 
         
-      </div>
+      </div> */}
       <HotelTable />
     </div>
   );

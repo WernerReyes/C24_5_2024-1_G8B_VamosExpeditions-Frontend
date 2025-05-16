@@ -45,6 +45,7 @@ export const QuotesTable = () => {
   const { trashVersions } = useSelector(
     (state: AppState) => state.versionQuotation
   );
+  
 
   const {
     handlePageChange,
@@ -111,6 +112,7 @@ export const QuotesTable = () => {
         completion_percentage: true,
         status: true,
         official: true,
+        final_price: true,
         quotation: {
           reservation: {
             id: true,

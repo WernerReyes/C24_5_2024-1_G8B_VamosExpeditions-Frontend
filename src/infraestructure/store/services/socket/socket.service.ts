@@ -23,6 +23,7 @@ export class SocketManager {
        },
         autoConnect: true,
         withCredentials: true,
+        reconnectionDelay: 1000,
       });
     }
     this.subscribers++;
