@@ -41,4 +41,3 @@ export const generateRecordFirstLetter = <T extends string>(
 export const firstLetterSubregions = generateRecordFirstLetter(SUBREGIONS, {
   "South America": "L", // L* for Latin America
 });
-

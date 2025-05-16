@@ -1,131 +1,103 @@
 # Vamos Expeditions Frontend
 
-A modern web application built with React, TypeScript, and Vite for managing travel expeditions and quotations.
+## Overview
+Vamos Expeditions is a modern web application built with React and TypeScript, designed to manage expeditions, hotels, and reservations. The application features a responsive UI with dark mode support and comprehensive booking management capabilities.
 
-## 🚀 Features
+## Tech Stack
+- **Framework**: React with TypeScript
+- **Styling**: Tailwind CSS + CSS Modules
+- **State Management**: Redux (with RTK Query)
+- **Form Handling**: React Hook Form with Zod validation 
+- **UI Components**: PrimeReact
+- **Build Tool**: Vite
 
-- User Authentication & Authorization
-- Quotation Management
+## Features
+- Hotel Management System
+  - Hotel registration and editing
+  - Category management (3-5 stars, Boutique, Villa, Lodge)
+  - District-based location tracking
 - Reservation System
-- Hotel Management
-- User Management
-- Real-time Updates
+  - Status management (Active, Pending, Rejected)
+  - Quotation version control
+  - Booking workflow management
 - Responsive Design
+  - Mobile-first approach
+  - Dark mode support
+- Form Validation
+  - Real-time validation
+  - Custom error messages
+  - Type-safe forms
 
-## 🛠️ Tech Stack
+## Getting Started
 
-- **Framework:** React 18.3
-- **Language:** TypeScript
-- **Build Tool:** Vite
-- **State Management:** Redux Toolkit
-- **UI Components:** PrimeReact 10.8
-- **Styling:** Tailwind CSS
-- **Form Handling:** React Hook Form
-- **Data Validation:** Zod
-- **Date Handling:** date-fns, luxon
-- **Notifications:** react-hot-toast
-- **Charts:** Chart.js with react-chartjs-2
-- **Other Tools:** Socket.io-client, JWT
+### Prerequisites
+- Node.js (Latest LTS version recommended)
+- pnpm (Package manager)
 
-## 🏗️ Project Structure
+### Installation
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+3. Copy the environment template:
+   ```bash
+   cp .env.template .env
+   ```
+4. Configure environment variables in `.env`
 
+### Development
+Start the development server:
+```bash
+pnpm run dev
+```
+
+### Build
+Create a production build:
+```bash
+pnpm run build
+```
+
+## Project Structure
 ```
 src/
-├── app/               # App initialization and store setup
-├── core/             # Core utilities and adapters
-├── domain/           # Business logic and entities
-├── infraestructure/  # External services and store
-└── presentation/     # UI components and pages
-    ├── components/   # Reusable UI components
-    ├── hooks/        # Custom React hooks
-    └── pages/        # Application pages
+├── app/           # App configuration and routes
+├── core/          # Core utilities and adapters
+├── data/          # Data layer and database interactions
+├── domain/        # Business logic and entities
+├── infrastructure/# External services and store
+└── presentation/  # UI components and pages
+    ├── components/# Reusable UI components
+    ├── guards/    # Route protection
+    ├── hooks/     # Custom React hooks
+    ├── pages/     # Application pages
+    └── routes/    # Route definitions
 ```
 
-## 🚦 Getting Started
+## Development Guidelines
 
-1. **Installation**
-```bash
-pnpm install
-```
+### Code Style
+- Use TypeScript for type safety
+- Follow React best practices and hooks guidelines
+- Implement proper error boundaries
+- Use CSS Modules for component-specific styles
 
-2. **Development**
-```bash
-pnpm dev
-```
+### Component Structure
+- Maintain separation of concerns
+- Use proper type definitions
+- Implement error handling
+- Follow the container/presenter pattern
 
-3. **Production Build**
-```bash
-pnpm build
-```
+### State Management
+- Use Redux for global state
+- Implement RTK Query for API calls
+- Handle loading and error states
 
-4. **Preview Production Build**
-```bash
-pnpm preview
-```
+## Contributing
+1. Create a feature branch
+2. Implement changes
+3. Submit a pull request
+4. Ensure all tests pass
 
-## 🔧 Configuration
-
-- **TypeScript:** Configured with strict mode and module bundler settings
-- **ESLint:** Extended configuration with React and TypeScript support
-- **Vite:** Configured with React SWC plugin for fast refresh
-- **Tailwind:** Custom theme configuration with extended colors
-
-## 🌐 Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-VITE_API_URL=your_api_url
-```
-
-## 🔐 Authentication
-
-The application uses JWT-based authentication with cookie storage and includes features like:
-- Login/Logout
-- Password Reset
-- Session Management
-- Token Refresh
-
-## 🎨 Theming
-
-Custom theme configuration with Tailwind CSS:
-- Primary: #01A3BB
-- Secondary: #F4F6F6
-- Tertiary: #01495D
-
-## 📱 Responsive Design
-
-Breakpoints:
-- Mobile: ≤ 640px
-- Tablet: ≤ 768px
-- Desktop: ≤ 1024px
-- Large: ≤ 1920px
-
-## 🛡️ Security Features
-
-- CSRF Protection
-- HTTP-Only Cookies
-- Time Zone Handling
-- Browser Detection
-
-## 📦 Available Scripts
-
-- `pnpm dev`: Start development server
-- `pnpm build`: Build for production
-- `pnpm lint`: Run ESLint
-- `pnpm start`: Build and serve production
-- `pnpm preview`: Preview production build
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📄 License
-
-This project is private and confidential. All rights reserved.
-
-        
+## License
+Private - All rights reserved
