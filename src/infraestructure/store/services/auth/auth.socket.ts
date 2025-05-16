@@ -126,6 +126,7 @@ export const authSocketListeners = (
   forceLogout: (socket: Socket) => {
     socket?.on("force-logout", async (data) => {
       const browserId = await getDeviceKey();
+      
       if (data.oldDeviceId.toLowerCase() === browserId.toLowerCase()) {
         const { browser, os } = getLoginMessageFromDeviceId(data.newDeviceId);
 

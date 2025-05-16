@@ -17,7 +17,7 @@ function getDeviceInfo() {
       brands.find((b) => b.brand !== "Not-A.Brand") || brands[0];
 
     return {
-      browser: mainBrand.brand.toLowerCase().replace(/\s+/g, "-"),
+      browser: detectBrowser(),
       version: mainBrand.version,
       platform: uaData.platform,
       // isMobile: entropy?.mobile ?? false,

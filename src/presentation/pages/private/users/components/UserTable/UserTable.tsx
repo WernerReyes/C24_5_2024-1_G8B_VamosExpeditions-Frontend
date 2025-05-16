@@ -79,7 +79,6 @@ export const UserTable = () => {
     createdAt,
     updatedAt,
     showDevices: true,
-    isDeleted: false,
     select: {
       id_user: true,
       fullname: true,

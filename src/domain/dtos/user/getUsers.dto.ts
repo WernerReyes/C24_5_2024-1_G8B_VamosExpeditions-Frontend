@@ -13,7 +13,6 @@ const getUsersDtoSchema = z
     createdAt: z.date().optional(),
     updatedAt: z.date().optional(),
     showDevices: z.boolean().default(false).optional(),
-    isDeleted: z.boolean().default(false).optional(),
     select: z.lazy(() =>
       z.object({
         ...userModel.schema.shape,

@@ -24,7 +24,7 @@ const PREFIX = "/user";
 
 export const userService = createApi({
   reducerPath: "userService",
-  tagTypes: ["Users"],
+  tagTypes: ["Users", "TrashUsers"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
     getUsers: builder.query<
@@ -40,11 +40,34 @@ export const userService = createApi({
           method: "GET",
           params: {
             ...params,
+            isDeleted: false,
             select: userModel.toString(params.select),
           },
         };
       },
       providesTags: ["Users"],
+    }),
+
+    getTrashUsers: builder.query<
+      ApiResponse<PaginatedResponse<UserEntity>>,
+      GetUsersDto
+    >({
+      query: (params) => {
+        const [_, errors] = getUsersDto.create(params);
+        if (errors) throw errors;
+
+        return {
+          url: "/",
+          method: "GET",
+          params: {
+            ...params,
+            isDeleted: true,
+            select: userModel.toString(params.select),
+          },
+        };
+      },
+
+      providesTags: ["TrashUsers"],
     }),
 
     upsertUser: builder.mutation<ApiResponse<UserEntity>, UserDto>({
@@ -110,13 +133,36 @@ export const userService = createApi({
         try {
           const { data } = await queryFulfilled;
 
-          userCache.toogleTrash(data.data, dispatch, getState as () => AppState);
+          userCache.trash(data.data, dispatch, getState as () => AppState);
 
           startShowSuccess(data.message);
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
         }
       },
+    }),
+
+    restoreUser: builder.mutation<ApiResponse<UserEntity>, UserEntity["id"]>({
+      query: (id) => {
+       if (!id) throw new Error("Id is required");
+       
+        return {
+          url: `/${id}/restore`,
+          method: "PUT",
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          userCache.restore(data.data, dispatch, getState as () => AppState);
+
+          startShowSuccess(data.message);
+
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      }
     }),
 
     changePassword: builder.mutation<ApiResponse<void>, ChangePasswordDto>({
@@ -144,7 +190,9 @@ export const userService = createApi({
 
 export const {
   useGetUsersQuery,
+  useGetTrashUsersQuery,
   useUpsertUserMutation,
   useTrashUserMutation,
+  useRestoreUserMutation,
   useChangePasswordMutation,
 } = userService;

@@ -1,6 +1,9 @@
 import { cn, dateFnsAdapter, phoneNumberAdapter } from "@/core/adapters";
 import { roleRender, UserEntity } from "@/domain/entities";
-import { useGetUsersQuery } from "@/infraestructure/store/services";
+import {
+  useGetTrashUsersQuery,
+  useRestoreUserMutation,
+} from "@/infraestructure/store/services";
 import { Tag } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
 import { TrashDialog } from "@/presentation/pages/private/components";
@@ -17,16 +20,21 @@ type Props = {
 export const TrashUserDialog = ({ visible, onHide }: Props) => {
   const { currentPage, first, handlePageChange, limit } = usePaginator(LIMIT);
 
-  const [searchByName, debouncedSearchByName, setSearchByName] = useDebounce("", 400);
+  const [restoreUser, { isLoading: isLoadingRestore }] =
+    useRestoreUserMutation();
+
+  const [searchByName, debouncedSearchByName, setSearchByName] = useDebounce(
+    "",
+    400
+  );
 
   const { currentData, isLoading, isFetching, isError, refetch } =
-    useGetUsersQuery(
-      { 
+    useGetTrashUsersQuery(
+      {
         fullname: debouncedSearchByName,
         email: debouncedSearchByName,
         page: currentPage,
         limit,
-        isDeleted: true,
         select: {
           id_user: true,
           fullname: true,
@@ -50,22 +58,18 @@ export const TrashUserDialog = ({ visible, onHide }: Props) => {
 
   const users = currentData?.data;
 
-  // const [restoreReservation, { isLoading: isLoadingRestore }] =
-  //   useRestoreReservationMutation();
-
   const [selectedUser, setSelectedUser] = useState<UserEntity | undefined>(
     undefined
   );
 
-
   const handleRestore = async () => {
-    //   if (selectedReservation) {
-    //     await restoreReservation(selectedReservation.id)
-    //       .unwrap()
-    //       .then(() => {
-    //         setSelectedReservation(undefined);
-    //       });
-    //   }
+    if (selectedUser) {
+      await restoreUser(selectedUser.id)
+        .unwrap()
+        .then(() => {
+          setSelectedUser(undefined);
+        });
+    }
   };
 
   return (
@@ -82,7 +86,7 @@ export const TrashUserDialog = ({ visible, onHide }: Props) => {
       onHide={onHide}
       isError={isError}
       isLoading={isLoading}
-      isFetching={isFetching}
+      isFetching={isFetching || isLoadingRestore}
       refetch={refetch}
       handleRestore={handleRestore}
       searchByName={searchByName}
@@ -113,7 +117,7 @@ export const TrashUserDialog = ({ visible, onHide }: Props) => {
                   subject: "Teléfono",
                   message: phoneNumberAdapter.format(
                     selectedUser.phoneNumber ?? ""
-                    ),
+                  ),
                 },
                 {
                   subject: "Descripción",
@@ -134,7 +138,7 @@ export const TrashUserDialog = ({ visible, onHide }: Props) => {
       dataViewProps={{
         first,
         rows: limit,
-        totalRecords: 0,
+        totalRecords: users?.total ?? 0,
         emptyMessage: "No hay usuarios en papelera",
         onPage: handlePageChange,
         value: users?.content ?? [],

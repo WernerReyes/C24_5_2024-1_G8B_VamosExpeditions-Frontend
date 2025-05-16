@@ -2,6 +2,9 @@ import type { UserEntity } from "@/domain/entities";
 import type { ThunkDispatch, UnknownAction } from "@reduxjs/toolkit";
 import type { RootState } from "@reduxjs/toolkit/query";
 import { userService } from "./user.service";
+import { AppState } from "@/app/store";
+import { extractParams } from "@/core/utils";
+import { GetUsersDto } from "@/domain/dtos/user";
 
 type Service = typeof userService.reducerPath;
 export const userCache = {
@@ -115,40 +118,114 @@ export const userCache = {
           });
 
           draft.data.content = updated;
-
-          // dispatch(setUsers(sortedUsers));
         })
       );
     });
   },
 
-  // TODO: When I delete a user, I need to remove it from the cache and add it to the trash
-  toogleTrash: function (
+
+  trash: function (
     data: UserEntity,
     dispatch: ThunkDispatch<any, any, UnknownAction>,
-    getState: () => RootState<any, any, Service>
+    getState: () => AppState
   ) {
-    const args = userService.util.selectCachedArgsForQuery(
-      getState(),
-      "getUsers"
-    );
+    const cachedQueries = getState().userService.queries;
 
-    args.forEach((arg) => {
-      dispatch(
-        userService.util.updateQueryData("getUsers", arg, (draft) => {
-          console.log("draft", data);
-          if (data.isDeleted) {
-            draft.data.content = draft.data.content.filter(
-              (user) => user.id !== data.id
-            );
-            return;
-          }
-          const updated = draft.data.content.map((user) =>
-            user.id === data.id ? { ...user, ...data } : user
-          );
-          draft.data.content = updated;
-        })
-      );
-    });
+    const extractedParams = extractParams<
+      {
+        getUsers: GetUsersDto;
+        getTrashUsers: GetUsersDto;
+      }[]
+    >(cachedQueries);
+
+    for (const query of extractedParams) {
+      if (query.getUsers) {
+        dispatch(
+          userService.util.updateQueryData(
+            "getUsers",
+            query.getUsers,
+            (draft) => {
+              draft.data = {
+               ...draft.data,
+                content: draft.data.content.filter(
+                  (user) => user.id!== data.id
+                ),
+                total: draft.data.total - 1,
+              }
+            }
+          )
+        );
+      }
+
+      if (query.getTrashUsers) {
+        dispatch(
+          userService.util.updateQueryData(
+            "getTrashUsers",
+            query.getTrashUsers,
+            (draft) => {
+              draft.data = {
+                ...draft.data,
+                content: [data, ...draft.data.content],
+                total: draft.data.total + 1,
+              };
+            }
+          )
+        );
+      }
+    }
   },
+
+  restore: function (
+    data: UserEntity,
+    dispatch: ThunkDispatch<any, any, UnknownAction>,
+    getState: () => AppState,
+    
+  ) {
+    const cachedQueries = getState().userService.queries;
+
+    const extractedParams = extractParams<
+      {
+        getUsers: GetUsersDto;
+        getTrashUsers: GetUsersDto;
+      }[]
+    >(cachedQueries);
+
+    for (const query of extractedParams) {
+      if (query.getUsers) {
+        dispatch(
+          userService.util.updateQueryData(
+            "getUsers",
+            query.getUsers,
+            (draft) => {
+              draft.data = {
+              ...draft.data,
+                content: [data,...draft.data.content],
+                total: draft.data.total + 1,
+              }
+            }
+
+
+          )
+        )
+      }
+
+      if (query.getTrashUsers) {
+        dispatch(
+          userService.util.updateQueryData(
+            "getTrashUsers",
+            query.getTrashUsers,
+            (draft) => {
+              draft.data = {
+               ...draft.data,
+                content: draft.data.content.filter(
+                  (user) => user.id!== data.id
+                ),
+                total: draft.data.total - 1,
+              }
+            }
+          )
+        )
+      }
+    }
+  }
 };
