@@ -1,5 +1,5 @@
-import { dtoValidator, generateEmptyObject } from "@/core/utils";
-import { HotelEntity } from "@/domain/entities";
+import { dtoValidator } from "@/core/utils";
+
 import { z } from "zod";
 
 export enum HotelRoomType {
@@ -26,6 +26,7 @@ export const hotelDtoSchema = z.object({
   id: z.number().optional().default(0),
   
 });
+
 
 export const registerRoomDtoSchema = z.object({
   type: z.literal(HotelRoomType.ROOM),
@@ -110,22 +111,6 @@ export const hotelDto ={
     return [dto, undefined];
   },
 
-  /* getDefault: (entity: HotelEntity | null) => {
-    if (entity) {
-      return {
-        id: entity.id,
-        category: entity.category,
-        name: entity.name,
-        address: entity.address,
-        distrit: entity.distrit,
-      };
-    }
-
-    return null;
-  },
-  getEmpty: generateEmptyObject<HotelDto>(hotelDtoSchema, {
-    id: 0,
-  }), */
 
   getSchema: hotelDtoSchema,
 }

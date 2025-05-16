@@ -1,43 +1,40 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-
 import { requestConfig } from "../config";
-import type { ApiResponse } from "../response";
-import type { DistritEntity } from "@/domain/entities";
-import { distritDto, DistritDto } from "@/domain/dtos/distrit";
+import { CityEntity } from "@/domain/entities";
+import { ApiResponse } from "../response";
+import { cityDto, CityDto } from "@/domain/dtos/city";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
 import { countryService } from "../country/country.service";
 
-const PREFIX = "/";
-
-export const distritService = createApi({
-  reducerPath: "distritService",
+const PREFIX = "/city";
+export const cityService = createApi({
+  reducerPath: "cityService",
+    tagTypes: ["CityAll"],
   baseQuery: requestConfig(PREFIX),
 
   endpoints: (builder) => ({
-    getDistrits: builder.query<ApiResponse<DistritEntity[]>, void>({
-      query: () => "country/distrit",
-      keepUnusedDataFor: 1000 * 60 * 60 * 60,
+    getCitiesAll: builder.query<ApiResponse<CityEntity[]>, void>({
+      providesTags: ["CityAll"],
+      query: () => "/all-city",
+      keepUnusedDataFor: 1000 * 60 * 60, //* 1 hour
     }),
-    getDistritsAndCity: builder.query<ApiResponse<DistritEntity[]>, void>({
-      query: () => "distrit",
-      keepUnusedDataFor: 1000 * 60 * 60 * 60,
-    }),
+
     // create and update
-    upsertDistrit: builder.mutation<ApiResponse<DistritEntity>, DistritDto>({
+    upsertCity: builder.mutation<ApiResponse<CityEntity>, CityDto>({
       query: (body) => {
-        const [_, errors] = distritDto.create(body);
+        const [_, errors] = cityDto.create(body);
         if (errors) throw errors;
 
-        if (body.distritId !== 0) {
+        if (body.cityId !== 0) {
           return {
-            url: `distrit/${body.distritId}`,
+            url: `/${body.cityId}`,
             method: "PUT",
             body,
           };
         }
 
         return {
-          url: "distrit",
+          url: "/",
           method: "POST",
           body,
         };
@@ -57,13 +54,9 @@ export const distritService = createApi({
           throw error;
         }
       },
+      invalidatesTags: [{ type: "CityAll" }],
     }),
     // create and update
   }),
 });
-
-export const {
-  useGetDistritsQuery,
-  useGetDistritsAndCityQuery,
-  useUpsertDistritMutation,
-} = distritService;
+export const { useUpsertCityMutation, useGetCitiesAllQuery } = cityService;

@@ -33,21 +33,20 @@ import { UnofficialDataTable } from "./UnofficialDataTable";
 import { useSelector } from "react-redux";
 import { AppState } from "@/app/store";
 
-const { QUOTATION_PAGINATION } = constantStorage;
+
 
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
+const { QUOTATION_PAGINATION } = constantStorage;
 
 export const QuotesTable = () => {
 
 
   //const dispatch = useDispatch();
-  const { currentQuotation } = useSelector(
-      (state: AppState) => state.quotation
-    );
-
+ 
   const { archivedVersions } = useSelector(
     (state: AppState) => state.versionQuotation
   );
+  
 
   const {
     handlePageChange,
@@ -98,7 +97,9 @@ export const QuotesTable = () => {
       skip: !currentPage,
     }
   );
+  
 
+ console.log(" filll", filters )
 
   const [duplicateMultipleVersionQuotations, { isLoading: isDuplicating }] =
     useDuplicateMultipleVersionQuotationsMutation();

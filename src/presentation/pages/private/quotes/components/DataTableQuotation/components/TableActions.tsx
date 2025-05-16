@@ -6,6 +6,7 @@ import {
 } from "@/domain/entities";
 import {
   notificationSocket,
+  useLazyGenerateVersionQuotationExcelQuery,
   useLazyGenerateVersionQuotationPdfQuery,
   useSendEmailAndGenerateReportMutation,
 } from "@/infraestructure/store/services";
@@ -19,7 +20,7 @@ import {
   MultiSelectChangeEvent,
   ProgressSpinner,
   SelectButton,
-  type SelectButtonChangeEvent
+  type SelectButtonChangeEvent,
 } from "@/presentation/components";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
@@ -49,8 +50,11 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   const { authUser } = useSelector((state: AppState) => state.auth);
   const { users } = useSelector((state: AppState) => state.users);
 
+  // pdf and excel
   const [handleGeneratePdf, { isLoading: isLoadingGeneratePdf }] =
     useLazyGenerateVersionQuotationPdfQuery();
+
+  const [handleGenerateExcel,{ isLoading: isLoadingGenerateExcel }]=useLazyGenerateVersionQuotationExcelQuery()
 
   const [
     sendEmailAndGenerateReport,
@@ -122,8 +126,9 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
       />
 
       <Button
-        icon="pi pi-file-pdf"
+        icon={isLoadingGeneratePdf ? "pi pi-spin pi-spinner" : "pi pi-file-pdf"}
         tooltip="Generar PDF"
+        className="text-red-500"
         tooltipOptions={{ position: "top" }}
         rounded
         text
@@ -139,6 +144,23 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
           });
         }}
       />
+      <Button
+        icon={isLoadingGenerateExcel ? "pi pi-spin pi-spinner" : "pi pi-file-excel"}
+        tooltip="Descargar Excel"
+        className="text-green-500"
+        tooltipOptions={{ position: "top" }}
+        rounded
+        text
+        disabled={isLoadingGenerateExcel || rowData.status === VersionQuotationStatus.DRAFT}
+        onClick={() => {
+          if (!rowData.tripDetails) return;
+          handleGenerateExcel({
+            id: rowData.id,
+            name: rowData?.tripDetails?.client?.fullName || "",
+          });
+        }}
+      />
+
       {type === "principal" && (
         <Button
           icon="pi pi-envelope"

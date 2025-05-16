@@ -12,6 +12,7 @@ import {
   Column,
   DataTable,
   DefaultFallBackComponent,
+  Dropdown,
   ErrorBoundary,
   Rating,
   Skeleton,
@@ -28,27 +29,62 @@ import { HotelEntity } from "@/domain/entities";
 import { HotelEditAndRegisterModal } from "./HotelEditAndRegisterModal";
 import { RoomTable } from "./RoomTable";
 import { UploadeExcelHotelAndRoom } from "./hotel/UploadeExcelHotelAndRoom";
+import { usePaginator } from "@/presentation/hooks";
+import { FilterApplyButton, FilterClearButton } from "../../filters";
+import { HotelsTableFilters } from "../../quotes/types";
+import { getTransformedFilters2 } from "../utils";
+
+
+
+
+
+const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
+const HOTELS_PAGINATION = "HOTELS_PAGINATION";
+
 
 export const HotelTable = () => {
-  // useState
+
+
+
   const [expandedRows, setExpandedRows] = useState<
     DataTableExpandedRows | DataTableValueArray | undefined
   >(undefined);
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [rowData, setRowData] = useState<HotelEntity>({} as HotelEntity);
+  
 
-  // hook to get all hotels
+  const {
+    handlePageChange,
+    currentPage,
+    first,
+    limit,
+    sortField,
+    filters,
+    handleSaveState,
+  } = usePaginator(ROW_PER_PAGE[0], HOTELS_PAGINATION);
+
+  const [{ name, distrit, category }, setUiFilters] = useState<HotelsTableFilters>({});
+
+
   const {
     data: allHotels,
     isFetching,
     isLoading,
     refetch,
     isError,
-  } = useGetHotelsPageWithDetailsQuery({
-    page: 1,
-    limit: 10,
-  });
+  } = useGetHotelsPageWithDetailsQuery(
+    {
+      page: currentPage,
+      limit,
+      name,
+      distrit,
+      category,
+    },
+    {
+      skip: !currentPage,
+    }
+  );
 
   useEffect(() => {
     if (!isError) return;
@@ -60,6 +96,15 @@ export const HotelTable = () => {
       tdEmpty.setAttribute("colspan", "12");
     }
   }, [isError]);
+
+  useEffect(() => {
+    if (!filters) return;
+    setUiFilters(getTransformedFilters2(filters));
+  }, [filters]);
+
+
+
+
 
   const header = (
     <div className="flex flex-wrap gap-2 p-2 items-center">
@@ -75,11 +120,10 @@ export const HotelTable = () => {
   return (
     <div className="card">
       <Toolbar
-        className="mt-10 mb-4"
+        className=""
         start={
           <div className="flex gap-2">
             <Button icon="pi pi-trash" label="Eliminar" severity="danger" />
-            {/* <Button icon="pi pi-clone" label="Duplicar" severity="secondary" /> */}
           </div>
         }
         end={
@@ -90,7 +134,7 @@ export const HotelTable = () => {
               onClick={() => {
                 const link = document.createElement("a");
                 link.href = "/Template/HOTELS_AND_ROOMS.xlsx";
-                link.download = "plantilla-hoteles.xlsx"; 
+                link.download = "plantilla-hoteles.xlsx";
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -137,7 +181,7 @@ export const HotelTable = () => {
             size="small"
             emptyMessage={"No hay hoteles"}
           >
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 7 }).map((_, i) => (
               <Column
                 key={i}
                 field={`loading-${i}`}
@@ -177,9 +221,11 @@ export const HotelTable = () => {
           scrollable
           size="small"
           stateStorage="custom"
+          stateKey={HOTELS_PAGINATION}
+          customSaveState={handleSaveState}
           showGridlines
           value={allHotels?.data.content || []}
-          emptyMessage={"No hay hoteles "}
+          
           filterDisplay="menu"
           editMode="cell"
           dataKey="id"
@@ -198,16 +244,32 @@ export const HotelTable = () => {
           rowExpansionTemplate={(data: HotelEntity) => {
             return <RoomTable rowData={data} />;
           }}
+          first={first}
+          rows={limit}
+          totalRecords={allHotels?.data?.total}
+          onPage={handlePageChange}
+          onFilter={handlePageChange}
+          rowsPerPageOptions={ROW_PER_PAGE}
+          loading={isFetching || isLoading}
+          lazy
+          sortField={sortField?.sortField}
+          sortOrder={sortField?.sortOrder}
+          filters={filters}
+          tableStyle={{ minWidth: "60rem" }}
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          paginator
+          currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} hoteles"
+          emptyMessage={"No hay hoteles "}
         >
           {/*  <Column /> */}
           <Column selectionMode="multiple" />
           <Column expander />
-          {/* <Column field="id" header="Código" filter sortable /> */}
+
           <Column
             field="name"
             header="Nombre"
+            className="min-w-32"
             filter
-            sortable
             body={(rowData) => (
               <div className="flex gap-2 items-center">
                 <i
@@ -218,12 +280,23 @@ export const HotelTable = () => {
                 {rowData.name}
               </div>
             )}
+            filterField="name"
+            showFilterMatchModes={false}
+            showFilterOperator={false}
+            showAddButton={false}
+            filterPlaceholder="Buscar nombre del hotel"
+            filterClear={(options) => <FilterClearButton {...options} />}
+            filterApply={(options) => <FilterApplyButton {...options} />}
           />
           <Column
-            header="Categoría"
             field="category"
+            header="Categoría"
+            filter
+            className="min-w-32"
+            headerClassName="min-w-32"
+            filterMenuStyle={{ width: "16rem" }}
             body={(rowData) => (
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center ">
                 {["3", "4", "5"].includes(rowData.category) ? (
                   <Rating
                     value={Number(rowData.category)}
@@ -242,12 +315,58 @@ export const HotelTable = () => {
                 )}
               </div>
             )}
+            showFilterMatchModes={false}
+            showFilterOperator={false}
+            showAddButton={false}
+            filterField="category"
+            filterPlaceholder="Buscar categoría"
+            filterClear={(options) => <FilterClearButton {...options} />}
+            filterApply={(options) => <FilterApplyButton {...options} />}
+            filterElement={(opcion) => (
+              <Dropdown
+                options={[
+                  { label: "⭐⭐⭐", value: "3" },
+                  { label: "⭐⭐⭐⭐", value: "4" },
+                  { label: "⭐⭐⭐⭐⭐", value: "5" },
+                  { label: "BOUTIQUE", value: "BOUTIQUE" },
+                  { label: "VILLA", value: "VILLA" },
+                  { label: "LODGE", value: "LODGE" },
+                ]}
+                value={opcion.value}
+                onChange={(e) => {
+                  console.log(e.value);
+                  opcion.filterCallback(e.value);
+                }}
+                placeholder="Seleccionar"
+                optionLabel="label"
+                optionValue="value"
+                itemTemplate={(option) => {
+                  const numValue = parseInt(option.label);
+                  return (
+                    <div className="flex items-center gap-2">
+                      {!isNaN(numValue) ? (
+                        <Rating
+                          value={numValue}
+                          cancel={false}
+                          readOnly
+                          onIcon="pi pi-star-fill text-yellow-500"
+                        />
+                      ) : (
+                        <span className="text-primary font-bold">
+                          {option.label}
+                        </span>
+                      )}
+                    </div>
+                  );
+                }}
+                showClear
+                filterPlaceholder="Buscar categoría"
+              />
+            )}
           />
           <Column
             field="address"
             header="Dirección"
-            filter
-            sortable
             body={(rowData) => (
               <div className="flex gap-2 items-center">
                 <i className="pi pi-map-marker text-xl text-primary" />
@@ -256,16 +375,22 @@ export const HotelTable = () => {
             )}
           />
           <Column
-            field="district"
+            field="distrit.name"
             header="Distrito"
+            filter
             body={(rowData) => (
               <div className="flex gap-2 items-center">
                 <i className="pi pi-map-marker text-xl text-primary" />
                 {rowData.distrit?.name}
               </div>
             )}
-            filter
-            sortable
+            showFilterMatchModes={false}
+            showFilterOperator={false}
+            showAddButton={false}
+            filterField="distrit.name"
+            filterPlaceholder="Buscar distrito"
+            filterClear={(options) => <FilterClearButton {...options} />}
+            filterApply={(options) => <FilterApplyButton {...options} />}
           />
           <Column
             header="Acciones"
@@ -282,11 +407,19 @@ export const HotelTable = () => {
 const headerColumnGroup = (
   <ColumnGroup>
     <Row>
-      <Column />
-      <Column header="Código" headerClassName="min-w-24" />
-      <Column header="Nombre" filter headerClassName="min-w-32" />
-      <Column header="Dirección" filter headerClassName="min-w-48" />
-      <Column header="Distrito" headerClassName="min-w-24" />
+    <Column selectionMode="multiple" />
+    <Column expander />
+
+
+      <Column header="Nombre" field="name" filter headerClassName="min-w-32" />
+      <Column
+        header="Categoría"
+        field="category"
+        filter
+        headerClassName="min-w-24"
+      />
+      <Column header="Dirección" field="" filter headerClassName="min-w-48" />
+      <Column header="Distrito" filter headerClassName="min-w-24" />
       <Column header="Acciones" />
     </Row>
   </ColumnGroup>

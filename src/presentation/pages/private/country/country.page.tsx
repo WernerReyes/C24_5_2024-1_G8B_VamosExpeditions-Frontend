@@ -1,182 +1,333 @@
+import { useGetCountriesAndCityAndDistritsQuery } from "@/infraestructure/store/services";
 import {
-  /* Button,
-  Dialog,
-  Dropdown,
-  InputText, */
-  TabView,
+  Badge,
+  Button,
+  DataTable,
+  type DataTableExpandedRows,
+  type DataTableValueArray,
+  DefaultFallBackComponent,
+  ErrorBoundary,
+  Skeleton,
 } from "@/presentation/components";
-import { DataViewDistrit } from "./distrit/DataViewDistrit";
-/* import { useState } from "react"; */
+import { Column } from "primereact/column";
+import { ColumnGroup } from "primereact/columngroup";
+import { Row } from "primereact/row";
+import { FilterApplyButton, FilterClearButton } from "../filters";
+import { useEffect, useState } from "react";
+import type { CityEntity, CountryEntity } from "@/domain/entities";
+import { CountryTable } from "./city/CityTable";
+import { Toolbar } from "primereact/toolbar";
+import { CountryEditAndRegisterModal } from "./CountryEditAndRegisterModal";
+
+import { TableCountryActions } from "./TableCountryActions";
 
 const CountryPage = () => {
-  /* const [visible, setVisible] = useState(false); */
+  const [expandedRows, setExpandedRows] = useState<
+    DataTableExpandedRows | DataTableValueArray | undefined
+  >(undefined);
 
-  const pais = <i className="pi pi-building"></i>;
+  const [selectedCountries, setSelectedCountries] = useState<CountryEntity[]>(
+    []
+  );
+
+  // start new country modal
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [rowData, setRowData] = useState<CountryEntity>({} as CountryEntity);
+  // end new country modal
+
+  // start new city modal
+
+
+  // end new city modal
+  // start apis
+  const {
+    data: allCountryAndCityAndDistrits,
+    isFetching,
+    isLoading,
+    refetch,
+    isError,
+  } = useGetCountriesAndCityAndDistritsQuery();
+  // end apis
+
+  useEffect(() => {
+    if (!isError) return;
+    const tdEmpty = document.querySelector(
+      "#fallback-country-table .p-datatable-emptymessage td"
+    );
+
+    if (tdEmpty) {
+      tdEmpty.setAttribute("colspan", "12");
+    }
+  }, [isError]);
 
   return (
-    <div className="bg-white p-10 rounded-lg shadow-md overflow-x-hidden">
-      {/* <div className="flex justify-end flex-wrap gap-y-5 space-x-4">
-         <Button
-          label="Nuevo"
-          icon="pi pi-plus"
-          onClick={() => setVisible(true)}
-        /> 
+    <div
+      className="bg-gradient-to-br 
+     from-slate-50 via-white 
+     to-slate-50 p-10 rounded-2xl 
+     shadow-[0_0_50px_rgba(0,0,0,0.05)] 
+     overflow-x-hidden border border-slate-100"
+    >
+      <div className="mb-8">
+        <h1
+          className="text-3xl font-bold 
+        bg-gradient-to-r from-primary
+        to-teal-500 bg-clip-text text-transparent mb-3"
+        >
+          Gestión de Territorios
+        </h1>
+        <p className="text-slate-500 text-lg max-w-2xl">
+          Administra países, ciudades y distritos en el sistema
+        </p>
+      </div>
 
+      <Toolbar
+        className="mb-6"
+        end={
+          <>
+            <Button
+              icon="pi pi-plus"
+              label="Nuevo País"
+              tooltip="Añadir nuevo país"
+              tooltipOptions={{ position: "top" }}
+              onClick={() => {
+                setRowData({} as CountryEntity);
+                setModalOpen(true);
+              }}
+            />
 
+            {/* start new Country */}
+            <CountryEditAndRegisterModal
+              rowData={rowData}
+              showModal={isModalOpen}
+              setShowModal={setModalOpen}
+            />
+            {/* end new Country */}
 
-      </div> */}
-
-      <TabView
-        className="my-0 mx-0"
-        tabPanelContent={[
-          {
-            header: (
+            {/* start new city */}
             
-                <div className="flex justify-center items-center gap-2 ">
-                <i className="pi pi-globe" 
-                 style={{ fontSize: "2rem" }}
-                />
-                <h2 className="">Pais</h2>
-               </div>
-              
-            ),
-            className: "w-full h-full",
-            children: (
-              <>
-                <h1>Pais</h1>
-              </>
-            ),
-          },
-          {
-            header: (
-              
-                <div className="flex justify-center items-center gap-2">
-                <i className="pi pi-map-marker"
-                style={{ fontSize: "2rem" }}
-                />
-                <h2>Ciudades</h2>
-                </div>
-              
-            ),
-            className: "w-full h-full",
-            children: (
-              <>
-                <h1>Ciudades</h1>
-              </>
-            ),
-          },
-          {
-            header: (
-              
-                <div className="flex justify-center items-center gap-2 ">
-                <i className="pi pi-map"
-                style={{ fontSize: "2rem" }}
-                />
-                <h2>Distritos</h2>
-                </div>
-              
-            ),
-            className: "w-full h-full",
-            children: (
-              <>
-                <DataViewDistrit/>
-              </>
-            ),
-          },
-        ]}
+          </>
+        }
+        start={
+          <Button
+            icon="pi pi-trash"
+            className="bg-gradient-to-r from-rose-500 to-red-500
+               hover:from-rose-600 hover:to-red-600
+                border-none shadow-md shadow-rose-200 transition-all duration-300"
+            label={`Eliminar (${selectedCountries.length})`}
+            disabled={selectedCountries.length === 0}
+            tooltip="Eliminar seleccionados"
+            tooltipOptions={{ position: "top" }}
+          />
+        }
       />
+
+      <ErrorBoundary
+        isLoader={isFetching || isLoading}
+        loadingComponent={
+          <DataTable
+            pt={{
+              header: {
+                className: "!bg-secondary",
+              },
+            }}
+            showGridlines
+            headerColumnGroup={headerColumnGroup}
+            value={Array.from({
+              length: Array.isArray(allCountryAndCityAndDistrits?.data)
+                ? allCountryAndCityAndDistrits?.data.length
+                : 10,
+            })}
+            lazy
+            size="small"
+            emptyMessage={"No hay hoteles"}
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Column
+                key={i}
+                field={`loading-${i}`}
+                header="Cargando..."
+                body={() => <Skeleton shape="rectangle" height="1.5rem" />}
+              />
+            ))}
+          </DataTable>
+        }
+        fallBackComponent={
+          <DataTable
+            pt={{
+              header: {
+                className: "!bg-secondary",
+              },
+            }}
+            id="fallback-country-table"
+            showGridlines
+            headerColumnGroup={headerColumnGroup}
+            value={[]}
+            lazy
+            size="small"
+            emptyMessage={
+              <DefaultFallBackComponent
+                refetch={refetch}
+                isFetching={isFetching}
+                isLoading={isLoading}
+                message="No se pudieron cargar los hoteles"
+              />
+            }
+          />
+        }
+        error={isError}
+      >
+        <div className="border border-slate-200 rounded-xl overflow-hidden shadow-lg bg-white">
+          <DataTable
+            scrollable
+            size="small"
+            stateStorage="custom"
+            value={allCountryAndCityAndDistrits?.data || []}
+            filterDisplay="menu"
+            editMode="cell"
+            dataKey="id"
+            className="text-sm lg:text-[15px]"
+            pt={{
+              header: {
+                className:
+                  "bg-gradient-to-r from-slate-50 to-white border-b border-slate-100",
+              },
+              wrapper: {
+                className: "rounded-xl",
+              },
+              tbody: {
+                className: "bg-white",
+              },
+            }}
+            onRowToggle={(e) => setExpandedRows(e.data)}
+            expandedRows={expandedRows}
+            selection={selectedCountries}
+            onSelectionChange={(e) =>
+              setSelectedCountries(e.value as CountryEntity[])
+            }
+            rowExpansionTemplate={(data: CountryEntity) => (
+              <CountryTable rowData={data} />
+            )}
+            emptyMessage={"No hay países registrados"}
+          >
+            <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
+            <Column
+              expander
+              headerStyle={{ width: "3rem" }}
+              pt={{
+                rowToggler: {
+                  className:
+                    "w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors duration-200",
+                },
+              }}
+            />
+
+            <Column
+              field="name"
+              header="Nombre"
+              headerClassName="font-semibold text-slate-700"
+              style={{ width: "40%" }}
+              filter
+              body={(rowData) => {
+                return (
+                  <div className="flex gap-4 items-center">
+                    <i
+                      className="pi pi-globe text-lg
+                        bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full p-2 
+                      "
+                    />
+
+                    <div>
+                      <span className="font-semibold text-slate-800 text-base">
+                        {rowData.name}
+                      </span>
+                      <div className="text-sm text-slate-500 mt-1">
+                        {rowData.cities?.length || 0} ciudades ·{" "}
+                        {rowData.cities?.reduce(
+                          (acc: number, city: CityEntity) =>
+                            acc + (city.distrits?.length || 0),
+                          0
+                        ) || 0}{" "}
+                        distritos
+                      </div>
+                    </div>
+                  </div>
+                );
+              }}
+              filterField="name"
+              showFilterMatchModes={false}
+              showFilterOperator={false}
+              showAddButton={false}
+              filterPlaceholder="Buscar nombre del país"
+              filterClear={(options) => <FilterClearButton {...options} />}
+              filterApply={(options) => <FilterApplyButton {...options} />}
+            />
+            <Column
+              field="Tipo"
+              header="Tipo"
+              style={{ width: "30%" }}
+              filter
+              filterMenuStyle={{ width: "16rem" }}
+              showFilterMatchModes={false}
+              showFilterOperator={false}
+              showAddButton={false}
+              filterField="category"
+              body={(rowData) => {
+                return (
+                  <Badge
+                    className="text-white
+                     bg-emerald-500 
+                    "
+                    severity={"success"}
+                    size={"normal"}
+                    value={rowData.code}
+                  />
+                );
+              }}
+              filterPlaceholder="Buscar código"
+              filterClear={(options) => <FilterClearButton {...options} />}
+              filterApply={(options) => <FilterApplyButton {...options} />}
+            />
+
+            <Column
+              header="Acciones"
+              headerClassName="font-semibold text-slate-700 text-right"
+              style={{ width: "30%" }}
+              body={(data: CountryEntity) => (
+                <TableCountryActions rowData={data} />
+              )}
+            />
+          </DataTable>
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };
+
+const headerColumnGroup = (
+  <ColumnGroup>
+    <Row>
+      <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
+      <Column expander style={{ width: "3rem" }} />
+      <Column
+        header="Nombre"
+        field="name"
+        headerClassName="font-semibold text-slate-700"
+        style={{ width: "40%" }}
+      />
+      <Column
+        header="Tipo"
+        field="code"
+        headerClassName="font-semibold text-slate-700"
+        style={{ width: "30%" }}
+      />
+      <Column
+        header="Acciones"
+        headerClassName="font-semibold text-slate-700 text-right"
+        style={{ width: "30%" }}
+      />
+    </Row>
+  </ColumnGroup>
+);
+
 export default CountryPage;
-
-{
-  /* <Dialog
-          header="Nuevo Pais"
-          visible={visible}
-          onHide={() => setVisible(false)}
-          breakpoints={{ "960px": "75vw", "641px": "100vw" }}
-          style={{ height: "auto" }}
-        >
-          <form>
-            <div
-              className="
-                           grid grid-cols-1 md:grid-cols-2 gap-4
-                            mb-4
-                bg-gradient-to-r from-blue-100 to-transparent p-4 rounded-lg
-                           "
-            >
-              <div >
-                <InputText
-                  label={{ text: "Nombre del pais" }}
-                  placeholder="Nombre del pais"
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <InputText
-                  label={{ text: "Codigo del pais" }}
-                  placeholder="Codigo del pais"
-                  className="w-full"
-                />
-              </div>
-            </div>
-            
-            <div
-              className="
-               grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 mb-4
-                bg-gradient-to-r from-purple-100 to-transparent p-4 rounded-lg
-            "
-            >
-              <div >
-                <Dropdown
-                  label={{ text: "Categoria" }}
-                  placeholder="Nombre del hotel"
-                  className="w-full"
-                  filter
-                  options={[
-                    { label: "Categoria 1", value: "1" },
-                    { label: "Categoria 2", value: "2" },
-                    { label: "Categoria 3", value: "3" },
-                  ]}
-                />
-              </div>
-              <div>
-                <InputText
-                  label={{ text: "Nombre del Hotel" }}
-                  placeholder="Nombre del hotel"
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-            <div
-              className="
-              grid grid-cols-1 md:grid-cols-2 gap-4
-              mt-4 mb-4  bg-gradient-to-r from-teal-100 to-transparent p-4 rounded-lg
-              "
-            >
-              <div >
-                <Dropdown
-                  label={{ text: "Categoria" }}
-                  placeholder="Nombre del hotel"
-                  className="w-full"
-                  filter
-                  options={[
-                    { label: "Categoria 1", value: "1" },
-                    { label: "Categoria 2", value: "2" },
-                    { label: "Categoria 3", value: "3" },
-                  ]}
-                />
-              </div>
-              <div>
-                <InputText
-                  label={{ text: "Nombre del Hotel" }}
-                  placeholder="Nombre del hotel"
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </form>
-        </Dialog> */
-}

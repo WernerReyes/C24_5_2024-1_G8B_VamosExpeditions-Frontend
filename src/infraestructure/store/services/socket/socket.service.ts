@@ -18,6 +18,7 @@ export class SocketManager {
         transports: ["websocket"],
         autoConnect: true,
         withCredentials: true,
+        reconnectionDelay: 1000,
       });
     }
     this.subscribers++;

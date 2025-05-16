@@ -367,11 +367,12 @@ export const DataTableQuotation = forwardRef(function DataTable2<
 
         <Column
           header="Acciones"
+          
           body={(quote: VersionQuotationEntity) => (
             <TableActions rowData={quote} type="principal" />
           )}
           exportable={false}
-          className="min-w-56"
+          className="min-w-72"
         />
       </DataTable>
     </>

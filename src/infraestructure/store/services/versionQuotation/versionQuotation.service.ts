@@ -404,6 +404,7 @@ export const versionQuotationService = createApi({
       },
     }),
 
+    //start pdf and excel
     generateVersionQuotationPdf: builder.query<
       Blob,
       { id: VersionQuotationEntity["id"]; name: string }
@@ -440,6 +441,44 @@ export const versionQuotationService = createApi({
         }
       },
     }),
+    //excel
+    generateVersionQuotationExcel: builder.query<
+      Blob,
+      { id: VersionQuotationEntity["id"]; name: string }
+    >({
+      query: ({ id }) => {
+        if (!id.quotationId || !id.versionNumber) {
+          throw "QuotationId and VersionNumber are required";
+        }
+        return {
+          url: `/excel/${id.quotationId}/${id.versionNumber}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      },
+      async onQueryStarted({ name }, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+
+          const blobURL = URL.createObjectURL(data);
+          const hiddenElement = document.createElement("a");
+          hiddenElement.href = blobURL;
+          hiddenElement.download = `${name}.xlsx`;
+          document.body.appendChild(hiddenElement);
+          hiddenElement.click();
+          document.body.removeChild(hiddenElement);
+          setTimeout(() => {
+            window.URL.revokeObjectURL(blobURL);
+          }, 1000);
+        } catch (error: any) {
+          if (error.error)
+            startShowError(
+              "Versión de cotización no encontrada o no completado"
+            );
+        }
+      },
+    }),
+    //end pdf and excel
 
     sendEmailAndGenerateReport: builder.mutation<
       ApiResponse<void>,
@@ -479,7 +518,11 @@ export const {
   useArchiveVersionQuotationMutation,
   useUnArchiveVersionQuotationMutation,
   useGetVersionQuotationByIdQuery,
+
+  // pdf and excel
   useLazyGenerateVersionQuotationPdfQuery,
+  useLazyGenerateVersionQuotationExcelQuery,
+  
 
   useSendEmailAndGenerateReportMutation,
 } = versionQuotationService;

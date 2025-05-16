@@ -14,7 +14,10 @@ import {
 import { hotelDto, HotelDto, HotelRoomType } from "@/domain/dtos/hotel";
 
 import Styles from "./Style.module.css";
-import { useGetDistritsQuery } from "@/infraestructure/store/services";
+import {
+  useGetDistritsQuery,
+  useUpsertHotelMutation,
+} from "@/infraestructure/store/services";
 type Props = {
   rowData: HotelEntity;
   showModal: boolean;
@@ -32,6 +35,7 @@ export const HotelEditAndRegisterModal = ({
     isLoading: isLoadingDistrits,
     isFetching: isFetchingDistrits,
     isError,
+    
     /* error, */
   } = useGetDistritsQuery();
   /* console.log(distrits); */
@@ -41,6 +45,7 @@ export const HotelEditAndRegisterModal = ({
     control,
     handleSubmit,
     formState: { isDirty },
+    reset,
   } = useForm<HotelDto>({
     resolver: zodResolver(hotelDto.getSchema),
     defaultValues: rowData?.id
@@ -61,8 +66,17 @@ export const HotelEditAndRegisterModal = ({
         },
   });
 
+  const [upsertHotel, { isLoading }] = useUpsertHotelMutation();
+
   const handleUpsertHotel = async (data: HotelDto) => {
-    console.log(data);
+    upsertHotel(data)
+      .unwrap()
+      .then(() => {
+        
+        reset();
+        /* setShowModal(false); */
+        
+      });
   };
 
   return (
@@ -109,9 +123,9 @@ export const HotelEditAndRegisterModal = ({
                         className="w-full"
                         filter
                         options={[
-                          { label: "3", value: "3" },
-                          { label: "4", value: "4" },
-                          { label: "5", value: "5" },
+                          { label: "⭐⭐⭐", value: "3" },
+                          { label: "⭐⭐⭐⭐", value: "4" },
+                          { label: "⭐⭐⭐⭐⭐", value: "5" },
                           { label: "BOUTIQUE", value: "BOUTIQUE" },
                           { label: "VILLA", value: "VILLA" },
                           { label: "LODGE", value: "LODGE" },
@@ -277,8 +291,8 @@ export const HotelEditAndRegisterModal = ({
 
           <div className="flex justify-end mt-3">
             <Button
-              icon="pi pi-save"
-              disabled={!isDirty}
+              icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-save"}
+              disabled={!isDirty || isLoading}
               label={`${rowData.id ? "Editar" : "Registrar"} `}
             />
           </div>
