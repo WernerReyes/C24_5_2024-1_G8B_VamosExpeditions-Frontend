@@ -39,6 +39,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import Style from "../Style.module.css";
 import TripDetailsFormStyle from "./TripDetailsForm.module.css";
+import { ClientInfo } from "@/presentation/pages/private/components";
 
 const TRAVELER_CLASES = [
   { key: TravelerStyle.COMFORT, label: "Confort" },
@@ -105,16 +106,11 @@ export const TripDetailsForm = () => {
     const daysToDelete = !accept
       ? hotelRoomTripDetails.filter((quote) => {
           const cityId = quote?.hotelRoom?.hotel?.distrit?.city?.id;
-
-          console.log({
-            cityId,
-            destination: tripDetailsDto.destination,
-          });
-
           if (!tripDetailsDto.destination[cityId!]) {
             setDeleteByDestination(true);
-            return !Object.keys(tripDetailsDto.destination).includes(cityId!.toString());
-           
+            return !Object.keys(tripDetailsDto.destination).includes(
+              cityId!.toString()
+            );
           }
           return !dateFnsAdapter.isWithinInterval(
             quote.date,
@@ -123,9 +119,7 @@ export const TripDetailsForm = () => {
           );
         })
       : [];
-
-    console.log({ daysToDelete });
-
+      
     if (daysToDelete.length > 0) {
       setVisible(true);
       setHotelsQuotationsOutSideDateRange(daysToDelete);
@@ -227,6 +221,9 @@ export const TripDetailsForm = () => {
                     placeholder="Escoge un cliente"
                     small={{
                       text: error?.message,
+                    }}
+                    itemTemplate={(option) => {
+                      return <ClientInfo client={option} />;
                     }}
                     value={field.value}
                     invalid={!!error}

@@ -48,6 +48,8 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
 
     const selectedRoom = rooms?.[index];
 
+    console.log(selectedRoom);
+
     if (index !== null) {
       setSelectedRoom(selectedRoom);
 
@@ -59,6 +61,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
 
   const handleAddHotelRoomQuotation = async () => {
     if (!selectedRoom) return;
+   
     await createManyHotelRoomTripDetails({
       tripDetailsId: currentTripDetails!.id,
       dateRange: dateRange,
@@ -66,7 +69,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
         ? Math.floor(currentTripDetails!.numberOfPeople / peopleAmount)
         : 1,
       hotelRoomId: selectedRoom.id,
-      costPerson: ((selectedRoom.priceUsd ?? 0) / currentTripDetails!.numberOfPeople)
+      costPerson: ((selectedRoom.rateUsd ?? 0) / currentTripDetails!.numberOfPeople) // TODO: For now, we use the rateUsd as the priceUsd
     })
       .unwrap()
       .then(() => {
@@ -234,7 +237,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
                   <p className="font-semibold text-gray-800">Precio:</p>
                   <ul className="list-disc pl-4">
                     <li>PEN: {room.pricePen}</li>
-                    <li>USD: {room.rateUsd}</li>
+                    <li>USD: {room.rateUsd}</li> 
                   </ul>
                 </div>
               </div>

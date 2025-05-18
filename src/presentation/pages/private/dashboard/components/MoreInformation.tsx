@@ -7,6 +7,7 @@ type Props = {
   userFullname: string;
   handleViewDetails: () => void;
   disabled?: boolean;
+  isLoading?: boolean;
 };
 
 export const MoreInformation = ({
@@ -14,6 +15,7 @@ export const MoreInformation = ({
   updatedAt,
   userFullname,
   handleViewDetails,
+  isLoading,
   disabled = false,
 }: Props) => {
   return (
@@ -50,7 +52,7 @@ export const MoreInformation = ({
 
       <div className="w-full flex md:justify-end">
         <Button
-          loading={disabled}
+          loading={isLoading}
           size="small"
           label="Ver detalles"
           disabled={disabled}

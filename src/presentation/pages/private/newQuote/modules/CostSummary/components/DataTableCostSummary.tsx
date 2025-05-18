@@ -1,13 +1,10 @@
 import type { AppState } from "@/app/store";
-import {
-  onSetIndirectCostMargin
-} from "@/infraestructure/store";
+import { onSetIndirectCostMargin } from "@/infraestructure/store";
 import {
   Badge,
   Column,
   DataTable,
-  InputText,
-  Slider,
+  InputNumber,
 } from "@/presentation/components";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,7 +28,6 @@ export const DataTableCostSummary = () => {
     }));
   }, [uniqueHotelRoomTripDetails]);
 
-
   return (
     <DataTable
       value={calculateCostsPerService}
@@ -50,21 +46,20 @@ export const DataTableCostSummary = () => {
             ) : (
               <div className="max-md:flex-col flex items-center gap-x-5">
                 <div className="font-bold mb-2">Costos Indirectos</div>
-                <div className="">
-                  <InputText
-                    disabled
-                    className="p-inputtext-sm w-full"
-                    value={indirectCostMargin.toString() + "%"}
-                  />
-                  <Slider
-                    value={indirectCostMargin}
-                    min={0}
-                    max={100}
-                    onChange={(e) =>
-                      dispatch(onSetIndirectCostMargin(e.value as number))
-                    }
-                  />
-                </div>
+                <InputNumber
+                  prefix="%"
+                  value={indirectCostMargin}
+                  min={0}
+                  max={100}
+                  onChange={(e) =>
+                    dispatch(onSetIndirectCostMargin(e.value as number))
+                  }
+                  showButtons
+                  buttonLayout="vertical"
+                  className="w-20"
+                  incrementButtonIcon="pi pi-plus"
+                  decrementButtonIcon="pi pi-minus"
+                />
               </div>
             )}
           </div>

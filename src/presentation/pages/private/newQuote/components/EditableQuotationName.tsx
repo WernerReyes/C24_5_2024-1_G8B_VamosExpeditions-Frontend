@@ -45,6 +45,14 @@ export const EditableQuotationName = () => {
               onChange={(e) => setName(e.target.value)}
               className="h-8 w-full focus-visible:ring-primary"
               autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  handleCancel();
+                }
+                if (e.key === "Enter") {
+                  handleSave();
+                }
+              }}
               disabled={isLoading}
             />
             <Button

@@ -116,7 +116,8 @@ export const ItemQuotation = ({ quotation }: Props) => {
         {/* Información Expandible */}
         {expanded && (
           <MoreInformation
-            disabled={isLoading || isFetching}
+            disabled={quotation.completionPercentage !== 100}
+            isLoading={isLoading || isFetching}
             createdAt={quotation.createdAt}
             updatedAt={quotation.updatedAt}
             userFullname={quotation.user?.fullname || "Usuario desconocido"}

@@ -30,6 +30,11 @@ export const Dialog = ({ maximizable, maximized, ...props }: Props) => {
         props.contentClassName
       )}
       breakpoints={BREAKPOINTS}
+      onMaximize={() => {
+        if (width < TABLET) {
+          props.onHide?.();
+        }
+      }}
       maximized={width < TABLET ? true : maximized}
       maximizable={width < TABLET ? false : maximizable}
       maximizeIcon={width < TABLET && "unmaximize"}

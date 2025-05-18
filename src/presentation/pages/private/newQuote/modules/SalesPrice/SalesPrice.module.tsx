@@ -30,7 +30,9 @@ export const SalesPriceModule = () => {
     (state: AppState) => state.versionQuotation
   );
 
-  const [updateVersionQuotation] = useUpdateVersionQuotationMutation();
+  const [updateVersionQuotation, {
+    isLoading: isLoadingUpdateVersionQuotation,
+  }] = useUpdateVersionQuotationMutation();
   const [profitMargin, setProfitMargin] = useState<number>(
     currentVersionQuotation?.profitMargin ?? 80
   );
@@ -169,6 +171,7 @@ export const SalesPriceModule = () => {
             (quoteId && version ? "Actualizar" : "Completar") + " cotización"
           }
           disabled={disableButton}
+          loading={isLoadingUpdateVersionQuotation} 
           onClick={handleSaveQuotation}
         />
       </div>

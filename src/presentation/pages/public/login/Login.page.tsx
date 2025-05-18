@@ -2,17 +2,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { loginDto, type LoginDto } from "@/domain/dtos/auth";
-import { InputText, Password } from "@/presentation/components";
+import { Avatar, InputText, Password } from "@/presentation/components";
 import { constantRoutes } from "@/core/constants";
 import { useLoginMutation } from "@/infraestructure/store/services";
 import { useCookieExpirationStore } from "@/infraestructure/hooks";
 import { AuthFormLayout } from "../layouts";
+import { useSelector } from "react-redux";
+import { AppState } from "@/app/store";
+import { useState } from "react";
 
 const { DASHBOARD } = constantRoutes.private;
-
 const { FORGET_PASSWORD } = constantRoutes.public;
 
 const LoginPage = () => {
+  const { authUser } = useSelector((state: AppState) => state.auth);
   const {
     control,
     handleSubmit,
@@ -23,15 +26,46 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { init } = useCookieExpirationStore();
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
+  const [isMounted, setIsMounted] = useState(false);
 
   const handleLogin = async (loginDto: LoginDto) => {
     await login(loginDto)
       .unwrap()
       .then(({ data }) => {
+      
         navigate(DASHBOARD);
         init(data.expiresAt);
+
+        new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
+        setIsMounted(true);
       });
   };
+
+  if (isMounted) return null;
+
+  if (authUser && !isLoggingIn) {
+    return (
+      <AuthFormLayout
+        title="Bienvenido de nuevo"
+        description="Tu sesión ya ha sido iniciada"
+        handleSubmit={() => navigate(DASHBOARD)}
+        loading={false}
+        disabled={false}
+        buttonLabel="Ir a Dashboard"
+      >
+        <div className="flex flex-col items-center">
+          <Avatar
+            size="xlarge"
+            className="mb-4 size-40 text-6xl"
+            shape="circle"
+            label={authUser.fullname}
+          />
+        </div>
+      </AuthFormLayout>
+    );
+  }
 
   return (
     <AuthFormLayout

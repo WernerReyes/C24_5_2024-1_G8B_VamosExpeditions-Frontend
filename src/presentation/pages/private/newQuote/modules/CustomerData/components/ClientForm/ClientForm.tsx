@@ -50,6 +50,7 @@ export const ClientForm = () => {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isDirty },
   } = useForm<ClientDto>({
     resolver: zodResolver(clientDto.getSchema),
@@ -72,16 +73,13 @@ export const ClientForm = () => {
   } = useGetAllExternalCountriesQuery();
 
   const [selectedCountry, setSelectedCountry] =
-    useState<ExternalCountryEntity>();
+    useState<ExternalCountryEntity>()
 
-
-
-    
   const [currentOp, setCurrentOp] = useState(OPERATIONS[0]);
   const [suggestPhone, setSuggestPhone] = useState(true);
   const [isContentLoading, setIsContentLoading] = useState(true);
-  const [numberPhone, setNumberPhone] = useState<string>(
-    currentTripDetails?.client?.phone ?? ""
+  const [numberPhone, setNumberPhone] = useState<string | null>(
+    currentTripDetails?.client?.phone ?? null
   );
 
   const handleOperation = (op: (typeof OPERATIONS)[number]) => {
@@ -152,6 +150,10 @@ export const ClientForm = () => {
 
   const countryPhoneMask = getCountryPhoneMask(selectedCountry);
 
+  console.log({
+    errors, watch: watch(),
+  })
+
   return (
     <form
       className={Style.form}
@@ -187,7 +189,7 @@ export const ClientForm = () => {
         <Controller
           control={control}
           name="email"
-          defaultValue=""
+          defaultValue={null}
           render={({ field, fieldState: { error } }) => (
             <InputText
               label={{
@@ -337,7 +339,7 @@ export const ClientForm = () => {
         <Controller
           control={control}
           name="phone"
-          defaultValue=""
+          defaultValue={null}
           render={({ field, fieldState: { error } }) => {
             return (
               <>
@@ -416,12 +418,6 @@ export const ClientForm = () => {
           </div>
         )}
       </div>
-
-      {/* <Controller
-        control={control}
-        name="id"
-        render={({ field }) => <input type="hidden" id="id" {...field} />}
-      /> */}
 
       <SplitButton
         label={isUpsertingClient ? currentOp.loading : currentOp.label}

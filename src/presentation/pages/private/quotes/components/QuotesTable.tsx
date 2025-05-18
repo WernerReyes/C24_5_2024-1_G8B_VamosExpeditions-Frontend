@@ -17,13 +17,13 @@ import {
   ErrorBoundary,
   Skeleton,
   Tag,
+  Row,
+  ColumnGroup,
+  Toolbar,
   type DataTableExpandedRows,
   type DataTableValueArray,
 } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
-import { ColumnGroup } from "primereact/columngroup";
-import { Row } from "primereact/row";
-import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
 import { QuotesTableFilters } from "../types";
 import { getTransformedFilters } from "../utils";

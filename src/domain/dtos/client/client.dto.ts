@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { generateEmptyObject, dtoValidator } from "@/core/utils";
 import { regex } from "@/core/constants";
-import { ClientEntity } from "@/domain/entities";
+import type { ClientEntity } from "@/domain/entities";
 
 const { EMAIL, PHONE } = regex;
 
@@ -11,25 +11,23 @@ const clientDtoSchema = z.object({
   }),
   email: z
     .string()
-    .min(1, {
-      message: "El campo email es requerido",
-    })
-    .regex(EMAIL, {
+    .optional()
+    .nullable()
+    .refine((value) => !value || EMAIL.test(value), {
       message: "El campo email es inválido",
     }),
   phone: z
     .string()
-    .min(1, {
-      message: "El campo telefono es requerido",
-    })
-    .regex(PHONE, {
+    .optional()
+    .nullable()
+    .refine((value) => !value || PHONE.test(value), {
       message:
         "El campo teléfono es inválido, debe tener el formato (+99..) 999999999..",
     }),
   country: z.string().min(1, {
     message: "El campo país es requerido",
   }),
-  subregion: z.string().min(1, {
+  subregion: z.string({
     message: "El campo subregión es requerido",
   }),
   id: z.number().optional().default(0),
@@ -61,4 +59,3 @@ export const clientDto = {
 
   getSchema: clientDtoSchema,
 };
-

@@ -11,14 +11,23 @@ export const ClientInfo = ({ client }: ClientInfoProps) => {
       <span className="text-xs text-muted-foreground">{client?.email}</span>
       <span className="text-xs flex items-center text-muted-foreground">
         <div className="flex items-center gap-1">
-         {client?.country.image && (
-          <img src={client?.country.image.png} alt="flag" className="w-4 h-4" /> )}
+          {client?.country.image && (
+            <img
+              src={client?.country.image.png}
+              alt="flag"
+              className="w-4 h-4"
+            />
+          )}
           <span>{client?.country.name}</span>
         </div>
-        <span className="mx-1">|</span>
-        <p className="text-xs text-muted-foreground">{
-            phoneNumberAdapter.format(client?.phone)
-            }</p>
+        {client?.phone ? (
+          <>
+            <span className="mx-1">|</span>
+            <p className="text-xs text-muted-foreground">
+              {phoneNumberAdapter.format(client?.phone)}
+            </p>
+          </>
+        ) : null}
       </span>
     </div>
   );

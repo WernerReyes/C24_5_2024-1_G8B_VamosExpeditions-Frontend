@@ -35,11 +35,9 @@ export const AppRouter = () => {
     isFetching: isUserAuthenticatedFetching,
     isLoading: isUserAuthenticatedLoading,
   } = useUserAuthenticatedQuery(undefined, {
-    skip: !(
-      pathname?.split("/").includes(PRIVATE_BASE.replace("/", "")) || pathname === "/"
-    ),
+    skip: skipUserCall(pathname),
   });
-
+  
   const { init } = useCookieExpirationStore();
 
   useEffect(() => {
@@ -83,3 +81,13 @@ export const AppRouter = () => {
     </BrowserRouter>
   );
 };
+
+const skipUserCall = (
+  pathname?: string,
+) => {
+  return !(
+    pathname?.split("/").includes(PRIVATE_BASE.replace("/", "")) ||
+    pathname === "/" || 
+    pathname === LOGIN
+  );
+}
