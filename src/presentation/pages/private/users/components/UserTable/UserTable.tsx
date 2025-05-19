@@ -27,11 +27,11 @@ import {
   FilterClearButton,
 } from "../../../filters";
 import { FilterByStatus } from "../../filters";
-import type { UserTableFilters } from "../../types";
 import { filterByStatus, getUserTransformedFilters } from "../../utils/filters";
 import { UserDevices } from "../UserDevices";
 import { TrashUserDialog } from "./components/TrashUserDialog";
 import { TrashUser } from "./components/TrashUser";
+import type { UserTableFilters } from "../../types";
 
 const { USERS_PAGINATION } = constantStorage;
 
