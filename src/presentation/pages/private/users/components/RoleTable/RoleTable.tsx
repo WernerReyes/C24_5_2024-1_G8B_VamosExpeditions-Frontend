@@ -16,7 +16,7 @@ import { dateFnsAdapter } from "@/core/adapters";
 import { useGetRolesQuery } from "@/infraestructure/store/services";
 import { usePaginator } from "@/presentation/hooks";
 import { RoleEntity, roleRender } from "@/domain/entities";
-import { RoleTableFilters } from "../../types";
+import type { RoleTableFilters } from "../../types";
 import { getRoleTransformedFilters } from "../../utils/filters";
 
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
