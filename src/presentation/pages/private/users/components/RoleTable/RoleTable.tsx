@@ -12,11 +12,6 @@ import {
   Skeleton,
   Tag,
 } from "@/presentation/components";
-// import {
-//   // FilterApplyButton,
-//   FilterByDate,
-//   FilterClearButton,
-// } from "../../../filters";
 import { dateFnsAdapter } from "@/core/adapters";
 import { useGetRolesQuery } from "@/infraestructure/store/services";
 import { usePaginator } from "@/presentation/hooks";
