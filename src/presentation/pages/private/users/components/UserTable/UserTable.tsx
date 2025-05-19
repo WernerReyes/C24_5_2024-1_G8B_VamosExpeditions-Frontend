@@ -31,7 +31,7 @@ import { filterByStatus, getUserTransformedFilters } from "../../utils/filters";
 import { UserDevices } from "../UserDevices";
 import { TrashUserDialog } from "./components/TrashUserDialog";
 import { TrashUser } from "./components/TrashUser";
-import type { UserTableFilters } from "../../types";
+import type { UserTableFilters } from "../../types/userTableFilters";
 
 const { USERS_PAGINATION } = constantStorage;
 

@@ -1,5 +1,6 @@
-import { RoleEnum } from "@/domain/entities";
-import type { RoleTableFilters, UserTableFilters } from "../types";
+import type { RoleEnum } from "@/domain/entities";
+import type { RoleTableFilters } from "../types/roleTableFilters";
+import type {UserTableFilters} from "../types/userTableFilters";
 
 export const filterByStatus = (
   value: RoleEnum,
