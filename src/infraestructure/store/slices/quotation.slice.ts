@@ -23,7 +23,6 @@ type QuotationSliceState = {
   days: Day[];
   selectedDay: Day | null;
   indirectCostMargin: number;
-  // operationType: "create" | "edit" | "replace" | null;
 };
 
 const initialState: QuotationSliceState = {
@@ -36,8 +35,6 @@ const initialState: QuotationSliceState = {
   indirectCostMargin: JSON.parse(
     localStorage.getItem(ITIERARY_INDIRECT_COST_MARGIN) || "5"
   ),
-
-  // operationType: null,
 };
 
 export const quotationSlice = createSlice({
@@ -89,17 +86,7 @@ export const quotationSlice = createSlice({
         ...state,
         indirectCostMargin: payload,
       };
-    },
-
-    // onSetOperationType: (
-    //   state,
-    //   { payload }: PayloadAction<"create" | "edit" | "replace" | null>
-    // ) => {
-    //   return {
-    //     ...state,
-    //     operationType: payload,
-    //   };
-    // }
+    }
   },
 });
 

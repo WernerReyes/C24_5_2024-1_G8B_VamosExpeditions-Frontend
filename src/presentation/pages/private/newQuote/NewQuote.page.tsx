@@ -92,6 +92,7 @@ const NewQuotePage = () => {
     isError: isErrorGetVersionQuotationById,
   } = useGetVersionQuotationByIdQuery(versionQuotationId!, {
     skip: !versionQuotationId,
+    refetchOnMountOrArgChange: true,
   });
 
   const currentTripDetailsData = currentVersionQuotationData?.data?.tripDetails;

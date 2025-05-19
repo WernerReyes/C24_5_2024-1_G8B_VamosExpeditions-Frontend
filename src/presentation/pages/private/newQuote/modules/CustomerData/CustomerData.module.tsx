@@ -5,7 +5,7 @@ import { useWindowSize } from "@/presentation/hooks";
 import { ClientForm, TripDetailsForm } from "./components";
 
 export const CustomerDataModule = () => {
-  const { width, LARGE_DESKTOP } = useWindowSize();
+  const { width, DESKTOP } = useWindowSize();
 
   return (
     <div className="flex flex-col xl:flex-row gap-4">
@@ -18,7 +18,7 @@ export const CustomerDataModule = () => {
       </div>
       <Divider
         className="my-4"
-        layout={width >= LARGE_DESKTOP ? "vertical" : "horizontal"}
+        layout={width >= DESKTOP + 238 ? "vertical" : "horizontal"}
       />
       {/* <ClientForm /> */}
       <div className="flex-[2]">

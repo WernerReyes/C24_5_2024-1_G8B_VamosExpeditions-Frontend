@@ -150,10 +150,6 @@ export const ClientForm = () => {
 
   const countryPhoneMask = getCountryPhoneMask(selectedCountry);
 
-  console.log({
-    errors, watch: watch(),
-  })
-
   return (
     <form
       className={Style.form}
