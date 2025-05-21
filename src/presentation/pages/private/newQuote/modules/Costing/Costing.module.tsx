@@ -38,7 +38,7 @@ const { ITINERARY_CURRENT_ACTIVITY } = constantStorage;
 const OPTIONS: SelectItem[] = [
   {
     label: "Servicios",
-    icon: "pi pi-users",
+    icon: "pi pi-cog",
     className: "w-1/2",
     value: "services",
   },

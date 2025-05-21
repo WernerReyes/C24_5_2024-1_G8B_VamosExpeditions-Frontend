@@ -5,8 +5,7 @@ import {
   isSameDay,
   isWithinInterval,
   getHours,
-  eachDayOfInterval
-  
+  eachDayOfInterval,
 } from "date-fns";
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale/es";
@@ -25,8 +24,12 @@ export const dateFnsAdapter = {
     return toZonedTime(date, "UTC");
   },
   parseISO(dateString: string | Date): Date {
-    const date = parseISO(dateString as any as string);
-    return toZonedTime(date, "UTC");
+    if (dateString instanceof Date) {
+      return toZonedTime(dateString, "UTC");
+    } else {
+      const date = parseISO(dateString);
+      return toZonedTime(date, "UTC");
+    }
   },
   toISO(date: Date): string {
     // Convert a date to the specified timezone, then format as ISO 8601
@@ -39,12 +42,16 @@ export const dateFnsAdapter = {
     } else {
       date = value;
     }
-    return format(date, pattern);
+    return format(date, pattern, {
+      locale: es,
+    });
   },
 
   isSameDay(date1: Date | string, date2: Date | string): boolean {
-    const dateFormat = typeof date1 === "string" ? dateFnsAdapter.parseISO(date1) : date1;
-    const dateFormat2 = typeof date2 === "string" ? dateFnsAdapter.parseISO(date2) : date2;
+    const dateFormat =
+      typeof date1 === "string" ? dateFnsAdapter.parseISO(date1) : date1;
+    const dateFormat2 =
+      typeof date2 === "string" ? dateFnsAdapter.parseISO(date2) : date2;
     return isSameDay(dateFormat, dateFormat2);
   },
 
@@ -56,8 +63,10 @@ export const dateFnsAdapter = {
     return isWithinInterval(date, { start: startDate, end: endDate });
   },
 
-
   eachDayOfInterval(startDate: Date, endDate: Date): Date[] {
-    return eachDayOfInterval({ start: dateFnsAdapter.parseISO(startDate), end: dateFnsAdapter.parseISO(endDate) });
+    return eachDayOfInterval({
+      start: dateFnsAdapter.parseISO(startDate),
+      end: dateFnsAdapter.parseISO(endDate),
+    });
   },
 };

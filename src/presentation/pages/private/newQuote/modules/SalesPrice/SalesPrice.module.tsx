@@ -14,6 +14,7 @@ import {
 import { deepEqual } from "@/core/utils";
 import { quotationService } from "@/data";
 import { onSetCurrentQuotation } from "@/infraestructure/store";
+import { cn } from "@/core/adapters";
 
 export const SalesPriceModule = () => {
   const dispatch = useDispatch();
@@ -30,9 +31,10 @@ export const SalesPriceModule = () => {
     (state: AppState) => state.versionQuotation
   );
 
-  const [updateVersionQuotation, {
-    isLoading: isLoadingUpdateVersionQuotation,
-  }] = useUpdateVersionQuotationMutation();
+  const [
+    updateVersionQuotation,
+    { isLoading: isLoadingUpdateVersionQuotation },
+  ] = useUpdateVersionQuotationMutation();
   const [profitMargin, setProfitMargin] = useState<number>(
     currentVersionQuotation?.profitMargin ?? 80
   );
@@ -101,7 +103,7 @@ export const SalesPriceModule = () => {
     if (!currentVersionQuotation.profitMargin) return;
     setProfitMargin(currentVersionQuotation.profitMargin);
   }, [currentVersionQuotation]);
-
+ 
   useEffect(() => {
     if (
       deepEqual(
@@ -170,8 +172,9 @@ export const SalesPriceModule = () => {
           label={
             (quoteId && version ? "Actualizar" : "Completar") + " cotización"
           }
+          className={cn(!disableButton && "animate-bounce")}
           disabled={disableButton}
-          loading={isLoadingUpdateVersionQuotation} 
+          loading={isLoadingUpdateVersionQuotation}
           onClick={handleSaveQuotation}
         />
       </div>

@@ -50,7 +50,6 @@ export const ClientForm = () => {
     handleSubmit,
     reset,
     setValue,
-    watch,
     formState: { errors, isDirty },
   } = useForm<ClientDto>({
     resolver: zodResolver(clientDto.getSchema),

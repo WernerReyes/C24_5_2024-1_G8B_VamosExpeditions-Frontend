@@ -6,7 +6,7 @@ import {
   type StepperChangeEvent,
 } from "@/presentation/components";
 import { useWindowSize } from "@/presentation/hooks";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   CostingModule,
   CostSummaryModule,
@@ -90,6 +90,7 @@ const NewQuotePage = () => {
   const {
     currentData: currentVersionQuotationData,
     isError: isErrorGetVersionQuotationById,
+    isLoading: isLoadingGetVersionQuotationById,
   } = useGetVersionQuotationByIdQuery(versionQuotationId!, {
     skip: !versionQuotationId,
     refetchOnMountOrArgChange: true,
@@ -99,10 +100,6 @@ const NewQuotePage = () => {
 
   const currentHotelRoomTripDetailsData =
     currentTripDetailsData?.hotelRoomTripDetails ?? [];
-
-  const [errorVersionQuotation, setErrorVersionQuotation] = useState(false);
-  const [isLoadingStep, setIsLoadingStep] = useState(true);
-  const [isVerified, setIsVerified] = useState(false);
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -121,30 +118,14 @@ const NewQuotePage = () => {
   };
 
   useEffect(() => {
-    setIsLoadingStep(true);
-
-    const timeout = setTimeout(() => {
-      setIsLoadingStep(false);
-    }, 700);
-
-    return () => clearTimeout(timeout);
-  }, [currentStep]);
-
-  useEffect(() => {
     if (isErrorGetVersionQuotationById) {
       dispatch(onSetCurrentVersionQuotation(null));
-      setErrorVersionQuotation(true);
 
       if (currentQuotation) {
         quotationService.deleteCurrentQuotation();
         dispatch(onSetCurrentQuotation(null));
       }
     }
-    const timeout = setTimeout(() => {
-      setIsVerified(true);
-    }, 500);
-
-    return () => clearTimeout(timeout);
   }, [isErrorGetVersionQuotationById]);
 
   useEffect(() => {
@@ -179,7 +160,7 @@ const NewQuotePage = () => {
   }, [currentVersionQuotationData]);
 
   useEffect(() => {
-    if (isLoadingStep) return;
+    if (isLoadingGetVersionQuotationById) return;
 
     if (
       !currentTripDetailsData &&
@@ -197,10 +178,15 @@ const NewQuotePage = () => {
         dispatch(onSetCurrentStep(1));
       }, 0);
     }
-  }, [currentHotelRoomTripDetailsData, isLoadingStep, currentStep]);
+  }, [
+    currentHotelRoomTripDetailsData,
+    isLoadingGetVersionQuotationById,
+    currentStep,
+  ]);
 
   useEffect(() => {
-    if (!currentVersionQuotationData || !isVerified || isLoadingStep) return;
+    if (!currentVersionQuotationData || isLoadingGetVersionQuotationById)
+      return;
 
     const storedCompletionPercentage =
       currentVersionQuotationData.data.completionPercentage;
@@ -236,15 +222,7 @@ const NewQuotePage = () => {
     );
   }, [currentStep, currentVersionQuotationData, indirectCostMargin]);
 
-  if (!isVerified) {
-    return (
-      <div className="flex justify-center items-center h-96 lg:h-[30rem]">
-        <i className="pi pi-spin pi-spinner text-primary text-4xl"></i>
-      </div>
-    );
-  }
-
-  if (errorVersionQuotation) {
+  if (isErrorGetVersionQuotationById) {
     return <NotFound screenSize="partial" />;
   }
 
@@ -261,7 +239,7 @@ const NewQuotePage = () => {
         onChangeStep={handleChangeStep}
         panelContent={STEPS.map((step, index) => ({
           header: step.header,
-          children: !isLoadingStep ? (
+          children: !isLoadingGetVersionQuotationById ? (
             <div className={"pe-4 h-full sm:pe-0"}>
               {renderStepContent(index)}
               <div className="flex pt-4  justify-between">

@@ -13,9 +13,9 @@ import { NewQuotationDialog } from "../NewQuotationDialog";
 import "./Sidebar.css";
 import { useSidebar } from "../../hooks";
 import { useSelector } from "react-redux";
-import { AppState } from "@/app/store";
+import type { AppState } from "@/app/store";
 
-const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, HOTEL, COUNTRY } =
+const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, HOTEL, COUNTRY, USERS } =
   constantRoutes.private;
 
 const ITEMS: MenuItem[] = [
@@ -37,6 +37,7 @@ const ITEMS: MenuItem[] = [
     className: "text-xs",
     icon: "pi  pi-book",
     items: [
+    
       {
         label: "Nueva Cotización",
         icon: "pi pi-plus-circle",
@@ -69,7 +70,7 @@ const ITEMS: MenuItem[] = [
     id: "users",
     label: "Usuarios",
     icon: "pi pi-users",
-    url: "/app/users",
+    url: USERS,
     template: (e) => <Template menuItem={e} />,
   },
 ];

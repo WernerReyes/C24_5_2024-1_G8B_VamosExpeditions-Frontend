@@ -32,24 +32,14 @@ export const ParnerTable = ({
     PartnerEntity | undefined
   >(currentVersionQuotation?.partner);
   const [commission, setCommission] = useState<number>(
-    currentVersionQuotation?.commission === 0 ||
-      currentVersionQuotation?.commission === undefined
-      ? 3
-      : currentVersionQuotation.commission
+    currentVersionQuotation?.commission ?? 3
   );
 
   useEffect(() => {
-    setParner(selectedPartner);
-  }, [selectedPartner]);
-
-  useEffect(() => {
-    if (!selectedPartner) {
-      setComission(0);
-      return;
-    }
-
-    setComission(commission);
-  }, [commission, selectedPartner]);
+    setParner(currentVersionQuotation?.partner);
+    setSelectedPartner(currentVersionQuotation?.partner);
+    setComission(currentVersionQuotation?.commission ?? 3);
+  }, [currentVersionQuotation]);
 
   return (
     <DataTable
