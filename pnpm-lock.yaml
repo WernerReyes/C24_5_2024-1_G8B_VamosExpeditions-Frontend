@@ -53,9 +53,6 @@ importers:
       react-countdown-circle-timer:
         specifier: ^3.2.1
         version: 3.2.1(react@18.3.1)
-      react-detect-offline:
-        specifier: ^2.4.5
-        version: 2.4.5
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
@@ -1324,9 +1321,6 @@ packages:
     resolution: {integrity: sha512-yBAy/9ILXOiFbLBM+3jS72TW5LeRcH8wkRC9NNqMpUkCXkGjSnaeRbJMsR9lsYF0oVXjSDbJaRbCuVMT+9HnKA==}
     peerDependencies:
       react: '>=16.8.0'
-
-  react-detect-offline@2.4.5:
-    resolution: {integrity: sha512-sI13NPEKl3uQp95FT5CwrYzH3DnXCwNP6TnY6NRF5gFDM4NU9KDlbtA6HG2dwhDVS0RYQGXwZW/mHbdf8fCnaw==}
 
   react-dom@18.3.1:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
@@ -2769,8 +2763,6 @@ snapshots:
   react-countdown-circle-timer@3.2.1(react@18.3.1):
     dependencies:
       react: 18.3.1
-
-  react-detect-offline@2.4.5: {}
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:

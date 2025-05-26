@@ -18,9 +18,16 @@ export const Dropdown = forwardRef<DropdownPrimereact, Props>(
       <>
         {label && <label {...label}>{label.text}</label>}
         {props.loading ? (
-          <Skeleton shape="rectangle" height="3rem"  {...skeleton} />
+          <Skeleton shape="rectangle" height="3rem" {...skeleton} />
         ) : (
-          <DropdownPrimereact {...props} ref={ref} />
+          <DropdownPrimereact
+            pt={{
+              wrapper: { className: "invisible-scrollbar" },
+              ...props.pt,
+            }}
+            {...props}
+            ref={ref}
+          />
         )}
         {small && <small {...small}>{small.text}</small>}
       </>

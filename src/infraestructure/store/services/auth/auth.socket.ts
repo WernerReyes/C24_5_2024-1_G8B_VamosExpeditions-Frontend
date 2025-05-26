@@ -40,8 +40,6 @@ export const authSocketListeners = (
       (data: { userId: UserEntity["id"]; devices: DeviceSocketRes[] }) => {
         // dispatch(onOnline(true));
 
-    
-
         //* Update user to online
         versionQuotationCache.updateByUserId(
           +data.userId,
@@ -80,8 +78,6 @@ export const authSocketListeners = (
     socket?.on(
       "userDisconnected",
       (data: UserEntity["id"]) => {
-        // dispatch(onOnline(false));
-
         //* Update user to online
         versionQuotationCache.updateByUserId(
           +data,
@@ -99,6 +95,8 @@ export const authSocketListeners = (
           dispatch,
           getState as () => AppState
         );
+
+        console.log("User disconnected: " + data);
 
         reservationCache.updateReservationByUser(
           {

@@ -6,11 +6,17 @@ import { UserEntity } from "@/domain/entities";
 const { EMAIL, PHONE } = regex;
 
 const userDtoSchema = z.object({
-  fullname: z.string().min(1, {
-    message: "El campo nombre es requerido",
-  }),
+  fullname: z
+    .string({
+      message: "El campo nombre es requerido",
+    })
+    .min(1, {
+      message: "El campo nombre es requerido",
+    }),
   email: z
-    .string()
+    .string({
+      message: "El campo nombre es requerido",
+    })
     .min(1, {
       message: "El campo email es requerido",
     })
@@ -19,13 +25,18 @@ const userDtoSchema = z.object({
     }),
   phoneNumber: z
     .string()
-    .regex(PHONE, {
-      message: "El campo teléfono es inválido",
-    })
-    .optional(),
+    .optional()
+    .refine((value) => !value || PHONE.test(value), {
+      message:
+        "El campo teléfono es inválido, debe tener el formato (+99..) 999999999..",
+    }),
   description: z.string().optional(),
-
-  id: z.number().optional().default(0),
+  id: z
+    .number()
+    .min(1, {
+      message: "El campo id es requerido",
+    })
+    .int(),
 });
 
 export type UserDto = z.infer<typeof userDtoSchema>;

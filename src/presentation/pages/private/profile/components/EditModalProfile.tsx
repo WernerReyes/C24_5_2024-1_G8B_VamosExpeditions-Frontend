@@ -1,6 +1,6 @@
 import { AppState } from "@/app/store";
 import { userDto, type UserDto } from "@/domain/dtos/user";
-import { useUpsertUserMutation } from "@/infraestructure/store/services";
+import { useUpdateUserMutation } from "@/infraestructure/store/services";
 import { Button, Dialog, InputText } from "@/presentation/components";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -23,7 +23,7 @@ export const EditModalProfile = ({ setShowModal, showModal }: Props) => {
     defaultValues: userDto.getDefault(authUser),
   });
 
-  const [upsertUser, { isLoading }] = useUpsertUserMutation();
+  const [upsertUser, { isLoading }] = useUpdateUserMutation();
 
   const handleUpsertUser = async (data: UserDto) => {
     upsertUser(data)

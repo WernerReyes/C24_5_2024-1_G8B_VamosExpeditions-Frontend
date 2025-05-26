@@ -64,10 +64,11 @@ export const reservationCache = {
     const extractedParams = extractParams<
       {
         getAllReservations: GetReservationsDto;
+        getTrashReservations: GetReservationsDto;
       }[]
     >(cachedQueries);
     for (const query of extractedParams) {
-      const { getAllReservations } = query;
+      const { getAllReservations, getTrashReservations } = query;
       if (getAllReservations) {
         dispatch(
           reservationServiceStore.util.updateQueryData(
@@ -92,6 +93,36 @@ export const reservationCache = {
                     }
 
                     return reservation;
+                  }),
+                },
+              });
+            }
+          )
+        );
+      }
+
+      if (getTrashReservations) {
+        dispatch(
+          reservationServiceStore.util.updateQueryData(
+            "getTrashReservations",
+            getTrashReservations,
+            (draft) => {
+              Object.assign(draft, {
+                data: {
+                  ...draft.data,
+                  content: draft.data.content.map((reservation) => {
+                    if (reservation?.versionQuotation?.user?.id === data.id) {
+                      return {
+                        ...reservation,
+                        versionQuotation: {
+                          ...reservation.versionQuotation,
+                          user: {
+                            ...reservation.versionQuotation.user,
+                            ...data,
+                          },
+                        },
+                      };
+                    }
                   }),
                 },
               });
@@ -243,7 +274,6 @@ export const reservationCache = {
           )
         );
       }
-
     }
-  }
+  },
 };

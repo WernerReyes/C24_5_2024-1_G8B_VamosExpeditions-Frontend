@@ -29,7 +29,13 @@ export const userCache = {
               user.id === data.id ? data : user
             );
           } else {
-            draft.data.content.push(data);
+            draft.data.content =
+              draft.data.limit < draft.data.total + 1
+                ? draft.data.content.slice(-draft.data.limit)
+                : draft.data.content;
+
+            draft.data.content = [data, ...draft.data.content];
+            draft.data = { ...draft.data, total: draft.data.total + 1 };
           }
         })
       );
@@ -123,7 +129,6 @@ export const userCache = {
     });
   },
 
-
   trash: function (
     data: UserEntity,
     dispatch: ThunkDispatch<any, any, UnknownAction>,
@@ -146,12 +151,12 @@ export const userCache = {
             query.getUsers,
             (draft) => {
               draft.data = {
-               ...draft.data,
+                ...draft.data,
                 content: draft.data.content.filter(
-                  (user) => user.id!== data.id
+                  (user) => user.id !== data.id
                 ),
                 total: draft.data.total - 1,
-              }
+              };
             }
           )
         );
@@ -178,8 +183,7 @@ export const userCache = {
   restore: function (
     data: UserEntity,
     dispatch: ThunkDispatch<any, any, UnknownAction>,
-    getState: () => AppState,
-    
+    getState: () => AppState
   ) {
     const cachedQueries = getState().userService.queries;
 
@@ -198,15 +202,13 @@ export const userCache = {
             query.getUsers,
             (draft) => {
               draft.data = {
-              ...draft.data,
-                content: [data,...draft.data.content],
+                ...draft.data,
+                content: [data, ...draft.data.content],
                 total: draft.data.total + 1,
-              }
+              };
             }
-
-
           )
-        )
+        );
       }
 
       if (query.getTrashUsers) {
@@ -216,16 +218,16 @@ export const userCache = {
             query.getTrashUsers,
             (draft) => {
               draft.data = {
-               ...draft.data,
+                ...draft.data,
                 content: draft.data.content.filter(
-                  (user) => user.id!== data.id
+                  (user) => user.id !== data.id
                 ),
                 total: draft.data.total - 1,
-              }
+              };
             }
           )
-        )
+        );
       }
     }
-  }
+  },
 };

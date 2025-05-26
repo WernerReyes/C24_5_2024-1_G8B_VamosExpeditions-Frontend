@@ -65,6 +65,7 @@ export const UnofficialDataTable = ({
         updatedAt,
 
         select: {
+          final_price: true,
           version_number: true,
           quotation_id: true,
           name: true,

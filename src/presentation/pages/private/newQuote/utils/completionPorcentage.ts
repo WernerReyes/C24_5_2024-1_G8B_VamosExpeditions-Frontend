@@ -60,25 +60,25 @@ export const getVersionDataAndCalculateCompletionPercentage = (
       return {
         ...versionQuotation,
         status: VersionQuotationStatus.DRAFT,
-        finalPrice: undefined,
-        profitMargin: undefined,
-        indirectCostMargin: undefined,
+        finalPrice: null,
+        profitMargin: null,
+        indirectCostMargin: null,
         completionPercentage: 25,
       };
     case 50:
       return {
         ...versionQuotation,
         status: VersionQuotationStatus.DRAFT,
-        finalPrice: undefined,
-        profitMargin: undefined,
-        indirectCostMargin: undefined,
+        finalPrice: null,
+        profitMargin: null,
+        indirectCostMargin: null,
         completionPercentage: 50,
       };
     case 75:
       return {
         ...versionQuotation,
         status: VersionQuotationStatus.DRAFT,
-        finalPrice: undefined,
+        finalPrice: null,
         // profitMargin: undefined,
         completionPercentage: 75,
       };

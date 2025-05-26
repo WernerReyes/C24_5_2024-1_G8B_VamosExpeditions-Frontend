@@ -5,7 +5,6 @@ export * from './Navbar/Navbar';
 export * from './Navbar/components/Notifications';
 export * from './Navbar/components/Settings';
 export * from './NewQuotationDialog';
-export * from './OfflineDialog';
 export * from './Sidebar/Sidebar';
 export * from './TrashDialog';
 export * from './UserInfo';

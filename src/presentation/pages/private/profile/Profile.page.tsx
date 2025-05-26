@@ -3,16 +3,17 @@ import { useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
 import { roleRender } from "@/domain/entities";
 import { Avatar, Button, Card, Divider, Tag } from "@/presentation/components";
-import { EditModalProfile } from "./components";
+import { AdvancedSettingDialog, EditModalProfile } from "./components";
 import { phoneNumberAdapter } from "@/core/adapters";
 import { EditModalPassword } from "./components/EditModalPassword";
 
 export const ProfilePage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  
-
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
+
+  const [isAdvancedSettingModalOpen, setIsAdvancedSettingModalOpen] =
     useState(false);
 
   const { authUser } = useSelector((state: AppState) => state.auth);
@@ -28,6 +29,11 @@ export const ProfilePage = () => {
       <EditModalPassword
         showModal={isChangePasswordModalOpen}
         setShowModal={setIsChangePasswordModalOpen}
+      />
+
+      <AdvancedSettingDialog
+        showModal={isAdvancedSettingModalOpen}
+        setShowModal={setIsAdvancedSettingModalOpen}
       />
       <div className="flex justify-center h-full items-center">
         <Card className="w-full shadow-lg p-4">
@@ -61,10 +67,17 @@ export const ProfilePage = () => {
                   icon="pi pi-lock"
                   onClick={() => setIsChangePasswordModalOpen(true)}
                 />
+
+                <Button
+                  outlined
+                  label="Configuración del Sistema"
+                  icon="pi pi-cog"
+                  onClick={() => setIsAdvancedSettingModalOpen(true)}
+                />
               </div>
             </div>
 
-            <Divider layout="vertical" />
+            <Divider className="max-md:hidden" layout="vertical" />
 
             {/* Profile Details */}
             <div className="w-full md:w-2/3">

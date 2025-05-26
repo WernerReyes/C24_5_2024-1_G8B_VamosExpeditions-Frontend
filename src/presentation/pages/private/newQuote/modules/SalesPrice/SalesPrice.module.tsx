@@ -41,9 +41,9 @@ export const SalesPriceModule = () => {
   const [isExploding, setIsExploding] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
   const [finalPrice, setFinalPrice] = useState<number>(0);
-  const [parner, setParner] = useState<PartnerEntity | undefined>();
+  const [parner, setParner] = useState<PartnerEntity |null>(null);
 
-  const [comission, setComission] = useState<number>(0);
+  const [comission, setComission] = useState<number | null>(null);
 
   const objectToCompare = {
     ...currentVersionQuotation!,
@@ -60,7 +60,7 @@ export const SalesPriceModule = () => {
       deepEqual(
         {
           ...currentVersionQuotation,
-          commission: currentVersionQuotation?.commission || 0,
+          commission: currentVersionQuotation?.commission || null,
         },
         objectToCompare
       )
@@ -73,7 +73,7 @@ export const SalesPriceModule = () => {
         finalPrice,
         profitMargin,
         completionPercentage: 100,
-        commission: comission,
+        commission: comission ?? 0,
         partner: parner,
         status: VersionQuotationStatus.COMPLETED,
       })
@@ -110,7 +110,7 @@ export const SalesPriceModule = () => {
         {
           ...currentVersionQuotation,
           partner: parner,
-          commission: currentVersionQuotation?.commission || 0,
+          commission: currentVersionQuotation?.commission || null,
         },
         objectToCompare
       ) &&
@@ -163,7 +163,7 @@ export const SalesPriceModule = () => {
         setFinalPrice={setFinalPrice}
         profitMargin={profitMargin}
         parnerName={parner?.name}
-        comission={comission}
+        comission={comission ?? 0}
       />
 
       <div className="flex justify-end">

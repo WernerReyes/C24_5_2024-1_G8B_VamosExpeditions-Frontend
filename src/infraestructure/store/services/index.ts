@@ -10,7 +10,7 @@ export * from "./versionQuotation/versionQuotation.response";
 export * from "./tripDetails/tripDetails.service";
 export * from "./hotelRoomTripDetails/hotelRoomTripDetails.service";
 export * from "./socket/socket.service";
-
+export * from './setting/setting.service'
 
 // api hotel and room
 export * from "./hotel/hotel.service";
@@ -25,6 +25,8 @@ export * from "./country/country.service";
 // api notification
 export * from "./notification/notification.socket";
 export * from "./notification/notification.service";
+
+
 
 
 

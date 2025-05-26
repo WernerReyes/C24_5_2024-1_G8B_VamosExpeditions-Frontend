@@ -23,6 +23,7 @@ import {
   onSetCurrentTripDetails,
   onSetCurrentVersionQuotation,
   onSetHotelRoomTripDetails,
+  onSetIndirectCostMargin,
 } from "@/infraestructure/store";
 import {
   useGetVersionQuotationByIdQuery,
@@ -141,6 +142,16 @@ const NewQuotePage = () => {
   useEffect(() => {
     if (currentVersionQuotationData) {
       dispatch(onSetCurrentVersionQuotation(currentVersionQuotationData!.data));
+      if (currentVersionQuotationData.data.indirectCostMargin) {
+        dispatch(
+          onSetIndirectCostMargin(
+            currentVersionQuotationData.data.indirectCostMargin
+          )
+        ) 
+        // dispatch(onSetCurrentStep(currentVersionQuotationData.data.currentStep));
+      } else {
+        dispatch(onSetIndirectCostMargin(8));
+      }
       if (currentTripDetailsData) {
         dispatch(onSetCurrentTripDetails(currentTripDetailsData));
         if (currentHotelRoomTripDetailsData.length > 0) {

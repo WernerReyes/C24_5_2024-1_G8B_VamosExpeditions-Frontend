@@ -13,6 +13,7 @@ export const RecentQuotes = () => {
       page: 1,
       limit: 5,
       select: {
+        name: true,
         version_number: true,
         quotation_id: true,
         completion_percentage: true,

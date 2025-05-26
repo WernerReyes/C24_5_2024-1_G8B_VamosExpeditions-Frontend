@@ -53,10 +53,9 @@ export * from "primereact/tooltip";
 export { ColumnGroup } from "primereact/columngroup";
 export { Row } from "primereact/row";
 export { Toolbar } from "primereact/toolbar";
+export { InputSwitch} from "primereact/inputswitch";
 
 export { CountdownCircleTimer } from "react-countdown-circle-timer";
-
-export { Offline } from "react-detect-offline";
 
 export { Bar } from "react-chartjs-2";
 

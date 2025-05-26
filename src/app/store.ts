@@ -18,6 +18,7 @@ import {
   notificationService,
   roomService,
   cityService,
+  settingService,
 } from "@/infraestructure/store/services";
 
 import {
@@ -67,6 +68,7 @@ export const store = configureStore({
     [notificationService.reducerPath]: notificationService.reducer,
     [hotelService.reducerPath]: hotelService.reducer,
     [roomService.reducerPath]: roomService.reducer,
+    [settingService.reducerPath]: settingService.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -93,7 +95,8 @@ export const store = configureStore({
 
       // apis hotel and room
       .concat(hotelService.middleware)
-      .concat(roomService.middleware),
+      .concat(roomService.middleware)
+      .concat(settingService.middleware)
 });
 
 export type AppState = ReturnType<typeof store.getState>;

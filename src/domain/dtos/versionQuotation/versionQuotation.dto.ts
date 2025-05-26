@@ -16,9 +16,9 @@ export const versionQuotationDtoSchema = z.object({
   commission: z.number().optional(),
   partnerId: z.number().optional(),
   completionPercentage: z.number().optional(),
-  indirectCostMargin: z.number().optional(),
-  profitMargin: z.number().optional(),
-  finalPrice: z.number().optional(),
+  indirectCostMargin: z.number().optional().nullable(),
+  profitMargin: z.number().optional().nullable(),
+  finalPrice: z.number().optional().nullable(),
 })
 
 export type VersionQuotationDto = z.infer<typeof versionQuotationDtoSchema>;

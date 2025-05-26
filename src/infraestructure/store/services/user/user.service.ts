@@ -1,8 +1,10 @@
-import { AppState } from "@/app/store";
+import type { AppState } from "@/app/store";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
 import {
   type ChangePasswordDto,
   changePasswordDto,
+  createUserDto,
+  CreateUserDto,
   type GetUsersDto,
   getUsersDto,
   userDto,
@@ -70,24 +72,17 @@ export const userService = createApi({
       providesTags: ["TrashUsers"],
     }),
 
-    upsertUser: builder.mutation<ApiResponse<UserEntity>, UserDto>({
+    updateUser: builder.mutation<ApiResponse<UserEntity>, UserDto>({
       query: (body) => {
         const [_, errors] = userDto.create(body);
         if (errors) throw errors;
-
-        if (body.id !== 0) {
           return {
             url: `/${body.id}`,
             method: "PUT",
             body,
           };
-        }
 
-        return {
-          url: "/",
-          method: "POST",
-          body,
-        };
+       
       },
       async onQueryStarted({ id }, { dispatch, queryFulfilled, getState }) {
         try {
@@ -115,6 +110,28 @@ export const userService = createApi({
           throw error;
         }
       },
+    }),
+
+    createUser: builder.mutation<ApiResponse<UserEntity>, CreateUserDto>({
+      query: (body) => {
+        const [_, errors] = createUserDto.create(body);
+        if (errors) throw errors;
+
+        return {
+          url: "/",
+          method: "POST",
+          body,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
+        try {
+          const { data } = await queryFulfilled;
+          userCache.upsertUser(data.data, dispatch, getState);
+          startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      }
     }),
 
     trashUser: builder.mutation<ApiResponse<UserEntity>, TrashDto>({
@@ -191,7 +208,8 @@ export const userService = createApi({
 export const {
   useGetUsersQuery,
   useGetTrashUsersQuery,
-  useUpsertUserMutation,
+  useUpdateUserMutation,
+  useCreateUserMutation,
   useTrashUserMutation,
   useRestoreUserMutation,
   useChangePasswordMutation,

@@ -92,11 +92,11 @@ export interface VersionQuotationEntity {
   updatedAt: Date;
   official: boolean;
   completionPercentage: number;
-  indirectCostMargin?: number;
-  profitMargin?: number;
-  finalPrice?: number;
-  commission?: number;
-  partner?: PartnerEntity;
+  indirectCostMargin?: number | null;
+  profitMargin?: number | null;
+  finalPrice?: number | null;
+  commission: number | null;
+  partner: PartnerEntity | null;
   reservation?: ReservationEntity;
   tripDetails?: TripDetailsEntity;
   user?: UserEntity;

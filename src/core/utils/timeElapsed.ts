@@ -6,6 +6,7 @@ const timeElapsed = (fechaInicio: Date, fechaFin: Date) => {
   const duracion = fin
     .diff(inicio, ["years", "months", "days", "hours", "minutes", "seconds"])
     .toObject();
+    
 
   return {
     años: duracion.years ?? 0,

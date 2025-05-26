@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 type Props = {
-  setParner: (parner: PartnerEntity | undefined) => void;
-  setComission: (salesPrice: number) => void;
+  setParner: (parner: PartnerEntity | null) => void;
+  setComission: (salesPrice: number | null) => void;
 };
 
 const PARNERS: PartnerEntity[] = [{ name: "Travel Local", id: 1 }];
@@ -29,17 +29,27 @@ export const ParnerTable = ({
     (state: AppState) => state.hotelRoomTripDetails
   );
   const [selectedPartner, setSelectedPartner] = useState<
-    PartnerEntity | undefined
-  >(currentVersionQuotation?.partner);
+    PartnerEntity | null
+  >(null);
   const [commission, setCommission] = useState<number>(
-    currentVersionQuotation?.commission ?? 3
+   3
   );
 
   useEffect(() => {
-    setParner(currentVersionQuotation?.partner);
-    setSelectedPartner(currentVersionQuotation?.partner);
-    setComission(currentVersionQuotation?.commission ?? 3);
+    setSelectedPartner(currentVersionQuotation?.partner ?? null);
+    setCommission(currentVersionQuotation?.commission?? 3);
   }, [currentVersionQuotation]);
+
+  useEffect(() => {
+    if (!selectedPartner) {
+      setParner(null);
+      setComission(null);
+      return;
+    };
+    setParner(selectedPartner);
+    setComission(commission);
+  }, [selectedPartner, commission]);
+
 
   return (
     <DataTable

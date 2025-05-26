@@ -59,7 +59,7 @@ export const SalesPriceTable = ({
   }, [calculateSalesPrice]);
 
   useEffect(() => {
-    setFinalPrice(parnerName ? finalPrice.parner : finalPrice.VE);
+    setFinalPrice(finalPrice.VE);
   }, [finalPrice]);
 
   return (

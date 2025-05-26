@@ -52,6 +52,7 @@ export const TrashReservationsDialog = ({ visible, onHide }: Props) => {
                   number_of_people: true,
                 },
                 user: {
+                  id_user: true,
                   fullname: true,
                 },
                 final_price: true,
