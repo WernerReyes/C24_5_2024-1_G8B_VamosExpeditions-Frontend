@@ -10,6 +10,7 @@ import { userCache } from "../user/user.cache";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
 import { setusersDevicesConnections } from "../../slices/users.slice";
 import type { DeviceSocketRes } from "./auth.response";
+import { onActiveDevice } from "../../slices/auth.slice";
 
 export const authSocket = {
   userConnected: () => {
@@ -56,9 +57,15 @@ export const authSocketListeners = (
           // data.devices
         );
 
+        console.log(data.devices)
+
         dispatch(
           setusersDevicesConnections(data.devices)
         );
+
+        dispatch(
+          onActiveDevice(data.devices)
+        )
 
        
 
@@ -117,6 +124,29 @@ export const authSocketListeners = (
         dispatch(
           setusersDevicesConnections(data.devices)
         );
+
+        dispatch(
+          onActiveDevice(data.devices)
+        )
+      }
+    );
+  },
+
+  logoutDevice: (socket: Socket) => {
+    socket?.on(
+      "disconnect-device",
+      async (data: string) => {
+        const browserId = await getDeviceKey();
+      
+        if (data.toLowerCase() === browserId.toLowerCase()) {
+          const { browser, os } = getLoginMessageFromDeviceId(data);
+  
+          toasterAdapter.disconnectDevice(browser, os);
+  
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 5000);
+        }
       }
     );
   },

@@ -71,6 +71,7 @@ export const SocketService = createApi({
           
         });
         
+        authSocket.logoutDevice(socket);
         authSocket.forceLogout(socket);
 
         const notificationSocket = notificationSocketListeners(dispatch);

@@ -147,7 +147,7 @@ const NewQuotePage = () => {
           onSetIndirectCostMargin(
             currentVersionQuotationData.data.indirectCostMargin
           )
-        ) 
+        );
         // dispatch(onSetCurrentStep(currentVersionQuotationData.data.currentStep));
       } else {
         dispatch(onSetIndirectCostMargin(8));
@@ -215,16 +215,17 @@ const NewQuotePage = () => {
       storedCompletionPercentage
     );
 
+    
     //* Prevent unnecessary updates when reloading
     if (storedCompletionPercentage === newCompletionPercentage) return;
-
+   
     updateVersionQuotation(
       versionQuotationDto.parse(
         getVersionDataAndCalculateCompletionPercentage(
           {
             ...currentVersionQuotationData.data,
             indirectCostMargin:
-              currentVersionQuotationData.data.indirectCostMargin ||
+              // currentVersionQuotationData.data.indirectCostMargin ||
               indirectCostMargin,
           },
           newCompletionPercentage
@@ -236,7 +237,8 @@ const NewQuotePage = () => {
   if (isErrorGetVersionQuotationById) {
     return <NotFound screenSize="partial" />;
   }
-
+ 
+  
   return (
     <section className="bg-white py-5 md:p-10 rounded-lg shadow-md">
       <EditableQuotationName />
@@ -273,7 +275,9 @@ const NewQuotePage = () => {
                     tooltip={width <= MOVILE ? "Continuar" : undefined}
                     onClick={handleNext}
                     disabled={
-                      (index === 0 && !currentTripDetailsData) ||
+                      (index === 0 &&
+                        (!currentTripDetailsData ||
+                          JSON.stringify(currentTripDetailsData) === "{}")) ||
                       (index === 1 &&
                         currentHotelRoomTripDetailsData.length === 0)
                     }

@@ -3,9 +3,10 @@ import { Avatar } from "@/presentation/components";
 
 type Props = {
   user: UserEntity;
+  extraInfo?: keyof UserEntity; // Automatically includes all UserEntity properties
 };
 
-export const UserInfo = ({ user }: Props) => {
+export const UserInfo = ({ user, extraInfo }: Props) => {
   return (
     <div className="flex items-center gap-2">
       <Avatar
@@ -16,7 +17,10 @@ export const UserInfo = ({ user }: Props) => {
         }}
         className="bg-primary text-white"
       />
-      <span>{user.fullname}</span>
+      <div className="flex flex-col items-center">
+        <span>{user.fullname}</span>
+        {extraInfo && <span>{String(user[extraInfo])}</span>}
+      </div>
     </div>
   );
 };

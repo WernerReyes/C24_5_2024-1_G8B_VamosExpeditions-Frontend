@@ -218,6 +218,7 @@ export const TripDetailsForm = () => {
                       text: "Cliente",
                       htmlFor: "client",
                     }}
+                    emptyMessage="No se encontraron clientes"
                     placeholder="Escoge un cliente"
                     small={{
                       text: error?.message,

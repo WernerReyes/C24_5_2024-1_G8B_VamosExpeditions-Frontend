@@ -40,7 +40,7 @@ export const versionQuotationDto = {
       name: entity.name,
       status: entity.status,
       official: entity.official,
-      commission: entity.commission,
+      commission: entity.commission ?? undefined,
       partnerId: entity.partner?.id,
       completionPercentage: entity.completionPercentage,
       indirectCostMargin: entity.indirectCostMargin,

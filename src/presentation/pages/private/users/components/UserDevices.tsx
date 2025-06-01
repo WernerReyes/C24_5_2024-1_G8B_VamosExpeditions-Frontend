@@ -85,7 +85,7 @@ const DeviceTooltip = ({ devices, target, icon }: DeviceTooltipProps) => {
                   className="bg-transparent"
                 />
 
-                <span className="text-sm font-bold">{`${browser} - ${platform}`}</span>
+                <span className="text-sm font-bold">{`${platform} - ${browser}`}</span>
               </div>
             );
           })}

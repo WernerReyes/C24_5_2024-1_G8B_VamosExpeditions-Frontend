@@ -67,6 +67,7 @@ export const SalesPriceModule = () => {
     )
       return;
 
+
     updateVersionQuotation(
       versionQuotationDto.parse({
         ...currentVersionQuotation!,

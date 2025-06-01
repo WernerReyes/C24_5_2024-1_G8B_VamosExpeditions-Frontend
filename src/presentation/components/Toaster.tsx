@@ -127,4 +127,30 @@ export const toasterAdapter = {
         </div>
       );
     }),
+
+  disconnectDevice: (browser: string, os: string) =>
+    toast.custom((t) => {
+      return (
+        <div
+          className={`flex items-start p-4 rounded-lg shadow-md bg-white border-l-4 border-primary ${
+            t.visible ? "animate-enter" : "animate-leave"
+          }`}
+          style={{ width: "22rem" }}
+        >
+          <div className="mr-4 text-red-500">
+            <i className="pi pi-wifi-off text-xl"></i>
+          </div>
+          <div className="flex-grow text-sm">
+            <h3 className="font-semibold text-md text-gray-800">
+              Dispositivo desconectado
+            </h3>
+            <p className="text-gray-600">{`${browser} on ${os}`}</p>
+          </div>
+          <i
+            className="pi pi-times cursor-pointer text-gray-500 hover:text-gray-800"
+            onClick={() => toast.dismiss(t.id)}
+          ></i>
+        </div>
+      );
+    }),
 };

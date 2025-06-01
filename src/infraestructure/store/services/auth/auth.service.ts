@@ -1,7 +1,7 @@
 import { startShowApiError, startShowSuccess } from "@/core/utils";
-import { loginDto, ResetPasswordDto, type LoginDto } from "@/domain/dtos/auth";
+import { disconnectDeviceDto, DisconnectDeviceDto, loginDto, ResetPasswordDto, type LoginDto } from "@/domain/dtos/auth";
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { onLogin, onLogout } from "../../slices/auth.slice";
+import { onLogin, onLogout, onRemoveDevice } from "../../slices/auth.slice";
 import {
   onSetCookieExpiration,
   onSetExpired,
@@ -127,7 +127,36 @@ export const authService = createApi({
           })
         );
       },
+    
     }),
+    
+    disconnectDevice: builder.mutation<ApiResponse<void>, DisconnectDeviceDto>({
+      query: (body) => {
+        const [_, errors] = disconnectDeviceDto.create(body);
+        if (errors) throw new Error(errors.join(", "));
+        return {
+          url: "/disconnect-device",
+          method: "POST",
+          body,
+        };
+      },
+      async onQueryStarted({ deviceId }, { queryFulfilled, dispatch }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+
+          dispatch(
+            onRemoveDevice(deviceId)
+          )
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      },
+     
+
+      
+    }),
+
     logout: builder.mutation<void, void>({
       query: () => ({
         url: "/logout",
@@ -156,5 +185,6 @@ export const {
   useReLoginMutation,
   useLazyUserAuthenticatedQuery,
   useUserAuthenticatedQuery,
+  useDisconnectDeviceMutation,
   useLogoutMutation,
 } = authService;

@@ -10,6 +10,8 @@ import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useCalculateCostsPerService } from "../../../hooks/useCalculateCostsPerService";
 import { CostTableEnum } from "../enums/costTable.enum";
+import { useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation";
 
 export const DataTableCostSummary = () => {
   const dispatch = useDispatch();
@@ -17,6 +19,15 @@ export const DataTableCostSummary = () => {
   const { indirectCostMargin } = useSelector(
     (state: AppState) => state.quotation
   );
+
+  const { currentVersionQuotation } = useSelector(
+    (state: AppState) => state.versionQuotation
+  );
+
+  const [
+    updateVersionQuotation,
+    { isLoading: isLoadingUpdateVersionQuotation },
+  ] = useUpdateVersionQuotationMutation();
 
   const { calculateCostsPerService, uniqueHotelRoomTripDetails } =
     useCalculateCostsPerService();
@@ -27,6 +38,20 @@ export const DataTableCostSummary = () => {
       number: quote.number,
     }));
   }, [uniqueHotelRoomTripDetails]);
+
+  const saveIndirectCostMargin = (value: number) => {
+    if (!currentVersionQuotation) return;
+    updateVersionQuotation(
+      versionQuotationDto.parse({
+        ...currentVersionQuotation,
+        indirectCostMargin: value,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(onSetIndirectCostMargin(value));
+      });
+  };
 
   return (
     <DataTable
@@ -50,10 +75,9 @@ export const DataTableCostSummary = () => {
                   prefix="%"
                   value={indirectCostMargin}
                   min={0}
+                  disabled={isLoadingUpdateVersionQuotation}
                   max={100}
-                  onChange={(e) =>
-                    dispatch(onSetIndirectCostMargin(e.value as number))
-                  }
+                  onChange={(e) => saveIndirectCostMargin(e.value as number)}
                   showButtons
                   buttonLayout="vertical"
                   className="w-20"
