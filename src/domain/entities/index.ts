@@ -10,6 +10,8 @@ export * from './partner.entity';
 export * from './quotation.entity';
 export * from './reservation.entity';
 export * from './role.entity';
+export * from './service.entity';
+export * from './serviceType.entity';
 export * from './setting.entity';
 export * from './tripDetails.entity';
 export * from './user.entity';

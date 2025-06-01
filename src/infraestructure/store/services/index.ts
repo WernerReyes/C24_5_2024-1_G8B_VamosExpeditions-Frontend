@@ -26,6 +26,12 @@ export * from "./country/country.service";
 export * from "./notification/notification.socket";
 export * from "./notification/notification.service";
 
+// api service
+export * from "./service/service.service";
+
+// api service_type
+export * from "./serviceType/serviceType.service";
+
 
 
 

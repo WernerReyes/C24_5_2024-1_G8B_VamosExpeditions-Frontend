@@ -10,6 +10,8 @@ export * from './partner.model';
 export * from './quotation.model';
 export * from './reservation.model';
 export * from './role.model';
+export * from './service.model';
+export * from './serviceTripDetails.model';
 export * from './tripDetails.model';
 export * from './tripDetailsHasCity.model';
 export * from './user.model';
