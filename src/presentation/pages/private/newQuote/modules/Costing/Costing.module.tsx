@@ -3,13 +3,11 @@ import {
   Button,
   Calendar,
   ConfirmDialog,
-  Menu,
-  type MenuItem,
   SelectButton,
   Skeleton,
-  SplitButton,
+  SplitButton
 } from "@/presentation/components";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Accommodiations, SidebarDays } from "./components";
 
 import type { AppState } from "@/app/store";
@@ -21,17 +19,17 @@ import {
 } from "@/domain/entities";
 import {
   onFetchHotelRoomTripDetails,
-  onSetHotels,
+  onSetSelectedCity
 } from "@/infraestructure/store";
 import {
   useDeleteManyHotelRoomTripDetailsMutation,
-  useGetHotelsQuery,
   useUpdateManyHotelRoomTripDetailsByDateMutation,
-  useUpsertTripDetailsMutation,
+  useUpsertTripDetailsMutation
 } from "@/infraestructure/store/services";
 import { SelectButtonChangeEvent } from "primereact/selectbutton";
 import { SelectItem } from "primereact/selectitem";
 import { useDispatch, useSelector } from "react-redux";
+import { Services } from "./components/services/Services";
 
 const { ITINERARY_CURRENT_ACTIVITY } = constantStorage;
 
@@ -50,34 +48,6 @@ const OPTIONS: SelectItem[] = [
   },
 ];
 
-const SERVICES: MenuItem[] = [
-  {
-    label: "Transporte",
-    icon: "pi pi-refresh",
-  },
-  {
-    separator: true,
-  },
-  {
-    label: "Actividades",
-    icon: "pi pi-upload",
-  },
-  {
-    separator: true,
-  },
-  {
-    label: "Alojamiento",
-    icon: "pi pi-upload",
-  },
-  {
-    separator: true,
-  },
-  {
-    label: "Guías",
-    icon: "pi pi-upload",
-  },
-];
-
 export const CostingModule = () => {
   const dispatch = useDispatch();
 
@@ -93,7 +63,7 @@ export const CostingModule = () => {
     (state: AppState) => state.hotelRoomTripDetails
   );
 
-  const { selectedDay } = useSelector((state: AppState) => state.quotation);
+  const { selectedDay, selectedCity } = useSelector((state: AppState) => state.quotation);
 
   const [upsertTripDetails] = useUpsertTripDetailsMutation();
 
@@ -106,18 +76,6 @@ export const CostingModule = () => {
     updateManyHotelRoomTripDetails,
     { isLoading: isUpdatingManyHotelRoomTripDetails },
   ] = useUpdateManyHotelRoomTripDetailsByDateMutation();
-
-  const [selectedCity, setSelectedCity] = useState<CityEntity | undefined>(
-    undefined
-  );
-  const { data: hotels } = useGetHotelsQuery(
-    {
-      cityId: selectedCity?.id,
-    },
-    {
-      skip: !selectedCity,
-    }
-  );
 
   const [[startDate, endDate], setDateRange] = useState<
     [Date | null, Date | null]
@@ -132,8 +90,7 @@ export const CostingModule = () => {
   ] = useState<HotelRoomTripDetailsEntity[]>([]);
 
   const [isDayDeleted, setIsDayDeleted] = useState<boolean>(false);
-  const menuLeft = useRef<Menu>(null);
-
+  
   const [{ visible, message, type }, setConfirmDialog] = useState<{
     visible: boolean;
     message?: string;
@@ -208,7 +165,7 @@ export const CostingModule = () => {
 
   useEffect(() => {
     if (currentTripDetails?.cities && !selectedCity) {
-      setSelectedCity(currentTripDetails.cities[0]);
+      dispatch(onSetSelectedCity((currentTripDetails.cities[0])));
     }
   }, [currentTripDetails]);
 
@@ -218,11 +175,7 @@ export const CostingModule = () => {
     }
   }, [currentTripDetails]);
 
-  useEffect(() => {
-    if (hotels?.data) {
-      dispatch(onSetHotels(hotels.data));
-    }
-  }, [hotels]);
+  
 
   useEffect(() => {
     localStorage.setItem(ITINERARY_CURRENT_ACTIVITY, activity);
@@ -261,7 +214,9 @@ export const CostingModule = () => {
             model={
               currentTripDetails?.cities?.map((city: CityEntity) => ({
                 label: city.name,
-                command: () => setSelectedCity(city),
+                command: () => {
+                  dispatch(onSetSelectedCity(city));
+                },
                 className: cn(
                   "border-[#D0D5DD]",
                   selectedCity === city
@@ -392,28 +347,7 @@ export const CostingModule = () => {
               />
 
               {/* Content */}
-              {activity === "services" && (
-                <>
-                  <div className="flex justify-end">
-                    <Menu
-                      model={SERVICES}
-                      popup
-                      ref={menuLeft}
-                      id="popup_menu_left"
-                    />
-                    <Button
-                      label="Agregar Servicio"
-                      icon="pi pi-plus-circle"
-                      onClick={(event) => menuLeft.current?.toggle(event)}
-                      aria-controls="popup_menu_left"
-                      aria-haspopup
-                    />
-                  </div>
-                  <p className="text-center bg-secondary p-2 md:w-3/4 mx-auto rounded-md text-gray-500">
-                    Ningún servicio por ahora
-                  </p>
-                </>
-              )}
+              {activity === "services" && <Services />}
 
               {activity === "accommodation" && <Accommodiations />}
             </div>

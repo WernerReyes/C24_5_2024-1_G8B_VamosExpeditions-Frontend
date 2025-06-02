@@ -10,8 +10,9 @@ import {
   // type ServiceTypeDto
 } from "@/domain/dtos/serviceType";
 import { serviceTypeModel } from "../../../models/serviceType.model";
+import { PaginatedResponse } from '../response';
 
-const PREFIX = "/serviceType";
+const PREFIX = "/service-type";
 
 export const serviceTypeService = createApi({
   reducerPath: "serviceTypeService",
@@ -19,7 +20,7 @@ export const serviceTypeService = createApi({
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
     getServiceTypes: builder.query<
-      ApiResponse<ServiceTypeEntity[]>,
+       ApiResponse<PaginatedResponse<ServiceTypeEntity>>,
       GetServiceTypesDto
     >({
       query: (params) => {

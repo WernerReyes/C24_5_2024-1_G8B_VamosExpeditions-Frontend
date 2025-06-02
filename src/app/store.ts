@@ -21,6 +21,7 @@ import {
   settingService,
   serviceService,
   serviceTypeService,
+  serviceTripDetailsService
 } from "@/infraestructure/store/services";
 
 import {
@@ -33,6 +34,7 @@ import {
   hotelSlice,
   versionquotationSlice,
   hotelRoomTripDetailsSlice,
+  serviceTripDetailsSlice,
   tripDetailsSlice,
   usersSlice,
   userNotificationSlice,
@@ -46,6 +48,7 @@ export const store = configureStore({
     quotation: quotationSlice.reducer,
     versionQuotation: versionquotationSlice.reducer,
     hotelRoomTripDetails: hotelRoomTripDetailsSlice.reducer,
+    serviceTripDetails: serviceTripDetailsSlice.reducer,
     client: clientSlice.reducer,
     country: countrySlice.reducer,
     tripDetails: tripDetailsSlice.reducer,
@@ -61,6 +64,8 @@ export const store = configureStore({
     [versionQuotationService.reducerPath]: versionQuotationService.reducer,
     [hotelRoomTripDetailsService.reducerPath]:
       hotelRoomTripDetailsService.reducer,
+    [serviceTripDetailsService.reducerPath]:
+      serviceTripDetailsService.reducer,
     [reservationServiceStore.reducerPath]: reservationServiceStore.reducer,
     [externalCountryService.reducerPath]: externalCountryService.reducer,
     [SocketService.reducerPath]: SocketService.reducer,
@@ -87,6 +92,7 @@ export const store = configureStore({
       .concat(quotationServiceStore.middleware)
       .concat(versionQuotationService.middleware)
       .concat(hotelRoomTripDetailsService.middleware)
+      .concat(serviceTripDetailsService.middleware)
       .concat(externalCountryService.middleware)
       .concat(SocketService.middleware)
 
@@ -95,15 +101,15 @@ export const store = configureStore({
       .concat(countryService.middleware)
 
       .concat(notificationService.middleware)
-      .concat(rtkQueryErrorLogger)
-
+      
       // apis hotel and room
       .concat(hotelService.middleware)
       .concat(roomService.middleware)
-
+      
       .concat(serviceService.middleware)
       .concat(serviceTypeService.middleware)
-      .concat(settingService.middleware),
+      .concat(settingService.middleware)
+      .concat(rtkQueryErrorLogger),
 });
 
 export type AppState = ReturnType<typeof store.getState>;

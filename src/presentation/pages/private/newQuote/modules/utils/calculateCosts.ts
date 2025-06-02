@@ -13,7 +13,7 @@ const tableData: CostTableType[] = generateDataTable();
 export const calculateCosts = (
   hotelRoomQuotations: HotelRoomTripDetailsEntity[],
   indirectCostPercentage: number = 5,
-  serviceCost: number = 0
+  serviceDirectCost: number = 0
 ): CostTableType[] => {
   // 2. Crear un mapa de totales por hotel (suma acumulada para los repetidos)
   const totalPricesByHotel = hotelRoomQuotations.reduce((acc, quote) => {
@@ -23,22 +23,16 @@ export const calculateCosts = (
         number: 0,
         total: 0,
         hotelName: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
-        indirectCost: 0,
+
         directCost: 0,
-        totalCost: 0,
-        serviceCost,
       };
     }
     acc[hotelKey].number += 1; // Incrementamos el número de habitaciones del mismo hotel
     acc[hotelKey].total += quote.costPerson || 0; // Sumamos el precio
-    acc[hotelKey].directCost += quote.costPerson || 0;  + serviceCost; // Calculamos el costo directo
-    acc[hotelKey].indirectCost +=
-      (quote.costPerson || 0) * (indirectCostPercentage / 100); // Calculamos el costo indirecto
-    acc[hotelKey].totalCost +=
-      (quote.costPerson || 0 + serviceCost) +
-      (quote.costPerson || 0) * (indirectCostPercentage / 100); // Calculamos el costo total
+    acc[hotelKey].directCost += quote.costPerson || 0; // Calculamos el costo directo
+
     return acc;
-  }, {} as Record<string, { total: number; number: number, serviceCost: number; hotelName: string; indirectCost: number; directCost: number; totalCost: number }>);
+  }, {} as Record<string, { total: number; number: number; hotelName: string; directCost: number }>);
 
   // 3. Calcular el total de todos los hoteles únicos
   const grandTotal = Object.values(totalPricesByHotel).reduce(
@@ -51,19 +45,23 @@ export const calculateCosts = (
     // Crear un objeto total con los totales por cada hotel único
     const hotelTotals = Object.keys(totalPricesByHotel).reduce(
       (totals, hotelKey) => {
-        const { total, hotelName, number, indirectCost, directCost, totalCost, serviceCost } =
+        const { total, hotelName, number, directCost } =
           totalPricesByHotel[hotelKey];
+        const directCostWithService = directCost + serviceDirectCost;
+        const indirectCostWithService =
+          (directCost + serviceDirectCost) * (indirectCostPercentage / 100);
+        const totalCostWithService =
+          directCostWithService + indirectCostWithService;
         return {
           ...totals,
           hotelName,
           [hotelName]: {
             total,
             number,
-            indirectCost,
-            directCost,
-            totalCost,
-            serviceCost,
-
+            indirectCost: indirectCostWithService,
+            directCost: directCostWithService,
+            totalCost: totalCostWithService,
+            serviceCost: serviceDirectCost,
           },
         };
       },

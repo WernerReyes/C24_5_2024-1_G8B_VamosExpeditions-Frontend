@@ -13,8 +13,8 @@ import {
 } from "@/presentation/components";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { DaysNumberToAddRoom } from "./components";
 import { getHotelRoomRenderProperties } from "./utils";
+import { DaysNumberToAdd } from "@/presentation/pages/private/newQuote/modules/components";
 
 type Props = {
   hotel: HotelEntity;
@@ -48,8 +48,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
 
     const selectedRoom = rooms?.[index];
 
-    console.log(selectedRoom);
-
+ 
     if (index !== null) {
       setSelectedRoom(selectedRoom);
 
@@ -85,7 +84,7 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
     confirmPopup({
       target: event.currentTarget,
       message: (
-        <DaysNumberToAddRoom
+        <DaysNumberToAdd
           setRange={setRangeState}
           setAutoCompleteDay={setAutoCompleteDay}
         />

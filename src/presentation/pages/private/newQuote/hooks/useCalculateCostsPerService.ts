@@ -15,6 +15,10 @@ export const useCalculateCostsPerService = () => {
     (state: AppState) => state.hotelRoomTripDetails
   );
 
+  const { serviceTripDetails } = useSelector(
+    (state: AppState) => state.serviceTripDetails
+  );
+
   const uniqueHotelRoomTripDetails: (HotelRoomTripDetailsEntity & {
     number: number;
   })[] = useMemo(() => {
@@ -41,7 +45,14 @@ export const useCalculateCostsPerService = () => {
   }, [hotelRoomTripDetails]);
 
   const calculateCostsPerService: CostTableType[] = useMemo(() => {
-    return calculateCosts(hotelRoomTripDetails, indirectCostMargin);
+    const serviceCost = serviceTripDetails.reduce((acc, service) => {
+      return acc + service.costPerson;
+    }, 0);
+    return calculateCosts(
+      hotelRoomTripDetails,
+      indirectCostMargin,
+      serviceCost
+    );
   }, [hotelRoomTripDetails, indirectCostMargin]);
 
   useEffect(() => {
@@ -69,6 +80,8 @@ export const useCalculateCostsPerService = () => {
       )
     );
   }, [uniqueHotelRoomTripDetails, calculateCostsPerService]);
+
+  console.log(calculateCostsPerService);
 
   return {
     calculateCostsPerService,

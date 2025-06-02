@@ -13,15 +13,7 @@ const serviceTypeModelSchema = z
   .object(serviceTypeModelSchemaPartial.shape)
   .merge(
     z.object({
-      service: z
-        .lazy(() =>
-          z
-            .object({
-              ...serviceModelSchemaPartial.shape,
-            })
-            .optional()
-        )
-        .optional(),
+      service: z.lazy(() => z.array(serviceModelSchemaPartial)).optional(),
     })
   );
 

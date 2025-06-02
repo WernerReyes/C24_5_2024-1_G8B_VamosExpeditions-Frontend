@@ -31,6 +31,8 @@ export * from "./service/service.service";
 
 // api service_type
 export * from "./serviceType/serviceType.service";
+export * from "./serviceTripDetails/serviceTripDetails.service";
+
 
 
 

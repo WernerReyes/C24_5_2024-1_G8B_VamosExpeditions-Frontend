@@ -5,7 +5,8 @@ import { paginationDtoSchema } from "../common";
 
 const getServicesDtoSchema = z
   .object({
-    districtId: z.number().min(1).optional(),
+    cityId: z.number().min(1).optional(),
+    serviceTypeId: z.number().min(1).optional(),
     select: z
       .lazy(() =>
         z.object({

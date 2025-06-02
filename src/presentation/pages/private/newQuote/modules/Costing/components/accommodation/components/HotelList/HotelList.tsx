@@ -11,6 +11,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { HotelContent } from "./components";
 import { cn } from "@/core/adapters";
+import { useGetHotelsQuery } from "@/infraestructure/store/services";
 
 type Props = {
   visible: boolean;
@@ -18,7 +19,18 @@ type Props = {
 };
 
 export const HotelList = ({ visible, setVisible }: Props) => {
-  const { hotels } = useSelector((state: AppState) => state.hotel);
+  const { selectedCity } = useSelector((state: AppState) => state.quotation);
+
+  const getAllHotels = useGetHotelsQuery(
+    {
+      cityId: selectedCity?.id,
+    },
+    {
+      skip: !selectedCity,
+    }
+  );
+
+  const hotels = getAllHotels?.data?.data ?? [];
 
   const [hotelsFiltered, setHotelsFiltered] = useState<HotelEntity[]>([]);
   const [hotelFilter, setHotelFilter] = useState("");
@@ -153,13 +165,15 @@ export const HotelList = ({ visible, setVisible }: Props) => {
               dialogMaximized ? "md:grid-cols-3" : "md:grid-cols-2"
             )}
           >
-            {hotels.length > 0 ? hotels.map((hotel) => (
-              <HotelContent
-                key={hotel.id}
-                hotel={hotel}
-                setVisible={setVisible}
-              />
-            )) : (
+            {hotels.length > 0 ? (
+              hotels.map((hotel) => (
+                <HotelContent
+                  key={hotel.id}
+                  hotel={hotel}
+                  setVisible={setVisible}
+                />
+              ))
+            ) : (
               <div className="col-span-2 flex items-center justify-center h-72">
                 <h3 className="text-lg font-semibold text-slate-500">
                   No se encontraron hoteles
@@ -174,13 +188,11 @@ export const HotelList = ({ visible, setVisible }: Props) => {
         paginatorTemplate={
           "FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
         }
-        
         pt={{
           content: {
             className: "min-h-[120px]",
-          }
+          },
         }}
-       
         rowsPerPageOptions={[5, 10, 15]}
         rows={5}
       />

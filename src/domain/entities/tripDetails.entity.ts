@@ -1,6 +1,7 @@
 import type { CityEntity, } from "./city.entity";
 import type { ClientEntity, } from "./client.entity";
 import { HotelRoomTripDetailsEntity } from "./hotelRoomTripDetails.entity";
+import { ServiceTripDetailsEntity } from "./serviceTripDetails.entity";
 import {
   VersionQuotationEntity
 } from "./versionQuotation.entity";
@@ -29,6 +30,7 @@ export type TripDetailsEntity = {
   specialSpecifications?: string;
   versionQuotation?: VersionQuotationEntity;
   hotelRoomTripDetails?: HotelRoomTripDetailsEntity[];
+  serviceTripDetails?: ServiceTripDetailsEntity[];
   client?: ClientEntity;
   cities?: CityEntity[];
 };

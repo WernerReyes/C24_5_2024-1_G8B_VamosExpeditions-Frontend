@@ -1,5 +1,6 @@
 import { constantStorage } from "@/core/constants";
 import { LocalQuotationEntity } from "@/data";
+import { CityEntity } from "@/domain/entities";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const {
@@ -23,6 +24,7 @@ type QuotationSliceState = {
   days: Day[];
   selectedDay: Day | null;
   indirectCostMargin: number;
+  selectedCity: CityEntity | null;
 };
 
 const initialState: QuotationSliceState = {
@@ -35,6 +37,7 @@ const initialState: QuotationSliceState = {
   indirectCostMargin: JSON.parse(
     localStorage.getItem(ITIERARY_INDIRECT_COST_MARGIN) || "5"
   ),
+  selectedCity: null,
 };
 
 export const quotationSlice = createSlice({
@@ -77,6 +80,13 @@ export const quotationSlice = createSlice({
       };
     },
 
+    onSetSelectedCity: (state, { payload }: PayloadAction<CityEntity | null>) => {
+      return {
+       ...state,
+        selectedCity: payload,
+      };
+    },
+
     onSetIndirectCostMargin: (state, { payload }: PayloadAction<number>) => {
       localStorage.setItem(
         ITIERARY_INDIRECT_COST_MARGIN,
@@ -96,5 +106,6 @@ export const {
   onSetSelectedDay,
   onSetDays,
   onSetIndirectCostMargin,
+  onSetSelectedCity
   // onSetOperationType,
 } = quotationSlice.actions;

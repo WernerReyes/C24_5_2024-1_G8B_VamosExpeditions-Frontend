@@ -15,12 +15,7 @@ export const hotelSlice = createSlice({
   name: "hotel",
   initialState,
   reducers: {
-    onSetHotels: (state, { payload }: PayloadAction<HotelEntity[]>) => {
-      return {
-        ...state,
-        hotels: payload,
-      };
-    },
+   
     onSetSelectedHotel: (state, { payload }: PayloadAction<HotelEntity>) => {
       return {
         ...state,
@@ -30,4 +25,4 @@ export const hotelSlice = createSlice({
   },
 });
 
-export const { onSetHotels, onSetSelectedHotel } = hotelSlice.actions;
+export const {  onSetSelectedHotel } = hotelSlice.actions;

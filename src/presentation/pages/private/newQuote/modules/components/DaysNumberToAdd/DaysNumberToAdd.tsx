@@ -7,14 +7,14 @@ import {
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-import "./DaysNumberToAddRoom.css";
+import "./DaysNumberToAdd.css";
 
 type Props = {
   setRange: (range: [number, number]) => void;
   setAutoCompleteDay: (autoComplete: boolean) => void;
 };
 
-export const DaysNumberToAddRoom = ({
+export const DaysNumberToAdd = ({
   setRange,
   setAutoCompleteDay,
 }: Props) => {

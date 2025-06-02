@@ -8,6 +8,7 @@ export * from './slices/hotel.slice';
 export * from './slices/tripDetails.slice';
 export * from './slices/versionQuotation.slice';
 export * from './slices/hotelRoomTripDetails.slice';
+export * from './slices/serviceTripDetails.slice';
 export * from './slices/sidebar.slice';
 
 

@@ -24,6 +24,7 @@ import {
   onSetCurrentVersionQuotation,
   onSetHotelRoomTripDetails,
   onSetIndirectCostMargin,
+  onSetServiceTripDetails,
 } from "@/infraestructure/store";
 import {
   useGetVersionQuotationByIdQuery,
@@ -102,6 +103,9 @@ const NewQuotePage = () => {
   const currentHotelRoomTripDetailsData =
     currentTripDetailsData?.hotelRoomTripDetails ?? [];
 
+  const currentServiceTripDetailsData =
+    currentTripDetailsData?.serviceTripDetails ?? [];
+
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
       dispatch(onSetCurrentStep(currentStep + 1));
@@ -159,6 +163,12 @@ const NewQuotePage = () => {
         } else {
           dispatch(onSetHotelRoomTripDetails([]));
         }
+
+        if (currentServiceTripDetailsData.length > 0) {
+          dispatch(onSetServiceTripDetails(currentServiceTripDetailsData));
+        } else {
+          dispatch(onSetServiceTripDetails([]));
+        }
       } else {
         dispatch(onSetCurrentTripDetails(null));
         dispatch(onSetHotelRoomTripDetails([]));
@@ -215,10 +225,9 @@ const NewQuotePage = () => {
       storedCompletionPercentage
     );
 
-    
     //* Prevent unnecessary updates when reloading
     if (storedCompletionPercentage === newCompletionPercentage) return;
-   
+
     updateVersionQuotation(
       versionQuotationDto.parse(
         getVersionDataAndCalculateCompletionPercentage(
@@ -237,8 +246,7 @@ const NewQuotePage = () => {
   if (isErrorGetVersionQuotationById) {
     return <NotFound screenSize="partial" />;
   }
- 
-  
+
   return (
     <section className="bg-white py-5 md:p-10 rounded-lg shadow-md">
       <EditableQuotationName />

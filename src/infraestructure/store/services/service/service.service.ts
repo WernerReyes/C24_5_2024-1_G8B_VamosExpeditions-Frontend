@@ -2,7 +2,7 @@ import { startShowApiError, startShowSuccess } from "@/core/utils";
 import type { ServiceEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { requestConfig } from "../config";
-import type { ApiResponse } from "../response";
+import type { ApiResponse, PaginatedResponse } from "../response";
 import { getServicesDto, type GetServicesDto } from "@/domain/dtos/service";
 import { serviceModel } from "../../../models/service.model";
 
@@ -13,7 +13,7 @@ export const serviceService = createApi({
   tagTypes: ["Services"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    getServices: builder.query<ApiResponse<ServiceEntity[]>, GetServicesDto>({
+    getServices: builder.query<ApiResponse<PaginatedResponse<ServiceEntity>>, GetServicesDto>({
       query: (params) => {
         const [_, errors] = getServicesDto.create(params);
         if (errors) {

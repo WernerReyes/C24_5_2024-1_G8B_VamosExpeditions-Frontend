@@ -1,5 +1,5 @@
 import { dtoValidator } from "@/core/utils";
-import { serviceModel } from "@/infraestructure/models";
+import { serviceTypeModel } from "@/infraestructure/models";
 import { z } from "zod";
 import { paginationDtoSchema } from "../common";
 
@@ -8,7 +8,7 @@ const getServiceTypesDtoSchema = z
     select: z
       .lazy(() =>
         z.object({
-          ...serviceModel.schema.shape,
+          ...serviceTypeModel.schema.shape,
         })
       )
       .optional(),

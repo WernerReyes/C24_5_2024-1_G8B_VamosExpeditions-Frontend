@@ -1,6 +1,6 @@
 import { Skeleton } from "@/presentation/components";
 
-export const HotelListDetailsSkeleton = () => {
+export const ListDetailsSkeleton = () => {
   return (
     <div className="w-full max-w-sm bg-white shadow-lg rounded-lg overflow-hidden">
       {/* Header */}
