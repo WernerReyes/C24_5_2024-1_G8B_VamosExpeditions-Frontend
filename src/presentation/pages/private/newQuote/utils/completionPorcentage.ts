@@ -7,6 +7,7 @@ export const calculateCompletionPercentage = (
   currentStep: number,
   currentTripDetails: boolean,
   hotelRoomTripDetails: boolean,
+  servicesTripDetails: boolean,
   versionQuotation: VersionQuotationEntity,
   currentCompletionPercentage: number
 ) => {
@@ -16,14 +17,14 @@ export const calculateCompletionPercentage = (
   if (currentStep >= 1 && currentTripDetails) {
     newPercentage = Math.max(newPercentage, 25);
   }
-  if (currentStep >= 2 && currentTripDetails && hotelRoomTripDetails) {
+  if (currentStep >= 2 && currentTripDetails && (hotelRoomTripDetails || servicesTripDetails)) {
     newPercentage = Math.max(newPercentage, 50);
   }
 
   if (
     currentStep >= 3 &&
     currentTripDetails &&
-    hotelRoomTripDetails &&
+    (hotelRoomTripDetails || servicesTripDetails) &&
     versionQuotation.indirectCostMargin
   ) {
     newPercentage = Math.max(newPercentage, 75);
@@ -41,7 +42,7 @@ export const calculateCompletionPercentage = (
     newPercentage = 50; // Drop back if no indirect cost margin
   }
 
-  if (!hotelRoomTripDetails && newPercentage > 25) {
+  if ((!hotelRoomTripDetails && !servicesTripDetails) && newPercentage > 25) {
     newPercentage = 25; // Drop back if no hotel details exist
   }
   if (!currentTripDetails && newPercentage > 0) {

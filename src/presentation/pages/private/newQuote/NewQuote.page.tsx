@@ -79,6 +79,8 @@ const NewQuotePage = () => {
     (state: AppState) => state.quotation
   );
 
+  const { authUser } = useSelector((state: AppState) => state.auth);
+
   const versionQuotationId =
     quoteId && version
       ? {
@@ -186,6 +188,7 @@ const NewQuotePage = () => {
     if (
       !currentTripDetailsData &&
       currentHotelRoomTripDetailsData.length === 0 &&
+      currentServiceTripDetailsData.length === 0 &&
       currentStep > 0
     ) {
       setTimeout(() => {
@@ -193,6 +196,7 @@ const NewQuotePage = () => {
       }, 0);
     } else if (
       currentHotelRoomTripDetailsData.length === 0 &&
+      currentServiceTripDetailsData.length === 0 &&
       currentStep > 1
     ) {
       setTimeout(() => {
@@ -201,6 +205,7 @@ const NewQuotePage = () => {
     }
   }, [
     currentHotelRoomTripDetailsData,
+    currentServiceTripDetailsData,
     isLoadingGetVersionQuotationById,
     currentStep,
   ]);
@@ -216,6 +221,7 @@ const NewQuotePage = () => {
       currentStep,
       !!currentTripDetailsData,
       currentHotelRoomTripDetailsData.length > 0,
+      currentServiceTripDetailsData.length > 0,
       {
         ...currentVersionQuotationData.data,
         indirectCostMargin:
@@ -245,6 +251,19 @@ const NewQuotePage = () => {
 
   if (isErrorGetVersionQuotationById) {
     return <NotFound screenSize="partial" />;
+  }
+
+  if (
+    authUser?.id !== currentVersionQuotationData?.data?.user?.id &&
+    !isLoadingGetVersionQuotationById
+  ) {
+    return (
+      <NotFound
+        screenSize="partial"
+        title="No tienes permiso para ver esta cotización"
+        message="Solo el usuario que creó la cotización puede verla"
+      />
+    );
   }
 
   return (
@@ -287,7 +306,8 @@ const NewQuotePage = () => {
                         (!currentTripDetailsData ||
                           JSON.stringify(currentTripDetailsData) === "{}")) ||
                       (index === 1 &&
-                        currentHotelRoomTripDetailsData.length === 0)
+                        currentHotelRoomTripDetailsData.length === 0 &&
+                        currentServiceTripDetailsData.length === 0)
                     }
                   />
                 )}

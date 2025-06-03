@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 
 import { SendReportToEmailDialog } from "./SendReportToEmailDialog";
 import { TrashVersionQuotation } from "./TrashVersionQuotation";
+import type { AppState } from "@/app/store";
+import { useSelector } from "react-redux";
 
 const { EDIT_QUOTE } = constantRoutes.private;
 
@@ -23,6 +25,8 @@ type TyoeTableActions = {
 
 export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   const navigate = useNavigate();
+
+  const { authUser } = useSelector((state: AppState) => state.auth);
 
   // pdf and excel
   const [handleGeneratePdf, { isLoading: isLoadingGeneratePdf }] =
@@ -43,7 +47,9 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
           navigate(EDIT_QUOTE(rowData?.id));
         }}
         disabled={
-          rowData.status === VersionQuotationStatus.APPROVED && rowData.official
+          (rowData.status === VersionQuotationStatus.APPROVED &&
+            rowData.official) ||
+          rowData.user?.id !== authUser?.id
         }
       />
 

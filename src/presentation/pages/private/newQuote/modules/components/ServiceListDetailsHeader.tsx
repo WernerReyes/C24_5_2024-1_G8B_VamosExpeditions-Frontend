@@ -1,7 +1,5 @@
-import { ServiceTripDetailsEntity } from "@/domain/entities";
-// import {
-//   useDeleteServiceTripDetailsMutation
-// } from "@/infraestructure/store/services";
+import type { ServiceTripDetailsEntity } from "@/domain/entities";
+import { useDeleteServiceTripDetailsMutation } from "@/infraestructure/store/services";
 import { Button, Tag } from "@/presentation/components";
 
 type Props = {
@@ -9,13 +7,13 @@ type Props = {
 };
 
 export const ServiceListDetailsHeader = ({ detail }: Props) => {
-  // const [
-  //   deleteServiceTripDetails,
-  //   { isLoading: isLoadingDeleteServiceTripDetails },
-  // ] = useDeleteServiceTripDetailsMutation();
+  const [
+    deleteServiceTripDetails,
+    { isLoading: isLoadingDeleteServiceTripDetails },
+  ] = useDeleteServiceTripDetailsMutation();
 
   const handleDelete = () => {
-    // deleteServiceTripDetails(detail.id);
+    deleteServiceTripDetails(detail.id);
   };
 
   return (
@@ -28,7 +26,7 @@ export const ServiceListDetailsHeader = ({ detail }: Props) => {
         <Button
           icon="pi pi-trash"
           onClick={handleDelete}
-          // disabled={isLoadingDeleteServiceTripDetails}
+          disabled={isLoadingDeleteServiceTripDetails}
         />
       </div>
       <div className="flex items-center justify-between">

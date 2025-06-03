@@ -5,31 +5,39 @@ import {
   ConfirmDialog,
   SelectButton,
   Skeleton,
-  SplitButton
+  SplitButton,
 } from "@/presentation/components";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Accommodiations, SidebarDays } from "./components";
 
 import type { AppState } from "@/app/store";
 import { constantStorage } from "@/core/constants";
 import { tripDetailsDto } from "@/domain/dtos/tripDetails";
 import {
+  ServiceTripDetailsEntity,
   type CityEntity,
   type HotelRoomTripDetailsEntity,
 } from "@/domain/entities";
 import {
   onFetchHotelRoomTripDetails,
-  onSetSelectedCity
+  onFetchServiceTripDetails,
+  onSetSelectedCity,
 } from "@/infraestructure/store";
 import {
   useDeleteManyHotelRoomTripDetailsMutation,
+  useDeleteManyServicesTripDetailsMutation,
   useUpdateManyHotelRoomTripDetailsByDateMutation,
-  useUpsertTripDetailsMutation
+  useUpdateManyServicesTripDetailsByDateMutation,
+  useUpsertTripDetailsMutation,
 } from "@/infraestructure/store/services";
 import { SelectButtonChangeEvent } from "primereact/selectbutton";
 import { SelectItem } from "primereact/selectitem";
 import { useDispatch, useSelector } from "react-redux";
 import { Services } from "./components/services/Services";
+import {
+  hotelRoomQuotationIdsPerDay,
+  servicesQuotationIdsPerDay,
+} from "./utils/detailsIds";
 
 const { ITINERARY_CURRENT_ACTIVITY } = constantStorage;
 
@@ -63,7 +71,13 @@ export const CostingModule = () => {
     (state: AppState) => state.hotelRoomTripDetails
   );
 
-  const { selectedDay, selectedCity } = useSelector((state: AppState) => state.quotation);
+  const { serviceTripDetails } = useSelector(
+    (state: AppState) => state.serviceTripDetails
+  );
+
+  const { selectedDay, selectedCity } = useSelector(
+    (state: AppState) => state.quotation
+  );
 
   const [upsertTripDetails] = useUpsertTripDetailsMutation();
 
@@ -77,6 +91,16 @@ export const CostingModule = () => {
     { isLoading: isUpdatingManyHotelRoomTripDetails },
   ] = useUpdateManyHotelRoomTripDetailsByDateMutation();
 
+  const [
+    deleteManyServicesTripDetails,
+    { isLoading: isDeletingManyServicesTripDetails },
+  ] = useDeleteManyServicesTripDetailsMutation();
+
+  const [
+    updateManyServicesTripDetails,
+    { isLoading: isUpdatingManyServicesTripDetails },
+  ] = useUpdateManyServicesTripDetailsByDateMutation();
+
   const [[startDate, endDate], setDateRange] = useState<
     [Date | null, Date | null]
   >([null, null]);
@@ -89,8 +113,13 @@ export const CostingModule = () => {
     setHotelsQuotationsOutSideDateRange,
   ] = useState<HotelRoomTripDetailsEntity[]>([]);
 
+  const [
+    servicesQuotationsOutSideDateRange,
+    setServicesQuotationsOutSideDateRange,
+  ] = useState<ServiceTripDetailsEntity[]>([]);
+
   const [isDayDeleted, setIsDayDeleted] = useState<boolean>(false);
-  
+
   const [{ visible, message, type }, setConfirmDialog] = useState<{
     visible: boolean;
     message?: string;
@@ -98,9 +127,49 @@ export const CostingModule = () => {
   }>({ visible: false, message: "" });
 
   const handleDelete = () => {
-    if (hotelRoomQuotationIdsPerDay.length > 0 && startDate && endDate) {
-      deleteManyHotelRoomTripDetails(hotelRoomQuotationIdsPerDay).then(
-        async () => {
+    const hotelRoomQuotationIds = hotelRoomQuotationIdsPerDay(
+      selectedDay!,
+      hotelRoomTripDetails
+    );
+    const servicesQuotationIds = servicesQuotationIdsPerDay(
+      selectedDay!,
+      serviceTripDetails
+    );
+
+    if (!startDate || !endDate) return;
+
+    if (hotelRoomQuotationIds.length > 0 && servicesQuotationIds.length > 0) {
+      Promise.all([
+        deleteManyHotelRoomTripDetails(hotelRoomQuotationIds),
+        deleteManyServicesTripDetails(servicesQuotationIds),
+      ]).then(() => {
+        if (
+          dateFnsAdapter.isSameDay(startDate, selectedDay!.date) ||
+          dateFnsAdapter.isSameDay(endDate, selectedDay!.date)
+        ) {
+          setIsDayDeleted(true);
+          setConfirmDialog({ visible: false });
+        } else {
+          if (!currentTripDetails) return;
+          Promise.all([
+            updateManyHotelRoomTripDetails({
+              tripDetailsId: currentTripDetails.id,
+              startDate: selectedDay!.date,
+            }),
+            updateManyServicesTripDetails({
+              tripDetailsId: currentTripDetails.id,
+              startDate: selectedDay!.date,
+            }),
+          ]).then(() => {
+            setIsDayDeleted(true);
+            setConfirmDialog({ visible: false });
+          });
+        }
+      });
+    } else if (hotelRoomQuotationIds.length > 0) {
+      deleteManyHotelRoomTripDetails(hotelRoomQuotationIds)
+        .unwrap()
+        .then(() => {
           if (
             dateFnsAdapter.isSameDay(startDate, selectedDay!.date) ||
             dateFnsAdapter.isSameDay(endDate, selectedDay!.date)
@@ -109,16 +178,102 @@ export const CostingModule = () => {
             setConfirmDialog({ visible: false });
           } else {
             if (!currentTripDetails) return;
-            await updateManyHotelRoomTripDetails({
+            updateManyHotelRoomTripDetails({
               tripDetailsId: currentTripDetails.id,
               startDate: selectedDay!.date,
-            }).then(() => {
-              setIsDayDeleted(true);
-              setConfirmDialog({ visible: false });
-            });
+            })
+              .unwrap()
+              .then(() => {
+                setIsDayDeleted(true);
+                setConfirmDialog({ visible: false });
+              });
           }
-        }
-      );
+        });
+    } else if (servicesQuotationIds.length > 0) {
+      deleteManyServicesTripDetails(servicesQuotationIds)
+        .unwrap()
+        .then(() => {
+          if (
+            dateFnsAdapter.isSameDay(startDate, selectedDay!.date) ||
+            dateFnsAdapter.isSameDay(endDate, selectedDay!.date)
+          ) {
+            setIsDayDeleted(true);
+            setConfirmDialog({ visible: false });
+          } else {
+            if (!currentTripDetails) return;
+            updateManyServicesTripDetails({
+              tripDetailsId: currentTripDetails.id,
+              startDate: selectedDay!.date,
+            })
+              .unwrap()
+              .then(() => {
+                setIsDayDeleted(true);
+                setConfirmDialog({ visible: false });
+              });
+          }
+        });
+    }
+  };
+
+  const handleUpdateAfterAnEmptyDay = () => {
+    if (!startDate || !endDate) return;
+
+    const emptyDay = selectedDay!.date;
+
+    if (dateFnsAdapter.isSameDay(emptyDay, startDate)) {
+      setIsDayDeleted(true);
+      return;
+    }
+
+    const hotelRoomDetailsAfterCurrentDay = hotelRoomTripDetails.filter(
+      (quote) =>
+        dateFnsAdapter
+          .eachDayOfInterval(emptyDay, endDate!)
+          .some((day) => dateFnsAdapter.isSameDay(day, quote.date))
+    );
+
+    const serviceDetailsAfterCurrentDay = serviceTripDetails.filter((quote) =>
+      dateFnsAdapter
+        .eachDayOfInterval(emptyDay, endDate!)
+        .some((day) => dateFnsAdapter.isSameDay(day, quote.date))
+    );
+
+    if (
+      hotelRoomDetailsAfterCurrentDay.length > 0 &&
+      serviceDetailsAfterCurrentDay.length > 0
+    ) {
+      Promise.all([
+        updateManyHotelRoomTripDetails({
+          tripDetailsId: currentTripDetails!.id,
+          startDate: emptyDay,
+        }),
+        updateManyServicesTripDetails({
+          tripDetailsId: currentTripDetails!.id,
+          startDate: emptyDay,
+        }),
+      ]).then(() => {
+        setIsDayDeleted(true);
+      });
+    } else if (hotelRoomDetailsAfterCurrentDay.length > 0) {
+      updateManyHotelRoomTripDetails({
+        tripDetailsId: currentTripDetails!.id,
+        startDate: emptyDay,
+      })
+        .unwrap()
+        .then(() => {
+          setIsDayDeleted(true);
+        });
+    } else if (serviceDetailsAfterCurrentDay.length > 0) {
+      updateManyServicesTripDetails({
+        tripDetailsId: currentTripDetails!.id,
+        startDate: emptyDay,
+      })
+        .unwrap()
+        .then(() => {
+          setIsDayDeleted(true);
+        });
+    } else {
+      setIsDayDeleted(true);
     }
   };
 
@@ -141,31 +296,45 @@ export const CostingModule = () => {
   };
 
   const handleDeleteManyDays = () => {
-    if (hotelsQuotationsOutSideDateRange.length > 0 && startDate && endDate) {
-      handleUpsertTripDetails([startDate, endDate]).then(() => {
-        deleteManyHotelRoomTripDetails(
-          hotelsQuotationsOutSideDateRange.map((quote) => quote.id)
-        ).then(() => {
+    if (!startDate || !endDate) return;
+    handleUpsertTripDetails([startDate, endDate]).then(() => {
+      if (
+        hotelsQuotationsOutSideDateRange.length > 0 &&
+        servicesQuotationsOutSideDateRange.length > 0
+      ) {
+        Promise.all([
+          deleteManyHotelRoomTripDetails(
+            hotelsQuotationsOutSideDateRange.map((quote) => quote.id)
+          ),
+          deleteManyServicesTripDetails(
+            servicesQuotationsOutSideDateRange.map((quote) => quote.id)
+          ),
+        ]).then(() => {
           setConfirmDialog({ visible: false });
         });
-      });
-    }
-  };
-
-  const hotelRoomQuotationIdsPerDay = useMemo(() => {
-    if (selectedDay && hotelRoomTripDetails.length > 0) {
-      return hotelRoomTripDetails
-        .filter((quote) =>
-          dateFnsAdapter.isSameDay(quote.date, selectedDay.date)
+      } else if (servicesQuotationsOutSideDateRange.length > 0) {
+        deleteManyServicesTripDetails(
+          servicesQuotationsOutSideDateRange.map((quote) => quote.id)
         )
-        .map((quote) => quote.id);
-    }
-    return [];
-  }, [selectedDay, hotelRoomTripDetails]);
+          .unwrap()
+          .then(() => {
+            setConfirmDialog({ visible: false });
+          });
+      } else if (hotelsQuotationsOutSideDateRange.length > 0) {
+        deleteManyHotelRoomTripDetails(
+          hotelsQuotationsOutSideDateRange.map((quote) => quote.id)
+        )
+          .unwrap()
+          .then(() => {
+            setConfirmDialog({ visible: false });
+          });
+      }
+    });
+  };
 
   useEffect(() => {
     if (currentTripDetails?.cities && !selectedCity) {
-      dispatch(onSetSelectedCity((currentTripDetails.cities[0])));
+      dispatch(onSetSelectedCity(currentTripDetails.cities[0]));
     }
   }, [currentTripDetails]);
 
@@ -174,8 +343,6 @@ export const CostingModule = () => {
       setDateRange([currentTripDetails.startDate, currentTripDetails.endDate]);
     }
   }, [currentTripDetails]);
-
-  
 
   useEffect(() => {
     localStorage.setItem(ITINERARY_CURRENT_ACTIVITY, activity);
@@ -188,6 +355,14 @@ export const CostingModule = () => {
       )
     );
   }, [isUpdatingManyHotelRoomTripDetails, isDeletingManyHotelRoomTripDetails]);
+
+  useEffect(() => {
+    dispatch(
+      onFetchServiceTripDetails(
+        isUpdatingManyServicesTripDetails || isDeletingManyServicesTripDetails
+      )
+    );
+  }, [isUpdatingManyServicesTripDetails, isDeletingManyServicesTripDetails]);
 
   return (
     <div className="w-full h-full">
@@ -247,7 +422,19 @@ export const CostingModule = () => {
                       e.value![1]!
                     )
                 );
-                if (daysToDelete.length > 0) {
+
+                const daysToDeleteServices = serviceTripDetails.filter(
+                  (quote) =>
+                    !dateFnsAdapter.isWithinInterval(
+                      quote.date,
+                      e.value![0]!,
+                      e.value![1]!
+                    )
+                );
+                if (
+                  daysToDelete.length > 0 ||
+                  daysToDeleteServices.length > 0
+                ) {
                   setConfirmDialog({
                     visible: true,
                     message:
@@ -255,6 +442,7 @@ export const CostingModule = () => {
                     type: "updateAndDeleteMany",
                   });
                   setHotelsQuotationsOutSideDateRange(daysToDelete);
+                  setServicesQuotationsOutSideDateRange(daysToDeleteServices);
                 } else {
                   handleUpsertTripDetails(e.value as [Date, Date]);
                 }
@@ -304,14 +492,16 @@ export const CostingModule = () => {
                       className="mb-auto"
                       loading={!selectedDay}
                       onClick={() => {
-                        const existHotelRoomTripDetails =
-                          hotelRoomTripDetails?.find((hotelRoomQuotation) =>
+                        const details = hotelRoomTripDetails
+                          .concat(serviceTripDetails)
+                          .find((detail) =>
                             dateFnsAdapter.isSameDay(
-                              hotelRoomQuotation.date,
+                              detail.date,
                               selectedDay.date
                             )
                           );
-                        if (existHotelRoomTripDetails) {
+
+                        if (details) {
                           setConfirmDialog({
                             visible: true,
                             message:
@@ -319,7 +509,7 @@ export const CostingModule = () => {
                             type: "delete",
                           });
                         } else {
-                          setIsDayDeleted(true);
+                          handleUpdateAfterAnEmptyDay();
                         }
                       }}
                       aria-label="Delete"

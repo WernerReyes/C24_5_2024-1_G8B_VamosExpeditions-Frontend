@@ -4,7 +4,7 @@ import { formatCurrency, measureExecutionTime } from "@/core/utils";
 import { Accordion, Badge, Button, TabView } from "@/presentation/components";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { HotelListDetailsHeader } from "../../components";
+import { HotelListDetailsHeader, ServiceListDetailsHeader } from "../../components";
 import { useSidebar } from "@/presentation/pages/private/hooks";
 import { useWindowSize } from "@/presentation/hooks";
 import type { TotalPerDay } from "../CostSummary.module";
@@ -13,11 +13,15 @@ type Props = {
   totalPerDay: TotalPerDay;
 };
 
-export const HotelsDetailsSummary = ({ totalPerDay }: Props) => {
+export const DetailsSummary = ({ totalPerDay }: Props) => {
   const { visible } = useSidebar();
   const { MACBOOK, width } = useWindowSize();
   const { hotelRoomTripDetails } = useSelector(
     (state: AppState) => state.hotelRoomTripDetails
+  );
+
+  const { serviceTripDetails } = useSelector(
+    (state: AppState) => state.serviceTripDetails
   );
 
   const { currentTripDetails } = useSelector(
@@ -37,6 +41,13 @@ export const HotelsDetailsSummary = ({ totalPerDay }: Props) => {
       dateFnsAdapter.isSameDay(quote.date, selectedDay!)
     );
   }, [selectedDay, hotelRoomTripDetails]);
+
+  const serviceTripDetailsPerDay = useMemo(() => {
+    if (!selectedDay || serviceTripDetails.length === 0) return [];
+    return serviceTripDetails.filter((quote) =>
+      dateFnsAdapter.isSameDay(quote.date, selectedDay!)
+    );
+  }, [selectedDay, serviceTripDetails]);
 
   useEffect(() => {
     setSelectedDay(currentTripDetails?.startDate);
@@ -86,20 +97,22 @@ export const HotelsDetailsSummary = ({ totalPerDay }: Props) => {
             <Accordion
               onTabClose={(e) => {
                 if (e.index === 0) {
-                  setAccordion([false, secondAccordion]);
-                } else {
                   setAccordion([firstAccordion, false]);
+                 
+                } else {
+                  setAccordion([false, secondAccordion]);
                 }
               }}
               onTabOpen={(e) => {
                 if (e.index === 0) {
-                  setAccordion([true, secondAccordion]);
+                  setAccordion([firstAccordion, false]);
+                 
                 } else {
-                  setAccordion([firstAccordion, true]);
+                  setAccordion([false, secondAccordion]);
                 }
               }}
               multiple
-              activeIndex={[1]}
+              activeIndex={[0, 1]}
               className={cn(
                 "grid grid-cols-1 lg:grid-cols-2 justify-center items-start gap-x-4 w-full",
                 visible && width < MACBOOK && "!grid-cols-1"
@@ -114,14 +127,49 @@ export const HotelsDetailsSummary = ({ totalPerDay }: Props) => {
                           Servicios ({formatCurrency(value.services)})
                         </span>
                       </div>
-                      <Badge value={0} />
+                      <Badge value={serviceTripDetailsPerDay.length} />
                     </div>
                   ),
-                  className: "overflow-y-auto thin-scrollbar max-h-64 w-full",
+                  className: cn(
+                    "overflow-y-auto max-lg:mt-5 thin-scrollbar w-full",
+                    firstAccordion ? "max-h-52" : "max-h-80"
+                  ),
                   children: (
-                    <p className="text-center bg-secondary p-2 md:w-3/4 mx-auto rounded-md text-gray-500">
-                      Ningún alojamiento por ahora
-                    </p>
+                    <>
+                      {serviceTripDetailsPerDay.length === 0 ? (
+                        <p className="text-center bg-secondary p-2 md:w-3/4 mx-auto rounded-md text-gray-500">
+                          Ningún servicio por ahora
+                        </p>
+                      ) : (
+                        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 3xl:grid-cols-2 gap-x-4 gap-y-8 justify-items-center jus bg-white">
+                          {serviceTripDetailsPerDay.map((quote) => (
+                            <div
+                              key={quote.id}
+                              className="w-full max-w-sm bg-white shadow-lg rounded-lg overflow-hidden"
+                            >
+                              {/* Header */}
+                              <ServiceListDetailsHeader detail={quote} />
+
+                              {/* Body */}
+                              <div className="p-4 border-t">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <i className="pi text-2xl pi-money-bill text-primary me-1"></i>
+
+                                    <span className="font-medium hidden min-[350px]:block">
+                                      Costo
+                                    </span>
+                                  </div>
+                                  <span className="text-lg md:text-2xl font-bold text-primary">
+                                    ${quote.costPerson}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   ),
                 },
                 {
@@ -138,7 +186,7 @@ export const HotelsDetailsSummary = ({ totalPerDay }: Props) => {
                   ),
                   className: cn(
                     "overflow-y-auto max-lg:mt-5 thin-scrollbar w-full",
-                    firstAccordion ? "max-h-52" : "max-h-80"
+                    secondAccordion ? "max-h-52" : "max-h-80"
                   ),
                   children: (
                     <>

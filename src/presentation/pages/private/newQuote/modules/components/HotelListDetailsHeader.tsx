@@ -24,7 +24,7 @@ export const HotelListDetailsHeader = ({ quote }: Props) => {
     <div className="bg-primary text-white p-4 items-center justify-between">
       <div className="flex items-center justify-between">
         <Tag
-          value="Alojamiento"
+          value="ALOJAMIENTO"
           className="bg-white text-primary rounded-lg px-5 py-0"
         />
         <Button

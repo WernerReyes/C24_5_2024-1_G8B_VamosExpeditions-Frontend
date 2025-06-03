@@ -29,14 +29,21 @@ export const DataTableCostSummary = () => {
     { isLoading: isLoadingUpdateVersionQuotation },
   ] = useUpdateVersionQuotationMutation();
 
-  const { calculateCostsPerService, uniqueHotelRoomTripDetails } =
+  const { calculateCostsPerService, uniqueHotelRoomTripDetails, emptyHotelRoomName } =
     useCalculateCostsPerService();
 
   const columsTable = useMemo(() => {
-    return uniqueHotelRoomTripDetails.map((quote) => ({
-      header: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
-      number: quote.number,
-    }));
+    return uniqueHotelRoomTripDetails.length > 0
+      ? uniqueHotelRoomTripDetails.map((quote) => ({
+          header: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
+          number: quote.number,
+        }))
+      : [
+          {
+            header: emptyHotelRoomName,
+            number: 0,
+          },
+        ];
   }, [uniqueHotelRoomTripDetails]);
 
   const saveIndirectCostMargin = (value: number) => {

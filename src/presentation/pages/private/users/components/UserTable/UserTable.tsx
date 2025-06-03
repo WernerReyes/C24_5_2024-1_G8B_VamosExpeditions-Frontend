@@ -241,7 +241,7 @@ export const UserTable = () => {
           showGridlines
           rowHover
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-          currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} cotizaciones"
+          currentPageReportTemplate="Mostrando del {first} al {last} de {totalRecords} usuarios"
           pt={{
             header: { className: "bg-secondary" },
           }}

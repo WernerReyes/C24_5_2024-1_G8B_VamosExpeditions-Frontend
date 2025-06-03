@@ -1,8 +1,8 @@
 import { Toolbar } from "primereact/toolbar";
 import {
   DataTableCostSummary,
-  HotelListDetailsSummary,
-  HotelsDetailsSummary,
+  DetailsSummary,
+  ListDetailsSummary,
 } from "./components";
 import { DataViewLayoutOptions } from "primereact/dataview";
 import { useMemo, useState } from "react";
@@ -43,7 +43,17 @@ export const CostSummaryModule = () => {
             dateFnsAdapter.isSameDay(quote.date, nextDay)
           ) ?? [];
 
-        const total = accommodiations.reduce(
+        const services =
+          currentTripDetails?.serviceTripDetails?.filter((quote) =>
+            dateFnsAdapter.isSameDay(quote.date, nextDay)
+          ) ?? [];
+
+        const totalAccommodations = accommodiations.reduce(
+          (sum, quote) => sum + quote.costPerson,
+          0
+        );
+
+        const totalServices = services.reduce(
           (sum, quote) => sum + quote.costPerson,
           0
         );
@@ -53,9 +63,9 @@ export const CostSummaryModule = () => {
           "EEEE, d 'de' MMMM 'de' yyyy"
         );
         (acc as TotalPerDay)[formattedDate] = {
-          accommodation: total,
-          services: 0,
-          total: total,
+          accommodation: totalAccommodations,
+          services: totalServices,
+          total: totalAccommodations + totalServices,
           dayNumber: index + 1,
         };
 
@@ -76,12 +86,8 @@ export const CostSummaryModule = () => {
         }
       />
       <div className="mb-10">
-        {layout === "list" && (
-          <HotelListDetailsSummary totalPerDay={totalPerDay} />
-        )}
-        {layout === "grid" && (
-          <HotelsDetailsSummary totalPerDay={totalPerDay} />
-        )}
+        {layout === "list" && <ListDetailsSummary totalPerDay={totalPerDay} />}
+        {layout === "grid" && <DetailsSummary totalPerDay={totalPerDay} />}
       </div>
 
       <DataTableCostSummary />

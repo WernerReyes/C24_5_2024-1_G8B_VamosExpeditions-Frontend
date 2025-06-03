@@ -13,7 +13,8 @@ const tableData: CostTableType[] = generateDataTable();
 export const calculateCosts = (
   hotelRoomQuotations: HotelRoomTripDetailsEntity[],
   indirectCostPercentage: number = 5,
-  serviceDirectCost: number = 0
+  serviceDirectCost: number = 0,
+  emptyHotelRoomName: string
 ): CostTableType[] => {
   // 2. Crear un mapa de totales por hotel (suma acumulada para los repetidos)
   const totalPricesByHotel = hotelRoomQuotations.reduce((acc, quote) => {
@@ -43,30 +44,41 @@ export const calculateCosts = (
   // 4. Actualizar los datos de la tabla
   const totalPricesPerTableData = tableData.map((data) => {
     // Crear un objeto total con los totales por cada hotel único
-    const hotelTotals = Object.keys(totalPricesByHotel).reduce(
-      (totals, hotelKey) => {
-        const { total, hotelName, number, directCost } =
-          totalPricesByHotel[hotelKey];
-        const directCostWithService = directCost + serviceDirectCost;
-        const indirectCostWithService =
-          (directCost + serviceDirectCost) * (indirectCostPercentage / 100);
-        const totalCostWithService =
-          directCostWithService + indirectCostWithService;
-        return {
-          ...totals,
-          hotelName,
-          [hotelName]: {
-            total,
-            number,
-            indirectCost: indirectCostWithService,
-            directCost: directCostWithService,
-            totalCost: totalCostWithService,
-            serviceCost: serviceDirectCost,
-          },
-        };
-      },
-      {}
-    );
+    const hotelTotals =
+      Object.keys(totalPricesByHotel).length > 0
+        ? Object.keys(totalPricesByHotel).reduce((_, hotelKey) => {
+            const { total, hotelName, number, directCost } =
+              totalPricesByHotel[hotelKey];
+            const directCostWithService = directCost + serviceDirectCost;
+            const indirectCostWithService =
+              (directCost + serviceDirectCost) * (indirectCostPercentage / 100);
+            const totalCostWithService =
+              directCostWithService + indirectCostWithService;
+            return {
+              // ...totals,
+              // hotelName,
+              [hotelName]: {
+                total,
+                number,
+                indirectCost: indirectCostWithService,
+                directCost: directCostWithService,
+                totalCost: totalCostWithService,
+                serviceCost: serviceDirectCost,
+              },
+            };
+          }, {})
+        : {
+            [emptyHotelRoomName]: {
+              total: 0,
+              number: 0,
+              indirectCost: serviceDirectCost * (indirectCostPercentage / 100),
+              directCost: serviceDirectCost,
+              totalCost:
+                serviceDirectCost +
+                serviceDirectCost * (indirectCostPercentage / 100),
+              serviceCost: serviceDirectCost,
+            },
+          };
     return {
       ...data,
       total: {
@@ -75,6 +87,8 @@ export const calculateCosts = (
       grandTotal, // Total acumulado de todos los hoteles
     };
   });
+
+  console.log("totalPricesPerTableData", totalPricesPerTableData);
 
   return totalPricesPerTableData;
 };

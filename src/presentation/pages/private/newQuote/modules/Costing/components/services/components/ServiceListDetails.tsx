@@ -68,8 +68,7 @@ export const ServiceListDetails = () => {
                           Capacidad
                         </div>
                         {detail?.service?.passengersMin ? (
-                          <div className="flex items-center space-x-1">
-                            <i className="pi pi-users" />
+                          <div className="flex items-center space-x-1 font-semibold">
                             <div className="flex gap-x-1">
                               <span>{detail?.service.passengersMin}</span>
                               {detail?.service.passengersMax && (
@@ -78,9 +77,7 @@ export const ServiceListDetails = () => {
                             </div>
                           </div>
                         ) : (
-                          <p className="font-semibold">
-                            No hay limite
-                          </p>
+                          <p className="font-semibold">No hay limite</p>
                         )}
                       </div>
                       <div className="space-y-1">
@@ -93,8 +90,6 @@ export const ServiceListDetails = () => {
                         </p>
                       </div>
                     </div>
-
-                   
 
                     {/* Footer */}
                     <div className="pt-2 border-t">

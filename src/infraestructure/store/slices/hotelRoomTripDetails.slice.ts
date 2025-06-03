@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type HotelRoomTripDetailsSliceState = {
   hotelRoomTripDetails: HotelRoomTripDetailsEntity[];
-  hotelRoomTripDetailsWithTotalCost: (HotelRoomTripDetailsEntity & {
+  hotelRoomTripDetailsWithTotalCost: (Partial<HotelRoomTripDetailsEntity> & {
     totalCost: number;
     number?: number;
   })[];
@@ -34,7 +34,7 @@ export const hotelRoomTripDetailsSlice = createSlice({
       state,
       {
         payload,
-      }: PayloadAction<(HotelRoomTripDetailsEntity & { totalCost: number, number?: number })[]>
+      }: PayloadAction<(Partial<HotelRoomTripDetailsEntity> & { totalCost: number, number?: number })[]>
     ) => {
       return {
         ...state,

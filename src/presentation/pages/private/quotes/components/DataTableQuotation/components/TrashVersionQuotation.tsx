@@ -13,6 +13,8 @@ type Props = {
 
 export const TrashVersionQuotation = ({ versionQuotation }: Props) => {
   const dispatch = useDispatch();
+   
+  const { authUser } = useSelector((state: AppState) => state.auth);
 
   const { trashVersions } = useSelector(
     (state: AppState) => state.versionQuotation
@@ -65,7 +67,7 @@ export const TrashVersionQuotation = ({ versionQuotation }: Props) => {
 
   return (
     <MoveToTrash
-      disabled={isLoadingArchive}
+      disabled={isLoadingArchive || authUser?.id !== versionQuotation.user?.id}
       handleTrash={handleTrashQuotation}
       handleVerifyBeforeTrash={handleVerifyBeforeTrash}
       setCurrentDeleteReason={setDeleteReason}

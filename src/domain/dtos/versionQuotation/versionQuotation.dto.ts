@@ -19,16 +19,14 @@ export const versionQuotationDtoSchema = z.object({
   indirectCostMargin: z.number().optional().nullable(),
   profitMargin: z.number().optional().nullable(),
   finalPrice: z.number().optional().nullable(),
-})
+  userId: z.number().optional(),
+});
 
 export type VersionQuotationDto = z.infer<typeof versionQuotationDtoSchema>;
 
 export const versionQuotationDto = {
   create: (dto: VersionQuotationDto): [VersionQuotationDto?, string[]?] => {
-    const errors = dtoValidator(
-      dto,
-      versionQuotationDtoSchema
-    );
+    const errors = dtoValidator(dto, versionQuotationDtoSchema);
     if (errors) {
       return [undefined, errors];
     }
@@ -46,6 +44,7 @@ export const versionQuotationDto = {
       indirectCostMargin: entity.indirectCostMargin,
       profitMargin: entity.profitMargin,
       finalPrice: entity.finalPrice,
+      userId: entity.user?.id,
     };
   },
 };

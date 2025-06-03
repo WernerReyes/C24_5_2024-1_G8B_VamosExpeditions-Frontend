@@ -34,6 +34,10 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
     (state: AppState) => state.hotelRoomTripDetails
   );
 
+  const { isFetchingServiceTripDetails } = useSelector(
+    (state: AppState) => state.serviceTripDetails
+  );
+
   const [upsertTripDetails] = useUpsertTripDetailsMutation();
 
   const [contentLoading, setContentLoading] = useState<boolean>(true);
@@ -287,7 +291,9 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
             ref={scrollContainerRef}
             className="thin-scrollbar max-h-screen space-y-2 overflow-y-auto"
           >
-            {contentLoading || isFetchingHotelRoomTripDetails ? (
+            {contentLoading ||
+            isFetchingHotelRoomTripDetails ||
+            isFetchingServiceTripDetails ? (
               <DaySkeleton length={generatedDays?.length || 5} />
             ) : (
               <DayComponent />

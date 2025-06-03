@@ -3,6 +3,7 @@ import type {
   ClientEntity,
   HotelRoomTripDetailsEntity,
   ReservationEntity,
+  ServiceTripDetailsEntity,
   TripDetailsEntity,
   UserEntity,
   VersionQuotationEntity,
@@ -31,6 +32,7 @@ import type {
   RestoreVersionQuotation,
   UpdateOfficialVersionQuotation,
 } from "./versionQuotation.response";
+import { addMultipleServiceTripDetails, deleteManyServicesTripDetails, updateManyServicesTripDetailsByDate } from "./cache/external/updateByServiceTripDetails";
 
 export const versionQuotationCache = {
   updateFromAnotherService: (
@@ -92,6 +94,24 @@ export const versionQuotationCache = {
     getState: () => AppState
   ) => deleteManyHotelRoomTripDetails([data], dispatch, getState),
 
+  //* ServiceTripDetails
+  addMultipleServiceTripDetails: (
+    data: ServiceTripDetailsEntity[],
+    dispatch: AppDispatch,
+    getState: () => AppState
+  ) => addMultipleServiceTripDetails(data, dispatch, getState),
+
+  updateManyServicesTripDetailsByDate: (
+    data: ServiceTripDetailsEntity[],
+    dispatch: AppDispatch,
+    getState: () => AppState
+  ) => updateManyServicesTripDetailsByDate(data, dispatch, getState),
+
+  deleteManyServicesTripDetails: (
+    data: ServiceTripDetailsEntity["id"][],
+    dispatch: AppDispatch,
+    getState: () => AppState
+  ) => deleteManyServicesTripDetails(data, dispatch, getState),
 
   //* Reservation
   updateByReservation: (

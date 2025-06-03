@@ -1,16 +1,16 @@
 import type { AppState } from "@/app/store";
 import { startShowApiError, startShowSuccess } from "@/core/utils";
-import {
-  type InsertManyHotelRoomTripDetailsDto,
-  insertManyHotelRoomTripDetailsDto,
-  updateManyHotelRoomTripDetailsByDateDto,
-  UpdateManyHotelRoomTripDetailsByDateDto,
-} from "@/domain/dtos/hotelRoomTripDetails";
 import type { HotelRoomTripDetailsEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { requestConfig } from "../config";
 import type { ApiResponse } from "../response";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
+import {
+  insertManyDetailsTripDetailsDto,
+  updateManyDetailsTripDetailsByDateDto,
+  type UpdateManyDetailsTripDetailsByDateDto,
+  type InsertManyDetailsTripDetailsDto,
+} from "@/domain/dtos/common";
 
 const PREFIX = "/hotel-room-trip-details";
 
@@ -20,10 +20,10 @@ export const hotelRoomTripDetailsService = createApi({
   endpoints: (builder) => ({
     createManyHotelRoomTripDetails: builder.mutation<
       ApiResponse<HotelRoomTripDetailsEntity[]>,
-      InsertManyHotelRoomTripDetailsDto
+      InsertManyDetailsTripDetailsDto
     >({
       query: (body) => {
-        const [_, errors] = insertManyHotelRoomTripDetailsDto.create(body);
+        const [_, errors] = insertManyDetailsTripDetailsDto.create(body);
         if (errors) throw errors;
         return {
           url: "/many",
@@ -54,11 +54,10 @@ export const hotelRoomTripDetailsService = createApi({
 
     updateManyHotelRoomTripDetailsByDate: builder.mutation<
       ApiResponse<HotelRoomTripDetailsEntity[]>,
-      UpdateManyHotelRoomTripDetailsByDateDto
+      UpdateManyDetailsTripDetailsByDateDto
     >({
       query: (body) => {
-        const [_, errors] =
-          updateManyHotelRoomTripDetailsByDateDto.create(body);
+        const [_, errors] = updateManyDetailsTripDetailsByDateDto.create(body);
         if (errors) throw errors;
         return {
           url: "/many/date",

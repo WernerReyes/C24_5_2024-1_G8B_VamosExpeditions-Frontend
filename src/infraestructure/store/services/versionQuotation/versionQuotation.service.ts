@@ -156,7 +156,7 @@ export const versionQuotationService = createApi({
         const [_, errors] = versionQuotationDto.create(body);
         if (errors) throw errors;
         return {
-          url: "/",
+          url: `/${body.userId}`,
           method: "PUT",
           body,
         };

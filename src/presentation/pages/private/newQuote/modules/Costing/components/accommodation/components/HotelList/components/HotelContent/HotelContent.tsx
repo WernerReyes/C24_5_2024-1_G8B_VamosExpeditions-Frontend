@@ -11,7 +11,7 @@ import {
   InputNumber,
   type AccordionTabChangeEvent,
 } from "@/presentation/components";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getHotelRoomRenderProperties } from "./utils";
 import { DaysNumberToAdd } from "@/presentation/pages/private/newQuote/modules/components";
@@ -60,14 +60,20 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
 
   const handleAddHotelRoomQuotation = async () => {
     if (!selectedRoom) return;
+
+    const dateRange = (): [Date, Date] => {
+      const startDate = days[rangeState[0] - 1];
+      const endDate = days?.[rangeState[1] - 1] ?? days[rangeState[0] - 1];
+      return [startDate.date, endDate.date];
+    };
    
     await createManyHotelRoomTripDetails({
       tripDetailsId: currentTripDetails!.id,
-      dateRange: dateRange,
+      dateRange: dateRange(),
       countPerDay: autoCompleteDay
         ? Math.floor(currentTripDetails!.numberOfPeople / peopleAmount)
         : 1,
-      hotelRoomId: selectedRoom.id,
+      id: selectedRoom.id,
       costPerson: ((selectedRoom.rateUsd ?? 0) / currentTripDetails!.numberOfPeople) // TODO: For now, we use the rateUsd as the priceUsd
     })
       .unwrap()
@@ -98,16 +104,11 @@ export const HotelContent = ({ hotel, setVisible }: Props) => {
     });
   };
 
-  const dateRange: [Date, Date] = useMemo(() => {
-    const startDate = days[rangeState[0] - 1];
-    const endDate = days[rangeState[1] - 1] ?? days[rangeState[0] - 1];
-    return [startDate.date, endDate.date];
-  }, [days, rangeState]);
 
   useEffect(() => {
     if (!confirm) return;
     handleAddHotelRoomQuotation();
-  }, [rangeState, confirm]);
+  }, [confirm]);
 
   useEffect(() => {
     if (!recommended) {

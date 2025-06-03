@@ -14,7 +14,7 @@ import {
   type DataTableProps,
   type DataTableValueArray,
 } from "@/presentation/components";
-import { DataTable } from "primereact/datatable";
+import { DataTable, DataTableRowData } from "primereact/datatable";
 import { createRef, forwardRef, useImperativeHandle, useState } from "react";
 import {
   FilterByClient,
@@ -41,6 +41,8 @@ import {
   EditQuotationName,
   TableActions,
 } from "./components";
+import type { AppState } from "@/app/store";
+import { useSelector } from "react-redux";
 
 type Props<TValue extends DataTableValueArray> = DataTableProps<TValue> & {
   extraColumns?: (ColumnProps & {
@@ -55,6 +57,8 @@ export const DataTableQuotation = forwardRef(function DataTable2<
   useImperativeHandle(ref, () => ({
     exportCSV: () => dataTableRef.current?.exportCSV(),
   }));
+
+  const { authUser } = useSelector((state: AppState) => state.auth);
 
   const [selectedQuotation, setSelectedQuotation] = useState<
     VersionQuotationEntity | undefined
@@ -84,7 +88,7 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           .map(({ position, ...column }, index) => (
             <Column key={index} {...column} />
           ))}
-        <Column selectionMode="multiple" />
+        <Column selectionMode="multiple" className="" />
         <Column
           field="id"
           headerClassName="min-w-24"
@@ -103,8 +107,9 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           filter
           editor={(options: ColumnEditorOptions) => {
             if (
-              options.rowData.status === VersionQuotationStatus.APPROVED &&
-              options.rowData.official
+              (options.rowData.status === VersionQuotationStatus.APPROVED &&
+                options.rowData.official) ||
+              authUser?.id !== options.rowData.user?.id
             ) {
               return <label>{options.rowData.name}</label>;
             }
@@ -294,7 +299,10 @@ export const DataTableQuotation = forwardRef(function DataTable2<
           header="Oficial"
           align="center"
           editor={(options: ColumnEditorOptions) => {
-            if (options.rowData.official) {
+            if (
+              options.rowData.official ||
+              authUser?.id !== options.rowData.user?.id
+            ) {
               return (
                 <i
                   className={cn(
@@ -366,13 +374,15 @@ export const DataTableQuotation = forwardRef(function DataTable2<
             dateFnsAdapter.format(e.updatedAt, "dd/MM/yyyy")
           }
           filterElement={(options) => (
-            <FilterByDate options={options} placeholder="Fecha de ultima modificación" />
+            <FilterByDate
+              options={options}
+              placeholder="Fecha de ultima modificación"
+            />
           )}
         />
 
         <Column
           header="Acciones"
-          
           body={(quote: VersionQuotationEntity) => (
             <TableActions rowData={quote} type="principal" />
           )}

@@ -1,5 +1,11 @@
 import type { AppState } from "@/app/store";
-import { Badge, Column, DataTable, ColumnGroup, Row } from "@/presentation/components";
+import {
+  Badge,
+  Column,
+  DataTable,
+  ColumnGroup,
+  Row,
+} from "@/presentation/components";
 import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useCalculateCostsPerService } from "../../../hooks/useCalculateCostsPerService";
@@ -21,7 +27,7 @@ export const SalesPriceTable = ({
     (state: AppState) => state.hotelRoomTripDetails
   );
 
-  const {} = useCalculateCostsPerService();
+  const { emptyHotelRoomName } = useCalculateCostsPerService();
 
   const calculateSalesPrice = useMemo(() => {
     return hotelRoomTripDetailsWithTotalCost.map((quote) => {
@@ -34,9 +40,10 @@ export const SalesPriceTable = ({
       );
       return {
         utility: parseFloat((salesPrice - quote.totalCost).toFixed(2)),
-        hotelName: `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`,
+        hotelName: quote.hotelRoom
+          ? `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`
+          : emptyHotelRoomName,
         margin: profitMargin,
-        costPerson: quote.costPerson,
         totalCost: +quote.totalCost.toFixed(2),
         salesPriceVE: salesPrice,
         salesPriceParner: salesPriceWithCommission,
@@ -168,5 +175,3 @@ export const SalesPriceTable = ({
     </DataTable>
   );
 };
-
-

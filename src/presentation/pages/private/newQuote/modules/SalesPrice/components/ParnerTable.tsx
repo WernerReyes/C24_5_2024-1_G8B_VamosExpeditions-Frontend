@@ -25,19 +25,14 @@ export const ParnerTable = ({
     (state: AppState) => state.versionQuotation
   );
 
-  const { hotelRoomTripDetailsWithTotalCost } = useSelector(
-    (state: AppState) => state.hotelRoomTripDetails
+  const [selectedPartner, setSelectedPartner] = useState<PartnerEntity | null>(
+    null
   );
-  const [selectedPartner, setSelectedPartner] = useState<
-    PartnerEntity | null
-  >(null);
-  const [commission, setCommission] = useState<number>(
-   3
-  );
+  const [commission, setCommission] = useState<number>(3);
 
   useEffect(() => {
     setSelectedPartner(currentVersionQuotation?.partner ?? null);
-    setCommission(currentVersionQuotation?.commission?? 3);
+    setCommission(currentVersionQuotation?.commission ?? 3);
   }, [currentVersionQuotation]);
 
   useEffect(() => {
@@ -45,15 +40,14 @@ export const ParnerTable = ({
       setParner(null);
       setComission(null);
       return;
-    };
+    }
     setParner(selectedPartner);
     setComission(commission);
   }, [selectedPartner, commission]);
 
-
   return (
     <DataTable
-      value={hotelRoomTripDetailsWithTotalCost.slice(0, 1)}
+      value={Array.from({ length: 1 })}
       className="w-full border-collapse mb-5 font-bold"
       header="Selección de parner"
     >

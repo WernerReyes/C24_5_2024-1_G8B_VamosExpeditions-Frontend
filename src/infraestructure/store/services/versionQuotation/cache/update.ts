@@ -138,7 +138,7 @@ export const updateOfficial = function (
     if (getAllUnofficialVersionQuotations) {
       dispatch(
         versionQuotationService.util.updateQueryData(
-          "getAllOfficialVersionQuotations",
+          "getAllUnofficialVersionQuotations",
           getAllUnofficialVersionQuotations,
           (draft) => {
             Object.assign(draft, {

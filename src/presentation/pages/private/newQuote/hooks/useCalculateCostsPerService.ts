@@ -6,6 +6,8 @@ import { calculateCosts } from "../modules/utils";
 import { CostTableType } from "../modules/types/costTable.type";
 import { onSetHotelRoomTripDetailsWithTotalCost } from "@/infraestructure/store";
 
+const EMPTY_HOTEL_ROOM_NAME = "SIN HABITACIONES";
+
 export const useCalculateCostsPerService = () => {
   const dispatch = useDispatch();
   const { indirectCostMargin } = useSelector(
@@ -51,40 +53,58 @@ export const useCalculateCostsPerService = () => {
     return calculateCosts(
       hotelRoomTripDetails,
       indirectCostMargin,
-      serviceCost
+      serviceCost,
+      EMPTY_HOTEL_ROOM_NAME
     );
   }, [hotelRoomTripDetails, indirectCostMargin]);
 
   useEffect(() => {
     dispatch(
       onSetHotelRoomTripDetailsWithTotalCost(
-        uniqueHotelRoomTripDetails.map((quote, index) => {
-          const totalCost =
-            (
-              calculateCostsPerService[index].total as {
-                [key: string]: {
-                  total: number;
-                  indirectCost: number;
-                  directCost: number;
-                  totalCost: number;
-                };
-              }
-            )[`${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`]
-              ?.totalCost ?? 0;
+        uniqueHotelRoomTripDetails.length > 0
+          ? uniqueHotelRoomTripDetails.map((quote, index) => {
+              const totalCost =
+                (
+                  calculateCostsPerService[index]?.total as {
+                    [key: string]: {
+                      total: number;
+                      indirectCost: number;
+                      directCost: number;
+                      totalCost: number;
+                    };
+                  }
+                )[
+                  `${quote.hotelRoom?.hotel?.name}-${quote.hotelRoom?.roomType}`
+                ]?.totalCost ?? 0;
 
-          return {
-            ...quote,
-            totalCost,
-          };
-        })
+              return {
+                ...quote,
+                totalCost,
+              };
+            })
+          : [
+              { 
+                number: 0,
+                totalCost:
+                  (
+                    calculateCostsPerService[0]?.total as {
+                      [key: string]: {
+                        total: number;
+                        indirectCost: number;
+                        directCost: number;
+                        totalCost: number;
+                      };
+                    }
+                  )?.[EMPTY_HOTEL_ROOM_NAME]?.totalCost ?? 0,
+              },
+            ]
       )
     );
   }, [uniqueHotelRoomTripDetails, calculateCostsPerService]);
 
-  console.log(calculateCostsPerService);
-
   return {
     calculateCostsPerService,
     uniqueHotelRoomTripDetails,
+    emptyHotelRoomName: EMPTY_HOTEL_ROOM_NAME,
   };
 };

@@ -1,7 +1,10 @@
 import type { AppState } from "@/app/store";
-import { dateFnsAdapter } from "@/core/adapters";
+import { cn, dateFnsAdapter } from "@/core/adapters";
 import { formatCurrency } from "@/core/utils";
-import type { HotelRoomTripDetailsEntity } from "@/domain/entities";
+import type {
+  HotelRoomTripDetailsEntity,
+  ServiceTripDetailsEntity,
+} from "@/domain/entities";
 import { Column, DataTable, Tag } from "@/presentation/components";
 import { FieldNotAssigned } from "@/presentation/pages/private/components";
 import { useMemo } from "react";
@@ -12,18 +15,20 @@ type Props = {
   totalPerDay: TotalPerDay;
 };
 
-export const HotelListDetailsSummary = ({ totalPerDay }: Props) => {
+export const ListDetailsSummary = ({ totalPerDay }: Props) => {
   const { hotelRoomTripDetails } = useSelector(
     (state: AppState) => state.hotelRoomTripDetails
   );
 
+  const { serviceTripDetails } = useSelector(
+    (state: AppState) => state.serviceTripDetails
+  );
 
-
-  const hotelRoomTripDetailsWithEmptyDates = useMemo(() => {
+  const detailsWithEmptyDates = useMemo(() => {
     const existingDates = new Set(
-      hotelRoomTripDetails.map((item) =>
-        dateFnsAdapter.format(item.date, "yyyy-MM-dd")
-      )
+      hotelRoomTripDetails
+        .concat(serviceTripDetails)
+        .map((item) => dateFnsAdapter.format(item.date, "yyyy-MM-dd"))
     );
     const missingDetails = Object.keys(totalPerDay)
       .map((dateStr) => {
@@ -33,7 +38,6 @@ export const HotelListDetailsSummary = ({ totalPerDay }: Props) => {
         );
         const formatted = dateFnsAdapter.format(parsedDate, "yyyy-MM-dd");
 
-       
         if (!existingDates.has(formatted)) {
           return {
             date: parsedDate,
@@ -50,8 +54,13 @@ export const HotelListDetailsSummary = ({ totalPerDay }: Props) => {
         ...item,
         dateString: dateFnsAdapter.format(item.date, "yyyy-MM-dd"),
       })),
+      ...serviceTripDetails.map((item) => ({
+        ...item,
+        dateString: dateFnsAdapter.format(item.date, "yyyy-MM-dd"),
+      })),
       ...missingDetails,
     ] as Partial<HotelRoomTripDetailsEntity>[];
+    // console.log(hotelRoomTripDetailsWithDate);
 
     return hotelRoomTripDetailsWithDate;
   }, [totalPerDay]);
@@ -59,7 +68,7 @@ export const HotelListDetailsSummary = ({ totalPerDay }: Props) => {
   return (
     <div className="card">
       <DataTable
-        value={hotelRoomTripDetailsWithEmptyDates}
+        value={detailsWithEmptyDates}
         rowGroupMode="subheader"
         groupRowsBy="dateString"
         sortMode="single"
@@ -72,7 +81,6 @@ export const HotelListDetailsSummary = ({ totalPerDay }: Props) => {
             data.date,
             "EEEE, d 'de' MMMM 'de' yyyy"
           );
-
           const { dayNumber, total } = totalPerDay[format];
           return (
             <div className="flex bg-secondary p-4 rounded-4 gap-2 items-center">
@@ -92,36 +100,70 @@ export const HotelListDetailsSummary = ({ totalPerDay }: Props) => {
       >
         <Column
           headerClassName="hidden"
-          body={(data: HotelRoomTripDetailsEntity) => {
+          body={(
+            data: HotelRoomTripDetailsEntity | ServiceTripDetailsEntity
+          ) => {
             if (!data.id)
               return (
                 <FieldNotAssigned message="No hay ningún recurso agregado por ahora" />
               );
+            let details: {
+              name: string;
+              cityName: string;
+              type: string;
+              costPerson: number;
+              icon: string;
+            } = {
+              name: "",
+              cityName: "",
+              type: "",
+              costPerson: 0,
+              icon: "",
+            };
+
+            if ("hotelRoom" in data) {
+              details = {
+                name: `${data?.hotelRoom?.hotel?.name} - ${data?.hotelRoom?.roomType}`,
+                cityName: data?.hotelRoom?.hotel?.distrit?.city?.name ?? "",
+                type: "ALOJAMIENTO",
+                costPerson: data.costPerson,
+                icon: "pi-home",
+              };
+            }
+
+            if ("service" in data) {
+              details = {
+                name: data?.service?.description ?? "",
+                cityName: data?.service?.district?.city?.name ?? "",
+                type: data?.service?.serviceType?.name ?? "",
+                costPerson: data.costPerson,
+                icon: "pi-cog",
+              };
+            }
+
             return (
               <div className="flex justify-between">
                 <div className="flex gap-2 items-center">
                   <div className="w-10 h-10 bg-primary/20 rounded flex items-center justify-center">
-                    <i className="text-xl pi pi-home text-primary"></i>
+                    <i className={cn("text-xl pi  text-primary", 
+                      details.icon
+                    )}></i>
                   </div>
                   <div className="flex flex-col">
-                    <h4 className="font-semibold">
-                      {data?.hotelRoom?.hotel?.name} -{" "}
-                      {data?.hotelRoom?.roomType}
-                    </h4>
+                    <h4 className="font-semibold">{details.name}</h4>
                     <small>
                       <i className="text-xs pi pi-map-marker me-1"></i>
-                      {data?.hotelRoom?.hotel?.distrit?.city?.name}
+                      {details.cityName}
                     </small>
                     <div className="flex gap-2 items-center justify-end">
-                      <Tag value="Alojamiento" className="text-xs" />
-                      {/* <Tag value="Servicios" className="text-xs" /> */}
+                      <Tag value={details.type} className="text-xs" />
                     </div>
                   </div>
                 </div>
 
                 <div className="flex gap-2 items-center">
                   <span className="text-xl text-primary font-semibold">
-                    {formatCurrency(data.costPerson)}
+                    {formatCurrency(details.costPerson)}
                   </span>
                 </div>
               </div>

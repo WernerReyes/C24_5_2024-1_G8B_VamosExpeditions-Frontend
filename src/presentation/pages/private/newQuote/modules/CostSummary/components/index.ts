@@ -1,3 +1,3 @@
 export * from './DataTableCostSummary';
-export * from './HotelListDetailsSummary';
-export * from './HotelsDetailsSummary';
+export * from './ListDetailsSummary';
+export * from './DetailsSummary';

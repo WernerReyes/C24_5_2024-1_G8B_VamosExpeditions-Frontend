@@ -1,7 +1,9 @@
 import type { AppState } from "@/app/store";
+import { cn } from "@/core/adapters";
 import { formatCurrency } from "@/core/utils";
 import type { ServiceEntity, ServiceTypeEntity } from "@/domain/entities";
 import {
+  useCreateManyServiceTripDetailsMutation,
   useGetServicesQuery,
   useGetServiceTypesQuery,
 } from "@/infraestructure/store/services";
@@ -16,11 +18,9 @@ import {
   Tag,
 } from "@/presentation/components";
 import { usePaginator } from "@/presentation/hooks";
-import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
 import { DaysNumberToAdd } from "@/presentation/pages/private/newQuote/modules/components";
-import { useCreateManyServiceTripDetailsMutation } from "@/infraestructure/store/services";
-import { cn } from "@/core/adapters";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 type Props = {
   visible: boolean;
@@ -118,13 +118,20 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
   };
 
   const handleAddServiceDetails = async (service: ServiceEntity) => {
+    setConfirm(false);
     if (extraPriceUsd?.[service.id] && extraPriceUsd?.[service.id] === 0)
       return;
     if (!service.priceUsd && !extraPriceUsd?.[service.id]) return;
 
+    const dateRange = (): [Date, Date] => {
+      const startDate = days[rangeState[0] - 1];
+      const endDate = days?.[rangeState[1] - 1] ?? days[rangeState[0] - 1];
+      return [startDate.date, endDate.date];
+    };
+
     await createManyServiceTripDetails({
       tripDetailsId: currentTripDetails!.id,
-      dateRange: dateRange,
+      dateRange: dateRange(),
       countPerDay: autoCompleteDay
         ? Math.floor(
             currentTripDetails!.numberOfPeople /
@@ -135,7 +142,7 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
                 : 1)
           )
         : 1,
-      serviceId: service.id,
+      id: service.id,
       costPerson: extraPriceUsd?.[service.id] ?? service.priceUsd!, // TODO: For now, we use the rateUsd as the priceUsd
     })
       .unwrap()
@@ -144,23 +151,18 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
       })
       .finally(() => {
         setConfirm(false);
+        setExtraPriceUsd(undefined)
       });
     // setConfirm(false);
     // setSelectedService(undefined);
   };
 
-  const dateRange: [Date, Date] = useMemo(() => {
-    if (!days || days.length === 0) return [new Date(), new Date()];
-    const startDate = days[rangeState[0] - 1];
-    const endDate = days[rangeState[1] - 1] ?? days[rangeState[0] - 1];
-    return [startDate.date, endDate.date];
-  }, [days, rangeState]);
 
   useEffect(() => {
     if (!confirm || !selectedService) return;
 
     handleAddServiceDetails(selectedService);
-  }, [confirm, selectedService]);
+  }, [confirm]);
 
   return (
     <Dialog

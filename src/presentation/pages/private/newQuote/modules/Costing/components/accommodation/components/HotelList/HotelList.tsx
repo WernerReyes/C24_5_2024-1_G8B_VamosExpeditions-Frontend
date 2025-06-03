@@ -81,6 +81,7 @@ export const HotelList = ({ visible, setVisible }: Props) => {
   );
 
   useEffect(() => {
+    if (hotels.length === 0) return;
     setHotelsFiltered(hotels);
   }, [hotels]);
 
