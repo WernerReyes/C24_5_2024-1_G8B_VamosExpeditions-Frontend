@@ -14,7 +14,14 @@ type Props = {
   setComission: (salesPrice: number) => void;
 };
 
-const PARNERS: PartnerEntity[] = [{ name: "Travel Local", id: 1 }];
+const PARNERS: PartnerEntity[] = [
+  {
+    name: "Travel Local",
+    id: 1,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
 
 export const ParnerTable = ({
   setParner,

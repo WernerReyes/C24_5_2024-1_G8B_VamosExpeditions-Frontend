@@ -393,7 +393,7 @@ export const versionQuotationService = createApi({
       },
     }),
 
-    //start pdf and excel
+    //!start pdf and excel
     generateVersionQuotationPdf: builder.query<
       Blob,
       { id: VersionQuotationEntity["id"]; name: string }
@@ -430,7 +430,7 @@ export const versionQuotationService = createApi({
         }
       },
     }),
-    //excel
+    //!excel
     generateVersionQuotationExcel: builder.query<
       Blob,
       { id: VersionQuotationEntity["id"]; name: string }
@@ -467,8 +467,9 @@ export const versionQuotationService = createApi({
         }
       },
     }),
-    //end pdf and excel
+    //!end pdf and excel
 
+    //! start preview pdf and excel
     previewVersionQuotationPdf: builder.query<
       Blob,
       VersionQuotationEntity["id"]
@@ -484,6 +485,24 @@ export const versionQuotationService = createApi({
         };
       },
     }),
+
+    previewVersionQuotationExcel: builder.query<
+      Blob,
+      VersionQuotationEntity["id"]
+    >({
+      query: (id) => {
+        if (!id.quotationId || !id.versionNumber) {
+          throw "QuotationId and VersionNumber are required";
+        }
+        return {
+          url: `/excel/${id.quotationId}/${id.versionNumber}`,
+          method: "GET",
+          responseHandler: (response) => response.blob(),
+        };
+      },
+    }),
+
+    //! end preview pdf and excel
 
     sendEmailAndGenerateReport: builder.mutation<
       ApiResponse<void>,
@@ -526,10 +545,11 @@ export const {
   // pdf and excel
   useLazyGenerateVersionQuotationPdfQuery,
 
+  //! start  preview pdf and excel
   useLazyPreviewVersionQuotationPdfQuery,
-
+  useLazyPreviewVersionQuotationExcelQuery,
+  //! end preview pdf and excel
   useLazyGenerateVersionQuotationExcelQuery,
-  
 
   useSendEmailAndGenerateReportMutation,
 } = versionQuotationService;

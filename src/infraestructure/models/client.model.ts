@@ -10,17 +10,18 @@ export const clientModelSchemaPartial = z.object({
   phone: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
+  is_deleted: z.boolean().optional(),
+  deleted_at: z.boolean().optional(),
+  delete_reason: z.boolean().optional(),
+
 });
 
-export const clientModelSchema = clientModelSchemaPartial.merge(
-  z.object({})
-);
+export const clientModelSchema = clientModelSchemaPartial;
 
 export type ClientModel = z.infer<typeof clientModelSchema>;
 
 export const clientModel = {
   schema: clientModelSchema,
-  toString: (client?: ClientModel): string => fromModelToString(client),
+  toString: (client?: ClientModel): string | undefined =>
+    client ? fromModelToString(client) : undefined,
 };
-
-

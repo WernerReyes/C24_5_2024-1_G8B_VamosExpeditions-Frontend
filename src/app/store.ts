@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { partnerService } from "../infraestructure/store/services/partner/partner.service";
 import {
   authService,
   externalCountryService,
@@ -67,6 +68,7 @@ export const store = configureStore({
     [notificationService.reducerPath]: notificationService.reducer,
     [hotelService.reducerPath]: hotelService.reducer,
     [roomService.reducerPath]: roomService.reducer,
+    [partnerService.reducerPath]: partnerService.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -84,6 +86,8 @@ export const store = configureStore({
       .concat(externalCountryService.middleware)
       .concat(SocketService.middleware)
 
+      .concat(partnerService.middleware)
+      //!
       .concat(distritService.middleware)
       .concat(cityService.middleware)
       .concat(countryService.middleware)

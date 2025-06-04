@@ -15,8 +15,16 @@ import { useSidebar } from "../../hooks";
 import { useSelector } from "react-redux";
 import { AppState } from "@/app/store";
 
-const { DASHBOARD, QUOTES, NEW_QUOTE, RESERVATIONS, HOTEL, COUNTRY } =
-  constantRoutes.private;
+const {
+  DASHBOARD,
+  QUOTES,
+  NEW_QUOTE,
+  RESERVATIONS,
+  HOTEL,
+  COUNTRY,
+  CLIENT,
+  PARTNER,
+} = constantRoutes.private;
 
 const ITEMS: MenuItem[] = [
   {
@@ -53,12 +61,14 @@ const ITEMS: MenuItem[] = [
     ],
   },
   {
+    id: "hotels",
     label: "Hoteles",
     icon: "pi pi-building",
     url: HOTEL,
     template: (e) => <Template menuItem={e} />,
   },
   {
+    id: "pais",
     label: "Países",
     icon: "pi pi-globe",
     url: COUNTRY,
@@ -70,6 +80,20 @@ const ITEMS: MenuItem[] = [
     label: "Usuarios",
     icon: "pi pi-users",
     url: "/app/users",
+    template: (e) => <Template menuItem={e} />,
+  },
+  {
+    id: "clientes",
+    label: "Clientes",
+    icon: "pi pi-address-book",
+    url: CLIENT,
+    template: (e) => <Template menuItem={e} />,
+  },
+  {
+    id: "socios",
+    label: "Socios",
+    icon: "pi pi-briefcase",
+    url: PARTNER,
     template: (e) => <Template menuItem={e} />,
   },
 ];
@@ -85,9 +109,9 @@ export const Sidebar = () => {
         toggleSidebar();
       }}
       header={
-        <div  className="flex flex-col items-center justify-center">
-          <img src="/images/logo.webp" alt="Logo"  width="200" />
-          
+        <div className="flex flex-col items-center justify-center">
+          <img src="/images/logo.webp" alt="Logo" width="200" />
+
           <hr className="mt-3 border-2 w-full border-gray-300 " />
         </div>
       }

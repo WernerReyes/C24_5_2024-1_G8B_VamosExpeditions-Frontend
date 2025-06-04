@@ -36,3 +36,6 @@ export * from "./response";
 
 export * from "./middleware";
 
+//! Partner
+export * from "./partner/partner.service";
+

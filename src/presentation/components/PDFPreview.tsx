@@ -1,12 +1,18 @@
 type Props = {
   blob: Blob;
   name?: string;
+  typeDocument: "pdf" | "xlsx";
 };
+
 import { useEffect, useState } from "react";
 import { Dialog } from "./Dialog";
 import { Button } from "./Button";
 
-export const PDFPreview = ({ blob, name = "document" }: Props) => {
+export const PDFPreview = ({
+  blob,
+  name = "document",
+  typeDocument,
+}: Props) => {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,7 +31,7 @@ export const PDFPreview = ({ blob, name = "document" }: Props) => {
         onHide={() => setUrl(null)}
         className="w-full max-w-4xl md:max-h-[90vh]"
         pt={{
-          header: { className: "hidden" },
+          header: { className: typeDocument === "xlsx" ? "" : "hidden" },
         }}
         maximized
         modal
@@ -41,7 +47,11 @@ export const PDFPreview = ({ blob, name = "document" }: Props) => {
           data={url}
           width="100%"
           height="100%"
-          type="application/pdf"
+          type={
+            typeDocument === "xlsx"
+              ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              : "application/pdf"
+          }
         >
           <div className={"h-full flex flex-col justify-center p-8"}>
             <div className="absolute top-10 right-10 opacity-10"></div>
@@ -53,23 +63,23 @@ export const PDFPreview = ({ blob, name = "document" }: Props) => {
 
               <div className="text-center space-y-4">
                 <h2 className="text-2xl md:text-3xl font-bold text-tertiary">
-                  Tu navegador no soporta la vista previa de PDF
+                 { ` Tu navegador no soporta la vista previa de ${typeDocument.toLowerCase()}.` }
                 </h2>
 
                 <p className="text-primary text-md md:text-lg max-w-2xl mx-auto">
-                  Si no puedes ver el PDF, puedes descargarlo o abrirlo en una
-                  nueva pestaña.
+                  {`Si no puedes ver el ${typeDocument.toLowerCase()}, puedes descargarlo o abrirlo en una
+                  nueva pestaña.`}
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
                 <Button
-                  label="Descargar PDF"
+                  label={`Descargar ${typeDocument.toLowerCase()}`}
                   icon="pi pi-download"
                   onClick={() => {
                     const link = document.createElement("a");
                     link.href = url;
-                    link.download = `${name}.pdf`;
+                    link.download = `${name}.${typeDocument}`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);

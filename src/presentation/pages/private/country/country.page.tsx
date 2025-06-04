@@ -106,7 +106,7 @@ const CountryPage = () => {
             {/* start new city */}
           </>
         }
-        start={
+        /* start={
           <Button
             icon="pi pi-trash"
             className="bg-gradient-to-r from-rose-500 to-red-500
@@ -117,7 +117,7 @@ const CountryPage = () => {
             tooltip="Eliminar seleccionados"
             tooltipOptions={{ position: "top" }}
           />
-        }
+        } */
       />
 
       <ErrorBoundary
@@ -208,7 +208,7 @@ const CountryPage = () => {
             )}
             emptyMessage={"No hay países registrados"}
           >
-            <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
+            {/* <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} /> */}
             <Column
               expander
               headerStyle={{ width: "3rem" }}
