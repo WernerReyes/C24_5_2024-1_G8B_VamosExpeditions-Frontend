@@ -88,7 +88,6 @@ export const calculateCosts = (
     };
   });
 
-  console.log("totalPricesPerTableData", totalPricesPerTableData);
 
   return totalPricesPerTableData;
 };

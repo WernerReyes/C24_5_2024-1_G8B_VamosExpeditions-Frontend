@@ -92,22 +92,6 @@ export const userCache = {
     args.forEach((arg) => {
       dispatch(
         userService.util.updateQueryData("getUsers", arg, (draft) => {
-          console.log({
-            hola: draft.data.content.map((user) => {
-              if (user.id === userId) {
-                return {
-                  ...user,
-                  activeDevices: user.activeDevices?.map((device) =>
-                    devices.includes(device.deviceId)
-                      ? { ...device, isOnline: online }
-                      : device
-                  ),
-                };
-              }
-
-              return user;
-            }),
-          });
           const updated = draft.data.content.map((user) => {
             if (user.id === userId) {
               return {

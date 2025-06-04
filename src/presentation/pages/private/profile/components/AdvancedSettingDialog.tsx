@@ -147,7 +147,6 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
         data.data
       );
 
-  
       setCleanupSetting({
         ...cleanupSetting!,
         autoCleanup: !!cleanupSetting?.value,
@@ -174,12 +173,11 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     );
 
     if (cleanup) {
-      
       setCleanupSetting((prev) => ({
         ...prev,
         isChange:
-          prev.value!= (cleanup?.value?? null) ||
-          !!cleanup?.value!== prev.autoCleanup,
+          prev.value != (cleanup?.value ?? null) ||
+          !!cleanup?.value !== prev.autoCleanup,
       }));
     }
   }, [cleanupInterval, autoCleanup]);
@@ -222,7 +220,6 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     </div>
   );
 
-  
   return (
     <>
       <DisconnectSessionDevice
@@ -396,15 +393,16 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                       <span>SISTEMA</span>
                     )}
                   </div>
-                  <div className="flex justify-between mt-2 text-gray-600">
-                    <span>Fecha:</span>
 
-                    {lastCleanupMadeAt &&
-                      dateFnsAdapter.format(
+                  {lastCleanupMadeAt && (
+                    <div className="flex justify-between mt-2 text-gray-600">
+                      <span>Fecha:</span>
+                      {dateFnsAdapter.format(
                         new Date(lastCleanupMadeAt),
                         "dd/MM/yyyy HH:mm"
                       )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

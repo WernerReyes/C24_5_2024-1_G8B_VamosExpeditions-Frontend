@@ -57,8 +57,6 @@ export const authSocketListeners = (
           // data.devices
         );
 
-        console.log(data.devices)
-
         dispatch(
           setusersDevicesConnections(data.devices)
         );

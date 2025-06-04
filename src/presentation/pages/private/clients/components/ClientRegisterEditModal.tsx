@@ -63,7 +63,6 @@ export const ClientRegisterEditModal = ({
     handleSubmit,
     reset,
     setValue,
-    watch,
     formState: { errors, isDirty },
   } = useForm<ClientDto>({
     resolver: zodResolver(clientDto.getSchema),
@@ -130,6 +129,8 @@ export const ClientRegisterEditModal = ({
             );
           }
         }
+
+        setShowModal(false);
       });
   };
 
@@ -163,11 +164,6 @@ export const ClientRegisterEditModal = ({
   }, [rowData, externalCountries]);
 
   const countryPhoneMask = getCountryPhoneMask(selectedCountry);
-
-  console.log({
-    errors,
-    watch: watch(),
-  });
 
   return (
     <Dialog

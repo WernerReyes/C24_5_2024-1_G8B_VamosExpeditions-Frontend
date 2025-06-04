@@ -14,7 +14,7 @@ import {
   type DataTableProps,
   type DataTableValueArray,
 } from "@/presentation/components";
-import { DataTable, DataTableRowData } from "primereact/datatable";
+import { DataTable } from "primereact/datatable";
 import { createRef, forwardRef, useImperativeHandle, useState } from "react";
 import {
   FilterByClient,
@@ -27,7 +27,9 @@ import {
   filterByStatus,
 } from "../../utils";
 
+import type { AppState } from "@/app/store";
 import { formatCurrency } from "@/core/utils";
+import { useSelector } from "react-redux";
 import { ClientInfo, FieldNotAssigned, UserInfo } from "../../../components";
 import {
   FilterApplyButton,
@@ -41,8 +43,6 @@ import {
   EditQuotationName,
   TableActions,
 } from "./components";
-import type { AppState } from "@/app/store";
-import { useSelector } from "react-redux";
 
 type Props<TValue extends DataTableValueArray> = DataTableProps<TValue> & {
   extraColumns?: (ColumnProps & {

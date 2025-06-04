@@ -41,7 +41,7 @@ export const TrashPartnerDialog = ({ visible, onHide }: Props) => {
   
   const partners = currentData?.data;
   const [selectedPartner, setSelectedPartner] = useState<PartnerEntity | undefined>(undefined);
- console.log("partners", partners);
+
 
   const handleRestore = async () => {
     if (selectedPartner) {

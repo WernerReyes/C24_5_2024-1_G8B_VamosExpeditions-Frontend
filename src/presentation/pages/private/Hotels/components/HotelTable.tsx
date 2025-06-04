@@ -329,7 +329,7 @@ export const HotelTable = () => {
                 ]}
                 value={opcion.value}
                 onChange={(e) => {
-                  console.log(e.value);
+                  
                   opcion.filterCallback(e.value);
                 }}
                 placeholder="Seleccionar"

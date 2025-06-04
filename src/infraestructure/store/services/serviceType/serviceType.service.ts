@@ -1,15 +1,12 @@
-import { startShowApiError, startShowSuccess } from "@/core/utils";
-import type { ServiceTypeEntity } from "@/domain/entities";
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { requestConfig } from "../config";
-import type { ApiResponse } from "../response";
 import {
   getServiceTypesDto,
   type GetServiceTypesDto,
-  // serviceTypeDto,
-  // type ServiceTypeDto
 } from "@/domain/dtos/serviceType";
+import type { ServiceTypeEntity } from "@/domain/entities";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { serviceTypeModel } from "../../../models/serviceType.model";
+import { requestConfig } from "../config";
+import type { ApiResponse } from "../response";
 import { PaginatedResponse } from '../response';
 
 const PREFIX = "/service-type";

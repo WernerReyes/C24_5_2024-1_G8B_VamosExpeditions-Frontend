@@ -104,7 +104,6 @@ export const hotelService = createApi({
         body: formData,
         responseHandler: async (response) => {
           const contentType = response.headers.get("content-type");
-          console.log("contentType", contentType);
           if (contentType?.includes("application/json")) {
             const json = await response.json();
 
@@ -114,10 +113,8 @@ export const hotelService = createApi({
           const contentDisposition = response.headers.get(
             "content-disposition"
           );
-          console.log("contentDisposition", contentDisposition);
           if (contentDisposition) {
             const match = contentDisposition.match(/filename="?([^"]+)"?/);
-            console.log("match", match);
             if (match) {
               filename = match[1];
             }
@@ -291,7 +288,6 @@ export const hotelService = createApi({
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          console.log("data", data);
           startShowSuccess(data.message);
         } catch (error: any) {
           console.error(error);

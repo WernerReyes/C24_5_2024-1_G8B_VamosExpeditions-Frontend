@@ -14,7 +14,6 @@ export const DataViewDistrit = () => {
       prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id]
     );
   };
-  console.log("selectedDistrits", selectedDistrits);
 
   const gridItem = (distrit: DistritEntity) => {
     return (

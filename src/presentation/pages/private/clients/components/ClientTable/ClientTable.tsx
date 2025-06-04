@@ -40,7 +40,7 @@ export const ClientTable = () => {
     filters,
     handleSaveState,
   } = usePaginator(ROW_PER_PAGE[0], CLIENTS_PAGINATION);
-const [openTrashDialog, setOpenTrashDialog] = useState(false);
+  const [openTrashDialog, setOpenTrashDialog] = useState(false);
 
   const [filterFields, setFilters] = useState<ClientTableFilters>({
     fullName: undefined,
@@ -116,7 +116,6 @@ const [openTrashDialog, setOpenTrashDialog] = useState(false);
       <TrashClientDialog
         visible={openTrashDialog}
         onHide={() => setOpenTrashDialog(false)}
-
       />
     </div>
   );
@@ -245,6 +244,9 @@ const [openTrashDialog, setOpenTrashDialog] = useState(false);
           filterApply={(options) => <FilterApplyButton {...options} />}
           filterClear={(options) => <FilterClearButton {...options} />}
           filterPlaceholder="Buscar Email"
+          body={(rowData: ClientEntity) =>
+            rowData.email ?? <FieldNotAssigned message="No asignado" />
+          }
         />
         <Column
           field="phone"

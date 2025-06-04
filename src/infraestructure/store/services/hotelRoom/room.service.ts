@@ -77,7 +77,6 @@ export const roomService = createApi({
     >({
       query: (id) => {
         if (!id) throw new Error("ID is required");
-        console.log("id", id);
         return {
           url: `/${id}/trash`,
           method: "PUT",

@@ -68,7 +68,6 @@ export const serviceTripDetailsService = createApi({
       async onQueryStarted(_, { queryFulfilled, dispatch, getState }) {
         try {
           const { data } = await queryFulfilled;
-          console.log(data);
           versionQuotationCache.updateManyServicesTripDetailsByDate(
             data.data,
             dispatch,
