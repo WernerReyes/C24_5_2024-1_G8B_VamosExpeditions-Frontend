@@ -2,6 +2,8 @@ import { /* HotelEntity, */ HotelRoomEntity } from "@/domain/entities";
 import { Button } from "@/presentation/components";
 import { useState } from "react";
 import { RoomEditAndRegisterModal } from "./RoomEditAndRegisterModal";
+import { useTrashRoomMutation } from "@/infraestructure/store/services";
+import { MoveToTrash } from "../../../components";
 
 export type RoomWithHotelInfo = Partial<HotelRoomEntity> & {
   hotels?: {
@@ -15,9 +17,18 @@ type Props = {
 };
 
 export const TableRoomActions = ({ rowData }: Props) => {
-  
-    const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState<string | undefined>();
+  const [trashRoom, { isLoading: isLoadingTrashRoom }] = useTrashRoomMutation();
 
+  const handleTrashRoom = async () => {
+    
+
+    await trashRoom({
+      id: rowData.id ? rowData.id : 0,
+      deleteReason: deleteReason,
+    }).unwrap();
+  };
 
   return (
     <div className="space-x-1">
@@ -25,10 +36,18 @@ export const TableRoomActions = ({ rowData }: Props) => {
         icon="pi pi-pen-to-square text-sm"
         rounded
         text
+        tooltip="Editar"
         onClick={() => setModalOpen(true)}
       />
 
-      <Button rounded text icon="pi pi-trash text-sm" severity="danger" />
+      <MoveToTrash
+        disabled={isLoadingTrashRoom}
+        handleTrash={handleTrashRoom}
+        handleVerifyBeforeTrash={() =>
+          new Promise<void>((resolve) => resolve())
+        }
+        setCurrentDeleteReason={setDeleteReason}
+      />
 
       <RoomEditAndRegisterModal
         showModal={isModalOpen}

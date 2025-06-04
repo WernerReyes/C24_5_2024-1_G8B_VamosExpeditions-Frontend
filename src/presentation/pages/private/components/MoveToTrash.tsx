@@ -22,6 +22,7 @@ export const MoveToTrash = ({
     <>
       <Button
         icon="pi pi-trash"
+        className="text-red-500"
         tooltip="Mover a papelera"
         rounded
         text

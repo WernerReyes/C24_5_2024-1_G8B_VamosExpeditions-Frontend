@@ -24,16 +24,18 @@ type Props = {
     title: string;
     deletedAt: Date | null;
     deleteReason: string | null;
+    isDeleted?: boolean;
     archivedDetails: {
       subject: string;
       message: string | React.ReactNode;
     }[];
+    dataQury?:  string | React.ReactNode;
   };
   placeholder?: string;
   downloadFilePdf: {
     handleDownload: () => void;
     disabled?: boolean;
-  },
+  };
   downloadFileExcel: {
     handleDownload: () => void;
     disabled?: boolean;
@@ -52,7 +54,6 @@ type Props = {
 };
 
 export const TrashDialog = ({
-
   visible,
   onHide,
   isError,
@@ -90,8 +91,8 @@ export const TrashDialog = ({
           <span className="text-primary font-semibold">
             <i className="pi pi-info-circle text-xs text-primary" /> Nota:{" "}
           </span>
-          La data en la papelera <strong>se eliminará cada fin de mes </strong>para
-          ahorrar espacio en el servidor. Si necesitas conservar alguna,
+          La data en la papelera <strong>se eliminará cada fin de mes </strong>
+          para ahorrar espacio en el servidor. Si necesitas conservar alguna,
           asegúrate de exportarla or restaurarla antes de que se elimine.
         </p>
       }
@@ -109,12 +110,11 @@ export const TrashDialog = ({
                 rows={10}
                 header={
                   <InputText
-                  type="text"
-                  placeholder={placeholder ?? "Buscar..."}
-                  className="p-inputtext-sm w-full"
-                  value={searchByName}
-             
-                />
+                    type="text"
+                    placeholder={placeholder ?? "Buscar..."}
+                    className="p-inputtext-sm w-full"
+                    value={searchByName}
+                  />
                 }
                 value={Array.from({ length: Math.max(5, value?.length ?? 0) })}
                 itemTemplate={(_, index) => (
@@ -155,12 +155,11 @@ export const TrashDialog = ({
                 rows={10}
                 header={
                   <InputText
-                  type="text"
-                   placeholder={placeholder ?? "Buscar..."}
-                  className="p-inputtext-sm w-full"
-                  value={searchByName}
-                 
-                />
+                    type="text"
+                    placeholder={placeholder ?? "Buscar..."}
+                    className="p-inputtext-sm w-full"
+                    value={searchByName}
+                  />
                 }
                 paginator
                 pt={{ content: { className: "min-h-[210px]" } }}
@@ -181,7 +180,7 @@ export const TrashDialog = ({
               header={
                 <InputText
                   type="text"
-                   placeholder={placeholder ?? "Buscar..."}
+                  placeholder={placeholder ?? "Buscar..."}
                   className="p-inputtext-sm w-full"
                   value={searchByName}
                   onKeyDown={(e) => {
@@ -226,7 +225,7 @@ export const TrashDialog = ({
         >
           {selectedField ? (
             <>
-              <div className="mb-4 flex w-full items-center justify-between">
+              <div className="mb-4 flex w-full items-center justify-between ">
                 <h4 className="font-medium flex items-center gap-x-2 text-xl xl:text-2xl text-900">
                   <i className="pi pi-file text-xl xl:text-2xl text-primary" />
                   <strong>{selectedField.title}</strong>
@@ -238,7 +237,7 @@ export const TrashDialog = ({
                     text
                     onClick={downloadFilePdf.handleDownload}
                     disabled={downloadFilePdf.disabled}
-                    tooltip="Descargar PDF"       
+                    tooltip="Descargar PDF"
                   />
                   <Button
                     icon="pi pi-file-excel"
@@ -257,7 +256,7 @@ export const TrashDialog = ({
                     {selectedField?.deleteReason ?? "Sin motivo de eliminación"}
                   </strong>
 
-                  <small className="block">
+                  <small className="block ">
                     Movido el:{" "}
                     {selectedField.deletedAt &&
                       dateFnsAdapter.format(selectedField.deletedAt)}
@@ -266,13 +265,13 @@ export const TrashDialog = ({
                 <div className="gap-2 items-center self-start justify-center">
                   <Button
                     size="small"
-                    className="self-start"
+                    className="self-start "
                     rounded
                     text
                     icon="pi pi-replay"
                     tooltip="Restaurar"
                     onClick={handleRestore}
-                    disabled={isLoading || isFetching}
+                    disabled={isLoading || isFetching  || !selectedField.isDeleted}
                   />
 
                   <Button
@@ -288,7 +287,7 @@ export const TrashDialog = ({
                 </div>
               </div>
 
-              <ul className="list-none p-0 m-0">
+              <ul className="list-none p-0 m-0 ">
                 {selectedField.archivedDetails.map((detail, index) => (
                   <li
                     key={index}
@@ -297,10 +296,23 @@ export const TrashDialog = ({
                     <span className="text-500 w-2/6 font-medium">
                       {detail.subject}
                     </span>
-                    <div className="text-900 w-4/6">{detail.message}</div>
+                    <div className="text-900 w-4/6 ">{detail.message}</div>
                   </li>
                 ))}
               </ul>
+              {selectedField.dataQury !== null ? (
+                
+                 
+                  <div className="mt-2">
+                    {selectedField.dataQury}
+                  </div>
+                 
+                
+              ) : (
+                <div className="bg-red-100 text-red-700 p-2 rounded-md">
+                  No hay habitaciones eliminadas
+                </div>
+              )}
             </>
           ) : (
             <div className="flex flex-col justify-center items-center mb-auto h-full">

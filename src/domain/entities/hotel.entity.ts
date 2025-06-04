@@ -17,4 +17,7 @@ export interface HotelEntity {
   email: string;
   hotelRooms?: HotelRoomEntity[];
   distrit?: DistritEntity;
+  readonly isDeleted?: boolean;
+  readonly deletedAt?: Date;
+  readonly deleteReason?: string;
 }

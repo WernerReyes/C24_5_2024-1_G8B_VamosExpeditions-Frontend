@@ -8,5 +8,8 @@ export interface HotelRoomEntity {
   rateUsd?: number;
   priceUsd?: number;
   pricePen?: number;
+  readonly isDeleted?: boolean;
+  readonly deletedAt?: Date;
+  readonly deleteReason?: string;
   hotel?: HotelEntity;
 }

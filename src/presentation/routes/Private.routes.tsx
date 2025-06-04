@@ -26,6 +26,8 @@ const ReservationsPage = lazy(
 const ProfilePage = lazy(() => import("../pages/private/profile/Profile.page"));
 const Hotelpage = lazy(() => import("../pages/private/Hotels/hotel.page"));
 const CountryPage = lazy(() => import("../pages/private/country/country.page"));
+const ClientPage = lazy(() => import("../pages/private/clients/Clients.page"));
+const PartnerPage = lazy(() => import("../pages/private/partners/Partners.page"));
 
 const NotificationPage = lazy(
   () => import("../pages/private/notification/Notification.page")
@@ -44,6 +46,8 @@ const {
   HOTEL,
   COUNTRY,
   NOTIFICATIONS,
+  CLIENT,
+  PARTNER,
   USERS,
 } = removeBaseRoute(rest, BASE);
 
@@ -81,6 +85,8 @@ const PrivateRoutes = () => {
           <Route path={HOTEL} element={<Hotelpage />} />
           <Route path={COUNTRY} element={<CountryPage />} />
           <Route path={NOTIFICATIONS} element={<NotificationPage />} />
+          <Route path={CLIENT} element={<ClientPage />} />
+          <Route path={PARTNER} element={<PartnerPage />} />
           //* Guard for users
           <Route
             element={

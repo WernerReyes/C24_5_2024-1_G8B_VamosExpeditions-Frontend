@@ -68,7 +68,6 @@ export const userService = createApi({
           },
         };
       },
-
       providesTags: ["TrashUsers"],
     }),
 
@@ -161,8 +160,8 @@ export const userService = createApi({
 
     restoreUser: builder.mutation<ApiResponse<UserEntity>, UserEntity["id"]>({
       query: (id) => {
-       if (!id) throw new Error("Id is required");
-       
+        if (!id) throw new Error("Id is required");
+
         return {
           url: `/${id}/restore`,
           method: "PUT",
@@ -175,11 +174,10 @@ export const userService = createApi({
           userCache.restore(data.data, dispatch, getState as () => AppState);
 
           startShowSuccess(data.message);
-
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
         }
-      }
+      },
     }),
 
     changePassword: builder.mutation<ApiResponse<void>, ChangePasswordDto>({

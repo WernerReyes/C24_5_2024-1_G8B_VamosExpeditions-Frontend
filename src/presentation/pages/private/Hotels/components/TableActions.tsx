@@ -1,7 +1,9 @@
 import { HotelEntity } from "@/domain/entities";
-import { Button} from "@/presentation/components";
+import { Button } from "@/presentation/components";
 import { useState } from "react";
 import { HotelEditAndRegisterModal } from "./HotelEditAndRegisterModal";
+import { useTrashHotelMutation } from "@/infraestructure/store/services";
+import { MoveToTrash } from "../../components";
 
 type TyoeTableActions = {
   rowData: HotelEntity;
@@ -9,16 +11,32 @@ type TyoeTableActions = {
 
 export const TableActions = ({ rowData }: TyoeTableActions) => {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState<string | undefined>();
+  const [trashRoom, { isLoading: isLoadingTrashRoom }] = useTrashHotelMutation();
+  const handleTrashRoom = async () => {
+    await trashRoom({
+      id: rowData.id,
+      deleteReason: deleteReason,
+    }).unwrap();
+  };
+
   return (
     <div className="space-x-1">
       <Button
-        icon="pi pi-pen-to-square text-xl"
+        icon="pi pi-pen-to-square"
+        tooltip="Editar"
         rounded
         text
         onClick={() => setModalOpen(true)}
       />
-
-      <Button rounded text icon="pi pi-trash text-xl" severity="danger" />
+      <MoveToTrash
+        disabled={isLoadingTrashRoom}
+        handleTrash={handleTrashRoom}
+        handleVerifyBeforeTrash={() =>
+          new Promise<void>((resolve) => resolve())
+        }
+        setCurrentDeleteReason={setDeleteReason}
+      />
 
       <HotelEditAndRegisterModal
         showModal={isModalOpen}

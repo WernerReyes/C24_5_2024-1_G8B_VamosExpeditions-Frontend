@@ -38,7 +38,7 @@ export const ItemQuotation = ({ quotation }: Props) => {
 
   return (
     <>
-      {blob && <PDFPreview blob={blob} name={quotation.name} />}
+      {blob && <PDFPreview blob={blob} name={quotation.name} typeDocument="pdf"/>}
       <Card
         title={
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">

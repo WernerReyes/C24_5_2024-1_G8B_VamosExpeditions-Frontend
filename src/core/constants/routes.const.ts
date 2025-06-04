@@ -17,6 +17,8 @@ type PrivateRoutes = {
   HOTEL: string;
   COUNTRY: string;
   NOTIFICATIONS: string;
+  CLIENT: string;
+  PARTNER: string;
   USERS: string;
 };
 
@@ -49,6 +51,8 @@ export const constantRoutes: Routes = {
     PROFILE: `${PRIVATE_BASE}/profile`,
     HOTEL: `${PRIVATE_BASE}/hotel`,
     COUNTRY: `${PRIVATE_BASE}/country`,
+    CLIENT: `${PRIVATE_BASE}/client`,
+    PARTNER: `${PRIVATE_BASE}/partner`,
     NOTIFICATIONS: `${PRIVATE_BASE}/notifications`,
   },
 };

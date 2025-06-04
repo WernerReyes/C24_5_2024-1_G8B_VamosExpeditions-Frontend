@@ -1,11 +1,9 @@
-/* import { cn } from "@/core/adapters"; */
-//import React
 import { useEffect, useState } from "react";
 
-//import hooks apis
+//!import hooks apis
 import { useGetHotelsPageWithDetailsQuery } from "@/infraestructure/store/services";
 
-//import components
+//!import components
 import {
   Badge,
   Button,
@@ -33,26 +31,18 @@ import { usePaginator } from "@/presentation/hooks";
 import { FilterApplyButton, FilterClearButton } from "../../filters";
 import { HotelsTableFilters } from "../../quotes/types";
 import { getTransformedFilters2 } from "../utils";
-
-
-
-
+import { TrasHotelDialog } from "./hotel/components/TrasHotelDialog";
 
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 const HOTELS_PAGINATION = "HOTELS_PAGINATION";
 
-
 export const HotelTable = () => {
-
-
-
   const [expandedRows, setExpandedRows] = useState<
     DataTableExpandedRows | DataTableValueArray | undefined
   >(undefined);
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [rowData, setRowData] = useState<HotelEntity>({} as HotelEntity);
-  
 
   const {
     handlePageChange,
@@ -64,9 +54,9 @@ export const HotelTable = () => {
     handleSaveState,
   } = usePaginator(ROW_PER_PAGE[0], HOTELS_PAGINATION);
 
-  const [{ name, distrit, category }, setUiFilters] = useState<HotelsTableFilters>({});
-
-
+  const [{ name, distrit, category }, setUiFilters] =
+    useState<HotelsTableFilters>({});
+  const [openTrashDialog, setOpenTrashDialog] = useState(false);
   const {
     data: allHotels,
     isFetching,
@@ -102,18 +92,27 @@ export const HotelTable = () => {
     setUiFilters(getTransformedFilters2(filters));
   }, [filters]);
 
-
-
-
-
   const header = (
-    <div className="flex flex-wrap gap-2 p-2 items-center">
-      <i
-        className="pi pi-building text-2xl text-primary"
-        style={{ fontSize: "1.5rem" }}
+    <div className="flex sm:justify-between gap-y-3 flex-wrap justify-center items-center">
+      <div className="flex ">
+        <i
+          className="pi pi-building text-2xl text-primary"
+          style={{ fontSize: "1.5rem" }}
+        />
+        <Badge value={allHotels?.data?.total} />
+      </div>
+
+      <Button
+        onClick={() => setOpenTrashDialog(true)}
+        icon="pi pi-trash"
+        label="Papelera"
+        outlined
+        size="small"
       />
-      {/* pi-map-marker */}
-      <Badge value={allHotels?.data?.total} />
+      <TrasHotelDialog
+        visible={openTrashDialog}
+        onHide={() => setOpenTrashDialog(false)}
+      />
     </div>
   );
 
@@ -122,25 +121,22 @@ export const HotelTable = () => {
       <Toolbar
         className=""
         start={
-          <div className="flex gap-2">
-            <Button icon="pi pi-trash" label="Eliminar" severity="danger" />
-          </div>
+          <Button
+            label="Descargar Plantilla"
+            icon="pi pi-download"
+            onClick={() => {
+              const link = document.createElement("a");
+              link.href = "/Template/HOTELS_AND_ROOMS.xlsx";
+              link.download = "plantilla-hoteles.xlsx";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+            className="bg-transparent text-black border-[#D0D5DD]"
+          />
         }
         end={
           <div className="flex gap-3">
-            <Button
-              label="Descargar Plantilla"
-              icon="pi pi-download"
-              onClick={() => {
-                const link = document.createElement("a");
-                link.href = "/Template/HOTELS_AND_ROOMS.xlsx";
-                link.download = "plantilla-hoteles.xlsx";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
-              className="bg-transparent text-black border-[#D0D5DD]"
-            />
             <UploadeExcelHotelAndRoom />
             <Button
               label="Nuevo Hotel"
@@ -225,11 +221,10 @@ export const HotelTable = () => {
           customSaveState={handleSaveState}
           showGridlines
           value={allHotels?.data.content || []}
-          
           filterDisplay="menu"
           editMode="cell"
           dataKey="id"
-          className="text-sm lg:text-[15px] mt-5"
+          className="w-full md:text-sm mt-4"
           header={header}
           pt={{
             footer: {
@@ -262,7 +257,7 @@ export const HotelTable = () => {
           emptyMessage={"No hay hoteles "}
         >
           {/*  <Column /> */}
-          <Column selectionMode="multiple" />
+          {/* <Column selectionMode="multiple" /> */}
           <Column expander />
 
           <Column
@@ -407,10 +402,8 @@ export const HotelTable = () => {
 const headerColumnGroup = (
   <ColumnGroup>
     <Row>
-    <Column selectionMode="multiple" />
-    <Column expander />
-
-
+      <Column selectionMode="multiple" />
+      <Column expander />
       <Column header="Nombre" field="name" filter headerClassName="min-w-32" />
       <Column
         header="Categoría"

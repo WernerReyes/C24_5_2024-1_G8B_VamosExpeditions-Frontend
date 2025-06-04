@@ -12,7 +12,11 @@ export interface ClientEntity {
       readonly svg: string;
     };
   };
+
   readonly subregion: Subregion;
-  readonly cretedAt: string;
-  readonly updatedAt: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly isDeleted?: boolean;
+  readonly deletedAt?: Date;
+  readonly deleteReason?: string;
 }
