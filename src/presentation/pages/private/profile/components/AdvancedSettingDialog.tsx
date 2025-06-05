@@ -233,209 +233,225 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
         footer={footer}
         onHide={() => setShowModal(false)}
       >
-        <p className="text-gray-600 mb-6">
-          Administra la configuración avanzada de tu cuenta y dispositivos.
-        </p>
+        <div>
+          <p className="text-gray-600 mb-6">
+            Administra la configuración avanzada de tu cuenta y dispositivos.
+          </p>
 
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <i className="pi pi-wifi text-blue-500"></i>
-            <h2 className="text-lg font-semibold">Dispositivos Conectados</h2>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="mb-4">
-              <h3 className="mb-1 font-semibold">Límite de dispositivos</h3>
-              <p className="text-gray-600 text-sm mb-2">
-                Máximo número de dispositivos permitidos
-              </p>
-              <div className="flex items-center md:justify-between gap-3 flex-wrap">
-                <Dropdown
-                  options={DEVICES_LIMIT}
-                  value={devicesLimit}
-                  onChange={(e) =>
-                    setMaxActiveSessionSetting({
-                      ...maxActiveSessionSetting,
-                      value: e.value,
-                    })
-                  }
-                  valueTemplate={(item) =>
-                    item !== Infinity ? (
-                      <>Máximo {item} dispositivos</>
-                    ) : (
-                      "Ilimitado"
-                    )
-                  }
-                  itemTemplate={(item) =>
-                    item !== Infinity ? (
-                      <>Máximo {item} dispositivos</>
-                    ) : (
-                      "Ilimitado"
-                    )
-                  }
-                  checkmark
-                  placeholder="Selecciona un límite"
-                />
-
-                {devicesLimit !== Infinity && (
-                  <span className="text-sm text-gray-500">
-                    Actualmente: {authUser?.activeDevices?.length} de{" "}
-                    {devicesLimit} dispositivos utilizados
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {authUser?.activeDevices?.map((device) => {
-                // console.log(currentDeviceKey,
-                //    device.id)
-                return (
-                  <div
-                    key={device.id}
-                    className="flex items-center justify-between bg-white p-3 rounded"
-                  >
-                    <div className="flex items-center gap-3">
-                      <i className="pi pi-desktop text-gray-600"></i>
-                      <div>
-                        <p className="font-medium">{device.name}</p>
-                        <p className="text-gray-500 text-sm">
-                          {device.model} • Versión: {device.version}
-                        </p>
-                        {!device.isOnline && (
-                          <p className="text-gray-500 text-xs">
-                            Última conexión:{" "}
-                            {messageTimestamp(device.createdAt)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "px-2 py-1 rounded text-sm",
-                          device.isOnline
-                            ? "bg-green-100 text-green-600 "
-                            : "bg-gray-100 text-gray-600"
-                        )}
-                      >
-                        {device.isOnline ? "Activo" : "Inactivo"}
-                      </span>
-
-                      {Cookie.get(constantEnvs.DEVICE_COOKIE_NAME) !==
-                        device.id && (
-                        <Button
-                          icon="pi pi-times"
-                          className="text-gray-400"
-                          text
-                          onClick={() => {
-                            setConfirmDisconnectDevice({
-                              show: true,
-                              deviceId: device.id,
-                            });
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {isManager && (
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <i className="pi pi-database text-orange-500"></i>
-              <h2 className="text-lg font-semibold">
-                Gestión de Almacenamiento
-              </h2>
+              <i className="pi pi-wifi text-blue-500"></i>
+              <h2 className="text-lg font-semibold">Dispositivos Conectados</h2>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Limpieza automática</p>
-                  <p className="text-gray-600 text-sm">
-                    Eliminar archivos temporales cada {cleanupInterval} días
-                  </p>
+              <div className="mb-4">
+                <h3 className="mb-1 font-semibold">Límite de dispositivos</h3>
+                <p className="text-gray-600 text-sm mb-2">
+                  Máximo número de dispositivos permitidos
+                </p>
+                <div className="flex items-center md:justify-between gap-3 flex-wrap">
+                  <Dropdown
+                    options={DEVICES_LIMIT}
+                    value={devicesLimit}
+                    onChange={(e) =>
+                      setMaxActiveSessionSetting({
+                        ...maxActiveSessionSetting,
+                        value: e.value,
+                      })
+                    }
+                    valueTemplate={(item) =>
+                      item !== Infinity ? (
+                        <>Máximo {item} dispositivos</>
+                      ) : (
+                        "Ilimitado"
+                      )
+                    }
+                    itemTemplate={(item) =>
+                      item !== Infinity ? (
+                        <>Máximo {item} dispositivos</>
+                      ) : (
+                        "Ilimitado"
+                      )
+                    }
+                    checkmark
+                    placeholder="Selecciona un límite"
+                  />
 
-                  {autoCleanup ? (
-                    <p className="text-green-500 text-sm mt-1">
-                      Activado - {diffDays}/{cleanupInterval} días transcurridos
-                    </p>
-                  ) : (
-                    <p className="text-red-500 text-sm mt-1">Desactivado</p>
+                  {devicesLimit !== Infinity && (
+                    <span className="text-sm text-gray-500">
+                      Actualmente: {authUser?.activeDevices?.length} de{" "}
+                      {devicesLimit} dispositivos utilizados
+                    </span>
                   )}
                 </div>
-
-                <InputSwitch
-                  checked={autoCleanup}
-                  onChange={(e) => {
-                    setCleanupSetting({
-                      ...cleanupSetting,
-                      autoCleanup: e.value,
-                      value: cleanupInterval ?? CLEANUP_INTERVAL[2].toString(),
-                    });
-                  }}
-                />
               </div>
 
-              <div className="bg-blue-50 p-3 rounded-lg mt-4">
-                <div className="flex items-center gap-2">
-                  <i className="pi pi-clock text-blue-500"></i>
-                  <span className="text-sm font-medium">
-                    Última modificación
-                  </span>
-                </div>
-                <div className="mt-2 text-sm">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Usuario:</span>
-                    {lastCleanupMadeBy ? (
-                      <UserInfo user={lastCleanupMadeBy} extraInfo={"email"} />
+              <div className="space-y-3">
+                {authUser?.activeDevices?.map((device) => {
+                  // console.log(currentDeviceKey,
+                  //    device.id)
+                  return (
+                    <div
+                      key={device.id}
+                      className="flex items-center justify-between bg-white p-3 rounded"
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* device.model === "Android" || device.model === "iOS" */}
+                        <i
+                          className={cn(
+                            " text-gray-600 pi",
+                            device.model === "Android" || device.model === "iOS"
+                              ? "pi-mobile"
+                              : "pi-desktop"
+                          )}
+                        />
+
+                        <div>
+                          <p className="font-medium">{device.name}</p>
+                          <p className="text-gray-500 text-sm">
+                            {device.model} • Versión: {device.version}
+                          </p>
+                          {!device.isOnline && (
+                            <p className="text-gray-500 text-xs">
+                              Última conexión:{" "}
+                              {messageTimestamp(device.createdAt)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "px-2 py-1 rounded text-sm",
+                            device.isOnline
+                              ? "bg-green-100 text-green-600 "
+                              : "bg-gray-100 text-gray-600"
+                          )}
+                        >
+                          {device.isOnline ? "Activo" : "Inactivo"}
+                        </span>
+
+                        {Cookie.get(constantEnvs.DEVICE_COOKIE_NAME) !==
+                          device.id && (
+                          <Button
+                            icon="pi pi-times"
+                            className="text-gray-400"
+                            text
+                            onClick={() => {
+                              setConfirmDisconnectDevice({
+                                show: true,
+                                deviceId: device.id,
+                              });
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {isManager && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <i className="pi pi-database text-orange-500"></i>
+                <h2 className="text-lg font-semibold">
+                  Gestión de Almacenamiento
+                </h2>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Limpieza automática</p>
+                    <p className="text-gray-600 text-sm">
+                      Eliminar archivos temporales cada {cleanupInterval} días
+                    </p>
+
+                    {autoCleanup ? (
+                      <p className="text-green-500 text-sm mt-1">
+                        Activado - {diffDays}/{cleanupInterval} días
+                        transcurridos
+                      </p>
                     ) : (
-                      <span>SISTEMA</span>
+                      <p className="text-red-500 text-sm mt-1">Desactivado</p>
                     )}
                   </div>
 
-                  {lastCleanupMadeAt && (
-                    <div className="flex justify-between mt-2 text-gray-600">
-                      <span>Fecha:</span>
-                      {dateFnsAdapter.format(
-                        new Date(lastCleanupMadeAt),
-                        "dd/MM/yyyy HH:mm"
+                  <InputSwitch
+                    checked={autoCleanup}
+                    onChange={(e) => {
+                      setCleanupSetting({
+                        ...cleanupSetting,
+                        autoCleanup: e.value,
+                        value:
+                          cleanupInterval ?? CLEANUP_INTERVAL[2].toString(),
+                      });
+                    }}
+                  />
+                </div>
+
+                <div className="bg-blue-50 p-3 rounded-lg mt-4">
+                  <div className="flex items-center gap-2">
+                    <i className="pi pi-clock text-blue-500"></i>
+                    <span className="text-sm font-medium">
+                      Última modificación
+                    </span>
+                  </div>
+                  <div className="mt-2 text-sm">
+                    <div className="flex justify-between text-gray-600">
+                      <span>Usuario:</span>
+                      {lastCleanupMadeBy ? (
+                        <UserInfo
+                          user={lastCleanupMadeBy}
+                          extraInfo={"email"}
+                        />
+                      ) : (
+                        <span>SISTEMA</span>
                       )}
                     </div>
-                  )}
+
+                    {lastCleanupMadeAt && (
+                      <div className="flex justify-between mt-2 text-gray-600">
+                        <span>Fecha:</span>
+                        {dateFnsAdapter.format(
+                          new Date(lastCleanupMadeAt),
+                          "dd/MM/yyyy HH:mm"
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 mt-3">
-              <Dropdown
-                className="w-full"
-                value={
-                  cleanupInterval
-                    ? Number(cleanupInterval)
-                    : CLEANUP_INTERVAL[2]
-                }
-                disabled={!autoCleanup}
-                onChange={(e) => {
-                  setCleanupSetting({
-                    ...cleanupSetting,
-                    value: e.value,
-                  });
-                }}
-                valueTemplate={(item) => <>Cada {item} días</>}
-                options={CLEANUP_INTERVAL}
-                itemTemplate={(item) => <>Cada {item} días</>}
-                checkmark
-                placeholder="Selecciona un límite"
-              />
+              <div className="bg-gray-50 rounded-lg p-4 mt-3">
+                <Dropdown
+                  className="w-full"
+                  value={
+                    cleanupInterval
+                      ? Number(cleanupInterval)
+                      : CLEANUP_INTERVAL[2]
+                  }
+                  disabled={!autoCleanup}
+                  onChange={(e) => {
+                    setCleanupSetting({
+                      ...cleanupSetting,
+                      value: e.value,
+                    });
+                  }}
+                  valueTemplate={(item) => <>Cada {item} días</>}
+                  options={CLEANUP_INTERVAL}
+                  itemTemplate={(item) => <>Cada {item} días</>}
+                  checkmark
+                  placeholder="Selecciona un límite"
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </Dialog>
     </>
   );
