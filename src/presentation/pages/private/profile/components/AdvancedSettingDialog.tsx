@@ -13,7 +13,11 @@ import {
 import { SettingEntity, SettingKeyEnum } from "@/domain/entities";
 import { useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
-import { messageTimestamp, startShowSuccess } from "@/core/utils";
+import {
+  messageTimestamp,
+  startShowError,
+  startShowSuccess,
+} from "@/core/utils";
 import { UserInfo } from "../../components";
 import { cn, dateFnsAdapter } from "@/core/adapters";
 import { DisconnectSessionDevice } from "./DisconnectSessionDevice";
@@ -108,10 +112,6 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     }
   };
 
-  console.log({
-    __Secure_DeviceID: currentDeviceKey
-  });
-
   const handleUpdateMaxActiveSessions = async () => {
     if (deviceLimitID) {
       if (!isChangeDeviceLimit) return;
@@ -186,7 +186,6 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     }
   }, [cleanupInterval, autoCleanup]);
 
- 
   useEffect(() => {
     if (!data) return;
 
@@ -260,12 +259,18 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                   <Dropdown
                     options={DEVICES_LIMIT}
                     value={devicesLimit}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      if (e.value < (authUser?.activeDevices?.length ?? 0)) {
+                        startShowError(
+                          "No puedes desactivar el límite de dispositivos si tienes más dispositivos conectados"
+                        );
+                        return;
+                      }
                       setMaxActiveSessionSetting({
                         ...maxActiveSessionSetting,
                         value: e.value,
-                      })
-                    }
+                      });
+                    }}
                     valueTemplate={(item) =>
                       item !== Infinity ? (
                         <>Máximo {item} dispositivos</>
@@ -295,8 +300,6 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
 
               <div className="space-y-3">
                 {authUser?.activeDevices?.map((device) => {
-                  // console.log(currentDeviceKey,
-                  //    device.id)
                   return (
                     <div
                       key={device.id}
