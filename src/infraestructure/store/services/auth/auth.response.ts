@@ -12,6 +12,7 @@ export  type DeviceConnection = {
 export type LoginResponse = {
   user: UserEntity;
   expiresAt: string;
+  deviceId: string;
 };
 
 export type DeviceSocketRes = {

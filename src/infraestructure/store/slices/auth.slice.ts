@@ -1,10 +1,6 @@
-import { constantEnvs } from "@/core/constants/env.const";
 import { RoleEnum, type UserEntity } from "@/domain/entities";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import Cookies from 'js-cookie';
 import { DeviceSocketRes } from "../services/auth/auth.response";
-
-const {  DEVICE_COOKIE_NAME } = constantEnvs;
 
 export enum AuthStatus {
   AUTHENTICATED = "authenticated",
@@ -15,14 +11,14 @@ export type AuthSliceState = {
   status: AuthStatus;
   authUser: null | UserEntity;
   isManager: boolean;
-  currentDeviceKey?: string;
+  currentDeviceKey: string | null;
 };
 
 const initialState: AuthSliceState = {
   status: AuthStatus.UNAUTHENTICATED,
   authUser: null,
   isManager: false,
-  currentDeviceKey: Cookies.get(DEVICE_COOKIE_NAME) ?? undefined,
+  currentDeviceKey: null
 };
 
 export const authSlice = createSlice({
@@ -87,8 +83,17 @@ export const authSlice = createSlice({
       }
       return state;
     },
+
+    onSetCurrentDeviceKey: (state, { payload }: PayloadAction<string>) => {
+      return {
+       ...state,
+        currentDeviceKey: payload,
+      };
+    }
   },
 });
 
-export const { onLogin, onLogout, onOnline, onActiveDevice, onRemoveDevice } =
+export const { onLogin, onLogout, onOnline, onActiveDevice, onRemoveDevice, 
+  onSetCurrentDeviceKey
+ } =
   authSlice.actions;

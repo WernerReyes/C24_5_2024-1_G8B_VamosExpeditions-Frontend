@@ -7,15 +7,22 @@ import {
   type LoginDto,
 } from "@/domain/dtos/auth";
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { onLogin, onLogout, onRemoveDevice } from "../../slices/auth.slice";
+import {
+  onLogin,
+  onLogout,
+  onRemoveDevice,
+  onSetCurrentDeviceKey,
+} from "../../slices/auth.slice";
 import {
   onSetCookieExpiration,
   onSetExpired,
 } from "../../slices/cookieExpiration.slice";
+// import {} = "."
 import { requestConfig } from "../config";
 import type { ApiResponse } from "../response";
 import type { LoginResponse } from "./auth.response";
 import { authSocket } from "./auth.socket";
+import { authService as authServiceDB } from "@/data";
 
 const PREFIX = "/auth";
 
@@ -31,12 +38,22 @@ export const authService = createApi({
         return {
           url: "/login",
           method: "POST",
-          body: dto,
+          body: {
+            ...dto,
+            // deviceId: uuid(),
+          },
         };
       },
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
+
+          // await authServiceDB.upsertDeviceConnection(data.data.deviceId);
+
+          console.log(data);
+
+          dispatch(onSetCurrentDeviceKey(data.data.deviceId));
+
           dispatch(
             onLogin({
               ...data.data.user,
@@ -47,8 +64,14 @@ export const authService = createApi({
 
           //* Connect to socket
           authSocket.userConnected();
+
+          await authServiceDB.upsertDeviceConnection(data.data.deviceId);
         } catch (error: any) {
-          startShowApiError(error.error);
+          console.log(error);
+          if (error.error) {
+            startShowApiError(error.error);
+          }
+          
         }
       },
     }),
@@ -132,6 +155,8 @@ export const authService = createApi({
             online: true,
           })
         );
+
+        dispatch(onSetCurrentDeviceKey(data.data.deviceId));
       },
     }),
 

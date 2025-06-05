@@ -12,6 +12,12 @@ export const initDB = async () => {
             autoIncrement: true,
           });
         }
+
+        if (!db.objectStoreNames.contains("deviceConnections")) {
+          db.createObjectStore("deviceConnections", {
+            keyPath: "id",
+          });
+        }
       },
     });
   } catch (error) {

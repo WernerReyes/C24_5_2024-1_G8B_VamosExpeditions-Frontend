@@ -3,5 +3,4 @@ export const constantEnvs = {
   DB_NAME: import.meta.env.VITE_DB_NAME,
   DB_VERSION: import.meta.env.VITE_DB_VERSION,
   ENV_MODE: import.meta.env.VITE_MODE,
-  DEVICE_COOKIE_NAME: import.meta.env.VITE_DEVICE_COOKIE_NAME,
 };

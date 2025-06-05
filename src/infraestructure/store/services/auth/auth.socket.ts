@@ -1,9 +1,8 @@
 import type { AppState } from "@/app/store";
-import { constantEnvs } from "@/core/constants/env.const";
+import { authService } from "@/data";
 import type { UserEntity } from "@/domain/entities";
 import { toasterAdapter } from "@/presentation/components";
 import type { Dispatch } from "@reduxjs/toolkit";
-import Cookies from "js-cookie";
 import type { Socket } from "socket.io-client";
 import { onActiveDevice } from "../../slices/auth.slice";
 import { setusersDevicesConnections } from "../../slices/users.slice";
@@ -71,10 +70,7 @@ export const authSocketListeners = (
     socket?.on("userDisconnected", (data: UserEntity["id"]) => {
       //* Update user to online
       versionQuotationCache.updateByUserId(+data, false, dispatch, getState);
-
-  
-      console.log("User disconnected: " + data);
-
+      
       reservationCache.updateReservationByUser(
         {
           id: +data,
@@ -99,7 +95,7 @@ export const authSocketListeners = (
 
   logoutDevice: (socket: Socket) => {
     socket?.on("disconnect-device", async (deviceId: string) => {
-      const deviceName = Cookies.get(constantEnvs.DEVICE_COOKIE_NAME);
+      const deviceName = await authService.getDeviceConnection();
       // const browserId = cookie ? cookie : "";
       if (deviceId === deviceName) {
         toasterAdapter.disconnectDevice();
@@ -113,7 +109,7 @@ export const authSocketListeners = (
 
   forceLogout: (socket: Socket) => {
     socket?.on("force-logout", async (data) => {
-      const deviceName = Cookies.get(constantEnvs.DEVICE_COOKIE_NAME);
+      const deviceName = await authService.getDeviceConnection();
 
       if (data.oldDeviceId === deviceName) {
        

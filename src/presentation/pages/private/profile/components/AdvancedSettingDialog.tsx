@@ -17,8 +17,7 @@ import { messageTimestamp, startShowSuccess } from "@/core/utils";
 import { UserInfo } from "../../components";
 import { cn, dateFnsAdapter } from "@/core/adapters";
 import { DisconnectSessionDevice } from "./DisconnectSessionDevice";
-import { constantEnvs } from "@/core/constants/env.const";
-import Cookie from "js-cookie";
+
 interface Props {
   showModal: boolean;
   setShowModal: (showModal: boolean) => void;
@@ -32,7 +31,9 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
   showModal,
   setShowModal,
 }) => {
-  const { isManager, authUser } = useSelector((state: AppState) => state.auth);
+  const { isManager, authUser, currentDeviceKey } = useSelector(
+    (state: AppState) => state.auth
+  );
 
   const { data } = useGetSettingsQuery();
 
@@ -108,8 +109,8 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
   };
 
   console.log({
-    __Secure_DeviceID: Cookie.get(constantEnvs.DEVICE_COOKIE_NAME),
-  })
+    __Secure_DeviceID: currentDeviceKey
+  });
 
   const handleUpdateMaxActiveSessions = async () => {
     if (deviceLimitID) {
@@ -185,6 +186,7 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     }
   }, [cleanupInterval, autoCleanup]);
 
+ 
   useEffect(() => {
     if (!data) return;
 
@@ -336,8 +338,7 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                           {device.isOnline ? "Activo" : "Inactivo"}
                         </span>
 
-                        {Cookie.get(constantEnvs.DEVICE_COOKIE_NAME) !==
-                          device.id && (
+                        {currentDeviceKey !== device.id && (
                           <Button
                             icon="pi pi-times"
                             className="text-gray-400"

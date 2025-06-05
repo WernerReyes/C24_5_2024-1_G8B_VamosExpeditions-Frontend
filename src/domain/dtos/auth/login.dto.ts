@@ -26,7 +26,6 @@ const loginDtoSchema = z.object({
 
 export type LoginDto = z.infer<typeof loginDtoSchema>;
 
-
 export const loginDto = {
   create: (dto: LoginDto): [LoginDto?, string[]?] => {
     const errors = dtoValidator(dto, loginDtoSchema);
@@ -38,4 +37,3 @@ export const loginDto = {
 
   getSchema: loginDtoSchema,
 };
-
