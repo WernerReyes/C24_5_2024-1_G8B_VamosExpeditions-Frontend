@@ -107,6 +107,10 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     }
   };
 
+  console.log({
+    __Secure_DeviceID: Cookie.get(constantEnvs.DEVICE_COOKIE_NAME),
+  })
+
   const handleUpdateMaxActiveSessions = async () => {
     if (deviceLimitID) {
       if (!isChangeDeviceLimit) return;
