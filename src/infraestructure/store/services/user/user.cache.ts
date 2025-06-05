@@ -17,6 +17,7 @@ export const userCache = {
       getState(),
       "getUsers"
     );
+    
 
     args.forEach((arg) => {
       dispatch(
@@ -25,13 +26,14 @@ export const userCache = {
             (user) => user.id === data.id
           );
           if (existUser !== -1) {
-            draft.data.content = draft.data.content.map((user) =>
-              user.id === data.id
+            draft.data.content = draft.data.content.map((user) => {
+              return user.id === data.id
                 ? {
                     ...user,
                     ...data,
                   }
                 : user
+            }
             );
           } else {
             draft.data.content =

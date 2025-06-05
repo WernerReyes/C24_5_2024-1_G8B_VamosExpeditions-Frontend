@@ -50,7 +50,6 @@ export const authService = createApi({
 
           // await authServiceDB.upsertDeviceConnection(data.data.deviceId);
 
-          console.log(data);
 
           dispatch(onSetCurrentDeviceKey(data.data.deviceId));
 

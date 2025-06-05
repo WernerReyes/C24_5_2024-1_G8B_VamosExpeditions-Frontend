@@ -18,7 +18,7 @@ const initialState: AuthSliceState = {
   status: AuthStatus.UNAUTHENTICATED,
   authUser: null,
   isManager: false,
-  currentDeviceKey: null
+  currentDeviceKey: null,
 };
 
 export const authSlice = createSlice({
@@ -29,7 +29,10 @@ export const authSlice = createSlice({
       return {
         ...state,
         status: AuthStatus.AUTHENTICATED,
-        authUser: payload,
+        authUser: {
+          ...state.authUser,
+          ...payload,
+        },
         isManager: payload.role?.name === RoleEnum.MANAGER_ROLE,
       };
     },
@@ -86,14 +89,18 @@ export const authSlice = createSlice({
 
     onSetCurrentDeviceKey: (state, { payload }: PayloadAction<string>) => {
       return {
-       ...state,
+        ...state,
         currentDeviceKey: payload,
       };
-    }
+    },
   },
 });
 
-export const { onLogin, onLogout, onOnline, onActiveDevice, onRemoveDevice, 
-  onSetCurrentDeviceKey
- } =
-  authSlice.actions;
+export const {
+  onLogin,
+  onLogout,
+  onOnline,
+  onActiveDevice,
+  onRemoveDevice,
+  onSetCurrentDeviceKey,
+} = authSlice.actions;
