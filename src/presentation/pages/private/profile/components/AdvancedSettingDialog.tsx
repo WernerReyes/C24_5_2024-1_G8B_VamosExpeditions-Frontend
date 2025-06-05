@@ -202,6 +202,8 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     }
   }, [devicesLimit]);
 
+  console.log(authUser)
+
   const footer = (
     <div className="flex justify-end gap-2">
       <Button

@@ -26,7 +26,12 @@ export const userCache = {
           );
           if (existUser !== -1) {
             draft.data.content = draft.data.content.map((user) =>
-              user.id === data.id ? data : user
+              user.id === data.id
+                ? {
+                    ...user,
+                    ...data,
+                  }
+                : user
             );
           } else {
             draft.data.content =
@@ -41,7 +46,6 @@ export const userCache = {
       );
     });
   },
-
 
   trash: function (
     data: UserEntity,
