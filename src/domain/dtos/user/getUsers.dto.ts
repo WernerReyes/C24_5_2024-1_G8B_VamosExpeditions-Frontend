@@ -12,7 +12,6 @@ const getUsersDtoSchema = z
     role: z.array(z.nativeEnum(RoleEnum)).optional(),
     createdAt: z.date().optional(),
     updatedAt: z.date().optional(),
-    showDevices: z.boolean().default(false).optional(),
     select: z.lazy(() =>
       z.object({
         ...userModel.schema.shape,

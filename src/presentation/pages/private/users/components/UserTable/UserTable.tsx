@@ -78,7 +78,6 @@ export const UserTable = () => {
     phoneNumber,
     createdAt,
     updatedAt,
-    showDevices: true,
     select: {
       id_user: true,
       fullname: true,
@@ -93,10 +92,6 @@ export const UserTable = () => {
     },
   });
 
-  const [usersWithDevices, setUsersWithDevices] = useState<UserEntity[]>(
-    usersData?.data.content || []
-  );
-
   const [openTrashDialog, setOpenTrashDialog] = useState(false);
 
   const users = usersData?.data;
@@ -106,24 +101,6 @@ export const UserTable = () => {
     if (!filters) return;
     setFilters(getUserTransformedFilters(filters));
   }, [filters]);
-
-  useEffect(() => {
-    if (!usersData) return;
-    setUsersWithDevices(
-      usersData.data.content.map((user) => {
-        const userFound = usersDevicesConnections.find(
-          (userConnection) => userConnection.userId === user.id
-        );
-        return {
-          ...user,
-          activeDevices: user.activeDevices?.map((device) => ({
-            ...device,
-            isOnline: userFound?.ids.includes(device.deviceId) ?? false,
-          })),
-        };
-      })
-    );
-  }, [usersDevicesConnections, usersData]);
 
   useEffect(() => {
     if (!isErrorUsers) return;
@@ -216,11 +193,7 @@ export const UserTable = () => {
         error={isErrorUsers}
       >
         <DataTable
-          value={
-            usersWithDevices.length > 0
-              ? usersWithDevices
-              : users?.content ?? []
-          }
+          value={users?.content ?? []}
           stateStorage="custom"
           stateKey={USERS_PAGINATION}
           customSaveState={(state: any) => {
@@ -334,7 +307,7 @@ export const UserTable = () => {
             body={(rowData: UserEntity) => (
               <UserDevices
                 userId={rowData.id}
-                activeDevices={rowData?.activeDevices}
+                activeDevices={usersDevicesConnections[rowData.id]}
               />
             )}
           />

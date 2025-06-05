@@ -1,7 +1,10 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { constantEnvs } from "@/core/constants/env.const";
 import { RoleEnum, type UserEntity } from "@/domain/entities";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import Cookies from 'js-cookie';
 import { DeviceSocketRes } from "../services/auth/auth.response";
-import { getDeviceKey } from "@/core/utils";
+
+const {  DEVICE_COOKIE_NAME } = constantEnvs;
 
 export enum AuthStatus {
   AUTHENTICATED = "authenticated",
@@ -12,14 +15,14 @@ export type AuthSliceState = {
   status: AuthStatus;
   authUser: null | UserEntity;
   isManager: boolean;
-  currentDeviceKey: string;
+  currentDeviceKey?: string;
 };
 
 const initialState: AuthSliceState = {
   status: AuthStatus.UNAUTHENTICATED,
   authUser: null,
   isManager: false,
-  currentDeviceKey: getDeviceKey(),
+  currentDeviceKey: Cookies.get(DEVICE_COOKIE_NAME) ?? undefined,
 };
 
 export const authSlice = createSlice({
@@ -58,32 +61,27 @@ export const authSlice = createSlice({
     onRemoveDevice: (state, { payload }: PayloadAction<string>) => {
       if (state.authUser?.id) {
         return {
-         ...state,
+          ...state,
           authUser: {
-           ...state.authUser,
+            ...state.authUser,
             activeDevices: state.authUser.activeDevices?.filter(
-              (device) => device.deviceId !== payload
+              (device) => device.id !== payload
             ),
           },
         };
       }
     },
 
-    onActiveDevice: (state, { payload }: PayloadAction<DeviceSocketRes[]>) => {
-      if (state.authUser?.id) {
-        const deviceByUserId = payload.find(
-          (device) => device.userId === state.authUser?.id
-        );
+    onActiveDevice: (
+      state,
+      { payload }: PayloadAction<DeviceSocketRes>
+    ): AuthSliceState => {
+      if (state.authUser?.id && payload[state.authUser.id]) {
         return {
           ...state,
           authUser: {
             ...state.authUser,
-            activeDevices: state.authUser.activeDevices?.map((device) => {
-              return {
-                ...device,
-                isOnline: deviceByUserId ? deviceByUserId.ids.includes(device.deviceId) : false,
-              };
-            }),
+            activeDevices: payload[state.authUser.id],
           },
         };
       }

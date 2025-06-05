@@ -8,7 +8,7 @@ import {
   useLazyGenerateVersionQuotationExcelQuery,
   /*   useLazyPreviewVersionQuotationExcelQuery, */
   /*   useLazyGenerateVersionQuotationPdfQuery, */
-  useLazyPreviewVersionQuotationPdfQuery
+  useLazyPreviewVersionQuotationPdfQuery,
 } from "@/infraestructure/store/services";
 import { Button, PDFPreview } from "@/presentation/components";
 import { useNavigate } from "react-router-dom";
@@ -74,7 +74,14 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
   }; */
 
   return (
-    <>
+    <div className="space-x-1">
+      {blob && (
+        <PDFPreview
+          blob={blob}
+          name={rowData.name}
+          typeDocument={typeDocument}
+        />
+      )}
       <div className="space-x-1">
         <Button
           rounded
@@ -90,90 +97,60 @@ export const TableActions = ({ type, rowData }: TyoeTableActions) => {
             rowData.user?.id !== authUser?.id
           }
         />
-
-        <>
-          {blob && (
-            <PDFPreview
-              blob={blob}
-              name={rowData.name}
-              typeDocument={typeDocument}
-            />
-          )}
-          <div className="space-x-1">
-            <Button
-              rounded
-              text
-              tooltip="Editar"
-              icon="pi pi-pencil"
-              onClick={() => {
-                navigate(EDIT_QUOTE(rowData?.id));
-              }}
-              disabled={
-                rowData.status === VersionQuotationStatus.APPROVED &&
-                rowData.official
-              }
-            />
-
-            <Button
-              icon={
-                isFetching || isLoading
-                  ? "pi pi-spin pi-spinner"
-                  : "pi pi-file-pdf"
-              }
-              tooltip="Generar PDF"
-              className="text-red-500"
-              tooltipOptions={{ position: "top" }}
-              rounded
-              text
-              disabled={
-                isLoading ||
-                isFetching ||
-                rowData.status === VersionQuotationStatus.DRAFT
-              }
-              onClick={() => {
-                if (!rowData.tripDetails) return;
-                /* handleGeneratePdf({
+        <Button
+          icon={
+            isFetching || isLoading ? "pi pi-spin pi-spinner" : "pi pi-file-pdf"
+          }
+          tooltip="Generar PDF"
+          className="text-red-500"
+          tooltipOptions={{ position: "top" }}
+          rounded
+          text
+          disabled={
+            isLoading ||
+            isFetching ||
+            rowData.status === VersionQuotationStatus.DRAFT
+          }
+          onClick={() => {
+            if (!rowData.tripDetails) return;
+            /* handleGeneratePdf({
             id: rowData.id,
             name: rowData?.tripDetails?.client?.fullName || "",
           }); */
-                handlePreviewQuotationPdf(rowData.id);
-              }}
-            />
+            handlePreviewQuotationPdf(rowData.id);
+          }}
+        />
 
-            {type === "principal" && (
-              <SendReportToEmailDialog rowData={rowData} />
-            )}
+        {type === "principal" && <SendReportToEmailDialog rowData={rowData} />}
 
-            <Button
-              icon={
-                isLoadingGenerateExcel || isFetchingGenerateExcel
-                  ? "pi pi-spin pi-spinner"
-                  : "pi pi-file-excel"
-              }
-              tooltip="Descargar Excel"
-              className="text-green-500"
-              tooltipOptions={{ position: "top" }}
-              rounded
-              text
-              disabled={
-                isLoadingGenerateExcel ||
-                isFetchingGenerateExcel ||
-                rowData.status === VersionQuotationStatus.DRAFT
-              }
-              onClick={() => {
-                if (!rowData.tripDetails) return;
-                handleGenerateExcel({
-                  id: rowData.id,
-                  name: rowData?.tripDetails?.client?.fullName || "",
-                });
-                /* handleGenerateExcel(rowData.id); */
-              }}
-            />
+        <Button
+          icon={
+            isLoadingGenerateExcel || isFetchingGenerateExcel
+              ? "pi pi-spin pi-spinner"
+              : "pi pi-file-excel"
+          }
+          tooltip="Descargar Excel"
+          className="text-green-500"
+          tooltipOptions={{ position: "top" }}
+          rounded
+          text
+          disabled={
+            isLoadingGenerateExcel ||
+            isFetchingGenerateExcel ||
+            rowData.status === VersionQuotationStatus.DRAFT
+          }
+          onClick={() => {
+            if (!rowData.tripDetails) return;
+            handleGenerateExcel({
+              id: rowData.id,
+              name: rowData?.tripDetails?.client?.fullName || "",
+            });
+            /* handleGenerateExcel(rowData.id); */
+          }}
+        />
 
-            <TrashVersionQuotation versionQuotation={rowData} />
-          </div>
-        </>
+        <TrashVersionQuotation versionQuotation={rowData} />
       </div>
-    </>
+    </div>
   );
 };

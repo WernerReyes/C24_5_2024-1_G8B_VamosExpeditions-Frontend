@@ -1,46 +1,3 @@
-import type { Platform } from "@/presentation/types";
-
-type NavigatorUAData = {
-  brands: { brand: string; version: string }[];
-  platform: string;
-  getHighEntropyValues?: (keys: string[]) => Promise<{ [key: string]: any }>;
-  mobile: boolean;
-};
-
-function getDeviceInfo() {
-  const nav = navigator as Navigator & { userAgentData?: NavigatorUAData };
-  const uaData = nav.userAgentData;
-
-  if (uaData) {
-    const brands = uaData.brands || [];
-    const mainBrand =
-      brands.find((b) => b.brand !== "Not-A.Brand") || brands[0];
-
-    return {
-      browser: detectBrowser(),
-      version: mainBrand.version,
-      platform: uaData.platform,
-      // isMobile: entropy?.mobile ?? false,
-    };
-  } else {
-    // Fallback for browsers that don't support userAgentData
-    let browser = detectBrowser();
-    let version = "Unknown";
-
-    return {
-      browser,
-      version,
-      platform: navigator.platform || "Unknown",
-    };
-  }
-}
-
-export function getDeviceKey() {
-  const info = getDeviceInfo();
-
-  return `${info.browser}_${info.version}_${info.platform}`;
-}
-
 export function detectBrowser() {
   const ua = navigator.userAgent;
 
@@ -49,45 +6,19 @@ export function detectBrowser() {
     ((navigator as any).brave &&
       typeof (navigator as any).brave.isBrave === "function")
   ) {
-    return "brave";
+    return "Brave";
   } else if (/Edg\//i.test(ua)) {
-    return "edge";
+    return "Edge";
   } else if (/OPR\//i.test(ua) || /Opera/i.test(ua)) {
-    return "opera";
+    return "Opera";
   } else if (/Chrome\//i.test(ua)) {
-    return "google-chrome";
+    return "Google Chrome";
   } else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) {
-    return "safari";
+    return "Safari";
   } else if (/Firefox\//i.test(ua)) {
-    return "firefox";
+    return "Firefox";
   } else {
     return "Desconocido";
   }
 }
 
-export function fromDeviceIdToObject(id: string): {
-  browser: string;
-  version: string;
-  platform: Platform;
-} {
-  const [browser, version, platform] = id.split("_");
-  if (browser.includes("-")) {
-    const [firstPart, secondPart] = browser.split("-");
-    return {
-      browser: `${capitalizeFirstLetter(firstPart)} ${capitalizeFirstLetter(
-        secondPart
-      )}`,
-      version,
-      platform: platform as Platform,
-    };
-  }
-  return {
-    browser: capitalizeFirstLetter(browser),
-    version,
-    platform: platform as Platform,
-  };
-}
-
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}

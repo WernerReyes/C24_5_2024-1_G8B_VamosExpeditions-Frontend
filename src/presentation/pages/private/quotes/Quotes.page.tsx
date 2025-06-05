@@ -19,7 +19,6 @@ const QuotesPage = () => {
   } = useGetUsersQuery({
     page: 1,
     limit: newLimit,
-    showDevices: false,
     select: {
       id_user: true,
       fullname: true,

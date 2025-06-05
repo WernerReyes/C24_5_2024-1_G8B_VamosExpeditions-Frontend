@@ -102,7 +102,7 @@ export const toasterAdapter = {
     }),
   dismiss: (id?: string) => toast.dismiss(id),
   remove: (message: string) => toast.remove(message),
-  connected: (browser: string, os: string) =>
+  connected: () =>
     toast.custom((t) => {
       return (
         <div
@@ -116,9 +116,8 @@ export const toasterAdapter = {
           </div>
           <div className="flex-grow text-sm">
             <h3 className="font-semibold text-md text-gray-800">
-              Nueva conexión detectada en
+              Nueva conexión detectada en tu cuenta
             </h3>
-            <p className="text-gray-600">{`${browser} on ${os}`}</p>
           </div>
           <i
             className="pi pi-times cursor-pointer text-gray-500 hover:text-gray-800"
@@ -128,7 +127,7 @@ export const toasterAdapter = {
       );
     }),
 
-  disconnectDevice: (browser: string, os: string) =>
+  disconnectDevice: () =>
     toast.custom((t) => {
       return (
         <div
@@ -144,7 +143,6 @@ export const toasterAdapter = {
             <h3 className="font-semibold text-md text-gray-800">
               Dispositivo desconectado
             </h3>
-            <p className="text-gray-600">{`${browser} on ${os}`}</p>
           </div>
           <i
             className="pi pi-times cursor-pointer text-gray-500 hover:text-gray-800"

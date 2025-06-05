@@ -1,16 +1,16 @@
 import type { AppState } from "@/app/store";
-import { getDeviceKey } from "@/core/utils";
+import { constantEnvs } from "@/core/constants/env.const";
 import type { UserEntity } from "@/domain/entities";
 import { toasterAdapter } from "@/presentation/components";
 import type { Dispatch } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
 import type { Socket } from "socket.io-client";
+import { onActiveDevice } from "../../slices/auth.slice";
+import { setusersDevicesConnections } from "../../slices/users.slice";
 import { reservationCache } from "../reservation/reservation.cache";
 import { SocketManager } from "../socket/socket.service";
-import { userCache } from "../user/user.cache";
 import { versionQuotationCache } from "../versionQuotation/versionQuotation.cache";
-import { setusersDevicesConnections } from "../../slices/users.slice";
 import type { DeviceSocketRes } from "./auth.response";
-import { onActiveDevice } from "../../slices/auth.slice";
 
 export const authSocket = {
   userConnected: () => {
@@ -38,7 +38,7 @@ export const authSocketListeners = (
   userConnected: (socket: Socket) => {
     socket?.on(
       "userConnected",
-      (data: { userId: UserEntity["id"]; devices: DeviceSocketRes[] }) => {
+      (data: { userId: UserEntity["id"]; devices: DeviceSocketRes }) => {
         // dispatch(onOnline(true));
 
         //* Update user to online
@@ -49,23 +49,11 @@ export const authSocketListeners = (
           getState
         );
 
-        userCache.updateById(
-          +data.userId,
-          true,
-          dispatch,
-          getState as () => AppState
-          // data.devices
-        );
+  
 
-        dispatch(
-          setusersDevicesConnections(data.devices)
-        );
+        dispatch(setusersDevicesConnections(data.devices));
 
-        dispatch(
-          onActiveDevice(data.devices)
-        )
-
-       
+        dispatch(onActiveDevice(data.devices));
 
         reservationCache.updateReservationByUser(
           {
@@ -80,83 +68,56 @@ export const authSocketListeners = (
   },
 
   userDisconnected: (socket: Socket) => {
-    socket?.on(
-      "userDisconnected",
-      (data: UserEntity["id"]) => {
-        //* Update user to online
-        versionQuotationCache.updateByUserId(
-          +data,
-          false,
-          dispatch,
-          getState
-        );
+    socket?.on("userDisconnected", (data: UserEntity["id"]) => {
+      //* Update user to online
+      versionQuotationCache.updateByUserId(+data, false, dispatch, getState);
 
-        
-       
+  
+      console.log("User disconnected: " + data);
 
-        userCache.updateById(
-          +data,
-          false,
-          dispatch,
-          getState as () => AppState
-        );
-
-        console.log("User disconnected: " + data);
-
-        reservationCache.updateReservationByUser(
-          {
-            id: +data,
-            online: false,
-          },
-          dispatch,
-          getState
-        );
-      }
-    );
+      reservationCache.updateReservationByUser(
+        {
+          id: +data,
+          online: false,
+        },
+        dispatch,
+        getState
+      );
+    });
   },
 
   deviceDisconnected: (socket: Socket) => {
     socket?.on(
       "deviceDisconnected",
-      (data: { devices: DeviceSocketRes[]; userId: UserEntity["id"] }) => {
-        dispatch(
-          setusersDevicesConnections(data.devices)
-        );
+      (data: { devices: DeviceSocketRes; userId: UserEntity["id"] }) => {
+        dispatch(setusersDevicesConnections(data.devices));
 
-        dispatch(
-          onActiveDevice(data.devices)
-        )
+        dispatch(onActiveDevice(data.devices));
       }
     );
   },
 
   logoutDevice: (socket: Socket) => {
-    socket?.on(
-      "disconnect-device",
-      async (data: string) => {
-        const browserId = await getDeviceKey();
-      
-        if (data.toLowerCase() === browserId.toLowerCase()) {
-          const { browser, os } = getLoginMessageFromDeviceId(data);
-  
-          toasterAdapter.disconnectDevice(browser, os);
-  
-          setTimeout(() => {
-            window.location.href = "/login";
-          }, 5000);
-        }
+    socket?.on("disconnect-device", async (deviceId: string) => {
+      const deviceName = Cookies.get(constantEnvs.DEVICE_COOKIE_NAME);
+      // const browserId = cookie ? cookie : "";
+      if (deviceId === deviceName) {
+        toasterAdapter.disconnectDevice();
+
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 5000);
       }
-    );
+    });
   },
 
   forceLogout: (socket: Socket) => {
     socket?.on("force-logout", async (data) => {
-      const browserId = await getDeviceKey();
-      
-      if (data.oldDeviceId.toLowerCase() === browserId.toLowerCase()) {
-        const { browser, os } = getLoginMessageFromDeviceId(data.newDeviceId);
+      const deviceName = Cookies.get(constantEnvs.DEVICE_COOKIE_NAME);
 
-        toasterAdapter.connected(browser, os);
+      if (data.oldDeviceId === deviceName) {
+       
+        toasterAdapter.connected();
 
         setTimeout(() => {
           window.location.href = "/login";
@@ -166,27 +127,3 @@ export const authSocketListeners = (
   },
 });
 
-function getLoginMessageFromDeviceId(deviceId: string) {
-  const regex = /^([\w-]+)_\d+_([\w\s]+)$/;
-  const match = deviceId.match(regex);
-
-  if (!match) {
-    return {
-      browser: "Desconocido",
-      os: "Desconocido",
-    };
-  }
-
-  const browser = match[1]
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase()); // Capitaliza palabras
-
-  const os = match[2]
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase());
-
-  return {
-    browser,
-    os,
-  };
-}

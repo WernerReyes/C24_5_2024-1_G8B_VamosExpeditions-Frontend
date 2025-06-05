@@ -1,3 +1,4 @@
+import { DeviceConnection } from "@/infraestructure/store/services/auth/auth.response";
 import type { RoleEntity } from "./role.entity";
 export interface UserEntity {
   readonly id: number;
@@ -13,8 +14,5 @@ export interface UserEntity {
   readonly isDeleted?: boolean;
   readonly deletedAt?: Date;
   readonly deleteReason?: string;
-  readonly activeDevices?: {
-    readonly deviceId: string;
-    readonly isOnline: boolean;
-  }[]
+  readonly activeDevices?: DeviceConnection[];
 }

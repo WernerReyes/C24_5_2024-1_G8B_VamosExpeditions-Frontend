@@ -13,11 +13,12 @@ import {
 import { SettingEntity, SettingKeyEnum } from "@/domain/entities";
 import { useSelector } from "react-redux";
 import type { AppState } from "@/app/store";
-import { fromDeviceIdToObject, startShowSuccess } from "@/core/utils";
+import { messageTimestamp, startShowSuccess } from "@/core/utils";
 import { UserInfo } from "../../components";
 import { cn, dateFnsAdapter } from "@/core/adapters";
 import { DisconnectSessionDevice } from "./DisconnectSessionDevice";
-
+import { constantEnvs } from "@/core/constants/env.const";
+import Cookie from "js-cookie";
 interface Props {
   showModal: boolean;
   setShowModal: (showModal: boolean) => void;
@@ -31,9 +32,7 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
   showModal,
   setShowModal,
 }) => {
-  const { isManager, authUser, currentDeviceKey } = useSelector(
-    (state: AppState) => state.auth
-  );
+  const { isManager, authUser } = useSelector((state: AppState) => state.auth);
 
   const { data } = useGetSettingsQuery();
 
@@ -289,21 +288,26 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
 
             <div className="space-y-3">
               {authUser?.activeDevices?.map((device) => {
-                const { browser, platform, version } = fromDeviceIdToObject(
-                  device.deviceId
-                );
+                // console.log(currentDeviceKey,
+                //    device.id)
                 return (
                   <div
-                    key={device.deviceId}
+                    key={device.id}
                     className="flex items-center justify-between bg-white p-3 rounded"
                   >
                     <div className="flex items-center gap-3">
                       <i className="pi pi-desktop text-gray-600"></i>
                       <div>
-                        <p className="font-medium">{browser}</p>
+                        <p className="font-medium">{device.name}</p>
                         <p className="text-gray-500 text-sm">
-                          {platform} • Versión: {version}
+                          {device.model} • Versión: {device.version}
                         </p>
+                        {!device.isOnline && (
+                          <p className="text-gray-500 text-xs">
+                            Última conexión:{" "}
+                            {messageTimestamp(device.createdAt)}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -318,7 +322,8 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                         {device.isOnline ? "Activo" : "Inactivo"}
                       </span>
 
-                      {currentDeviceKey !== device.deviceId && (
+                      {Cookie.get(constantEnvs.DEVICE_COOKIE_NAME) !==
+                        device.id && (
                         <Button
                           icon="pi pi-times"
                           className="text-gray-400"
@@ -326,7 +331,7 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                           onClick={() => {
                             setConfirmDisconnectDevice({
                               show: true,
-                              deviceId: device.deviceId,
+                              deviceId: device.id,
                             });
                           }}
                         />

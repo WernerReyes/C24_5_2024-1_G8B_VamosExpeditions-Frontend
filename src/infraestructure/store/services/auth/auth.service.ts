@@ -1,5 +1,11 @@
 import { startShowApiError, startShowSuccess } from "@/core/utils";
-import { disconnectDeviceDto, DisconnectDeviceDto, loginDto, ResetPasswordDto, type LoginDto } from "@/domain/dtos/auth";
+import {
+  disconnectDeviceDto,
+  DisconnectDeviceDto,
+  loginDto,
+  ResetPasswordDto,
+  type LoginDto,
+} from "@/domain/dtos/auth";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { onLogin, onLogout, onRemoveDevice } from "../../slices/auth.slice";
 import {
@@ -127,10 +133,8 @@ export const authService = createApi({
           })
         );
       },
-     
-    
     }),
-    
+
     disconnectDevice: builder.mutation<ApiResponse<void>, DisconnectDeviceDto>({
       query: (body) => {
         const [_, errors] = disconnectDeviceDto.create(body);
@@ -146,16 +150,11 @@ export const authService = createApi({
           const { data } = await queryFulfilled;
           startShowSuccess(data.message);
 
-          dispatch(
-            onRemoveDevice(deviceId)
-          )
+          dispatch(onRemoveDevice(deviceId));
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
         }
       },
-     
-
-      
     }),
 
     logout: builder.mutation<void, void>({

@@ -7,7 +7,7 @@ export type UsersState = {
   usersPagination: PaginatedResponse<UserEntity>;
   isLoadingUsers?: boolean;
   newLimit: number;
-  usersDevicesConnections: DeviceSocketRes[];
+  usersDevicesConnections: DeviceSocketRes;
  
 };
 
@@ -21,7 +21,7 @@ const initialState: UsersState = {
   },
   isLoadingUsers: false,
   newLimit: 10,
-  usersDevicesConnections: [],
+  usersDevicesConnections: {},
   
 };
 
@@ -46,7 +46,7 @@ export const usersSlice = createSlice({
 
     setusersDevicesConnections: (
       state,
-      { payload }: PayloadAction<DeviceSocketRes[]>
+      { payload }: PayloadAction<DeviceSocketRes>
     ) => {
       return {
         ...state,
