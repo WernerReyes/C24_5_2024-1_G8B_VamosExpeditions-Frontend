@@ -95,9 +95,10 @@ export const authSocketListeners = (
 
   logoutDevice: (socket: Socket) => {
     socket?.on("disconnect-device", async (deviceId: string) => {
-      const deviceName = await authService.getDeviceConnection();
+      const { id } = await authService.getDeviceConnection();
+    
       // const browserId = cookie ? cookie : "";
-      if (deviceId === deviceName) {
+      if (deviceId === id) {
         toasterAdapter.disconnectDevice();
 
         setTimeout(() => {
@@ -109,9 +110,9 @@ export const authSocketListeners = (
 
   forceLogout: (socket: Socket) => {
     socket?.on("force-logout", async (data) => {
-      const deviceName = await authService.getDeviceConnection();
+      const { id } = await authService.getDeviceConnection();
 
-      if (data.oldDeviceId === deviceName) {
+      if (data.oldDeviceId === id) {
        
         toasterAdapter.connected();
 

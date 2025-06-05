@@ -22,7 +22,9 @@ export const authService = {
     return store
       .getAll()
       .then((deviceConnections) => deviceConnections[0]) as Promise<
-      DeviceConnection["id"]
+      {
+        id: DeviceConnection["id"]
+      }
     >;
   },
 };
