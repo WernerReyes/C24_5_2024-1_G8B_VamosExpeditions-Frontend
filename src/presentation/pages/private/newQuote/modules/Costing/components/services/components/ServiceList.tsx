@@ -192,7 +192,7 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
         header={
           <Dropdown
             value={activeCategoryId}
-            options={serviceTypes?.content}
+            options={serviceTypes?.content ?? []}
             editable
             optionValue="id"
             optionLabel="name"
