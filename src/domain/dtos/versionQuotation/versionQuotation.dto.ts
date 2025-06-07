@@ -26,7 +26,7 @@ export type VersionQuotationDto = z.infer<typeof versionQuotationDtoSchema>;
 
 export const versionQuotationDto = {
   create: (dto: VersionQuotationDto): [VersionQuotationDto?, string[]?] => {
-    const errors = dtoValidator(dto, versionQuotationDtoSchema);
+    const errors = dtoValidator(dto, versionQuotationDtoSchema)
     if (errors) {
       return [undefined, errors];
     }

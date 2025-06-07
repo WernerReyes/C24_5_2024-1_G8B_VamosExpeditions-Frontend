@@ -82,6 +82,8 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
         },
       ],
     },
+  }, {
+    skip:!selectedCity,
   });
 
   const serviceTypes = getAllServiceTypes.data?.data;

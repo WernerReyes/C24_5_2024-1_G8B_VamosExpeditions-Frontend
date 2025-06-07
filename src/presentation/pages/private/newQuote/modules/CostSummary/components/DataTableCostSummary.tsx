@@ -60,6 +60,8 @@ export const DataTableCostSummary = () => {
       });
   };
 
+  console.log(calculateCostsPerService);
+
   return (
     <DataTable
       value={calculateCostsPerService}

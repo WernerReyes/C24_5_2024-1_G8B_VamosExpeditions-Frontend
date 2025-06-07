@@ -53,7 +53,8 @@ export * from "primereact/tooltip";
 export { ColumnGroup } from "primereact/columngroup";
 export { Row } from "primereact/row";
 export { Toolbar } from "primereact/toolbar";
-export { InputSwitch} from "primereact/inputswitch";
+export { InputSwitch } from "primereact/inputswitch";
+export { InputOtp } from "primereact/inputotp";
 
 export { CountdownCircleTimer } from "react-countdown-circle-timer";
 
@@ -69,4 +70,3 @@ export * from "./alerts/ExpiredSessionCountdown";
 export * from "./error/DefaultFallBackComponent";
 export * from "./error/ErrorBoundary";
 export * from "./error/NotFound";
-

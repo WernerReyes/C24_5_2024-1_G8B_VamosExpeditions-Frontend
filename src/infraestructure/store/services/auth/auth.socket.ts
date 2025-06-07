@@ -93,6 +93,14 @@ export const authSocketListeners = (
     );
   },
 
+  success2FA: (socket: Socket) => {
+    socket?.on("2fa-verified", (data: { suscess: true }) => {
+      console.log(data);
+
+      alert("success2FA");
+      
+    })
+  },
   logoutDevice: (socket: Socket) => {
     socket?.on("disconnect-device", async (deviceId: string) => {
       const { id } = await authService.getDeviceConnection();

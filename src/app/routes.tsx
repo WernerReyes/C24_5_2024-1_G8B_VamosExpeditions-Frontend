@@ -23,8 +23,12 @@ const ResetPasswordPage = lazy(
   () => import("../presentation/pages/public/resetPassword/ResetPassword.page")
 );
 
+const TwoFactorAuthenticationPage = lazy(
+  () => import("../presentation/pages/public/2fa/TwoFA.page")
+);
+
 const {
-  public: { LOGIN, FORGET_PASSWORD, RESET_PASSWORD },
+  public: { LOGIN, FORGET_PASSWORD, RESET_PASSWORD, TWO_FACTOR_AUTHENTICATION },
   private: { BASE: PRIVATE_BASE, DASHBOARD },
 } = constantRoutes;
 
@@ -37,7 +41,7 @@ export const AppRouter = () => {
   } = useUserAuthenticatedQuery(undefined, {
     skip: skipUserCall(pathname),
   });
-  
+
   const { init } = useCookieExpirationStore();
 
   useEffect(() => {
@@ -72,6 +76,11 @@ export const AppRouter = () => {
         <Route path={LOGIN} element={<LoginPage />} />
         <Route path={FORGET_PASSWORD} element={<ForgetPasswordPage />} />
         <Route path={RESET_PASSWORD()} element={<ResetPasswordPage />} />
+        <Route
+          path={TWO_FACTOR_AUTHENTICATION()}
+          element={<TwoFactorAuthenticationPage />}
+        />
+        
         <Route element={<AuthGuard privateValidation />}>
           <Route path={PRIVATE_BASE}>
             <Route path={"*"} element={<PrivateRoutes />} />
@@ -82,12 +91,10 @@ export const AppRouter = () => {
   );
 };
 
-const skipUserCall = (
-  pathname?: string,
-) => {
+const skipUserCall = (pathname?: string) => {
   return !(
     pathname?.split("/").includes(PRIVATE_BASE.replace("/", "")) ||
-    pathname === "/" || 
+    pathname === "/" ||
     pathname === LOGIN
   );
-}
+};

@@ -4,6 +4,8 @@ import {
   DisconnectDeviceDto,
   loginDto,
   ResetPasswordDto,
+  verify2FAAnfAuthenticateUserDto,
+  Verify2FAAnfAuthenticateUserDto,
   type LoginDto,
 } from "@/domain/dtos/auth";
 import { createApi } from "@reduxjs/toolkit/query/react";
@@ -20,9 +22,14 @@ import {
 // import {} = "."
 import { requestConfig } from "../config";
 import type { ApiResponse } from "../response";
-import type { LoginResponse } from "./auth.response";
+import type {
+  LoginResponse,
+  LoginTwoFactorResponse,
+  TwoFactorResponse,
+} from "./auth.response";
 import { authSocket } from "./auth.socket";
 import { authService as authServiceDB } from "@/data";
+import { SocketManager } from "../socket/socket.service";
 
 const PREFIX = "/auth";
 
@@ -30,7 +37,10 @@ export const authService = createApi({
   reducerPath: "authService",
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    login: builder.mutation<ApiResponse<LoginResponse>, LoginDto>({
+    login: builder.mutation<
+      ApiResponse<LoginResponse | LoginTwoFactorResponse>,
+      LoginDto
+    >({
       query: (body) => {
         //* Validate before sending
         const [dto, errors] = loginDto.create(body);
@@ -49,7 +59,10 @@ export const authService = createApi({
           const { data } = await queryFulfilled;
 
           // await authServiceDB.upsertDeviceConnection(data.data.deviceId);
-
+          if ("require2FA" in data.data) {
+            //* 2FA is required
+            return;
+          }
 
           dispatch(onSetCurrentDeviceKey(data.data.deviceId));
 
@@ -66,11 +79,9 @@ export const authService = createApi({
 
           await authServiceDB.upsertDeviceConnection(data.data.deviceId);
         } catch (error: any) {
-          console.log(error);
           if (error.error) {
             startShowApiError(error.error);
           }
-          
         }
       },
     }),
@@ -143,6 +154,65 @@ export const authService = createApi({
       },
     }),
 
+    generateTwoFactorAuthentication: builder.query<
+      ApiResponse<TwoFactorResponse>,
+      string
+    >({
+      query: (token) => ({
+        url: `/generate-two-factor-authentication-secret/${token}`,
+        method: "GET",
+      }),
+    }),
+
+    verify2FAAnfAuthenticateUser: builder.mutation<
+      ApiResponse<LoginResponse>,
+      Verify2FAAnfAuthenticateUserDto
+    >({
+      query: (body) => {
+        const [_, errors] = verify2FAAnfAuthenticateUserDto.create(body);
+        if (errors) throw new Error(errors.join(", "));
+        return {
+          url: "/verify-two-factor-authentication",
+          method: "POST",
+          body,
+        };
+      },
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(onLogin(data.data.user));
+          dispatch(onSetCurrentDeviceKey(data.data.deviceId));
+          startShowSuccess(data.message);
+
+          //* Connect to socket
+          authSocket.userConnected();
+          await authServiceDB.upsertDeviceConnection(data.data.deviceId);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
+    }),
+
+    sendEmailToVerify2FA: builder.mutation<ApiResponse<void>, string>({
+      query: (token) => {
+        return {
+          url: `/send-email-to-verify-2fa/${token}`,
+          method: "POST",
+        };
+      },
+      async onQueryStarted(token, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+
+          SocketManager.connect(token);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      },
+    }),
+
     userAuthenticated: builder.query<ApiResponse<LoginResponse>, void>({
       query: () => "/user-authenticated",
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
@@ -207,6 +277,9 @@ export const {
   useVerifyResetPasswordTokenQuery,
   useResetPasswordMutation,
   useReLoginMutation,
+  useGenerateTwoFactorAuthenticationQuery,
+  useVerify2FAAnfAuthenticateUserMutation,
+  useSendEmailToVerify2FAMutation,
   useLazyUserAuthenticatedQuery,
   useUserAuthenticatedQuery,
   useDisconnectDeviceMutation,

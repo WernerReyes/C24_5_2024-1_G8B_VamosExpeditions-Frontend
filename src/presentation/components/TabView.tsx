@@ -33,7 +33,7 @@ export const TabView = ({
         },
         nav: {
           className:
-            "flex justify-evenly list-none thin-scrollbar overflow-x-auto overflow-y-hidden border border-gray-300  border-0 border-b-2",
+            "flex justify-evenly list-none thin-scrollbar bg-transparent overflow-x-auto overflow-y-hidden border border-gray-300  border-0 border-b-2",
         },
         inkbar: {
           className: "border-transparent p-0 border-none hidden",

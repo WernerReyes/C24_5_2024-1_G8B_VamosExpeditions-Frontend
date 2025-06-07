@@ -9,24 +9,31 @@ import { detectBrowser } from "@/core/utils";
 
 const { VITE_API_URL } = constantEnvs;
 
-
 export class SocketManager {
   private static instance: Socket | null = null;
   private static subscribers = 0;
 
-  static connect() {
+  static connect(token?: string) {
     if (!this.instance) {
       this.instance = io(VITE_API_URL, {
         transports: ["websocket"],
-       auth: {
-        "browserName": detectBrowser(),
-       },
+        auth: {
+          browserName: detectBrowser(),
+          // "token": token,
+          token: token,
+        },
         autoConnect: true,
         withCredentials: true,
         reconnectionDelay: 1000,
       });
     }
     this.subscribers++;
+    this.instance.auth = {
+      browserName: detectBrowser(),
+      // "token": token,
+      token: token,
+    };
+
     return this.instance;
   }
 
@@ -57,27 +64,26 @@ export const SocketService = createApi({
       ) {
         await cacheDataLoaded;
 
-        const socket = SocketManager.connect();
+        const token = window.location.pathname.split("/")[2];
+
+        const socket = SocketManager.connect(token);
         const authSocket = authSocketListeners(
           dispatch,
           getState as () => AppState
         );
 
-
         socket?.on("connect", () => {
           authSocket.userConnected(socket);
           authSocket.userDisconnected(socket);
           authSocket.deviceDisconnected(socket);
-          
         });
-        
+        authSocket.success2FA(socket);
         authSocket.logoutDevice(socket);
         authSocket.forceLogout(socket);
 
         const notificationSocket = notificationSocketListeners(dispatch);
         notificationSocket.getPersonalMessages(socket);
 
-        
         socket?.on("disconnect", () => {
           console.log("Disconnected from socket server");
         });

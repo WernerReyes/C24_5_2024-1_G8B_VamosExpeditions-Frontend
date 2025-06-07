@@ -347,7 +347,7 @@ export const ClientForm = () => {
                       htmlFor: "phone",
                       text: "Telefono ( +51999999999 )",
                     }}
-                    value={numberPhone}
+                    value={numberPhone ?? undefined}
                     onChange={(e) => {
                       if (!e.value) return field.onChange(e.value);
                       const parsedValue = phoneNumberAdapter.parse(

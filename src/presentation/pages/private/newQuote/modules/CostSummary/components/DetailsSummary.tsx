@@ -63,7 +63,6 @@ export const DetailsSummary = ({ totalPerDay }: Props) => {
   return (
     <TabView
       scrollable
-      className={cn(firstAccordion || secondAccordion ? "" : "")}
       onBeforeTabChange={(e) => {
         const { executionTime } = measureExecutionTime(() => {
           const nextDay = new Date(currentTripDetails?.startDate ?? new Date());

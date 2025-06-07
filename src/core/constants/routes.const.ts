@@ -4,6 +4,7 @@ type PublicRoutes = {
   LOGIN: string;
   FORGET_PASSWORD: string;
   RESET_PASSWORD: (token?: string) => string;
+  TWO_FACTOR_AUTHENTICATION: (tempToken?: string) => string;
 };
 
 type PrivateRoutes = {
@@ -35,6 +36,8 @@ export const constantRoutes: Routes = {
     FORGET_PASSWORD: "/forget-password",
     RESET_PASSWORD: (token?: string) =>
       token ? `/reset-password/${token}` : "/reset-password/:token",
+    TWO_FACTOR_AUTHENTICATION: (tempToken?: string) =>
+      tempToken ? `/two-factor-authentication/${tempToken}` : "/two-factor-authentication/:tempToken",
   },
 
   private: {

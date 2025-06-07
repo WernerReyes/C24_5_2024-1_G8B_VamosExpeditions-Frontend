@@ -38,7 +38,9 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
     (state: AppState) => state.serviceTripDetails
   );
 
-  const [upsertTripDetails] = useUpsertTripDetailsMutation();
+  const [upsertTripDetails, {
+    isLoading: isUpsertingTripDetails,
+  }] = useUpsertTripDetailsMutation();
 
   const [contentLoading, setContentLoading] = useState<boolean>(true);
   const [[startDate, endDate], setDaysRange] = useState<
@@ -304,6 +306,12 @@ export const SidebarDays = ({ isDayDeleted, setIsDayDeleted }: Props) => {
               label="Agregar Día"
               icon="pi pi-plus-circle"
               text
+              disabled={
+                !startDate ||
+                !endDate ||
+                isFetchingHotelRoomTripDetails ||
+                isFetchingServiceTripDetails || isUpsertingTripDetails
+              }
               onClick={handleAddDay}
             />
           </div>

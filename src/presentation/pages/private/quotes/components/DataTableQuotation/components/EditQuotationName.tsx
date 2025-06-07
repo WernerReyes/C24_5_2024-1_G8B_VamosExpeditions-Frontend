@@ -1,6 +1,7 @@
 import { useUpdateVersionQuotationMutation } from "@/infraestructure/store/services";
 import { InputText, type ColumnEditorOptions } from "@/presentation/components";
 import { useState } from "react";
+import { versionQuotationDto } from "@/domain/dtos/versionQuotation/versionQuotation.dto";
 
 type Props = {
   options: ColumnEditorOptions;
@@ -26,10 +27,12 @@ export const EditQuotationName = ({ options }: Props) => {
       onKeyDown={(e) => {
         if (options.value === frozenName || !options.value.trim()) return;
         if (e.key === "Enter")
-          handleUpdate({
-            ...options.rowData,
-            name: options.value,
-          }).then(() => options.editorCallback?.(options.value));
+          handleUpdate(
+            versionQuotationDto.parse({
+              ...options.rowData,
+              name: options.value,
+            })
+          ).then(() => options.editorCallback?.(options.value));
       }}
     />
   );

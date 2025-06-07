@@ -12,7 +12,7 @@ import { AppState } from "@/app/store";
 import { useState } from "react";
 
 const { DASHBOARD } = constantRoutes.private;
-const { FORGET_PASSWORD } = constantRoutes.public;
+const { FORGET_PASSWORD, TWO_FACTOR_AUTHENTICATION } = constantRoutes.public;
 
 const LoginPage = () => {
   const { authUser } = useSelector((state: AppState) => state.auth);
@@ -32,7 +32,12 @@ const LoginPage = () => {
     await login(loginDto)
       .unwrap()
       .then(({ data }) => {
-      
+        if ("require2FA" in data) {
+          navigate(TWO_FACTOR_AUTHENTICATION(data.tempToken));
+
+          return;
+        }
+
         navigate(DASHBOARD);
         init(data.expiresAt);
 
