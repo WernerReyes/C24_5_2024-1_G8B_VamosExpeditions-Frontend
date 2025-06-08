@@ -1,5 +1,6 @@
 import { DeviceConnection } from "@/infraestructure/store/services/auth/auth.response";
 import type { RoleEntity } from "./role.entity";
+import type { SettingEntity } from './setting.entity';
 export interface UserEntity {
   readonly id: number;
   readonly fullname: string;
@@ -15,4 +16,5 @@ export interface UserEntity {
   readonly deletedAt?: Date;
   readonly deleteReason?: string;
   readonly activeDevices?: DeviceConnection[];
+  readonly settings?: SettingEntity[];
 }

@@ -82,7 +82,7 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
     );
 
   const archivedQuotes = data?.data;
-
+  
   const [restoreVersionQuotation, { isLoading: isLoadingUnArchive }] =
     useRestoreVersionQuotationMutation();
 
@@ -146,6 +146,7 @@ export const TrashQuotesDialog = ({ visible, onHide }: Props) => {
               title: selectedQuote.name,
               deletedAt: selectedQuote.deletedAt ?? null,
               deleteReason: selectedQuote.deleteReason ?? null,
+              isDeleted: selectedQuote.isDeleted,
               archivedDetails: [
                 {
                   subject: "Cliente",

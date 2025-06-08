@@ -56,7 +56,7 @@ const PrivateRoutes = () => {
   const { pathname } = useLocation();
 
   //* Connect to socket
-  useConnectSocketQuery();
+  useConnectSocketQuery(undefined);
 
   useEffect(() => {
     if (!pathname) return;

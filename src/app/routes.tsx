@@ -26,9 +26,12 @@ const ResetPasswordPage = lazy(
 const TwoFactorAuthenticationPage = lazy(
   () => import("../presentation/pages/public/2fa/TwoFA.page")
 );
+const TwoFAConfirmEmail = lazy(
+  () => import("../presentation/pages/public/2faConfirmEmail/TwoFAConfirmEmail.page")
+);
 
 const {
-  public: { LOGIN, FORGET_PASSWORD, RESET_PASSWORD, TWO_FACTOR_AUTHENTICATION },
+  public: { LOGIN, FORGET_PASSWORD, RESET_PASSWORD, TWO_FACTOR_AUTHENTICATION, VERIFY_F2A_EMAIL },
   private: { BASE: PRIVATE_BASE, DASHBOARD },
 } = constantRoutes;
 
@@ -79,6 +82,10 @@ export const AppRouter = () => {
         <Route
           path={TWO_FACTOR_AUTHENTICATION()}
           element={<TwoFactorAuthenticationPage />}
+        />
+        <Route
+          path={VERIFY_F2A_EMAIL}
+          element={<TwoFAConfirmEmail />}
         />
         
         <Route element={<AuthGuard privateValidation />}>

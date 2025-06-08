@@ -96,7 +96,7 @@ export const TrashClientDialog = ({ visible, onHide }: Props) => {
               title: selectedClient.fullName,
               deletedAt: selectedClient.deletedAt ?? null,
               deleteReason: selectedClient.deleteReason ?? null,
-              isDeleted: selectedClient.isDeleted,
+              isDeleted: selectedClient.isDeleted ?? false,
               archivedDetails: [
                 {
                   subject: "ID",

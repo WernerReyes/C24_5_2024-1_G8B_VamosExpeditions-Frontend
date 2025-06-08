@@ -94,7 +94,7 @@ export const TrasHotelDialog = ({ visible, onHide }: Props) => {
               title: selectedHotel.name,
               deletedAt: null,
               deleteReason: null,
-              isDeleted: selectedHotel.isDeleted,
+              isDeleted: selectedHotel.isDeleted ?? false,
               archivedDetails: [
                 {
                   subject: "ID",

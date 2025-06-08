@@ -24,7 +24,7 @@ type Props = {
     title: string;
     deletedAt: Date | null;
     deleteReason: string | null;
-    isDeleted?: boolean;
+    isDeleted: boolean;
     archivedDetails: {
       subject: string;
       message: string | React.ReactNode;

@@ -20,16 +20,15 @@ import {
   onSetExpired,
 } from "../../slices/cookieExpiration.slice";
 // import {} = "."
+import { authService as authServiceDB } from "@/data";
 import { requestConfig } from "../config";
 import type { ApiResponse } from "../response";
 import type {
   LoginResponse,
   LoginTwoFactorResponse,
-  TwoFactorResponse,
+  TwoFactorResponse
 } from "./auth.response";
 import { authSocket } from "./auth.socket";
-import { authService as authServiceDB } from "@/data";
-import { SocketManager } from "../socket/socket.service";
 
 const PREFIX = "/auth";
 
@@ -201,12 +200,47 @@ export const authService = createApi({
           method: "POST",
         };
       },
-      async onQueryStarted(token, { queryFulfilled }) {
+      async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           startShowSuccess(data.message);
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+        }
+      },
+    }),
 
-          SocketManager.connect(token);
+    verify2FAEmail: builder.query<ApiResponse<LoginResponse>, string>({
+      query: (token) => {
+        return {
+          url: `/verify-2fa/${token}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    setTokenFrom2FAEmail: builder.mutation<ApiResponse<LoginResponse>, string>({
+      query: (token) => {
+        return {
+          url: `/set-token-from-2fa-email/${token}`,
+          method: "POST",
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(onLogin({
+            ...data.data.user,
+            online: true,
+          }));
+          dispatch(onSetCurrentDeviceKey(data.data.deviceId));
+
+          //* Connect to socket
+          authSocket.userConnected();
+
+          console.log(data);
+
+          await authServiceDB.upsertDeviceConnection(data.data.deviceId);
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
         }
@@ -280,6 +314,8 @@ export const {
   useGenerateTwoFactorAuthenticationQuery,
   useVerify2FAAnfAuthenticateUserMutation,
   useSendEmailToVerify2FAMutation,
+  useVerify2FAEmailQuery,
+  useSetTokenFrom2FAEmailMutation,
   useLazyUserAuthenticatedQuery,
   useUserAuthenticatedQuery,
   useDisconnectDeviceMutation,

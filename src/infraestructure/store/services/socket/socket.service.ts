@@ -20,6 +20,7 @@ export class SocketManager {
         auth: {
           browserName: detectBrowser(),
           // "token": token,
+          //  "2fa": token,
           token: token,
         },
         autoConnect: true,
@@ -55,29 +56,33 @@ export const SocketService = createApi({
   reducerPath: "socketApi",
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    connectSocket: builder.query<void, void>({
+    connectSocket: builder.query<void, string | undefined>({
       queryFn: () => ({ data: undefined }),
 
       async onCacheEntryAdded(
-        _,
+        token,
         { cacheDataLoaded, cacheEntryRemoved, dispatch, getState }
       ) {
         await cacheDataLoaded;
 
-        const token = window.location.pathname.split("/")[2];
+        // const token = window.location.pathname.split("/")[2];
 
         const socket = SocketManager.connect(token);
         const authSocket = authSocketListeners(
           dispatch,
           getState as () => AppState
         );
+        if (token) {
+          authSocket.success2FA(socket);
+          return;
+        }
 
         socket?.on("connect", () => {
           authSocket.userConnected(socket);
           authSocket.userDisconnected(socket);
           authSocket.deviceDisconnected(socket);
         });
-        authSocket.success2FA(socket);
+        // authSocket.success2FA(socket);
         authSocket.logoutDevice(socket);
         authSocket.forceLogout(socket);
 

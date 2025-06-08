@@ -4,7 +4,10 @@ import type { UserEntity } from "@/domain/entities";
 import { toasterAdapter } from "@/presentation/components";
 import type { Dispatch } from "@reduxjs/toolkit";
 import type { Socket } from "socket.io-client";
-import { onActiveDevice } from "../../slices/auth.slice";
+import {
+  onActiveDevice,
+  onSetemail2FAsuccess
+} from "../../slices/auth.slice";
 import { setusersDevicesConnections } from "../../slices/users.slice";
 import { reservationCache } from "../reservation/reservation.cache";
 import { SocketManager } from "../socket/socket.service";
@@ -14,13 +17,17 @@ import type { DeviceSocketRes } from "./auth.response";
 export const authSocket = {
   userConnected: () => {
     const socket = SocketManager.getInstance();
+    console.log(socket)
     if (!socket?.connected) {
+      console.log("socket not connected");
       socket?.connect();
       socket?.once("connect", () => {
         socket.emit("connection");
       });
     } else {
-      socket.emit("connection");
+     
+        socket.emit("connection");
+      
     }
   },
 
@@ -48,9 +55,8 @@ export const authSocketListeners = (
           getState
         );
 
-  
-
         dispatch(setusersDevicesConnections(data.devices));
+
 
         dispatch(onActiveDevice(data.devices));
 
@@ -70,7 +76,7 @@ export const authSocketListeners = (
     socket?.on("userDisconnected", (data: UserEntity["id"]) => {
       //* Update user to online
       versionQuotationCache.updateByUserId(+data, false, dispatch, getState);
-      
+
       reservationCache.updateReservationByUser(
         {
           id: +data,
@@ -94,17 +100,21 @@ export const authSocketListeners = (
   },
 
   success2FA: (socket: Socket) => {
-    socket?.on("2fa-verified", (data: { suscess: true }) => {
-      console.log(data);
+    socket?.on(
+      "2fa-verified",
+      async (data: { success: boolean }) => {
 
-      alert("success2FA");
-      
-    })
+        console.log("2fa-verified", data);
+        
+        
+        dispatch(onSetemail2FAsuccess(data.success));
+      }
+    );
   },
   logoutDevice: (socket: Socket) => {
     socket?.on("disconnect-device", async (deviceId: string) => {
       const { id } = await authService.getDeviceConnection();
-    
+
       // const browserId = cookie ? cookie : "";
       if (deviceId === id) {
         toasterAdapter.disconnectDevice();
@@ -121,7 +131,6 @@ export const authSocketListeners = (
       const { id } = await authService.getDeviceConnection();
 
       if (data.oldDeviceId === id) {
-       
         toasterAdapter.connected();
 
         setTimeout(() => {
@@ -131,4 +140,3 @@ export const authSocketListeners = (
     });
   },
 });
-

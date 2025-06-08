@@ -99,6 +99,7 @@ export const TrashUserDialog = ({ visible, onHide }: Props) => {
               title: selectedUser.fullname,
               deletedAt: selectedUser.deletedAt ?? null,
               deleteReason: selectedUser.deleteReason ?? null,
+              isDeleted: selectedUser.isDeleted?? false,
 
               archivedDetails: [
                 {

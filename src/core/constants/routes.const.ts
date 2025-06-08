@@ -5,6 +5,7 @@ type PublicRoutes = {
   FORGET_PASSWORD: string;
   RESET_PASSWORD: (token?: string) => string;
   TWO_FACTOR_AUTHENTICATION: (tempToken?: string) => string;
+  VERIFY_F2A_EMAIL: string;
 };
 
 type PrivateRoutes = {
@@ -38,6 +39,7 @@ export const constantRoutes: Routes = {
       token ? `/reset-password/${token}` : "/reset-password/:token",
     TWO_FACTOR_AUTHENTICATION: (tempToken?: string) =>
       tempToken ? `/two-factor-authentication/${tempToken}` : "/two-factor-authentication/:tempToken",
+    VERIFY_F2A_EMAIL: "/verify-2fa-email/:tempToken",
   },
 
   private: {

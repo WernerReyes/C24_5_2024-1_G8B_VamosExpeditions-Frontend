@@ -23,6 +23,10 @@ export type LoginResponse = {
   deviceId: string;
 };
 
+export type SetTokenFrom2FAEmailResponse = {
+  expiresAt: string;
+};
+
 export type DeviceSocketRes = {
   [userId: string]: DeviceConnection[];
 };

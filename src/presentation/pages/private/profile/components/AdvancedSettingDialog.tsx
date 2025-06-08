@@ -6,9 +6,10 @@ import {
   Button,
 } from "@/presentation/components";
 import {
-  useGetSettingsQuery,
+  useGetByKeyQuery,
   useUpdateDinamicCleanUpMutation,
   useUpdateMaxActiveSessionsMutation,
+  useUpdateTwoFactorAuthMutation,
 } from "@/infraestructure/store/services";
 import { SettingEntity, SettingKeyEnum } from "@/domain/entities";
 import { useSelector } from "react-redux";
@@ -39,7 +40,12 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     (state: AppState) => state.auth
   );
 
-  const { data } = useGetSettingsQuery();
+  const { data } = useGetByKeyQuery(SettingKeyEnum.DATA_CLEANUP_PERIOD, {
+    skip: !isManager,
+  });
+
+  const [updateTwoFactorAuth, { isLoading: isLoadingUpdateTwoFactorAuth }] =
+    useUpdateTwoFactorAuthMutation();
 
   const [updateDinamicCleanUp, { isLoading: isLoadingUpdateDinamicCleanUp }] =
     useUpdateDinamicCleanUpMutation();
@@ -49,12 +55,24 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     { isLoading: isLoadingUpdateMaxActiveSessions },
   ] = useUpdateMaxActiveSessionsMutation();
 
+  const [twoFactorAuth, setTwoFactorAuth] = useState<{
+    id?: number;
+    value: boolean;
+    currentValue: boolean;
+    isChange?: boolean;
+  }>({
+    value: false,
+    currentValue: false,
+  });
+
   const [maxActiveSessionSetting, setMaxActiveSessionSetting] = useState<{
     id?: number;
     value: number;
+    currentValue: number;
     isChange?: boolean;
   }>({
     value: DEVICES_LIMIT[0],
+    currentValue: DEVICES_LIMIT[0],
   });
 
   const {
@@ -64,28 +82,31 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
   } = maxActiveSessionSetting;
 
   const [cleanupSetting, setCleanupSetting] = useState<
-    SettingEntity & {
+    Partial<SettingEntity> & {
+      currentAutoCleanup: boolean;
+      currentValue: string;
       autoCleanup: boolean;
       isChange?: boolean;
     }
   >({
-    value: CLEANUP_INTERVAL[2].toString(),
-    key: SettingKeyEnum.DATA_CLEANUP_PERIOD,
+    value: data?.data.value ?? CLEANUP_INTERVAL[2].toString(),
+    currentAutoCleanup: true,
     autoCleanup: true,
-    id: 0,
-    updatedAt: new Date(),
+    currentValue: data?.data.value ?? CLEANUP_INTERVAL[2].toString(),
   });
 
-  const {
-    value: cleanupInterval,
-    autoCleanup,
-    updatedBy: lastCleanupMadeBy,
-    updatedAt: lastCleanupMadeAt,
-    id: cleanupID,
-    isChange: isChangeCleanup,
-  } = cleanupSetting;
-
-  const [diffDays, setDiffDays] = useState<number>(0); //* Diff days between today and the last cleanup
+  const [diffDays] = useState<number>(
+    (function () {
+      const diffDays = Math.floor(
+        (new Date().getTime() -
+          new Date(
+            cleanupSetting.updatedAt ?? new Date().toISOString()
+          ).getTime()) /
+          (1000 * 3600 * 24)
+      );
+      return diffDays;
+    })()
+  ); //* Diff days between today and the last cleanup
 
   const [
     { show: openConfirmDisconnectDevice, deviceId },
@@ -98,16 +119,35 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
     deviceId: undefined,
   });
 
+  const handleUpdateTwoFactorAuth = async () => {
+    if (twoFactorAuth.id) {
+      if (!twoFactorAuth.isChange) return;
+      await updateTwoFactorAuth({
+        id: twoFactorAuth.id,
+        value: twoFactorAuth.currentValue.toString(),
+      }).unwrap();
+    }
+  };
+
   const handleUpdateCleanup = async () => {
-    if (cleanupID) {
-      if (!isChangeCleanup) return;
+    if (cleanupSetting.id && cleanupSetting.id !== 0) {
+      if (!cleanupSetting.isChange) return;
+      console.log(
+        cleanupSetting.currentValue.toString(),
+        cleanupSetting.autoCleanup
+      );
       await updateDinamicCleanUp({
-        id: cleanupID,
-        value: autoCleanup ? cleanupInterval!.toString() : null,
+        id: cleanupSetting.id,
+        value: cleanupSetting.currentAutoCleanup
+          ? cleanupSetting.currentValue.toString()
+          : null,
       })
         .unwrap()
-        .catch((err) => {
-          throw err;
+        .then(() => {
+          setCleanupSetting({
+            ...cleanupSetting,
+            isChange: false,
+          });
         });
     }
   };
@@ -117,92 +157,74 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
       if (!isChangeDeviceLimit) return;
       await updateMaxActiveSessions({
         id: deviceLimitID,
-        value: devicesLimit.toString(),
+        value: maxActiveSessionSetting.currentValue.toString(),
       })
         .unwrap()
-        .catch((err) => {
-          throw err;
+        .then(() => {
+          setMaxActiveSessionSetting({
+            ...maxActiveSessionSetting,
+            isChange: false,
+          });
         });
     }
   };
 
   const handleSaveChanges = async () => {
-    Promise.all([handleUpdateCleanup(), handleUpdateMaxActiveSessions()]).then(
-      () => {
-        startShowSuccess("Cambios guardados correctamente");
-        setShowModal(false);
-      }
-    );
+    Promise.all([
+      handleUpdateTwoFactorAuth(),
+      handleUpdateCleanup(),
+      handleUpdateMaxActiveSessions(),
+    ]).then(() => {
+      startShowSuccess("Cambios guardados correctamente");
+      setShowModal(false);
+    });
   };
 
   useEffect(() => {
-    if (data) {
-      const devicesLimit = getSettingByKey(
-        SettingKeyEnum.MAX_ACTIVE_SESSIONS,
-        data.data
-      );
-      setMaxActiveSessionSetting({
-        id: devicesLimit?.id,
-        value: Number(devicesLimit?.value ?? Infinity),
-      });
+    const { value, id } = getSettingByKey(
+      SettingKeyEnum.TWO_FACTOR_AUTH,
+      authUser?.settings
+    ) ?? {
+      id: undefined,
+      value: false,
+    };
+    setTwoFactorAuth({
+      id,
+      value: value === "true",
+      currentValue: value === "true",
+    });
 
-      const cleanupSetting = getSettingByKey(
-        SettingKeyEnum.DATA_CLEANUP_PERIOD,
-        data.data
-      );
+    const { id: idSessions, value: valueSessions } = getSettingByKey(
+      SettingKeyEnum.MAX_ACTIVE_SESSIONS,
+      authUser?.settings
+    ) ?? {
+      id: undefined,
+      value: DEVICES_LIMIT[0],
+    };
+    setMaxActiveSessionSetting({
+      id: idSessions,
+      value: Number(valueSessions ?? Infinity),
+      currentValue: Number(valueSessions ?? Infinity),
+    });
+  }, [authUser]);
 
+  useEffect(() => {
+    if (!data?.data) return;
+    if (cleanupSetting.id !== 0) {
       setCleanupSetting({
-        ...cleanupSetting!,
-        autoCleanup: !!cleanupSetting?.value,
+        value: data?.data.value ?? CLEANUP_INTERVAL[2].toString(),
+        key: SettingKeyEnum.DATA_CLEANUP_PERIOD,
+        autoCleanup: !!data?.data.value,
+        currentAutoCleanup: !!data?.data.value,
+        id: data.data.id,
+        updatedAt: data?.data.updatedAt ?? null,
+        updatedBy: data?.data.updatedBy,
+        currentValue: data?.data.value ?? CLEANUP_INTERVAL[2].toString(),
       });
-
-      const lastCleanup =
-        getSettingByKey(SettingKeyEnum.LAST_CLEANUP_RUN, data.data)?.value ??
-        new Date().toISOString();
-
-      const diffDays = Math.floor(
-        (new Date().getTime() - new Date(lastCleanup).getTime()) /
-          (1000 * 3600 * 24)
-      );
-      setDiffDays(diffDays);
     }
   }, [data]);
 
-  useEffect(() => {
-    if (!data) return;
-
-    const cleanup = getSettingByKey(
-      SettingKeyEnum.DATA_CLEANUP_PERIOD,
-      data.data
-    );
-
-    if (cleanup) {
-      setCleanupSetting((prev) => ({
-        ...prev,
-        isChange:
-          prev.value != (cleanup?.value ?? null) ||
-          !!cleanup?.value !== prev.autoCleanup,
-      }));
-    }
-  }, [cleanupInterval, autoCleanup]);
-
-  useEffect(() => {
-    if (!data) return;
-
-    const device = getSettingByKey(
-      SettingKeyEnum.MAX_ACTIVE_SESSIONS,
-      data.data
-    );
-
-    if (device) {
-      setMaxActiveSessionSetting({
-        ...maxActiveSessionSetting,
-        isChange: devicesLimit != Number(device?.value ?? Infinity),
-      });
-    }
-  }, [devicesLimit]);
-
-  console.log(authUser)
+  console.log(data?.data);
 
   const footer = (
     <div className="flex justify-end gap-2">
@@ -210,10 +232,16 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
         label="Guardar Cambios"
         icon="pi pi-check"
         loading={
-          isLoadingUpdateDinamicCleanUp || isLoadingUpdateMaxActiveSessions
+          isLoadingUpdateDinamicCleanUp ||
+          isLoadingUpdateMaxActiveSessions ||
+          isLoadingUpdateTwoFactorAuth
         }
         onClick={handleSaveChanges}
-        disabled={!isChangeCleanup && !isChangeDeviceLimit}
+        disabled={
+          !cleanupSetting.isChange &&
+          !isChangeDeviceLimit &&
+          !twoFactorAuth.isChange
+        }
         className="p-button-primary"
         autoFocus
       />
@@ -247,8 +275,41 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
 
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4">
+              <i className="pi pi-shield text-green-500"></i>
+              <h4 className="text-lg font-semibold">
+                Configuración de Seguridad
+              </h4>
+            </div>
+
+            <div className="bg-gray-50 flex gap-5 justify-between flex-wrap rounded-lg p-4">
+              <div className="mb-4">
+                <h5 className="mb-1 font-semibold">
+                  Autenticación de dos factores (2FA)
+                </h5>
+                <p className="text-gray-600 text-sm mb-2">
+                  Protección adicional activada para tu cuenta
+                </p>
+              </div>
+
+              <div className="mb-4">
+                <InputSwitch
+                  checked={twoFactorAuth.currentValue}
+                  onChange={(e) => {
+                    setTwoFactorAuth({
+                      ...twoFactorAuth,
+                      currentValue: e.value,
+                      isChange: e.value !== twoFactorAuth.value,
+                    });
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-4">
               <i className="pi pi-wifi text-blue-500"></i>
-              <h2 className="text-lg font-semibold">Dispositivos Conectados</h2>
+              <h4 className="text-lg font-semibold">Dispositivos Conectados</h4>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4">
@@ -260,7 +321,7 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                 <div className="flex items-center md:justify-between gap-3 flex-wrap">
                   <Dropdown
                     options={DEVICES_LIMIT}
-                    value={devicesLimit}
+                    value={maxActiveSessionSetting.currentValue}
                     onChange={(e) => {
                       if (e.value < (authUser?.activeDevices?.length ?? 0)) {
                         startShowError(
@@ -270,7 +331,8 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                       }
                       setMaxActiveSessionSetting({
                         ...maxActiveSessionSetting,
-                        value: e.value,
+                        currentValue: e.value,
+                        isChange: e.value !== maxActiveSessionSetting.value,
                       });
                     }}
                     valueTemplate={(item) =>
@@ -368,9 +430,9 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-4">
                 <i className="pi pi-database text-orange-500"></i>
-                <h2 className="text-lg font-semibold">
+                <h4 className="text-lg font-semibold">
                   Gestión de Almacenamiento
-                </h2>
+                </h4>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4">
@@ -378,12 +440,13 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                   <div>
                     <p className="font-medium">Limpieza automática</p>
                     <p className="text-gray-600 text-sm">
-                      Eliminar archivos temporales cada {cleanupInterval} días
+                      Eliminar archivos temporales cada{" "}
+                      {cleanupSetting.currentValue} días
                     </p>
 
-                    {autoCleanup ? (
+                    {cleanupSetting.currentAutoCleanup ? (
                       <p className="text-green-500 text-sm mt-1">
-                        Activado - {diffDays}/{cleanupInterval} días
+                        Activado - {diffDays}/{cleanupSetting.currentValue} días
                         transcurridos
                       </p>
                     ) : (
@@ -392,13 +455,14 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                   </div>
 
                   <InputSwitch
-                    checked={autoCleanup}
+                    checked={cleanupSetting.currentAutoCleanup}
                     onChange={(e) => {
-                      setCleanupSetting({
-                        ...cleanupSetting,
-                        autoCleanup: e.value,
-                        value:
-                          cleanupInterval ?? CLEANUP_INTERVAL[2].toString(),
+                      setCleanupSetting((prev) => {
+                        return {
+                          ...prev,
+                          currentAutoCleanup: e.value,
+                          isChange: prev.autoCleanup !== e.value,
+                        };
                       });
                     }}
                   />
@@ -414,9 +478,9 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                   <div className="mt-2 text-sm">
                     <div className="flex justify-between text-gray-600">
                       <span>Usuario:</span>
-                      {lastCleanupMadeBy ? (
+                      {cleanupSetting.updatedBy ? (
                         <UserInfo
-                          user={lastCleanupMadeBy}
+                          user={cleanupSetting.updatedBy}
                           extraInfo={"email"}
                         />
                       ) : (
@@ -424,11 +488,11 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
                       )}
                     </div>
 
-                    {lastCleanupMadeAt && (
+                    {cleanupSetting.updatedAt && (
                       <div className="flex justify-between mt-2 text-gray-600">
                         <span>Fecha:</span>
                         {dateFnsAdapter.format(
-                          new Date(lastCleanupMadeAt),
+                          new Date(cleanupSetting.updatedAt),
                           "dd/MM/yyyy HH:mm"
                         )}
                       </div>
@@ -440,17 +504,14 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
               <div className="bg-gray-50 rounded-lg p-4 mt-3">
                 <Dropdown
                   className="w-full"
-                  value={
-                    cleanupInterval
-                      ? Number(cleanupInterval)
-                      : CLEANUP_INTERVAL[2]
-                  }
-                  disabled={!autoCleanup}
+                  value={+cleanupSetting.currentValue}
+                  disabled={!cleanupSetting.currentAutoCleanup}
                   onChange={(e) => {
-                    setCleanupSetting({
-                      ...cleanupSetting,
-                      value: e.value,
-                    });
+                    setCleanupSetting((prev) => ({
+                      ...prev,
+                      currentValue: e.value,
+                      isChange: e.value !== prev.value,
+                    }));
                   }}
                   valueTemplate={(item) => <>Cada {item} días</>}
                   options={CLEANUP_INTERVAL}

@@ -1,6 +1,7 @@
 import { RoleEnum, type UserEntity } from "@/domain/entities";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DeviceSocketRes } from "../services/auth/auth.response";
+import { SettingEntity } from "../../../domain/entities/setting.entity";
 
 export enum AuthStatus {
   AUTHENTICATED = "authenticated",
@@ -12,6 +13,7 @@ export type AuthSliceState = {
   authUser: null | UserEntity;
   isManager: boolean;
   currentDeviceKey: string | null;
+  email2FAsuccess: boolean;
 };
 
 const initialState: AuthSliceState = {
@@ -19,6 +21,7 @@ const initialState: AuthSliceState = {
   authUser: null,
   isManager: false,
   currentDeviceKey: null,
+  email2FAsuccess: false,
 };
 
 export const authSlice = createSlice({
@@ -26,6 +29,7 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     onLogin: (state, { payload }: PayloadAction<UserEntity>) => {
+      console.log(state.authUser?.activeDevices);
       return {
         ...state,
         status: AuthStatus.AUTHENTICATED,
@@ -93,6 +97,28 @@ export const authSlice = createSlice({
         currentDeviceKey: payload,
       };
     },
+
+    onSetemail2FAsuccess: (state, { payload }: PayloadAction<boolean>) => {
+      return {
+        ...state,
+        email2FAsuccess: payload,
+      };
+    },
+
+    onUpdateSetting: (state, { payload }: PayloadAction<SettingEntity>) => {
+      if (state.authUser?.id) {
+        return {
+          ...state,
+          authUser: {
+            ...state.authUser,
+            settings: state.authUser.settings?.map((setting) =>
+              setting.id === payload.id ? payload : setting
+            ),
+          },
+        };
+      }
+      return state;
+    },
   },
 });
 
@@ -103,4 +129,6 @@ export const {
   onActiveDevice,
   onRemoveDevice,
   onSetCurrentDeviceKey,
+  onSetemail2FAsuccess,
+  onUpdateSetting
 } = authSlice.actions;

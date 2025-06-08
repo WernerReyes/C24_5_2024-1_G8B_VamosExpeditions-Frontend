@@ -71,7 +71,7 @@ export const TrashPartnerDialog = ({ visible, onHide }: Props) => {
           title: selectedPartner.name,
           deleteReason: selectedPartner.deleteReason ?? null,
           deletedAt: selectedPartner.deletedAt ?? null,
-          isDeleted: selectedPartner.isDeleted,
+          isDeleted: selectedPartner.isDeleted ?? false,
           archivedDetails: [
             { subject: "ID", message: selectedPartner.id },
             { subject: "Nombre", message: selectedPartner.name },

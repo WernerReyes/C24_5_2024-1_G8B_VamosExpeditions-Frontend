@@ -33,8 +33,7 @@ const LoginPage = () => {
       .unwrap()
       .then(({ data }) => {
         if ("require2FA" in data) {
-          navigate(TWO_FACTOR_AUTHENTICATION(data.tempToken));
-
+          window.location.href = TWO_FACTOR_AUTHENTICATION(data.tempToken);
           return;
         }
 

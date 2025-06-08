@@ -5,16 +5,21 @@ import {
   useConnectSocketQuery,
   useGenerateTwoFactorAuthenticationQuery,
   useSendEmailToVerify2FAMutation,
+  useSetTokenFrom2FAEmailMutation,
   useVerify2FAAnfAuthenticateUserMutation,
 } from "@/infraestructure/store/services";
 import { useNavigate, useParams } from "react-router-dom";
 import { constantRoutes } from "@/core/constants";
 import { useCookieExpirationStore } from "@/infraestructure/hooks";
+import { useDispatch, useSelector } from "react-redux";
+import { AppState } from "@/app/store";
+import { onSetemail2FAsuccess } from "@/infraestructure/store";
 
 const { LOGIN } = constantRoutes.public;
 const { DASHBOARD } = constantRoutes.private;
 
 const TwoFAPage = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { tempToken } = useParams<{
     tempToken: string;
@@ -40,12 +45,21 @@ const TwoFAPage = () => {
     {
       isLoading: isLoadingSendEmailToVerify2FA,
       // isError: isErrorSendEmailToVerify2FA,
+      isSuccess: isSuccessVerify2FAAnfAuthenticateUser,
+      isUninitialized: isUninitializedSendEmailToVerify2FA,
     },
   ] = useSendEmailToVerify2FAMutation();
 
+  const [
+    setTokenFrom2FAEmail,
+    { isLoading: isLoadingSetTokenFrom2FA, isSuccess },
+  ] = useSetTokenFrom2FAEmailMutation();
+
+  const { email2FAsuccess } = useSelector((state: AppState) => state.auth);
+
   const { init } = useCookieExpirationStore();
 
-  useConnectSocketQuery();
+  useConnectSocketQuery(tempToken);
 
   const handleVerify2FAAnfAuthenticateUser = () => {
     verify2FAAnfAuthenticateUser({
@@ -55,7 +69,8 @@ const TwoFAPage = () => {
       .unwrap()
       .then(({ data }) => {
         init(data.expiresAt);
-        navigate(DASHBOARD);
+        // navigate(DASHBOARD);
+        window.location.href = DASHBOARD;
       });
   };
 
@@ -78,6 +93,22 @@ const TwoFAPage = () => {
       handleVerify2FAAnfAuthenticateUser();
     }
   }, [code]);
+
+  useEffect(() => {
+    if (email2FAsuccess) {
+      setTokenFrom2FAEmail(tempToken!)
+        .unwrap()
+        .then(({ data }) => {
+          init(data.expiresAt);
+          setTimeout(() => {
+            window.location.href = DASHBOARD;
+          }, 5000);
+        })
+        .finally(() => {
+          dispatch(onSetemail2FAsuccess(false));
+        });
+    }
+  }, [email2FAsuccess]);
 
   return (
     <section className="bg-login bg-no-repeat bg-cover bg-center min-h-screen  flex justify-center items-center">
@@ -124,15 +155,6 @@ const TwoFAPage = () => {
                     </p>
 
                     <div className="flex justify-center mb-4">
-                      {/* QR Code placeholder */}
-                      {/* <div className="w-40 h-40 bg-gray-200 rounded-lg"></div> */}
-                      {/* <span
-                        className="
-                          w-40 h-40 bg-gray-200 rounded-lg flex justify-center items-center text-xl font-bold cursor-pointer
-                        "
-                      >
-                        Abrir QR
-                      </span> */}
                       <Image
                         preview
                         src={data?.data.qrCodeImageUrl}
@@ -175,33 +197,35 @@ const TwoFAPage = () => {
                     <strong>{data?.data.email}</strong>
                   </div>
                   {/* <ProgressSpinner /> */}
-                  <div className="flex flex-col items-center justify-center space-y-4 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-primary/20">
-                    {/* <Loader className="w-8 h-8 animate-spin text-blue-600" /> */}
-                    <i className="pi pi-envelope animate-spin text-primary"></i>
-                    <div className="text-center">
-                      <p className="text-primary font-medium mb-2">
-                        Verifica tu correo...
-                      </p>
-                      <p className="text-sm text-primary italic animate-pulse">
-                        {/* "{travelQuotes[currentQuoteIndex]}" */}
-                        Enviando correo...
-                      </p>
-                    </div>
-                  </div>
+                  {!isUninitializedSendEmailToVerify2FA && (
+                    <div className="flex flex-col items-center justify-center space-y-4 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-primary/20">
+                      {/* <Loader className="w-8 h-8 animate-spin text-blue-600" /> */}
+                      <i className="pi pi-envelope animate-bounce text-3xl duration-1000 text-primary"></i>
+                      <div className="text-center">
+                        <p className="text-primary font-medium mb-2">
+                          Verifica tu correo...
+                        </p>
+                        <p className="text-sm text-primary italic animate-pulse">
+                          {isLoadingSendEmailToVerify2FA &&
+                            "Enviando correo..."}
+                          {isSuccessVerify2FAAnfAuthenticateUser &&
+                            !isSuccess &&
+                            "Esperando confirmación..."}
 
-                  <div className="flex items-center justify-center space-x-2 p-4 bg-green-50 rounded-lg border border-green-200">
-                    {/* <CheckCircle className="w-5 h-5 text-green-600" /> */}
-                    <i className="pi pi-check text-green-600"></i>
-                    <span className="text-green-700 font-medium">
-                      Email sent! Please check your inbox.
-                    </span>
-                  </div>
+                          {isSuccess && "Email confirmado correctamente"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <Button
                     label="Enviar confirmación"
                     icon="pi pi-envelope"
                     onClick={handleSendEmailToVerify2FA}
-                    loading={isLoadingSendEmailToVerify2FA}
-                    disabled={isLoadingSendEmailToVerify2FA}
+                    loading={
+                      isLoadingSendEmailToVerify2FA || isLoadingSetTokenFrom2FA
+                    }
+                    disabled={isLoadingSendEmailToVerify2FA || isSuccess}
                     className="p-button-outlined w-full mt-auto"
                   />
                 </div>

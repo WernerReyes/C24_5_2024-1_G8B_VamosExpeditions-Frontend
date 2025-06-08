@@ -114,6 +114,7 @@ export const TrashReservationsDialog = ({ visible, onHide }: Props) => {
               title: "Reserva seleccionada",
               deletedAt: selectedReservation.deletedAt ?? null,
               deleteReason: selectedReservation.deleteReason ?? null,
+              isDeleted: selectedReservation.isDeleted?? false,
               archivedDetails: [
                 {
                   subject: "ID",
