@@ -173,7 +173,7 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
       onHide={() => setVisible(false)}
     >
       <DataView
-        value={services?.content}
+        value={services?.content ?? []}
         paginator
         rows={limit}
         first={first}
