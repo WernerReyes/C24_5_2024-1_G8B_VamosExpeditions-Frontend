@@ -132,10 +132,6 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
   const handleUpdateCleanup = async () => {
     if (cleanupSetting.id && cleanupSetting.id !== 0) {
       if (!cleanupSetting.isChange) return;
-      console.log(
-        cleanupSetting.currentValue.toString(),
-        cleanupSetting.autoCleanup
-      );
       await updateDinamicCleanUp({
         id: cleanupSetting.id,
         value: cleanupSetting.currentAutoCleanup
@@ -223,8 +219,6 @@ export const AdvancedSettingDialog: React.FC<Props> = ({
       });
     }
   }, [data]);
-
-  console.log(data?.data);
 
   const footer = (
     <div className="flex justify-end gap-2">

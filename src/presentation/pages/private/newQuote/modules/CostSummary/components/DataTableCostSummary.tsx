@@ -59,9 +59,6 @@ export const DataTableCostSummary = () => {
         dispatch(onSetIndirectCostMargin(value));
       });
   };
-
-  console.log(calculateCostsPerService);
-
   return (
     <DataTable
       value={calculateCostsPerService}

@@ -29,7 +29,6 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     onLogin: (state, { payload }: PayloadAction<UserEntity>) => {
-      console.log(state.authUser?.activeDevices);
       return {
         ...state,
         status: AuthStatus.AUTHENTICATED,

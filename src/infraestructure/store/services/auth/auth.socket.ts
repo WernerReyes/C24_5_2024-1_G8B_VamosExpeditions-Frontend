@@ -17,15 +17,12 @@ import type { DeviceSocketRes } from "./auth.response";
 export const authSocket = {
   userConnected: () => {
     const socket = SocketManager.getInstance();
-    console.log(socket)
     if (!socket?.connected) {
-      console.log("socket not connected");
       socket?.connect();
       socket?.once("connect", () => {
         socket.emit("connection");
       });
     } else {
-     
         socket.emit("connection");
       
     }
@@ -103,10 +100,6 @@ export const authSocketListeners = (
     socket?.on(
       "2fa-verified",
       async (data: { success: boolean }) => {
-
-        console.log("2fa-verified", data);
-        
-        
         dispatch(onSetemail2FAsuccess(data.success));
       }
     );

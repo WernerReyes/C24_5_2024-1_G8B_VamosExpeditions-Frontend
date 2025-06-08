@@ -238,8 +238,6 @@ export const authService = createApi({
           //* Connect to socket
           authSocket.userConnected();
 
-          console.log(data);
-
           await authServiceDB.upsertDeviceConnection(data.data.deviceId);
         } catch (error: any) {
           if (error.error) startShowApiError(error.error);
