@@ -344,7 +344,7 @@ export const QuotesTable = () => {
           onPage={handlePageChange}
           onFilter={handlePageChange}
           rowsPerPageOptions={ROW_PER_PAGE}
-          loading={isLoadingOfficial || isFetchingOfficial}
+          loading={isLoadingOfficial}
           lazy
           paginatorClassName="max-sm:text-xs"
           size="small"

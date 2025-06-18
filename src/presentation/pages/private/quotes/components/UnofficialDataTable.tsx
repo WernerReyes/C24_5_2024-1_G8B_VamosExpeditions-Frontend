@@ -170,7 +170,7 @@ export const UnofficialDataTable = ({
         rows={limit}
         onFilter={handlePageChange}
         filters={filters}
-        loading={isLoading || isFetching}
+        loading={isLoading}
         onSelectionChange={(
           e: DataTableSelectionMultipleChangeEvent<VersionQuotationEntity[]>
         ) => setSelectedQuotes(e.value)}
