@@ -22,12 +22,11 @@ import { getRoleTransformedFilters } from "../../utils/filters";
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
 export const RoleTable = () => {
-  const [{ createdAt, updatedAt }, setFilters] =
-    useState<RoleTableFilters>({
-      name: undefined,
-      createdAt: undefined,
-      updatedAt: undefined,
-    });
+  const [{ createdAt, updatedAt }, setFilters] = useState<RoleTableFilters>({
+    name: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+  });
   const {
     currentPage,
     filters,
@@ -79,7 +78,13 @@ export const RoleTable = () => {
         />
       </div>
 
-      <Button icon="pi pi-trash" disabled label="Papelera" outlined size="small" />
+      <Button
+        icon="pi pi-trash"
+        disabled
+        label="Papelera"
+        outlined
+        size="small"
+      />
     </div>
   );
 
@@ -113,7 +118,7 @@ export const RoleTable = () => {
           ))}
         </DataTable>
       }
-      isLoader={isLoading || isFetching}
+      isLoader={isLoading}
       fallBackComponent={
         <DataTable
           value={[]}

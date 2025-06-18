@@ -24,7 +24,6 @@ import { PartnerEntity } from "@/domain/entities";
 import { TrashPartnerDialog } from "../TrasPartnerDialog";
 import { PartnerTableFilters_v2 } from "../../types";
 
-
 const { PARTNERS_PAGINATION } = constantStorage;
 const ROW_PER_PAGE: [number, number, number] = [10, 20, 30];
 
@@ -104,7 +103,6 @@ export const PartnerTable = () => {
       <TrashPartnerDialog
         visible={openTrashDialog}
         onHide={() => setOpenTrashDialog(false)}
-       
       />
     </div>
   );
@@ -133,7 +131,7 @@ export const PartnerTable = () => {
           ))}
         </DataTable>
       }
-      isLoader={isLoading || isFetching}
+      isLoader={isLoading}
       fallBackComponent={
         <DataTable
           id="fallback-partners"
@@ -248,11 +246,7 @@ export const PartnerTable = () => {
           header="Acciones"
           align="center"
           body={(partner: PartnerEntity) => {
-            return (
-              <TableActions
-                rowData={partner}
-                />
-            );
+            return <TableActions rowData={partner} />;
           }}
         />
       </DataTable>

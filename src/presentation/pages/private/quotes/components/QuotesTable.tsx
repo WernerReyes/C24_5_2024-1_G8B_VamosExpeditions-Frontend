@@ -239,7 +239,7 @@ export const QuotesTable = () => {
         }
       />
       <ErrorBoundary
-        isLoader={isLoadingOfficial || isFetchingOfficial}
+        isLoader={isLoadingOfficial}
         loadingComponent={
           <DataTable
             pt={{

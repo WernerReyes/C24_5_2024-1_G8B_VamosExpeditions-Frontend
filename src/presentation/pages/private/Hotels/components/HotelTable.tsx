@@ -99,7 +99,7 @@ export const HotelTable = () => {
           className="pi pi-building text-2xl text-primary"
           style={{ fontSize: "1.5rem" }}
         />
-        <Badge value={allHotels?.data?.total} />
+        <Badge value={allHotels?.data?.total ?? "0"} />
       </div>
 
       <Button
@@ -157,7 +157,7 @@ export const HotelTable = () => {
       />
 
       <ErrorBoundary
-        isLoader={isFetching || isLoading}
+        isLoader={isLoading}
         loadingComponent={
           <DataTable
             header={header}
@@ -245,7 +245,7 @@ export const HotelTable = () => {
           onPage={handlePageChange}
           onFilter={handlePageChange}
           rowsPerPageOptions={ROW_PER_PAGE}
-          loading={isFetching || isLoading}
+          loading={isLoading}
           lazy
           sortField={sortField?.sortField}
           sortOrder={sortField?.sortOrder}

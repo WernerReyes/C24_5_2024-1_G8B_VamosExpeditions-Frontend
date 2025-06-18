@@ -138,7 +138,7 @@ export const UnofficialDataTable = ({
           ))}
         </DataTable>
       }
-      isLoader={isLoading || isFetching}
+      isLoader={isLoading}
       fallBackComponent={
         <DataTableQuotation
           value={[]}

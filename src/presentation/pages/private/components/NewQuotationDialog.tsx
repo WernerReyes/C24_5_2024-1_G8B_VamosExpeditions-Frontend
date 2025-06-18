@@ -14,13 +14,12 @@ type Props = {
 };
 
 export const NewQuotationDialog = ({ children, outlined }: Props) => {
- 
   const navigate = useNavigate();
   const { currentQuotation } = useSelector(
     (state: AppState) => state.quotation
   );
-  const [createQuotation] = useCreateQuotationMutation();
-  
+  const [createQuotation, { isLoading }] = useCreateQuotationMutation();
+
   const [visible, setVisible] = useState(false);
 
   const handleAccept = async () => {
@@ -33,10 +32,8 @@ export const NewQuotationDialog = ({ children, outlined }: Props) => {
   };
 
   const handleReject = () => {
-  
     setVisible(false);
     navigate(NEW_QUOTE);
- 
   };
 
   return (
@@ -55,6 +52,7 @@ export const NewQuotationDialog = ({ children, outlined }: Props) => {
       />
       {children && React.isValidElement(children) ? (
         React.cloneElement(children as React.ReactElement<any>, {
+          disabled: isLoading,
           onClick: async () => {
             if (currentQuotation) {
               setVisible(true);
@@ -67,9 +65,11 @@ export const NewQuotationDialog = ({ children, outlined }: Props) => {
         })
       ) : (
         <Button
+          disabled={isLoading}
           label="Nueva cotización"
           icon="pi pi-plus-circle"
           outlined={outlined}
+          loading={isLoading}
           onClick={async () => {
             if (currentQuotation) {
               setVisible(true);

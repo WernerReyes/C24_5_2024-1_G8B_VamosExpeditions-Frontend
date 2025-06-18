@@ -164,7 +164,8 @@ export const ReservationTable = () => {
       />
 
       <ErrorBoundary
-        isLoader={isFetching || isLoading}
+        isLoader={
+          isLoading}
         loadingComponent={
           <DataTable
             pt={{

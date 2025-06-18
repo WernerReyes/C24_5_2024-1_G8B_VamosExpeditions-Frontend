@@ -167,7 +167,7 @@ export const UserTable = () => {
             ))}
           </DataTable>
         }
-        isLoader={isLoadingUsers || isFetchingUsers}
+        isLoader={isLoadingUsers}
         fallBackComponent={
           <DataTable
             value={[]}

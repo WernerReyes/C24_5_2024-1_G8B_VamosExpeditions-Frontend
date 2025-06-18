@@ -1,0 +1,31 @@
+# Dependencias
+node_modules
+npm-debug.log
+pnpm-debug.log
+
+# Archivos de sistema
+.DS_Store
+.idea
+.vscode
+
+# Archivos de construcción
+dist
+build
+coverage
+
+# Archivos de entorno (excepto plantillas)
+.env
+.env.local
+.env.development
+!.env.template
+
+# Archivos de control de versiones
+.git
+.gitignore
+
+# Otros archivos
+*.log
+*.md
+!README.md
+MANUAL_SISTEMA.md
+MANUAL_USUARIO.md
