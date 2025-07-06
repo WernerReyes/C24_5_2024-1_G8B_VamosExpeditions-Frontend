@@ -21,7 +21,7 @@ export const hotelDtoSchema = z.object({
   category: z.nativeEnum(HotelCategory, {message: "La categoría es requerida"}),
   name: z.string().min(1, { message: "El nombre del hotel es requerido" }),
   address: z.string().min(1, { message: "La dirección es requerida" }),
-  distrit: z.number().min(1, { message: "El distrito es requerido" }),
+  distrit: z.string().min(1, { message: "El distrito es requerido" }),
   id: z.number().optional().default(0),
   
 });

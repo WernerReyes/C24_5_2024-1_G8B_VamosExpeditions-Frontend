@@ -10,12 +10,16 @@ import {
   ErrorBoundary,
   InputText,
   Rating,
+  TreeSelect,
+  TreeSelectChangeEvent,
+  TreeSelectSelectionKeysType,
 } from "@/presentation/components";
 import { hotelDto, HotelDto, HotelRoomType } from "@/domain/dtos/hotel";
 
 import Styles from "./Style.module.css";
 import {
-  useGetDistritsQuery,
+  useGetCitiAndDistrilAllQuery,
+  /*   useGetDistritsQuery, */
   useUpsertHotelMutation,
 } from "@/infraestructure/store/services";
 type Props = {
@@ -29,18 +33,27 @@ export const HotelEditAndRegisterModal = ({
   rowData,
 }: Props) => {
   //Api
-  const {
+  /*   const {
     data: distrits,
     refetch: isRefetchDistrits,
     isLoading: isLoadingDistrits,
     isFetching: isFetchingDistrits,
     isError,
-    
-    /* error, */
-  } = useGetDistritsQuery();
+
+
+  } = useGetDistritsQuery(); */
   /* console.log(distrits); */
 
-  //Hook Form
+  const {
+    data: cityAndDistrit,
+    refetch: isRefetchDistritsAndCity,
+    isLoading: isLoadingDistritsAndCity,
+    isFetching: isFetchingDistritsAndCity,
+    isError: isErrorDistritAndCity,
+  } = useGetCitiAndDistrilAllQuery();
+
+
+  //Hook Fory()m
   const {
     control,
     handleSubmit,
@@ -55,7 +68,7 @@ export const HotelEditAndRegisterModal = ({
           name: rowData.name,
           address: rowData.address,
           category: rowData.category ?? undefined,
-          distrit: rowData.distrit?.id ?? undefined,
+          distrit: rowData.distrit?.id.toString() ?? undefined,
         }
       : {
           type: HotelRoomType.HOTEL,
@@ -72,10 +85,8 @@ export const HotelEditAndRegisterModal = ({
     upsertHotel(data)
       .unwrap()
       .then(() => {
-        
         reset();
         /* setShowModal(false); */
-        
       });
   };
 
@@ -204,7 +215,7 @@ export const HotelEditAndRegisterModal = ({
               </div>
 
               {/* Distrit */}
-              <div>
+              {/* <div>
                 <ErrorBoundary
                   isLoader={isFetchingDistrits || isLoadingDistrits}
                   fallBackComponent={
@@ -214,9 +225,7 @@ export const HotelEditAndRegisterModal = ({
                         name="distrit"
                         defaultValue={undefined}
                         render={({ field, fieldState: { error } }) => {
-                          /* const country = distrits?.data.find(
-                            (country) => country.name === field?.value
-                          ); */
+                        
                           return (
                             <Dropdown
                               label={{ text: "Distrito" }}
@@ -284,8 +293,101 @@ export const HotelEditAndRegisterModal = ({
                     }}
                   />
                 </ErrorBoundary>
-              </div>
+              </div>*/}
               {/* Distrit */}
+
+              <div>
+                <ErrorBoundary
+                  isLoader={
+                    isFetchingDistritsAndCity || isLoadingDistritsAndCity
+                  }
+                  fallBackComponent={
+                    <>
+                      <Controller
+                        control={control}
+                        name="distrit"
+                        render={({ field, fieldState: { error } }) => {
+                          return (
+                            <TreeSelect
+                              options={[]}
+                              className="w-full"
+                              label={{
+                                text: "Distrit",
+                                htmlFor: "Distrit",
+                              }}
+                              invalid={!!error}
+                              {...field}
+                              value={
+                                field.value !== undefined &&
+                                field.value !== null
+                                  ? String(field.value)
+                                  : undefined
+                              }
+                              onChange={(e: TreeSelectChangeEvent) => {
+                                field.onChange(e.value);
+                              }}
+                              emptyMessage={
+                                <DefaultFallBackComponent
+                                  refetch={isRefetchDistritsAndCity}
+                                  isFetching={isFetchingDistritsAndCity}
+                                  isLoading={isLoadingDistritsAndCity}
+                                  message="No se pudieron cargar los distritos"
+                                />
+                              }
+                            />
+                          );
+                        }}
+                      />
+                    </>
+                  }
+                  error={isErrorDistritAndCity}
+                >
+                  <Controller
+                    control={control}
+                    name="distrit"
+                    defaultValue=""
+                    render={({ field, fieldState: { error } }) => (
+                      <TreeSelect
+                        className="w-full"
+                        options={
+                          cityAndDistrit?.data.map((country) => ({
+                            key: country.id.toString(),
+                            label: country.name,
+                            selectable: false,
+                            children: country.distrits?.map((distrit) => ({
+                              key: distrit?.id.toString(),
+                              label: distrit.name,
+                              selectable: true,
+                            })),
+                          })) || []
+                        }
+                        
+                        showClear
+                        filter
+                        pt={{
+                          labelContainer: { className: "w-10" },
+                        }}
+                        placeholder="Seleccione una ciudad"
+                        label={{
+                          text: "Destino",
+                          htmlFor: "destino",
+                        }}
+                        invalid={!!error}
+                        value={
+                          field.value as unknown as TreeSelectSelectionKeysType
+                        }
+                        onChange={(e: TreeSelectChangeEvent) => {
+                          field.onChange(e.value);
+                        }}
+                        small={{
+                          text: error?.message,
+                          className: "text-red-500 font-bold",
+                        }}
+                      />
+                    )}
+                  />
+                </ErrorBoundary>
+              </div>
             </div>
           </div>
 

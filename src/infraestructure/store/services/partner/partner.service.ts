@@ -80,6 +80,7 @@ export const partnerService = createApi({
         try {
           const { data } = await queryFulfilled;
           startShowSuccess(data.message);
+          console.log(data);
           /* dispatch(
         partnerService.util.invalidateTags([
           { type: "Partners" },

@@ -1,9 +1,10 @@
-import { getServicesDto, type GetServicesDto } from "@/domain/dtos/service";
+import { getServicesDto, serviceDto, ServiceDto, type GetServicesDto } from "@/domain/dtos/service";
 import type { ServiceEntity } from "@/domain/entities";
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { serviceModel } from "../../../models/service.model";
 import { requestConfig } from "../config";
 import type { ApiResponse, PaginatedResponse } from "../response";
+import { startShowApiError, startShowSuccess } from "@/core/utils";
 
 const PREFIX = "/service";
 
@@ -12,7 +13,10 @@ export const serviceService = createApi({
   tagTypes: ["Services"],
   baseQuery: requestConfig(PREFIX),
   endpoints: (builder) => ({
-    getServices: builder.query<ApiResponse<PaginatedResponse<ServiceEntity>>, GetServicesDto>({
+    getServices: builder.query<
+      ApiResponse<PaginatedResponse<ServiceEntity>>,
+      GetServicesDto
+    >({
       query: (params) => {
         const [_, errors] = getServicesDto.create(params);
         if (errors) {
@@ -28,6 +32,38 @@ export const serviceService = createApi({
         };
       },
       providesTags: ["Services"],
+    }),
+    upsertService: builder.mutation<ApiResponse<ServiceEntity>, ServiceDto>({
+      query: (body) => {
+        const [_, errors] = serviceDto.create(body);
+        if (errors) throw errors;
+
+        if (body.id !== 0) {
+          return {
+            url: `/${body.id}`,
+            method: "PUT",
+            body,
+          };
+        }
+
+        return {
+          url: "",
+          method: "POST",
+          body,
+        };
+      },
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          startShowSuccess(data.message);
+          // invalidate cache si usas tags
+          // dispatch(serviceApi.util.invalidateTags(["Services"]));
+        } catch (error: any) {
+          if (error.error) startShowApiError(error.error);
+          throw error;
+        }
+      },
+      invalidatesTags: ["Services"],
     }),
 
     // upsertService: builder.mutation<ApiResponse<ServiceEntity>, ServiceDto>({
@@ -73,6 +109,7 @@ export const serviceService = createApi({
 
 export const {
   useGetServicesQuery,
+  useUpsertServiceMutation,
   //   useUpsertServiceMutation,
   //   useDeleteServiceMutation,
 } = serviceService;
