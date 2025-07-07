@@ -19,6 +19,13 @@ export const cityService = createApi({
       keepUnusedDataFor: 1000 * 60 * 60, //* 1 hour
     }),
 
+    getCitiAndDistrilAll:builder.query<ApiResponse<CityEntity[]>,void>(
+      {
+        query:()=>"/all-city-and-distrit",
+        keepUnusedDataFor:1000*60*60,
+      }
+    ),
+
     // create and update
     upsertCity: builder.mutation<ApiResponse<CityEntity>, CityDto>({
       query: (body) => {
@@ -59,4 +66,9 @@ export const cityService = createApi({
     // create and update
   }),
 });
-export const { useUpsertCityMutation, useGetCitiesAllQuery } = cityService;
+export const { 
+  useUpsertCityMutation,
+  useGetCitiesAllQuery ,
+  useGetCitiAndDistrilAllQuery
+
+} = cityService;

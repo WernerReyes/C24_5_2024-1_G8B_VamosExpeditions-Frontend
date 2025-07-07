@@ -26,6 +26,7 @@ const {
   CLIENT,
   PARTNER,
   USERS,
+  SERVICES,
 } = constantRoutes.private;
 
 const ITEMS: MenuItem[] = [
@@ -99,6 +100,13 @@ const ITEMS: MenuItem[] = [
     url: PARTNER,
     template: (e) => <Template menuItem={e} />,
   },
+  {
+    id: "services",
+    label: "Servicios",
+    icon: "pi pi-cog",
+    url: SERVICES,
+    template: (e) => <Template menuItem={e} />,
+  }
 ];
 
 export const Sidebar = () => {

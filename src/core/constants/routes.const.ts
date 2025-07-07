@@ -22,6 +22,7 @@ type PrivateRoutes = {
   CLIENT: string;
   PARTNER: string;
   USERS: string;
+  SERVICES: string;
 };
 
 type Routes = {
@@ -58,6 +59,7 @@ export const constantRoutes: Routes = {
     COUNTRY: `${PRIVATE_BASE}/country`,
     CLIENT: `${PRIVATE_BASE}/client`,
     PARTNER: `${PRIVATE_BASE}/partner`,
+    SERVICES: `${PRIVATE_BASE}/services`,
     NOTIFICATIONS: `${PRIVATE_BASE}/notifications`,
   },
 };
