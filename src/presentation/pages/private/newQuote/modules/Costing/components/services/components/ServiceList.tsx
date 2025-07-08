@@ -70,21 +70,24 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
     }
   );
 
-  const getAllServiceTypes = useGetServiceTypesQuery({
-    page: 1,
-    limit: 100,
-    select: {
-      id: true,
-      name: true,
-      service: [
-        {
-          id: true,
-        },
-      ],
+  const getAllServiceTypes = useGetServiceTypesQuery(
+    {
+      page: 1,
+      limit: 100,
+      select: {
+        id: true,
+        name: true,
+        service: [
+          {
+            id: true,
+          },
+        ],
+      },
     },
-  }, {
-    skip:!selectedCity,
-  });
+    {
+      skip: !selectedCity,
+    }
+  );
 
   const serviceTypes = getAllServiceTypes.data?.data;
 
@@ -153,12 +156,11 @@ export const ServiceList = ({ visible, setVisible }: Props) => {
       })
       .finally(() => {
         setConfirm(false);
-        setExtraPriceUsd(undefined)
+        setExtraPriceUsd(undefined);
       });
     // setConfirm(false);
     // setSelectedService(undefined);
   };
-
 
   useEffect(() => {
     if (!confirm || !selectedService) return;

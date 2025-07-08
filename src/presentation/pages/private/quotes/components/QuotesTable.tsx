@@ -72,7 +72,7 @@ export const QuotesTable = () => {
   ] = useState<QuotesTableFilters>({});
 
   const {
-    currentData: officialCurrentData,
+    data: officialCurrentData,
     isFetching: isFetchingOfficial,
     isLoading: isLoadingOfficial,
     isError: isErrorOfficial,

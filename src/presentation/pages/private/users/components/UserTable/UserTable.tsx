@@ -64,7 +64,7 @@ export const UserTable = () => {
   });
 
   const {
-    currentData: usersData,
+    data: usersData,
     isLoading: isLoadingUsers,
     isFetching: isFetchingUsers,
     isError: isErrorUsers,

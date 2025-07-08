@@ -49,7 +49,7 @@ export const UnofficialDataTable = ({
     setFilters,
   ] = useState<QuotesTableFilters>({});
 
-  const { currentData, isLoading, isFetching, isError, refetch } =
+  const { data:currentData, isLoading, isFetching, isError, refetch } =
     useGetAllUnofficialVersionQuotationsQuery(
       {
         page: currentPage,

@@ -52,7 +52,7 @@ export const ServiceTable = () => {
   });
 
   const {
-    currentData: servicesData,
+    data: servicesData,
     isLoading: isLoadingServices,
     isFetching: isFetchingServices,
     isError: isErrorServices,
@@ -151,7 +151,7 @@ export const ServiceTable = () => {
           ))}
         </DataTable>
       }
-      isLoader={isLoadingServices || isFetchingServices}
+      isLoader={isLoadingServices}
       fallBackComponent={
         <DataTable
           value={[]}

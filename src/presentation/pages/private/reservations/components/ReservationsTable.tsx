@@ -58,7 +58,7 @@ export const ReservationTable = () => {
   const [{ status, createdAt, updatedAt }, setFormatedFilters] =
     useState<ReservationTableFilters>({});
 
-  const { currentData, isFetching, isLoading, refetch, isError } =
+  const { data:currentData, isFetching, isLoading, refetch, isError } =
     useGetAllReservationsQuery({
       page: currentPage,
       limit,

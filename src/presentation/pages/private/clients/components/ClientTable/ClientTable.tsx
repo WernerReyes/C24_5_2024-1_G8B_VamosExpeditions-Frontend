@@ -53,7 +53,7 @@ export const ClientTable = () => {
   });
 
   const {
-    currentData: clientsData,
+    data: clientsData,
     isLoading,
     isFetching,
     isError,
@@ -148,7 +148,7 @@ export const ClientTable = () => {
           ))}
         </DataTable>
       }
-      isLoader={isLoading || isFetching}
+      isLoader={isLoading}
       fallBackComponent={
         <DataTable
           id="fallback-clients"
